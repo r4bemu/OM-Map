@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>NIA R4B O&amp;M GIS - Field Data Crowdsourcing</title>
+    
+    <!-- Android & Mobile Web App PWA Metadata -->
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="application-name" content="NIA GIS" />
+    <meta name="apple-mobile-web-app-title" content="NIA GIS" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" href="/nia-logo.png" />
+    <link rel="apple-touch-icon" href="/nia-logo.png" />
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cinzel+Decorative:wght@700&family=Outfit:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-slate-900 text-slate-100 antialiased selection:bg-cyan-500 selection:text-slate-900">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Aggressively unregister stale Service Workers and purge obsolete CacheStorage in development/localhost
+      if ('serviceWorker' in navigator) {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '8080') {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (let reg of registrations) {
+              reg.unregister().then(function(unregistered) {
+                if (unregistered) {
+                  console.log('🔄 Stale Service Worker unregistered for localhost development.');
+                }
+              });
+            }
+          });
+          if ('caches' in window) {
+            caches.keys().then(function(cacheNames) {
+              for (let name of cacheNames) {
+                caches.delete(name).then(function() {
+                  console.log('🧹 Purged obsolete browser cache:', name);
+                });
+              }
+            });
+          }
+        } else {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch((err) => {
+              console.log('[SW] ServiceWorker registration skipped/offline:', err);
+            });
+          });
+        }
+      }
+    </script>
+  </body>
+</html>
+

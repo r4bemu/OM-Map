@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production build outputs
+dist/
+build/
+coverage/
+
+# Environment Variables & Secrets (CRITICAL: Do NOT commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local Data Cache & Sensitive Tokens
+data/drive_cache/
+data/photos/
+data/*.tmp
+data/persistent_drive_token.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS & Editor configurations
+.DS_Store
+Thumbs.db
+.idea/
+

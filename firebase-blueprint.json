@@ -1,0 +1,47 @@
+{
+  "entities": {
+    "gis_layers": {
+      "title": "GIS Layers",
+      "description": "Uploaded GIS layers, GeoJSON spatial features, and layer settings",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "visible": { "type": "boolean" },
+        "color": { "type": "string" },
+        "opacity": { "type": "number" },
+        "data": { "type": "object" },
+        "featureCount": { "type": "number" },
+        "geometryType": { "type": "string" },
+        "uploadedAt": { "type": "string" },
+        "isDefault": { "type": "boolean" },
+        "sizeBytes": { "type": "number" }
+      },
+      "required": ["id", "name"]
+    },
+    "field_reports": {
+      "title": "Field Reports",
+      "description": "Field work logs, desilting completion reports, hazards, and photo records",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "reportType": { "type": "string" },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "canalSegment": { "type": "string" },
+        "parcelId": { "type": "string" },
+        "completionPercent": { "type": "number" },
+        "desiltingVolumeM3": { "type": "number" },
+        "status": { "type": "string" },
+        "remarks": { "type": "string" },
+        "reporterName": { "type": "string" },
+        "reporterRole": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "synced": { "type": "boolean" },
+        "photoUrl": { "type": "string" },
+        "hazardSeverity": { "type": "string" }
+      },
+      "required": ["id", "title", "lat", "lng"]
+    }
+  }
+}

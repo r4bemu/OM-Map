@@ -1,0 +1,56 @@
+{
+  "name": "NIA MIMAROPA O&M GIS & Field Reporting",
+  "short_name": "NIA GIS",
+  "description": "Operations & Maintenance GIS and Form 691 Field Reporting Platform for NIA Region IV-B (MIMAROPA)",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "categories": [
+    "productivity",
+    "utilities",
+    "government"
+  ],
+  "icons": [
+    {
+      "src": "/nia-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/nia-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/asd.ico.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/asd.ico.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Maintenance Report",
+      "short_name": "New Report",
+      "description": "Create a new field maintenance report with photos and GPS",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/nia-logo.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
