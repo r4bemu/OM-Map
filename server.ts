@@ -255,7 +255,15 @@ export async function createApp() {
 
   // API Routes
   app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', serverTime: new Date().toISOString() });
+    res.json({
+      status: 'ok',
+      serverTime: new Date().toISOString(),
+      isVercel: Boolean(process.env.VERCEL),
+      hasDriveRefreshToken: Boolean(process.env.GOOGLE_REFRESH_TOKEN),
+      hasDriveAccessToken: Boolean(process.env.GOOGLE_DRIVE_ACCESS_TOKEN),
+      hasClientId: Boolean(process.env.GOOGLE_CLIENT_ID),
+      hasClientSecret: Boolean(process.env.GOOGLE_CLIENT_SECRET)
+    });
   });
 
   // User Accounts Management Endpoints (Persistent Server Store)
@@ -1010,10 +1018,9 @@ export async function createApp() {
     }
   });
 
-const DRIVE_CACHE_DIR = path.join(process.cwd(), 'data', 'drive_cache');
 function ensureDriveCacheDir() {
   if (!fs.existsSync(DRIVE_CACHE_DIR)) {
-    fs.mkdirSync(DRIVE_CACHE_DIR, { recursive: true });
+    try { fs.mkdirSync(DRIVE_CACHE_DIR, { recursive: true }); } catch (e) {}
   }
 }
 
@@ -1352,7 +1359,7 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
+  } else if (!process.env.VERCEL) {
     const candidates = [
       __dirname,
       path.join(__dirname, 'dist'),
@@ -1389,6 +1396,11 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
       } else {
         res.status(404).send(`Application index.html not found. Looked in: ${indexPath}`);
       }
+    });
+  } else {
+    // On Vercel Serverless Function, return 404 JSON for unknown API routes
+    app.use((req, res) => {
+      res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });
     });
   }
 

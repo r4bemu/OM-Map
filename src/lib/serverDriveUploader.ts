@@ -19,7 +19,7 @@ if (typeof (process as any).loadEnvFile === 'function') {
   } catch (e) {}
 }
 
-const DATA_DIR = path.join(process.cwd(), 'data');
+const DATA_DIR = process.env.VERCEL ? path.join('/tmp', 'data') : (process.env.USER_DATA_DIR || path.join(process.cwd(), 'data'));
 if (!fs.existsSync(DATA_DIR)) {
   try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 }
