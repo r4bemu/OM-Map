@@ -2,6 +2,10 @@ import express from 'express';
 import compression from 'compression';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = typeof import.meta !== 'undefined' && import.meta.url ? fileURLToPath(import.meta.url) : '';
+const __dirname = __filename ? path.dirname(__filename) : (typeof (globalThis as any).__dirname === 'string' ? (globalThis as any).__dirname : process.cwd());
 
 // Ensure environment variables are loaded on server startup
 if (typeof (process as any).loadEnvFile === 'function') {
@@ -10,7 +14,6 @@ if (typeof (process as any).loadEnvFile === 'function') {
   } catch (e) {}
 }
 
-import { createServer as createViteServer } from 'vite';
 import { INITIAL_GIS_LAYERS, INITIAL_FIELD_REPORTS } from './src/data/sampleLayers.js';
 import { MOCK_FIELD_REPORTS_2026 } from './src/data/mockFieldReports2026.js';
 import { DEFAULT_AUTH_USERS } from './src/config/authUsers.js';
@@ -1329,7 +1332,8 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
   // Production static file serving vs Vite Middleware for Development
   const isProduction = process.env.NODE_ENV === 'production' || process.env.K_SERVICE !== undefined || !fs.existsSync(path.join(process.cwd(), 'src', 'main.tsx'));
 
-  if (!isProduction) {
+  if (!isProduction && !process.env.VERCEL) {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: {
         middlewareMode: true,
@@ -1391,7 +1395,13 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
   return app;
 }
 
-if (!process.env.VERCEL) {
+const isMainModule = process.argv[1] && (
+  process.argv[1].endsWith('server.ts') ||
+  process.argv[1].endsWith('server.js') ||
+  process.argv[1].endsWith('server.cjs')
+);
+
+if (!process.env.VERCEL && isMainModule) {
   createApp().then(app => {
     const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
     app.listen(PORT, '0.0.0.0', () => {
