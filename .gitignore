@@ -6,6 +6,9 @@ node_modules/
 # Production build outputs
 dist/
 build/
+release/
+*.exe
+*.blockmap
 coverage/
 
 # Environment Variables & Secrets (CRITICAL: Do NOT commit)

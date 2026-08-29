@@ -40,7 +40,7 @@ import { generateWmrReportId } from './src/utils/reportIdGenerator.js';
 import { getFridayEndingWeekInfo, isReportInWeek } from './src/utils/weekUtils.js';
 import { sanitizeLayerToBlueHierarchy } from './src/utils/canalLayerClassifier.js';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
+const DATA_DIR = process.env.VERCEL ? path.join('/tmp', 'data') : (process.env.USER_DATA_DIR || path.join(process.cwd(), 'data'));
 const DRIVE_CACHE_DIR = path.join(DATA_DIR, 'drive_cache');
 const PHOTOS_DIR = path.join(DATA_DIR, 'photos');
 const LAYERS_FILE = path.join(DATA_DIR, 'persistent_layers.json');
@@ -224,7 +224,7 @@ function saveUsersToFile(usersList: any[]) {
   }
 }
 
-async function startServer() {
+export async function createApp() {
   const app = express();
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 
@@ -1349,7 +1349,23 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
+    const candidates = [
+      __dirname,
+      path.join(__dirname, 'dist'),
+      path.join(process.cwd(), 'dist'),
+      path.join(__dirname, '../dist'),
+      path.join(__dirname, '../../dist'),
+      process.cwd()
+    ];
+    let distPath = path.join(process.cwd(), 'dist');
+    for (const c of candidates) {
+      if (fs.existsSync(path.join(c, 'index.html'))) {
+        distPath = c;
+        break;
+      }
+    }
+    console.log('Serving production static assets from:', distPath);
+
     app.use(express.static(distPath, {
       setHeaders: (res, filePath) => {
         if (filePath.endsWith('.html') || filePath.endsWith('sw.js') || filePath.endsWith('manifest.json')) {
@@ -1363,13 +1379,25 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
-      res.sendFile(path.join(distPath, 'index.html'));
+      const indexPath = path.join(distPath, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(404).send(`Application index.html not found. Looked in: ${indexPath}`);
+      }
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server listening on http://0.0.0.0:${PORT}`);
-  });
+  return app;
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  createApp().then(app => {
+    const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server listening on http://0.0.0.0:${PORT}`);
+    });
+  }).catch(err => {
+    console.error('Server startup failed:', err);
+  });
+}

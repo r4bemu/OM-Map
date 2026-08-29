@@ -70,6 +70,7 @@ import { SyncDataModal } from './components/SyncDataModal';
 import { ConfigurationsModal } from './components/ConfigurationsModal';
 import { SyncOverlay, SyncStep } from './components/SyncOverlay';
 import { useMobileBackStack, WindowId } from './hooks/useMobileBackStack';
+import { DesktopUpdateModal } from './components/DesktopUpdateModal';
 
 function deduplicateItems<T extends { id: string }>(items: T[]): T[] {
   if (!Array.isArray(items)) return [];
@@ -2068,6 +2069,9 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Desktop GitHub Auto-Updater Notifications */}
+      <DesktopUpdateModal />
     </div>
   );
 };
