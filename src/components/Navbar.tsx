@@ -64,6 +64,8 @@ interface NavbarProps {
   isMapPickerActive?: boolean;
   currentTheme?: 'dark' | 'light';
   onToggleTheme?: (theme: 'dark' | 'light') => void;
+  isMenuOpen?: boolean;
+  onToggleMenu?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -95,9 +97,26 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout,
   isMapPickerActive = false,
   currentTheme = 'dark',
-  onToggleTheme
+  onToggleTheme,
+  isMenuOpen,
+  onToggleMenu
 }) => {
-  const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
+  const [internalHamburgerOpen, setInternalHamburgerOpen] = useState(false);
+  const isHamburgerOpen = isMenuOpen !== undefined ? isMenuOpen : internalHamburgerOpen;
+  const toggleHamburger = () => {
+    if (onToggleMenu) {
+      onToggleMenu();
+    } else {
+      setInternalHamburgerOpen(prev => !prev);
+    }
+  };
+  const closeHamburger = () => {
+    if (isMenuOpen !== undefined) {
+      if (isMenuOpen && onToggleMenu) onToggleMenu();
+    } else {
+      setInternalHamburgerOpen(false);
+    }
+  };
   const [isSimulatorExpanded, setIsSimulatorExpanded] = useState(false);
   const hamburgerRef = useRef<HTMLDivElement>(null);
 
@@ -135,7 +154,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (hamburgerRef.current && !hamburgerRef.current.contains(event.target as Node)) {
-        setIsHamburgerOpen(false);
+        closeHamburger();
       }
     };
     if (isHamburgerOpen) {
@@ -326,7 +345,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Hamburger Menu Trigger Button & Slide-down Drawer (Right Side) */}
       <div className="relative pointer-events-auto shrink-0" ref={hamburgerRef}>
         <button
-          onClick={() => setIsHamburgerOpen(prev => !prev)}
+          onClick={toggleHamburger}
           className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition border shadow-2xl cursor-pointer active:scale-95 ${
             isHamburgerOpen || isSimulating
               ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-amber-500/10'
@@ -345,7 +364,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </button>
 
-        {/* Floating Hamburger Popover Drawer */}
         {/* Floating Hamburger Popover Drawer */}
         {isHamburgerOpen && (
           <div className="absolute top-full right-0 mt-2 w-80 max-w-[94vw] bg-slate-900/98 backdrop-blur-2xl border border-slate-700/90 rounded-2xl shadow-2xl p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150 max-h-[85vh] overflow-y-auto custom-scrollbar flex flex-col gap-3">
@@ -378,7 +396,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  setIsHamburgerOpen(false);
+                  closeHamburger();
                   handleInstallPwa();
                 }}
                 className="w-full flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-emerald-600/30 to-teal-600/30 hover:from-emerald-600/40 hover:to-teal-600/40 text-emerald-200 border border-emerald-500/50 rounded-xl transition cursor-pointer text-xs font-bold shadow-lg shadow-emerald-950/40 active:scale-95"

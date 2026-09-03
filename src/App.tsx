@@ -70,7 +70,8 @@ import { SyncDataModal } from './components/SyncDataModal';
 import { ConfigurationsModal } from './components/ConfigurationsModal';
 import { SyncOverlay, SyncStep } from './components/SyncOverlay';
 import { useMobileBackStack, WindowId } from './hooks/useMobileBackStack';
-import { DesktopUpdateModal } from './components/DesktopUpdateModal';
+import { MobileBottomNav } from './components/MobileBottomNav';
+import { PwaUpdateToast } from './components/PwaUpdateToast';
 
 function deduplicateItems<T extends { id: string }>(items: T[]): T[] {
   if (!Array.isArray(items)) return [];
@@ -89,6 +90,7 @@ export default function App() {
   const [simulatedRole, setSimulatedRole] = useState<UserRole | null>(null);
   const [simulatedImo, setSimulatedImo] = useState<string | null>(null);
   const [simulatedNis, setSimulatedNis] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const activeRole: UserRole = simulatedRole || authenticatedUser?.role || 'Viewer';
   const activeImo: string = simulatedImo || authenticatedUser?.imoOffice || 'All IMOs';
@@ -241,6 +243,7 @@ export default function App() {
     setPreviewingPdfReport(null);
     setSelectedFeatureProps(null);
     setSelectedReport(undefined);
+    setIsMenuOpen(false);
   }, []);
 
   const handleOpenPdfPreview = useCallback((report: FieldReport) => {
@@ -1677,6 +1680,8 @@ export default function App() {
         isMapPickerActive={isMapPickerActive}
         currentTheme={theme}
         onToggleTheme={toggleTheme}
+        isMenuOpen={isMenuOpen}
+        onToggleMenu={() => setIsMenuOpen(prev => !prev)}
       />
 
       {/* Privileged Role Simulation Banner */}
@@ -2070,8 +2075,49 @@ export default function App() {
         </div>
       )}
 
-      {/* Desktop GitHub Auto-Updater Notifications */}
-      <DesktopUpdateModal />
+      {/* Dedicated Mobile Bottom Navigation Dock */}
+      <MobileBottomNav
+        onOpenReportModal={() => {
+          closeAllModals();
+          setEditingReport(null);
+          setReportPrefill({
+            canalSegment: undefined,
+            parcelId: undefined,
+            lat: undefined,
+            lng: undefined,
+            lat2: undefined,
+            lng2: undefined,
+            reportType: 'maintenance'
+          });
+          setIsReportModalOpen(true);
+        }}
+        onToggleLayerPanel={() => {
+          const willOpen = !isLayerPanelOpen;
+          closeAllModals();
+          setIsLayerPanelOpen(willOpen);
+        }}
+        isLayerPanelOpen={isLayerPanelOpen}
+        onOpenReportsSummary={() => {
+          closeAllModals();
+          setSummaryModalInitialTab('ledger');
+          setIsSummaryModalOpen(true);
+        }}
+        isSummaryModalOpen={isSummaryModalOpen}
+        onToggleMenu={() => {
+          setIsMenuOpen(prev => !prev);
+        }}
+        isMenuOpen={isMenuOpen}
+        onOpenFilter={() => {
+          const willOpen = !isFilterModalOpen;
+          closeAllModals();
+          setIsFilterModalOpen(willOpen);
+        }}
+        isFilterActive={isFilterActive}
+        unsyncedCount={unsyncedCount}
+      />
+
+      {/* PWA In-App Real-time Cloud Update Notifier */}
+      <PwaUpdateToast />
     </div>
   );
 };

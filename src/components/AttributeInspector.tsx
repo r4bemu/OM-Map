@@ -229,10 +229,15 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
   return (
     <aside
       ref={inspectorRef}
-      className="absolute bottom-6 right-4 z-20 w-80 sm:w-96 max-h-[calc(100vh-8rem)] bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+      className="fixed sm:absolute bottom-16 sm:bottom-6 left-2 right-2 sm:left-auto sm:right-4 z-30 w-auto sm:w-96 max-h-[70vh] sm:max-h-[calc(100vh-8rem)] bg-slate-900/98 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4"
     >
+      {/* Mobile Top Drag Indicator */}
+      <div className="sm:hidden flex justify-center pt-2 pb-1 bg-slate-900/90">
+        <div className="w-10 h-1 rounded-full bg-slate-700" />
+      </div>
+
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/80">
+      <div className="flex items-center justify-between px-4 py-3 sm:p-4 border-b border-slate-800 bg-slate-900/80">
         <div className="min-w-0 pr-2">
           <span className="text-[10px] uppercase tracking-wider font-bold text-cyan-400">
             {selectedReport ? 'Field Work Report' : selectedFeatureType || 'Spatial Feature'}
