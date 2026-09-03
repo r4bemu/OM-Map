@@ -20,7 +20,9 @@ import {
   WifiOff,
   Sun,
   Moon,
-  MapPin
+  MapPin,
+  Download,
+  Smartphone
 } from 'lucide-react';
 import { UserRole, GISLayer, FieldReport, AuthUser, AvailableCloudWeek } from '../types';
 
@@ -98,6 +100,36 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
   const [isSimulatorExpanded, setIsSimulatorExpanded] = useState(false);
   const hamburgerRef = useRef<HTMLDivElement>(null);
+
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isStandalone, setIsStandalone] = useState<boolean>(() => {
+    try {
+      return window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+    } catch (_) {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallPwa = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else {
+      alert('To install this app on your device:\n\n• Chrome / Edge (Desktop): Click the Install icon (⤓) in the address bar.\n• Android Chrome: Tap Menu (⋮) → "Install app" or "Add to Home Screen".\n• iPhone / iPad (Safari): Tap Share (⬆) → "Add to Home Screen".');
+    }
+  };
 
   // Close hamburger menu on outside click
   useEffect(() => {
@@ -340,6 +372,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="truncate">{authenticatedUser?.nisBinding || authenticatedUser?.imoOffice || 'Regional Office IV-B'}</span>
               </div>
             </div>
+
+            {/* PWA 1-Click Install Button */}
+            {!isStandalone && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsHamburgerOpen(false);
+                  handleInstallPwa();
+                }}
+                className="w-full flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-emerald-600/30 to-teal-600/30 hover:from-emerald-600/40 hover:to-teal-600/40 text-emerald-200 border border-emerald-500/50 rounded-xl transition cursor-pointer text-xs font-bold shadow-lg shadow-emerald-950/40 active:scale-95"
+              >
+                <div className="flex items-center gap-2">
+                  <Download className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <div className="text-left">
+                    <div className="font-bold text-white">📲 Install App on Device</div>
+                    <div className="text-[10px] text-emerald-300 font-normal">Offline-ready • Auto-updating</div>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[10px] font-black uppercase tracking-wider">
+                  Install
+                </span>
+              </button>
+            )}
 
             {/* 2. Privileged Role & Location Simulator */}
             {isPrivilegedUser && (

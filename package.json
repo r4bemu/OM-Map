@@ -9,9 +9,7 @@
     "start": "node dist/server.cjs",
     "preview": "vite preview",
     "clean": "node -e \"const fs=require('fs'); fs.rmSync('dist',{recursive:true,force:true});\"",
-    "lint": "tsc --noEmit",
-    "electron:build": "node scripts/build-electron.js && electron-builder --win",
-    "electron:dev": "node scripts/build-electron.js && electron dist/electron/main.cjs"
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -39,8 +37,7 @@
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "recharts": "^3.10.1",
-    "vite": "^6.2.3",
-    "electron-updater": "^6.8.9"
+    "vite": "^6.2.3"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",
@@ -49,54 +46,12 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "autoprefixer": "^10.4.21",
-    "electron": "^44.0.0",
-    "electron-builder": "^26.15.3",
     "esbuild": "^0.25.0",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.3"
   },
-  "main": "dist/electron/main.cjs",
-  "build": {
-    "appId": "ph.gov.nia.ommap",
-    "productName": "NIA O&M Map & Report System",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "dist/**/*",
-      "public/**/*",
-      "package.json"
-    ],
-    "asar": true,
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "icon": "public/nia-logo.png"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "NIA O&M Map",
-      "uninstallDisplayName": "NIA O&M Map & Report System"
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "r4bemu",
-      "repo": "OM-Map"
-    },
-    "npmRebuild": false,
-    "nodeGypRebuild": false
-  },
-  "description": "NIA O&M Map & Report System Desktop Application",
+  "description": "NIA MIMAROPA O&M GIS & Field Reporting Platform",
   "author": "National Irrigation Administration"
 }

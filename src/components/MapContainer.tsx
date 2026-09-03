@@ -377,7 +377,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       center: initialCenter,
       zoom: initialZoom,
       zoomControl: false,
-      attributionControl: true
+      attributionControl: true,
+      preferCanvas: true
     });
 
     // Create Base Tile Layer immediately on map initialization

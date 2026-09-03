@@ -43,7 +43,7 @@ import { generateWmrReportId } from './src/utils/reportIdGenerator.js';
 import { getFridayEndingWeekInfo, isReportInWeek } from './src/utils/weekUtils.js';
 import { sanitizeLayerToBlueHierarchy } from './src/utils/canalLayerClassifier.js';
 
-const DATA_DIR = process.env.VERCEL ? path.join('/tmp', 'data') : (process.env.USER_DATA_DIR || path.join(process.cwd(), 'data'));
+const DATA_DIR = process.env.USER_DATA_DIR || path.join(process.cwd(), 'data');
 const DRIVE_CACHE_DIR = path.join(DATA_DIR, 'drive_cache');
 const PHOTOS_DIR = path.join(DATA_DIR, 'photos');
 const LAYERS_FILE = path.join(DATA_DIR, 'persistent_layers.json');
@@ -60,6 +60,36 @@ function ensureDataDir() {
     }
     if (!fs.existsSync(PHOTOS_DIR)) {
       fs.mkdirSync(PHOTOS_DIR, { recursive: true });
+    }
+
+    // Seed initial dataset files from bundled app directories if not yet in USER_DATA_DIR
+    const seedCandidates = [
+      path.join(__dirname, '../data'),
+      path.join(__dirname, 'data'),
+      path.join(process.cwd(), 'data')
+    ];
+    const targetFiles = [
+      'drive_manifest.json',
+      'persistent_reports.json',
+      'reports.json',
+      'persistent_users.json',
+      'persistent_layers.json'
+    ];
+
+    for (const seedDir of seedCandidates) {
+      if (fs.existsSync(seedDir)) {
+        for (const file of targetFiles) {
+          const dest = path.join(DATA_DIR, file);
+          const src = path.join(seedDir, file);
+          if (!fs.existsSync(dest) && fs.existsSync(src)) {
+            try {
+              fs.copyFileSync(src, dest);
+              console.log(`📦 Seeded ${file} from ${src} to ${dest}`);
+            } catch (copyErr) {}
+          }
+        }
+        break;
+      }
     }
   } catch (e) {}
 }
@@ -260,11 +290,8 @@ export async function createApp() {
     res.json({
       status: 'ok',
       serverTime: new Date().toISOString(),
-      isVercel: Boolean(process.env.VERCEL),
       hasDriveRefreshToken: Boolean(process.env.GOOGLE_REFRESH_TOKEN),
-      hasDriveAccessToken: Boolean(process.env.GOOGLE_DRIVE_ACCESS_TOKEN),
-      hasClientId: Boolean(process.env.GOOGLE_CLIENT_ID),
-      hasClientSecret: Boolean(process.env.GOOGLE_CLIENT_SECRET)
+      hasDriveAccessToken: Boolean(process.env.GOOGLE_DRIVE_ACCESS_TOKEN)
     });
   });
 
@@ -1361,7 +1388,7 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
   // Production static file serving vs Vite Middleware for Development
   const isProduction = process.env.NODE_ENV === 'production' || process.env.K_SERVICE !== undefined || !fs.existsSync(path.join(process.cwd(), 'src', 'main.tsx'));
 
-  if (!isProduction && !process.env.VERCEL) {
+  if (!isProduction) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: {
@@ -1381,7 +1408,7 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else if (!process.env.VERCEL) {
+  } else {
     const candidates = [
       __dirname,
       path.join(__dirname, 'dist'),
@@ -1419,11 +1446,6 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
         res.status(404).send(`Application index.html not found. Looked in: ${indexPath}`);
       }
     });
-  } else {
-    // On Vercel Serverless Function, return 404 JSON for unknown API routes
-    app.use((req, res) => {
-      res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });
-    });
   }
 
   return app;
@@ -1435,7 +1457,7 @@ const isMainModule = process.argv[1] && (
   process.argv[1].endsWith('server.cjs')
 );
 
-if (!process.env.VERCEL && isMainModule) {
+if (isMainModule) {
   createApp().then(app => {
     const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
     app.listen(PORT, '0.0.0.0', () => {
