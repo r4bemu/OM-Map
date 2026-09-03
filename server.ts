@@ -51,15 +51,17 @@ const REPORTS_FILE = path.join(DATA_DIR, 'persistent_reports.json');
 const USERS_FILE = path.join(DATA_DIR, 'persistent_users.json');
 
 function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(DRIVE_CACHE_DIR)) {
-    fs.mkdirSync(DRIVE_CACHE_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(PHOTOS_DIR)) {
-    fs.mkdirSync(PHOTOS_DIR, { recursive: true });
-  }
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    if (!fs.existsSync(DRIVE_CACHE_DIR)) {
+      fs.mkdirSync(DRIVE_CACHE_DIR, { recursive: true });
+    }
+    if (!fs.existsSync(PHOTOS_DIR)) {
+      fs.mkdirSync(PHOTOS_DIR, { recursive: true });
+    }
+  } catch (e) {}
 }
 
 function saveBase64PhotoToDisk(photoId: string, base64Url: string, driveFileId?: string) {
@@ -1063,6 +1065,26 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
     } catch (err: any) {
       console.error(`Error streaming Drive file ${req.params.fileId}:`, err);
       res.status(500).json({ error: err.message || 'Failed to download file from Drive' });
+    }
+  });
+
+  // Stream Google Drive Inspection Photos by File ID with server disk caching
+  app.get('/api/drive/photo/:fileId', async (req, res) => {
+    try {
+      const { fileId } = req.params;
+      const clientToken = req.headers['x-google-drive-token'] as string | undefined;
+      const accessToken = await getOrRefreshServerDriveToken(clientToken);
+
+      const buffer = await getOrFetchDriveFileBuffer(fileId, accessToken);
+      if (!buffer || buffer.length === 0) {
+        return res.status(404).send('Photo not found on Drive');
+      }
+      res.setHeader('Content-Type', 'image/jpeg');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.send(buffer);
+    } catch (err: any) {
+      console.error(`Error streaming Drive photo ${req.params.fileId}:`, err);
+      res.status(500).json({ error: err.message || 'Failed to download photo from Drive' });
     }
   });
 
