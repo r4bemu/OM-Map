@@ -559,7 +559,7 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
   }
 ];
 
-export const STORAGE_USERS_KEY = 'ommap_registered_users_v2';
+export const STORAGE_USERS_KEY = 'ommap_registered_users_v3';
 export const STORAGE_SESSION_KEY = 'ommap_auth_session';
 
 let memoryUsersCache: AuthUser[] | null = null;
@@ -570,34 +570,49 @@ export function getAuthUsers(): AuthUser[] {
   }
 
   try {
+    // Clean out legacy storage versions to prevent stale role names
+    try {
+      localStorage.removeItem('ommap_registered_users_v2');
+      localStorage.removeItem('ommap_registered_users');
+    } catch (_) {}
+
     const raw = localStorage.getItem(STORAGE_USERS_KEY);
     if (raw) {
       const parsed: AuthUser[] = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        // Merge with default users to ensure all required fields and accounts exist
-        const map = new Map<string, AuthUser>();
-        DEFAULT_AUTH_USERS.forEach(u => map.set(u.id, u));
+        const defaultMap = new Map<string, AuthUser>();
+        DEFAULT_AUTH_USERS.forEach(u => defaultMap.set(u.id, u));
+
+        const result: AuthUser[] = [];
+        const seenIds = new Set<string>();
+
+        // Process stored users: if it is a default account, adopt latest canonical name, role, username & designation
         parsed.forEach(u => {
-          const base = map.get(u.id);
-          map.set(u.id, {
-            ...base,
-            ...u,
-            role: normalizeUserRole(u.role)
-          });
-        });
-        // Clean out legacy / obsolete IDs
-        map.delete('usr-adm-01');
-        map.delete('usr-ro-con-01');
-        // Re-inject fresh RO and IMO accounts if needed
-        DEFAULT_AUTH_USERS.filter(u => u.role.startsWith('RO') || u.role.startsWith('IMO')).forEach(u => {
-          if (!map.has(u.id)) {
-            map.set(u.id, u);
+          seenIds.add(u.id);
+          const def = defaultMap.get(u.id);
+          if (def) {
+            result.push({
+              ...def,
+              passcode: u.passcode || def.passcode,
+              imoOffice: u.imoOffice || def.imoOffice,
+              nisBinding: u.nisBinding || def.nisBinding
+            });
+          } else if (u.id.startsWith('usr-custom-')) {
+            result.push({
+              ...u,
+              role: normalizeUserRole(u.role)
+            });
           }
         });
-        memoryUsersCache = Array.from(map.values()).map(u => ({
-          ...u,
-          role: normalizeUserRole(u.role)
-        }));
+
+        // Add any missing default users
+        DEFAULT_AUTH_USERS.forEach(u => {
+          if (!seenIds.has(u.id)) {
+            result.push(u);
+          }
+        });
+
+        memoryUsersCache = result;
         return memoryUsersCache;
       }
     }
@@ -624,11 +639,26 @@ export async function fetchRemoteAuthUsers(): Promise<AuthUser[]> {
     const res = await fetch('/api/users');
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        const normalized = data.map((u: AuthUser) => ({
-          ...u,
-          role: normalizeUserRole(u.role)
-        }));
+      const list = Array.isArray(data) ? data : (data && Array.isArray(data.users) ? data.users : []);
+      if (Array.isArray(list) && list.length > 0) {
+        const defaultMap = new Map<string, AuthUser>();
+        DEFAULT_AUTH_USERS.forEach(u => defaultMap.set(u.id, u));
+
+        const normalized = list.map((u: AuthUser) => {
+          const def = defaultMap.get(u.id);
+          if (def) {
+            return {
+              ...def,
+              passcode: u.passcode || def.passcode,
+              imoOffice: u.imoOffice || def.imoOffice,
+              nisBinding: u.nisBinding || def.nisBinding
+            };
+          }
+          return {
+            ...u,
+            role: normalizeUserRole(u.role)
+          };
+        });
         saveAuthUsers(normalized);
         return normalized;
       }
@@ -763,10 +793,17 @@ export function getSavedAuthSession(): AuthUser | null {
     const raw = localStorage.getItem(STORAGE_SESSION_KEY);
     if (raw) {
       const user = JSON.parse(raw);
-      if (user && user.role) {
-        user.role = normalizeUserRole(user.role);
+      if (user && user.id) {
+        const def = DEFAULT_AUTH_USERS.find(d => d.id === user.id);
+        const updated: AuthUser = {
+          ...user,
+          name: def?.name || user.name,
+          username: def?.username || user.username,
+          designation: def?.designation || user.designation,
+          role: normalizeUserRole(user.role)
+        };
+        return updated;
       }
-      return user;
     }
   } catch (e) {}
   return null;
@@ -774,7 +811,14 @@ export function getSavedAuthSession(): AuthUser | null {
 
 export function saveAuthSession(user: AuthUser): void {
   try {
-    const norm = { ...user, role: normalizeUserRole(user.role) };
+    const def = DEFAULT_AUTH_USERS.find(d => d.id === user.id);
+    const norm = { 
+      ...user, 
+      name: def?.name || user.name,
+      username: def?.username || user.username,
+      designation: def?.designation || user.designation,
+      role: normalizeUserRole(user.role) 
+    };
     localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(norm));
   } catch (e) {}
 }
