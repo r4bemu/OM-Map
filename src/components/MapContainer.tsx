@@ -202,6 +202,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const activePopupCoordsRef = useRef(activePopupCoords);
   const activePopupPropsRef = useRef(activePopupProps);
   const hasAutoFitRef = useRef(false);
+  const activeMeasureToolRef = useRef(activeMeasureTool);
+  const onDeselectFeatureRef = useRef(onDeselectFeature);
+  const onSelectFeatureRef = useRef(onSelectFeature);
+  const onTriggerReportFromMapRef = useRef(onTriggerReportFromMap);
+  const onSelectReportRef = useRef(onSelectReport);
 
   useEffect(() => { isMapPickerActiveRef.current = isMapPickerActive; }, [isMapPickerActive]);
   useEffect(() => { isPoint1SetRef.current = isPoint1Set; }, [isPoint1Set]);
@@ -210,6 +215,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   useEffect(() => { pickerPt2Ref.current = pickerPt2; }, [pickerPt2]);
   useEffect(() => { activePopupCoordsRef.current = activePopupCoords; }, [activePopupCoords]);
   useEffect(() => { activePopupPropsRef.current = activePopupProps; }, [activePopupProps]);
+  useEffect(() => { activeMeasureToolRef.current = activeMeasureTool; }, [activeMeasureTool]);
+  useEffect(() => { onDeselectFeatureRef.current = onDeselectFeature; }, [onDeselectFeature]);
+  useEffect(() => { onSelectFeatureRef.current = onSelectFeature; }, [onSelectFeature]);
+  useEffect(() => { onTriggerReportFromMapRef.current = onTriggerReportFromMap; }, [onTriggerReportFromMap]);
+  useEffect(() => { onSelectReportRef.current = onSelectReport; }, [onSelectReport]);
 
   // Update picker state when initial coordinates change
   useEffect(() => {
@@ -476,7 +486,17 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       );
     }
 
+    const handleGeneralMapClick = () => {
+      if (isMapPickerActiveRef.current || activeMeasureToolRef.current !== 'none') {
+        return;
+      }
+      onDeselectFeatureRef.current?.();
+    };
+
+    map.on('click', handleGeneralMapClick);
+
     return () => {
+      map.off('click', handleGeneralMapClick);
       map.remove();
       mapRef.current = null;
     };
@@ -591,14 +611,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     }
   };
 
-  const onSelectFeatureRef = useRef(onSelectFeature);
-  useEffect(() => { onSelectFeatureRef.current = onSelectFeature; }, [onSelectFeature]);
 
-  const onTriggerReportFromMapRef = useRef(onTriggerReportFromMap);
-  useEffect(() => { onTriggerReportFromMapRef.current = onTriggerReportFromMap; }, [onTriggerReportFromMap]);
-
-  const onSelectReportRef = useRef(onSelectReport);
-  useEffect(() => { onSelectReportRef.current = onSelectReport; }, [onSelectReport]);
 
   // Render Vector GIS Layers & Field Report Markers
   useEffect(() => {
@@ -919,7 +932,6 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                   const curLatlng = e.popup?.getLatLng();
                   if (curLatlng) {
                     onSelectFeatureRef.current?.(props, layer.category, [curLatlng.lat, curLatlng.lng]);
-                    e.popup?.close();
                   }
                 };
               }

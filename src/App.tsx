@@ -1467,6 +1467,7 @@ export default function App() {
 
   const handleDeselectFeature = useCallback(() => {
     setSelectedFeatureProps(null);
+    setSelectedReport(undefined);
     setSelectedCoords(undefined);
   }, []);
 
