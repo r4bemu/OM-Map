@@ -233,13 +233,41 @@ function saveReportsToFile(reportsList: any[]) {
   }
 }
 
+function normalizeServerUserRole(role?: string | null): string {
+  if (!role) return 'Viewer';
+  const r = role.trim();
+  if (r === 'RO Admin') return 'RO Evaluator';
+  if (r === 'RO Evaluator') return 'RO Reviewer';
+  if (r === 'IMO Admin') return 'IMO Evaluator';
+  if (r === 'NIS In-Charge' || r === 'NIS In-charge') return 'IMO Reviewer';
+  if (r === 'NIS Preparer') return 'IMO Preparer';
+  return r;
+}
+
 function loadSavedUsers(): any[] {
   ensureDataDir();
   if (fs.existsSync(USERS_FILE)) {
     try {
       const data = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
       if (Array.isArray(data) && data.length > 0) {
-        return data;
+        let hasChanges = false;
+        const normalized = data.map((u: any) => {
+          const normRole = normalizeServerUserRole(u.role);
+          if (normRole !== u.role) {
+            hasChanges = true;
+            return {
+              ...u,
+              role: normRole,
+              name: typeof u.name === 'string' ? u.name.replace(/NIS In-Charge/g, 'IMO Reviewer').replace(/NIS Preparer/g, 'IMO Preparer').replace(/RO Admin/g, 'RO Evaluator').replace(/IMO Admin/g, 'IMO Evaluator') : u.name,
+              designation: typeof u.designation === 'string' ? u.designation.replace(/NIS In-Charge/g, 'IMO Reviewer').replace(/NIS Report Preparer/g, 'IMO Report Preparer').replace(/NIS Preparer/g, 'IMO Preparer').replace(/RO Admin/g, 'RO Evaluator').replace(/IMO Admin/g, 'IMO Evaluator') : u.designation
+            };
+          }
+          return u;
+        });
+        if (hasChanges) {
+          saveUsersToFile(normalized);
+        }
+        return normalized;
       }
     } catch (err) {
       console.warn('Failed to parse persistent_users.json, resetting to defaults:', err);
@@ -630,11 +658,11 @@ export async function createApp() {
 
       if (action === 'pre_approve') {
         targetReport.approvalStatus = 'PreApproved';
-        targetReport.preApprovedBy = authorizerName || 'NIS In-Charge';
+        targetReport.preApprovedBy = authorizerName || 'IMO Reviewer';
         targetReport.preApprovedAt = new Date().toISOString();
       } else if (action === 'final_approve') {
         targetReport.approvalStatus = 'Approved';
-        targetReport.approvedBy = authorizerName || (authorizerRole?.startsWith('RO') ? 'RO Admin' : 'IMO Admin');
+        targetReport.approvedBy = authorizerName || (authorizerRole?.startsWith('RO') ? 'RO Evaluator' : 'IMO Evaluator');
         targetReport.approvedAt = new Date().toISOString();
       } else if (action === 'reject') {
         targetReport.approvalStatus = 'Rejected';

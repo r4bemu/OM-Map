@@ -1,4 +1,5 @@
 import { AuthUser, UserRole } from '../types';
+import { normalizeUserRole } from '../utils/approvalHierarchyEngine';
 
 export const IMO_LIST = [
   'Mindoro Oriental-Marinduque-Romblon IMO',
@@ -81,23 +82,23 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
   // ==========================================
   {
     id: 'usr-ro-adm-01',
-    username: 'ro_admin',
+    username: 'ro_evaluator',
     name: 'Division Manager (Regional Office)',
-    role: 'RO Admin',
+    role: 'RO Evaluator',
     passcode: 'ROA7721R',
     imoOffice: 'All IMOs',
     nisBinding: 'All NIS',
-    designation: 'Regional Office Division Admin'
+    designation: 'Regional Office Division Manager & Evaluator'
   },
   {
     id: 'usr-ro-eva-01',
-    username: 'ro_evaluator',
-    name: 'Regional Report Evaluator',
-    role: 'RO Evaluator',
+    username: 'ro_reviewer',
+    name: 'Regional Report Reviewer',
+    role: 'RO Reviewer',
     passcode: 'ROE5534R',
     imoOffice: 'All IMOs',
     nisBinding: 'All NIS',
-    designation: 'Regional O&M Report Evaluator'
+    designation: 'Regional O&M Report Reviewer'
   },
   {
     id: 'usr-ro-pre-01',
@@ -111,355 +112,355 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
   },
 
   // ==========================================
-  // 3. IMO ADMIN ACCOUNTS (3 Accounts: 1 per IMO)
+  // 3. IMO EVALUATOR ACCOUNTS (3 Accounts: 1 per IMO)
   // ==========================================
   {
     id: 'usr-adm-02',
-    username: 'admin_momaro',
+    username: 'evaluator_momaro',
     name: 'Division Manager (MOMARO IMO)',
-    role: 'IMO Admin',
+    role: 'IMO Evaluator',
     passcode: 'MOM8841A',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
     nisBinding: 'MOMARO Systems',
-    designation: 'MOMARO IMO Division Manager & Admin'
+    designation: 'MOMARO IMO Division Manager & Evaluator'
   },
   {
     id: 'usr-adm-03',
-    username: 'admin_occmindoro',
+    username: 'evaluator_occmindoro',
     name: 'Division Manager (Occ. Mindoro IMO)',
-    role: 'IMO Admin',
+    role: 'IMO Evaluator',
     passcode: 'OCC4419A',
     imoOffice: 'Occidental Mindoro IMO',
     nisBinding: 'Occidental Mindoro Systems',
-    designation: 'Occidental Mindoro IMO Division Manager & Admin'
+    designation: 'Occidental Mindoro IMO Division Manager & Evaluator'
   },
   {
     id: 'usr-adm-04',
-    username: 'admin_palawan',
+    username: 'evaluator_palawan',
     name: 'Division Manager (Palawan IMO)',
-    role: 'IMO Admin',
+    role: 'IMO Evaluator',
     passcode: 'PAL5523A',
     imoOffice: 'Palawan IMO',
     nisBinding: 'Palawan Systems',
-    designation: 'Palawan IMO Division Manager & Admin'
+    designation: 'Palawan IMO Division Manager & Evaluator'
   },
 
   // ==========================================
-  // 4. NIS IN-CHARGE ACCOUNTS (15 Accounts: 5 per IMO)
+  // 4. IMO REVIEWER ACCOUNTS (15 Accounts: 5 per IMO)
   // ==========================================
-  // MOMARO IMO (5 NIS In-Charge)
+  // MOMARO IMO (5 IMO Reviewers)
   {
     id: 'usr-eng-mom-01',
-    username: 'nis_momaro_1',
-    name: 'NIS In-Charge MOMARO 01',
-    role: 'NIS In-Charge',
+    username: 'reviewer_momaro_1',
+    name: 'IMO Reviewer MOMARO 01',
+    role: 'IMO Reviewer',
     passcode: 'ENG8101M',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
     nisBinding: 'Baco-Bucayao RIS',
-    designation: 'Principal NIS In-Charge - Baco-Bucayao RIS'
+    designation: 'Principal IMO Reviewer - Baco-Bucayao RIS'
   },
   {
     id: 'usr-eng-mom-02',
-    username: 'nis_momaro_2',
-    name: 'NIS In-Charge MOMARO 02',
-    role: 'NIS In-Charge',
+    username: 'reviewer_momaro_2',
+    name: 'IMO Reviewer MOMARO 02',
+    role: 'IMO Reviewer',
     passcode: 'ENG8102M',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
     nisBinding: 'Mag-asawang Tubig RIS',
-    designation: 'Senior NIS In-Charge - Mag-asawang Tubig RIS'
+    designation: 'Senior IMO Reviewer - Mag-asawang Tubig RIS'
   },
   {
     id: 'usr-eng-mom-03',
-    username: 'nis_momaro_3',
-    name: 'NIS In-Charge MOMARO 03',
-    role: 'NIS In-Charge',
+    username: 'reviewer_momaro_3',
+    name: 'IMO Reviewer MOMARO 03',
+    role: 'IMO Reviewer',
     passcode: 'ENG8103M',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
     nisBinding: 'Pula RIS',
-    designation: 'Supervising NIS In-Charge - Pula RIS'
+    designation: 'Supervising IMO Reviewer - Pula RIS'
   },
   {
     id: 'usr-eng-mom-04',
-    username: 'nis_momaro_4',
-    name: 'NIS In-Charge MOMARO 04',
-    role: 'NIS In-Charge',
+    username: 'reviewer_momaro_4',
+    name: 'IMO Reviewer MOMARO 04',
+    role: 'IMO Reviewer',
     passcode: 'ENG8104M',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
     nisBinding: 'Bongabong RIS',
-    designation: 'Lead NIS In-Charge - Bongabong RIS'
+    designation: 'Lead IMO Reviewer - Bongabong RIS'
   },
   {
     id: 'usr-eng-mom-05',
-    username: 'nis_momaro_5',
-    name: 'NIS In-Charge MOMARO 05',
-    role: 'NIS In-Charge',
+    username: 'reviewer_momaro_5',
+    name: 'IMO Reviewer MOMARO 05',
+    role: 'IMO Reviewer',
     passcode: 'ENG8105M',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
     nisBinding: 'Pagbahan RIS',
-    designation: 'Field NIS In-Charge - Pagbahan RIS'
+    designation: 'Field IMO Reviewer - Pagbahan RIS'
   },
 
-  // Occidental Mindoro IMO (5 NIS In-Charge)
+  // Occidental Mindoro IMO (5 IMO Reviewers)
   {
     id: 'usr-eng-occ-01',
-    username: 'nis_occmindoro_1',
-    name: 'NIS In-Charge Occ. Mindoro 01',
-    role: 'NIS In-Charge',
+    username: 'reviewer_occmindoro_1',
+    name: 'IMO Reviewer Occ. Mindoro 01',
+    role: 'IMO Reviewer',
     passcode: 'ENG9201O',
     imoOffice: 'Occidental Mindoro IMO',
     nisBinding: 'Mamburao RIS',
-    designation: 'Principal NIS In-Charge - Mamburao RIS'
+    designation: 'Principal IMO Reviewer - Mamburao RIS'
   },
   {
     id: 'usr-eng-occ-02',
-    username: 'nis_occmindoro_2',
-    name: 'NIS In-Charge Occ. Mindoro 02',
-    role: 'NIS In-Charge',
+    username: 'reviewer_occmindoro_2',
+    name: 'IMO Reviewer Occ. Mindoro 02',
+    role: 'IMO Reviewer',
     passcode: 'ENG9202O',
     imoOffice: 'Occidental Mindoro IMO',
     nisBinding: 'Amnay RIS',
-    designation: 'Senior NIS In-Charge - Amnay RIS'
+    designation: 'Senior IMO Reviewer - Amnay RIS'
   },
   {
     id: 'usr-eng-occ-03',
-    username: 'nis_occmindoro_3',
-    name: 'NIS In-Charge Occ. Mindoro 03',
-    role: 'NIS In-Charge',
+    username: 'reviewer_occmindoro_3',
+    name: 'IMO Reviewer Occ. Mindoro 03',
+    role: 'IMO Reviewer',
     passcode: 'ENG9203O',
     imoOffice: 'Occidental Mindoro IMO',
     nisBinding: 'Patrick RIS',
-    designation: 'Supervising NIS In-Charge - Patrick RIS'
+    designation: 'Supervising IMO Reviewer - Patrick RIS'
   },
   {
     id: 'usr-eng-occ-04',
-    username: 'nis_occmindoro_4',
-    name: 'NIS In-Charge Occ. Mindoro 04',
-    role: 'NIS In-Charge',
+    username: 'reviewer_occmindoro_4',
+    name: 'IMO Reviewer Occ. Mindoro 04',
+    role: 'IMO Reviewer',
     passcode: 'ENG9204O',
     imoOffice: 'Occidental Mindoro IMO',
     nisBinding: 'Lumintao RIS',
-    designation: 'Lead NIS In-Charge - Lumintao RIS'
+    designation: 'Lead IMO Reviewer - Lumintao RIS'
   },
   {
     id: 'usr-eng-occ-05',
-    username: 'nis_occmindoro_5',
-    name: 'NIS In-Charge Occ. Mindoro 05',
-    role: 'NIS In-Charge',
+    username: 'reviewer_occmindoro_5',
+    name: 'IMO Reviewer Occ. Mindoro 05',
+    role: 'IMO Reviewer',
     passcode: 'ENG9205O',
     imoOffice: 'Occidental Mindoro IMO',
     nisBinding: 'Monpong RIS',
-    designation: 'Field NIS In-Charge - Monpong RIS'
+    designation: 'Field IMO Reviewer - Monpong RIS'
   },
 
-  // Palawan IMO (5 NIS In-Charge)
+  // Palawan IMO (5 IMO Reviewers)
   {
     id: 'usr-eng-pal-01',
-    username: 'nis_palawan_1',
-    name: 'NIS In-Charge Palawan 01',
-    role: 'NIS In-Charge',
+    username: 'reviewer_palawan_1',
+    name: 'IMO Reviewer Palawan 01',
+    role: 'IMO Reviewer',
     passcode: 'ENG7301P',
     imoOffice: 'Palawan IMO',
     nisBinding: 'Malatgao RIS',
-    designation: 'Principal NIS In-Charge - Malatgao RIS'
+    designation: 'Principal IMO Reviewer - Malatgao RIS'
   },
   {
     id: 'usr-eng-pal-02',
-    username: 'nis_palawan_2',
-    name: 'NIS In-Charge Palawan 02',
-    role: 'NIS In-Charge',
+    username: 'reviewer_palawan_2',
+    name: 'IMO Reviewer Palawan 02',
+    role: 'IMO Reviewer',
     passcode: 'ENG7302P',
     imoOffice: 'Palawan IMO',
     nisBinding: 'Batang-Batang RIS',
-    designation: 'Senior NIS In-Charge - Batang-Batang RIS'
+    designation: 'Senior IMO Reviewer - Batang-Batang RIS'
   },
   {
     id: 'usr-eng-pal-03',
-    username: 'nis_palawan_3',
-    name: 'NIS In-Charge Palawan 03',
-    role: 'NIS In-Charge',
+    username: 'reviewer_palawan_3',
+    name: 'IMO Reviewer Palawan 03',
+    role: 'IMO Reviewer',
     passcode: 'ENG7303P',
     imoOffice: 'Palawan IMO',
     nisBinding: 'Malinao RIS',
-    designation: 'Supervising NIS In-Charge - Malinao RIS'
+    designation: 'Supervising IMO Reviewer - Malinao RIS'
   },
   {
     id: 'usr-eng-pal-04',
-    username: 'nis_palawan_4',
-    name: 'NIS In-Charge Palawan 04',
-    role: 'NIS In-Charge',
+    username: 'reviewer_palawan_4',
+    name: 'IMO Reviewer Palawan 04',
+    role: 'IMO Reviewer',
     passcode: 'ENG7304P',
     imoOffice: 'Palawan IMO',
     nisBinding: 'Inagawan RIS',
-    designation: 'Lead NIS In-Charge - Inagawan RIS'
+    designation: 'Lead IMO Reviewer - Inagawan RIS'
   },
   {
     id: 'usr-eng-pal-05',
-    username: 'nis_palawan_5',
-    name: 'NIS In-Charge Palawan 05',
-    role: 'NIS In-Charge',
+    username: 'reviewer_palawan_5',
+    name: 'IMO Reviewer Palawan 05',
+    role: 'IMO Reviewer',
     passcode: 'ENG7305P',
     imoOffice: 'Palawan IMO',
     nisBinding: 'Panitian RIS',
-    designation: 'Field NIS In-Charge - Panitian RIS'
+    designation: 'Field IMO Reviewer - Panitian RIS'
   },
 
   // ==========================================
-  // 5. NIS PREPARER ACCOUNTS (15 Accounts: 5 per IMO)
+  // 5. IMO PREPARER ACCOUNTS (15 Accounts: 5 per IMO)
   // ==========================================
-  // MOMARO IMO (5 NIS Preparers)
+  // MOMARO IMO (5 IMO Preparers)
   {
     id: 'usr-prep-mom-01',
     username: 'prep_momaro_1',
-    name: 'NIS Preparer MOMARO 01',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer MOMARO 01',
+    role: 'IMO Preparer',
     passcode: 'NPR8101M',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
     nisBinding: 'Baco-Bucayao RIS',
-    designation: 'NIS Report Preparer - Baco-Bucayao RIS'
+    designation: 'IMO Report Preparer - Baco-Bucayao RIS'
   },
   {
     id: 'usr-prep-mom-02',
     username: 'prep_momaro_2',
-    name: 'NIS Preparer MOMARO 02',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer MOMARO 02',
+    role: 'IMO Preparer',
     passcode: 'NPR8102M',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
     nisBinding: 'Mag-asawang Tubig RIS',
-    designation: 'NIS Report Preparer - Mag-asawang Tubig RIS'
+    designation: 'IMO Report Preparer - Mag-asawang Tubig RIS'
   },
   {
     id: 'usr-prep-mom-03',
     username: 'prep_momaro_3',
-    name: 'NIS Preparer MOMARO 03',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer MOMARO 03',
+    role: 'IMO Preparer',
     passcode: 'NPR8103M',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
     nisBinding: 'Pula RIS',
-    designation: 'NIS Report Preparer - Pula RIS'
+    designation: 'IMO Report Preparer - Pula RIS'
   },
   {
     id: 'usr-prep-mom-04',
     username: 'prep_momaro_4',
-    name: 'NIS Preparer MOMARO 04',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer MOMARO 04',
+    role: 'IMO Preparer',
     passcode: 'NPR8104M',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
     nisBinding: 'Bongabong RIS',
-    designation: 'NIS Report Preparer - Bongabong RIS'
+    designation: 'IMO Report Preparer - Bongabong RIS'
   },
   {
     id: 'usr-prep-mom-05',
     username: 'prep_momaro_5',
-    name: 'NIS Preparer MOMARO 05',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer MOMARO 05',
+    role: 'IMO Preparer',
     passcode: 'NPR8105M',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
     nisBinding: 'Pagbahan RIS',
-    designation: 'NIS Report Preparer - Pagbahan RIS'
+    designation: 'IMO Report Preparer - Pagbahan RIS'
   },
 
-  // Occidental Mindoro IMO (5 NIS Preparers)
+  // Occidental Mindoro IMO (5 IMO Preparers)
   {
     id: 'usr-prep-occ-01',
     username: 'prep_occmindoro_1',
-    name: 'NIS Preparer Occ. Mindoro 01',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer Occ. Mindoro 01',
+    role: 'IMO Preparer',
     passcode: 'NPR9201O',
     imoOffice: 'Occidental Mindoro IMO',
     nisBinding: 'Mamburao RIS',
-    designation: 'NIS Report Preparer - Mamburao RIS'
+    designation: 'IMO Report Preparer - Mamburao RIS'
   },
   {
     id: 'usr-prep-occ-02',
     username: 'prep_occmindoro_2',
-    name: 'NIS Preparer Occ. Mindoro 02',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer Occ. Mindoro 02',
+    role: 'IMO Preparer',
     passcode: 'NPR9202O',
     imoOffice: 'Occidental Mindoro IMO',
     nisBinding: 'Amnay RIS',
-    designation: 'NIS Report Preparer - Amnay RIS'
+    designation: 'IMO Report Preparer - Amnay RIS'
   },
   {
     id: 'usr-prep-occ-03',
     username: 'prep_occmindoro_3',
-    name: 'NIS Preparer Occ. Mindoro 03',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer Occ. Mindoro 03',
+    role: 'IMO Preparer',
     passcode: 'NPR9203O',
     imoOffice: 'Occidental Mindoro IMO',
     nisBinding: 'Patrick RIS',
-    designation: 'NIS Report Preparer - Patrick RIS'
+    designation: 'IMO Report Preparer - Patrick RIS'
   },
   {
     id: 'usr-prep-occ-04',
     username: 'prep_occmindoro_4',
-    name: 'NIS Preparer Occ. Mindoro 04',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer Occ. Mindoro 04',
+    role: 'IMO Preparer',
     passcode: 'NPR9204O',
     imoOffice: 'Occidental Mindoro IMO',
     nisBinding: 'Lumintao RIS',
-    designation: 'NIS Report Preparer - Lumintao RIS'
+    designation: 'IMO Report Preparer - Lumintao RIS'
   },
   {
     id: 'usr-prep-occ-05',
     username: 'prep_occmindoro_5',
-    name: 'NIS Preparer Occ. Mindoro 05',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer Occ. Mindoro 05',
+    role: 'IMO Preparer',
     passcode: 'NPR9205O',
     imoOffice: 'Occidental Mindoro IMO',
     nisBinding: 'Monpong RIS',
-    designation: 'NIS Report Preparer - Monpong RIS'
+    designation: 'IMO Report Preparer - Monpong RIS'
   },
 
-  // Palawan IMO (5 NIS Preparers)
+  // Palawan IMO (5 IMO Preparers)
   {
     id: 'usr-prep-pal-01',
     username: 'prep_palawan_1',
-    name: 'NIS Preparer Palawan 01',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer Palawan 01',
+    role: 'IMO Preparer',
     passcode: 'NPR7301P',
     imoOffice: 'Palawan IMO',
     nisBinding: 'Malatgao RIS',
-    designation: 'NIS Report Preparer - Malatgao RIS'
+    designation: 'IMO Report Preparer - Malatgao RIS'
   },
   {
     id: 'usr-prep-pal-02',
     username: 'prep_palawan_2',
-    name: 'NIS Preparer Palawan 02',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer Palawan 02',
+    role: 'IMO Preparer',
     passcode: 'NPR7302P',
     imoOffice: 'Palawan IMO',
     nisBinding: 'Batang-Batang RIS',
-    designation: 'NIS Report Preparer - Batang-Batang RIS'
+    designation: 'IMO Report Preparer - Batang-Batang RIS'
   },
   {
     id: 'usr-prep-pal-03',
     username: 'prep_palawan_3',
-    name: 'NIS Preparer Palawan 03',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer Palawan 03',
+    role: 'IMO Preparer',
     passcode: 'NPR7303P',
     imoOffice: 'Palawan IMO',
     nisBinding: 'Malinao RIS',
-    designation: 'NIS Report Preparer - Malinao RIS'
+    designation: 'IMO Report Preparer - Malinao RIS'
   },
   {
     id: 'usr-prep-pal-04',
     username: 'prep_palawan_4',
-    name: 'NIS Preparer Palawan 04',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer Palawan 04',
+    role: 'IMO Preparer',
     passcode: 'NPR7304P',
     imoOffice: 'Palawan IMO',
     nisBinding: 'Inagawan RIS',
-    designation: 'NIS Report Preparer - Inagawan RIS'
+    designation: 'IMO Report Preparer - Inagawan RIS'
   },
   {
     id: 'usr-prep-pal-05',
     username: 'prep_palawan_5',
-    name: 'NIS Preparer Palawan 05',
-    role: 'NIS Preparer',
+    name: 'IMO Preparer Palawan 05',
+    role: 'IMO Preparer',
     passcode: 'NPR7305P',
     imoOffice: 'Palawan IMO',
     nisBinding: 'Panitian RIS',
-    designation: 'NIS Report Preparer - Panitian RIS'
+    designation: 'IMO Report Preparer - Panitian RIS'
   },
 
   // ==========================================
@@ -576,14 +577,27 @@ export function getAuthUsers(): AuthUser[] {
         // Merge with default users to ensure all required fields and accounts exist
         const map = new Map<string, AuthUser>();
         DEFAULT_AUTH_USERS.forEach(u => map.set(u.id, u));
-        parsed.forEach(u => map.set(u.id, { ...map.get(u.id), ...u }));
+        parsed.forEach(u => {
+          const base = map.get(u.id);
+          map.set(u.id, {
+            ...base,
+            ...u,
+            role: normalizeUserRole(u.role)
+          });
+        });
         // Clean out legacy / obsolete IDs
         map.delete('usr-adm-01');
         map.delete('usr-ro-con-01');
-        map.delete('usr-ro-pre-01');
-        // Re-inject fresh RO accounts
-        DEFAULT_AUTH_USERS.filter(u => u.role.startsWith('RO') || u.role === 'NIS Preparer').forEach(u => map.set(u.id, u));
-        memoryUsersCache = Array.from(map.values());
+        // Re-inject fresh RO and IMO accounts if needed
+        DEFAULT_AUTH_USERS.filter(u => u.role.startsWith('RO') || u.role.startsWith('IMO')).forEach(u => {
+          if (!map.has(u.id)) {
+            map.set(u.id, u);
+          }
+        });
+        memoryUsersCache = Array.from(map.values()).map(u => ({
+          ...u,
+          role: normalizeUserRole(u.role)
+        }));
         return memoryUsersCache;
       }
     }
@@ -611,8 +625,12 @@ export async function fetchRemoteAuthUsers(): Promise<AuthUser[]> {
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
-        saveAuthUsers(data);
-        return data;
+        const normalized = data.map((u: AuthUser) => ({
+          ...u,
+          role: normalizeUserRole(u.role)
+        }));
+        saveAuthUsers(normalized);
+        return normalized;
       }
     }
   } catch (e) {}
@@ -694,6 +712,7 @@ export async function createNewUser(userData: Omit<AuthUser, 'id'>): Promise<Aut
   const newUser: AuthUser = {
     id: newId,
     ...userData,
+    role: normalizeUserRole(userData.role),
     passcode: userData.passcode.trim().toUpperCase()
   };
 
@@ -743,7 +762,11 @@ export function getSavedAuthSession(): AuthUser | null {
   try {
     const raw = localStorage.getItem(STORAGE_SESSION_KEY);
     if (raw) {
-      return JSON.parse(raw);
+      const user = JSON.parse(raw);
+      if (user && user.role) {
+        user.role = normalizeUserRole(user.role);
+      }
+      return user;
     }
   } catch (e) {}
   return null;
@@ -751,7 +774,8 @@ export function getSavedAuthSession(): AuthUser | null {
 
 export function saveAuthSession(user: AuthUser): void {
   try {
-    localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(user));
+    const norm = { ...user, role: normalizeUserRole(user.role) };
+    localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(norm));
   } catch (e) {}
 }
 

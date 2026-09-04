@@ -43,15 +43,16 @@ interface AttributeInspectorProps {
 
 export function canUserEditReport(user: AuthUser | null | undefined, role: UserRole, report: FieldReport): boolean {
   if (!report) return false;
-  if (role === 'Viewer') return false;
+  const normRole = (user?.role || role);
+  if (normRole === 'Viewer' || role === 'Viewer') return false;
 
   // Master Developer has unrestricted edit authority over all reports
   if (role === 'Developer' || user?.role === 'Developer') return true;
 
-  // Regional Admin (Access to all IMOs) has unrestricted edit authority over published reports
-  const isRegionalAdmin = (role === 'RO Admin' || role === 'RO Evaluator' || user?.role === 'RO Admin' || user?.role === 'RO Evaluator') && 
+  // Regional Evaluator / Reviewer (Access to all IMOs) has unrestricted edit authority over reports
+  const isRegionalAuthority = (role === 'RO Evaluator' || role === 'RO Reviewer' || user?.role === 'RO Evaluator' || user?.role === 'RO Reviewer') && 
     (!user?.imoOffice || user.imoOffice === 'All IMOs' || user.imoOffice === 'Regional Office IV-B' || user.imoOffice === 'Regional Office');
-  if (isRegionalAdmin) return true;
+  if (isRegionalAuthority) return true;
 
   // Check IMO Scope for assigned users
   const userImo = (user?.imoOffice || '').toLowerCase();
@@ -71,13 +72,13 @@ export function canUserEditReport(user: AuthUser | null | undefined, role: UserR
 
   const approval = report.approvalStatus || 'Pending_PreApproval';
 
-  // IMO Admin & NIS In-Charge can edit until Approved & Published
-  if (role === 'IMO Admin' || role === 'NIS In-Charge') {
+  // IMO Evaluator & IMO Reviewer can edit until Approved & Published
+  if (role === 'IMO Evaluator' || role === 'IMO Reviewer') {
     return approval !== 'Approved';
   }
 
   // Preparer roles can edit until preapproved/approved
-  if (role === 'NIS Preparer' || role === 'RO Preparer') {
+  if (role === 'IMO Preparer' || role === 'RO Preparer') {
     return approval !== 'Approved';
   }
 

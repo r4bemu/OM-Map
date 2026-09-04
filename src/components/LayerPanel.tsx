@@ -291,7 +291,7 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
 
       {/* Footer Controls */}
       <div className="p-2 border-t border-slate-700/80 bg-slate-800/80 flex items-center justify-between shrink-0">
-        {(currentRole === 'Developer' || currentRole === 'RO Admin' || currentRole === 'IMO Admin' || currentRole === 'NIS In-Charge') ? (
+        {(currentRole === 'Developer' || currentRole === 'RO Evaluator' || currentRole === 'RO Reviewer' || currentRole === 'IMO Evaluator' || currentRole === 'IMO Reviewer') ? (
           <button
             onClick={onOpenUpload}
             className="px-2.5 py-1 bg-[#166534] hover:bg-[#15803d] text-white border border-[#15803d]/50 rounded-lg text-[10px] font-bold flex items-center gap-1 transition cursor-pointer shadow-sm active:scale-95"
@@ -303,7 +303,7 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
           <span className="text-[10px] text-slate-500 font-medium">Read-Only Layer Access</span>
         )}
 
-        {(currentRole === 'Developer' || currentRole === 'RO Admin' || currentRole === 'IMO Admin') && (
+        {(currentRole === 'Developer' || currentRole === 'RO Evaluator' || currentRole === 'IMO Evaluator') && (
           <div className="flex items-center gap-1">
             {onSyncDriveLayers && (
               <button

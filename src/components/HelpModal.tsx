@@ -57,7 +57,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                 <span>Role-Based Access (RBAC) &amp; Approvals</span>
               </div>
               <p className="text-slate-400">
-                Manage permissions across <strong>Developer</strong> (master control), <strong>RO Admin / Evaluator / Preparer</strong> (Regional Office oversight &amp; packages), <strong>IMO Admin</strong> (IMO approvals &amp; publishing), <strong>NIS In-Charge</strong> (system inspections &amp; pre-approvals), <strong>NIS Preparer</strong> (NIS reporting), <strong>Field Personnel</strong> (field reporting), and <strong>Viewer</strong>.
+                Manage permissions across <strong>Developer</strong> (master control), <strong>RO Evaluator / Reviewer / Preparer</strong> (Regional Office oversight, evaluation &amp; consolidation), <strong>IMO Evaluator</strong> (IMO approvals &amp; forwarding), <strong>IMO Reviewer</strong> (system inspections &amp; pre-approvals), <strong>IMO Preparer</strong> (IMO reporting &amp; compilation), <strong>Field Personnel</strong> (field crowdsource reporting), and <strong>Viewer</strong>.
               </p>
             </div>
 

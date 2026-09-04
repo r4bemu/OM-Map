@@ -241,7 +241,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
   }, [editingReport, currentUser, currentRole]);
 
   const effectiveTier = useMemo(() => {
-    if (!editingReport) return 'Pending_NIS_Preparer' as const;
+    if (!editingReport) return 'Pending_IMO_Preparer' as const;
     return getEffectiveReportTier(editingReport);
   }, [editingReport]);
 
@@ -1231,11 +1231,11 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
     let approvedBy: string | undefined = undefined;
     let approvedAt: string | undefined = undefined;
 
-    if (currentRole === 'NIS In-Charge' || currentRole === 'RO Evaluator' || currentRole === 'RO Preparer') {
+    if (currentRole === 'IMO Reviewer' || currentRole === 'RO Reviewer' || currentRole === 'RO Preparer') {
       initialApprovalStatus = 'PreApproved';
       preApprovedBy = reporterName.trim();
       preApprovedAt = new Date().toISOString();
-    } else if (currentRole === 'IMO Admin' || currentRole === 'RO Admin' || currentRole === 'Developer') {
+    } else if (currentRole === 'IMO Evaluator' || currentRole === 'RO Evaluator' || currentRole === 'Developer') {
       initialApprovalStatus = 'Approved';
       approvedBy = reporterName.trim();
       approvedAt = new Date().toISOString();
@@ -1341,8 +1341,8 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
         suspensionReason: status === 'Suspended' && suspensionReason.trim() ? suspensionReason.trim() : undefined,
         // Institutional Multi-Tier State Assignment
         currentTier: isRevisionMode
-          ? 'Pending_NIS_Preparer'
-          : (editingReport?.currentTier || (currentRole === 'RO Admin' ? 'Approved_RO_Admin' : 'Pending_NIS_Preparer')),
+          ? 'Pending_IMO_Preparer'
+          : (editingReport?.currentTier || (currentRole === 'RO Evaluator' ? 'Approved_RO_Evaluator' : 'Pending_IMO_Preparer')),
         submittedByUserId: editingReport?.submittedByUserId || currentUser?.id,
         submittedByUsername: editingReport?.submittedByUsername || currentUser?.username,
         submittedByRole: editingReport?.submittedByRole || currentRole,

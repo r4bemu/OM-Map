@@ -51,17 +51,17 @@ function generateDefaultTitle(role: UserRole, imo: string, nis: string, count: n
   const safeImoKey = shortImo.toLowerCase().replace(/[^a-z0-9]/g, '');
 
   switch (role) {
-    case 'RO Admin':
-      return {
-        name: 'Division Manager (Regional Office)',
-        username: 'ro_admin',
-        designation: 'Regional Office Division Admin'
-      };
     case 'RO Evaluator':
       return {
-        name: 'Regional Report Evaluator',
+        name: 'Division Manager (Regional Office)',
         username: 'ro_evaluator',
-        designation: 'Regional O&M Report Evaluator'
+        designation: 'Regional Office Division Manager & Evaluator'
+      };
+    case 'RO Reviewer':
+      return {
+        name: 'Regional Report Reviewer',
+        username: 'ro_reviewer',
+        designation: 'Regional O&M Report Reviewer'
       };
     case 'RO Preparer':
       return {
@@ -69,23 +69,23 @@ function generateDefaultTitle(role: UserRole, imo: string, nis: string, count: n
         username: 'ro_preparer',
         designation: 'Regional O&M Report Preparer'
       };
-    case 'IMO Admin':
+    case 'IMO Evaluator':
       return {
         name: `Division Manager (${shortImo} IMO)`,
-        username: `admin_${safeImoKey}`,
-        designation: `${shortImo} IMO Division Manager & Admin`
+        username: `evaluator_${safeImoKey}`,
+        designation: `${shortImo} IMO Division Manager & Evaluator`
       };
-    case 'NIS In-Charge':
+    case 'IMO Reviewer':
       return {
-        name: `NIS In-Charge ${shortImo} ${numStr}`,
-        username: `nis_${safeImoKey}_${numStr}`,
-        designation: `Principal NIS In-Charge - ${nis}`
+        name: `IMO Reviewer ${shortImo} ${numStr}`,
+        username: `reviewer_${safeImoKey}_${numStr}`,
+        designation: `Principal IMO Reviewer - ${nis}`
       };
-    case 'NIS Preparer':
+    case 'IMO Preparer':
       return {
-        name: `NIS Preparer ${shortImo} ${numStr}`,
+        name: `IMO Preparer ${shortImo} ${numStr}`,
         username: `prep_${safeImoKey}_${numStr}`,
-        designation: `NIS Report Preparer - ${nis}`
+        designation: `IMO Report Preparer - ${nis}`
       };
     case 'Field Personnel':
       return {
@@ -232,7 +232,7 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
   };
 
   const handleGeneratePasscode = () => {
-    const prefix = newRole === 'RO Admin' ? 'ROA' : newRole === 'RO Evaluator' ? 'ROE' : newRole === 'RO Preparer' ? 'ROP' : newRole === 'IMO Admin' ? 'ADM' : newRole === 'NIS In-Charge' ? 'ENG' : newRole === 'NIS Preparer' ? 'NPR' : newRole === 'Field Personnel' ? 'FLD' : newRole === 'Viewer' ? 'VIEW' : 'DEV';
+    const prefix = newRole === 'RO Evaluator' ? 'ROE' : newRole === 'RO Reviewer' ? 'ROR' : newRole === 'RO Preparer' ? 'ROP' : newRole === 'IMO Evaluator' ? 'IOE' : newRole === 'IMO Reviewer' ? 'IOR' : newRole === 'IMO Preparer' ? 'IOP' : newRole === 'Field Personnel' ? 'FLD' : newRole === 'Viewer' ? 'VIEW' : 'DEV';
     const rand = Math.floor(1000 + Math.random() * 9000);
     const suffix = newImo.includes('MOMARO') ? 'M' : newImo.includes('Occidental') ? 'O' : newImo.includes('Palawan') ? 'P' : 'R';
     setNewPasscode(`${prefix}${rand}${suffix}`);
@@ -322,12 +322,12 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
   const getRoleBadgeStyle = (role: UserRole) => {
     switch (role) {
       case 'Developer': return 'bg-rose-500/20 text-rose-300 border-rose-500/30 font-mono';
-      case 'RO Admin': return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
-      case 'RO Evaluator': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+      case 'RO Evaluator': return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+      case 'RO Reviewer': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
       case 'RO Preparer': return 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30';
-      case 'IMO Admin': return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-      case 'NIS In-Charge': return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
-      case 'NIS Preparer': return 'bg-teal-500/20 text-teal-300 border-teal-500/30';
+      case 'IMO Evaluator': return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+      case 'IMO Reviewer': return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
+      case 'IMO Preparer': return 'bg-teal-500/20 text-teal-300 border-teal-500/30';
       case 'Field Personnel': return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
       case 'Viewer': return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
       default: return 'bg-slate-800 text-slate-300 border-slate-700';
@@ -494,12 +494,12 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
                     }}
                     className="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-emerald-500 cursor-pointer"
                   >
-                    <option value="RO Admin">RO Admin (Regional Office Division Admin)</option>
-                    <option value="RO Evaluator">RO Evaluator (Regional Report Evaluator &amp; Verification)</option>
-                    <option value="RO Preparer">RO Preparer (Regional Package Preparer &amp; Deadlines)</option>
-                    <option value="IMO Admin">IMO Admin (IMO Division Manager &amp; Approvals)</option>
-                    <option value="NIS In-Charge">NIS In-Charge (System Lead &amp; Pre-Approval)</option>
-                    <option value="NIS Preparer">NIS Preparer (NIS Report Preparer &amp; Accomplishments)</option>
+                    <option value="RO Evaluator">RO Evaluator (Regional Division Manager &amp; Final Approval)</option>
+                    <option value="RO Reviewer">RO Reviewer (Regional Report Reviewer &amp; Verification)</option>
+                    <option value="RO Preparer">RO Preparer (Regional Package Preparer &amp; Consolidation)</option>
+                    <option value="IMO Evaluator">IMO Evaluator (IMO Division Manager &amp; Approvals)</option>
+                    <option value="IMO Reviewer">IMO Reviewer (IMO System Reviewer &amp; O&amp;M Engineer)</option>
+                    <option value="IMO Preparer">IMO Preparer (IMO Report Preparer &amp; Accomplishments)</option>
                     <option value="Field Personnel">Field Personnel (Submit Field Reports)</option>
                     <option value="Viewer">Viewer (Read-Only Public Audit)</option>
                     <option value="Developer">Developer (Master Systems Administrator)</option>
@@ -647,12 +647,12 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
             >
               <option value="All">All Roles ({users.length})</option>
               <option value="Developer">Developer</option>
-              <option value="RO Admin">RO Admin</option>
               <option value="RO Evaluator">RO Evaluator</option>
+              <option value="RO Reviewer">RO Reviewer</option>
               <option value="RO Preparer">RO Preparer</option>
-              <option value="IMO Admin">IMO Admin</option>
-              <option value="NIS In-Charge">NIS In-Charge</option>
-              <option value="NIS Preparer">NIS Preparer</option>
+              <option value="IMO Evaluator">IMO Evaluator</option>
+              <option value="IMO Reviewer">IMO Reviewer</option>
+              <option value="IMO Preparer">IMO Preparer</option>
               <option value="Field Personnel">Field Personnel</option>
               <option value="Viewer">Viewer</option>
             </select>
@@ -728,12 +728,12 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
                             onChange={(e) => setEditRole(e.target.value as UserRole)}
                             className="bg-slate-800 border border-cyan-500 text-white text-xs px-2 py-1 rounded cursor-pointer"
                           >
-                            <option value="RO Admin">RO Admin</option>
                             <option value="RO Evaluator">RO Evaluator</option>
+                            <option value="RO Reviewer">RO Reviewer</option>
                             <option value="RO Preparer">RO Preparer</option>
-                            <option value="IMO Admin">IMO Admin</option>
-                            <option value="NIS In-Charge">NIS In-Charge</option>
-                            <option value="NIS Preparer">NIS Preparer</option>
+                            <option value="IMO Evaluator">IMO Evaluator</option>
+                            <option value="IMO Reviewer">IMO Reviewer</option>
+                            <option value="IMO Preparer">IMO Preparer</option>
                             <option value="Field Personnel">Field Personnel</option>
                             <option value="Viewer">Viewer</option>
                             <option value="Developer">Developer</option>
@@ -893,13 +893,13 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
               <span className="w-2 h-2 rounded-full bg-purple-500"></span> {users.filter(u => u.role.startsWith('RO')).length} Regional Office
             </span>
             <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-amber-500"></span> {users.filter(u => u.role === 'IMO Admin').length} IMO Admins
+              <span className="w-2 h-2 rounded-full bg-amber-500"></span> {users.filter(u => u.role === 'IMO Evaluator').length} IMO Evaluators
             </span>
             <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-cyan-500"></span> {users.filter(u => u.role === 'NIS In-Charge').length} NIS In-Charge
+              <span className="w-2 h-2 rounded-full bg-cyan-500"></span> {users.filter(u => u.role === 'IMO Reviewer').length} IMO Reviewers
             </span>
             <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-teal-500"></span> {users.filter(u => u.role === 'NIS Preparer').length} NIS Preparers
+              <span className="w-2 h-2 rounded-full bg-teal-500"></span> {users.filter(u => u.role === 'IMO Preparer').length} IMO Preparers
             </span>
             <span className="flex items-center gap-1 text-slate-400">
               <span className="w-2 h-2 rounded-full bg-emerald-500"></span> {users.filter(u => u.role === 'Field Personnel').length} Field Personnel

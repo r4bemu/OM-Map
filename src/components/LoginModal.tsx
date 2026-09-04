@@ -116,12 +116,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     if (isLight) {
       switch (role) {
         case 'Developer': return 'bg-rose-100 text-rose-700 border-rose-200';
-        case 'RO Admin':
-        case 'RO Evaluator':
-        case 'IMO Admin': return 'bg-purple-100 text-purple-700 border-purple-200';
-        case 'NIS In-Charge':
-        case 'NIS Preparer':
-        case 'RO Preparer': return 'bg-cyan-100 text-cyan-800 border-cyan-200';
+        case 'RO Evaluator': return 'bg-purple-100 text-purple-700 border-purple-200';
+        case 'RO Reviewer': return 'bg-blue-100 text-blue-700 border-blue-200';
+        case 'RO Preparer': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
+        case 'IMO Evaluator': return 'bg-amber-100 text-amber-700 border-amber-200';
+        case 'IMO Reviewer': return 'bg-cyan-100 text-cyan-800 border-cyan-200';
+        case 'IMO Preparer': return 'bg-teal-100 text-teal-800 border-teal-200';
         case 'Field Personnel': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
         case 'Viewer': return 'bg-slate-200 text-slate-700 border-slate-300';
         default: return 'bg-slate-100 text-slate-700 border-slate-200';
@@ -129,12 +129,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
     switch (role) {
       case 'Developer': return 'bg-rose-500/20 text-rose-300 border-rose-500/30';
-      case 'RO Admin':
-      case 'RO Evaluator':
-      case 'IMO Admin': return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
-      case 'NIS In-Charge':
-      case 'NIS Preparer':
-      case 'RO Preparer': return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
+      case 'RO Evaluator': return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+      case 'RO Reviewer': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+      case 'RO Preparer': return 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30';
+      case 'IMO Evaluator': return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+      case 'IMO Reviewer': return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
+      case 'IMO Preparer': return 'bg-teal-500/20 text-teal-300 border-teal-500/30';
       case 'Field Personnel': return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
       case 'Viewer': return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
       default: return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
@@ -255,7 +255,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="e.g. dev_master, admin_momaro, engr_momaro_1"
+                    placeholder="e.g. dev_master, ro_evaluator, reviewer_momaro_1"
                     className={`w-full text-xs rounded-xl pl-9 pr-3 py-2.5 focus:outline-none transition border ${
                       isLight 
                         ? 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#15803d] focus:ring-1 focus:ring-[#15803d] shadow-sm'
@@ -347,7 +347,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
             {/* Role Filter Pills */}
             <div className="flex flex-wrap gap-1 mb-3">
-              {(['All', 'Developer', 'RO Admin', 'RO Evaluator', 'RO Preparer', 'IMO Admin', 'NIS In-Charge', 'NIS Preparer', 'Field Personnel', 'Viewer'] as const).map((r) => (
+              {(['All', 'Developer', 'RO Evaluator', 'RO Reviewer', 'RO Preparer', 'IMO Evaluator', 'IMO Reviewer', 'IMO Preparer', 'Field Personnel', 'Viewer'] as const).map((r) => (
                 <button
                   key={r}
                   type="button"
@@ -360,7 +360,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                           : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800')
                   }`}
                 >
-                  {r === 'Field Personnel' ? 'Field' : r === 'NIS In-Charge' ? 'NIS Lead' : r === 'NIS Preparer' ? 'NIS Prep' : r === 'RO Evaluator' ? 'RO Eval' : r === 'RO Preparer' ? 'RO Prep' : r}
+                  {r === 'Field Personnel' ? 'Field' : r === 'IMO Preparer' ? 'IMO Prep' : r === 'IMO Reviewer' ? 'IMO Rev' : r === 'IMO Evaluator' ? 'IMO Eval' : r === 'RO Preparer' ? 'RO Prep' : r === 'RO Reviewer' ? 'RO Rev' : r === 'RO Evaluator' ? 'RO Eval' : r}
                 </button>
               ))}
             </div>

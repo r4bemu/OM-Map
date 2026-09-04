@@ -1,24 +1,24 @@
 export type UserRole = 
   | 'Developer' 
-  | 'RO Admin' 
   | 'RO Evaluator' 
+  | 'RO Reviewer' 
   | 'RO Preparer' 
-  | 'IMO Admin' 
-  | 'NIS In-Charge' 
-  | 'NIS Preparer' 
+  | 'IMO Evaluator' 
+  | 'IMO Reviewer' 
+  | 'IMO Preparer' 
   | 'Field Personnel' 
   | 'Viewer';
 
 export type ApprovalStatus = 'Draft' | 'Pending_PreApproval' | 'PreApproved' | 'Approved' | 'Rejected';
 
 export type ApprovalTier = 
-  | 'Pending_NIS_Preparer'
-  | 'Pending_NIS_InCharge'
-  | 'Pending_IMO_Admin'
+  | 'Pending_IMO_Preparer'
+  | 'Pending_IMO_Reviewer'
+  | 'Pending_IMO_Evaluator'
   | 'Pending_RO_Preparer'
+  | 'Pending_RO_Reviewer'
   | 'Pending_RO_Evaluator'
-  | 'Pending_RO_Admin'
-  | 'Approved_RO_Admin'
+  | 'Approved_RO_Evaluator'
   | 'Returned_For_Revision';
 
 export interface FieldDiffItem {

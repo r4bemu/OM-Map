@@ -1,14 +1,25 @@
 import { ApprovalTier, FieldReport, UserRole, AuthUser, FieldDiffItem } from '../types';
 
 export const ORDERED_APPROVAL_TIERS: ApprovalTier[] = [
-  'Pending_NIS_Preparer',
-  'Pending_NIS_InCharge',
-  'Pending_IMO_Admin',
+  'Pending_IMO_Preparer',
+  'Pending_IMO_Reviewer',
+  'Pending_IMO_Evaluator',
   'Pending_RO_Preparer',
+  'Pending_RO_Reviewer',
   'Pending_RO_Evaluator',
-  'Pending_RO_Admin',
-  'Approved_RO_Admin'
+  'Approved_RO_Evaluator'
 ];
+
+export function normalizeUserRole(role?: string | null): UserRole {
+  if (!role) return 'Viewer';
+  const r = role.trim();
+  if (r === 'RO Admin') return 'RO Evaluator';
+  if (r === 'RO Evaluator') return 'RO Reviewer';
+  if (r === 'IMO Admin') return 'IMO Evaluator';
+  if (r === 'NIS In-Charge' || r === 'NIS In-charge') return 'IMO Reviewer';
+  if (r === 'NIS Preparer') return 'IMO Preparer';
+  return r as UserRole;
+}
 
 export const TIER_CONFIG: Record<ApprovalTier, {
   label: string;
@@ -18,29 +29,29 @@ export const TIER_CONFIG: Record<ApprovalTier, {
   badgeStyle: string;
   description: string;
 }> = {
-  Pending_NIS_Preparer: {
-    label: 'Pending NIS Preparer',
-    shortLabel: 'NIS Prep Review',
-    requiredRole: 'NIS Preparer',
+  Pending_IMO_Preparer: {
+    label: 'Pending IMO Preparer',
+    shortLabel: 'IMO Prep Review',
+    requiredRole: 'IMO Preparer',
     stageNumber: 1,
     badgeStyle: 'bg-teal-500/20 text-teal-300 border-teal-500/40',
-    description: 'Submitted from field; awaiting review and pre-approval by NIS Preparer.'
+    description: 'Submitted from field; awaiting review and pre-approval by IMO Preparer.'
   },
-  Pending_NIS_InCharge: {
-    label: 'Pending NIS In-Charge',
-    shortLabel: 'NIS In-Charge',
-    requiredRole: 'NIS In-Charge',
+  Pending_IMO_Reviewer: {
+    label: 'Pending IMO Reviewer',
+    shortLabel: 'IMO Reviewer',
+    requiredRole: 'IMO Reviewer',
     stageNumber: 2,
     badgeStyle: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
-    description: 'Pre-approved by NIS Preparer; awaiting review & approval by System Engineer.'
+    description: 'Pre-approved by IMO Preparer; awaiting review & approval by IMO O&M Reviewer.'
   },
-  Pending_IMO_Admin: {
-    label: 'Pending IMO Admin',
-    shortLabel: 'IMO Admin',
-    requiredRole: 'IMO Admin',
+  Pending_IMO_Evaluator: {
+    label: 'Pending IMO Evaluator',
+    shortLabel: 'IMO Evaluator',
+    requiredRole: 'IMO Evaluator',
     stageNumber: 3,
     badgeStyle: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-    description: 'Approved by NIS In-Charge; awaiting approval by IMO Division Manager.'
+    description: 'Approved by IMO Reviewer; awaiting evaluation & approval by IMO Division Manager.'
   },
   Pending_RO_Preparer: {
     label: 'Pending RO Preparer',
@@ -50,23 +61,23 @@ export const TIER_CONFIG: Record<ApprovalTier, {
     badgeStyle: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
     description: 'Endorsed by IMO; awaiting regional packaging and consolidation.'
   },
+  Pending_RO_Reviewer: {
+    label: 'Pending RO Reviewer',
+    shortLabel: 'RO Reviewer',
+    requiredRole: 'RO Reviewer',
+    stageNumber: 5,
+    badgeStyle: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+    description: 'Consolidated; awaiting regional technical & compliance review.'
+  },
   Pending_RO_Evaluator: {
     label: 'Pending RO Evaluator',
     shortLabel: 'RO Evaluator',
     requiredRole: 'RO Evaluator',
-    stageNumber: 5,
-    badgeStyle: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
-    description: 'Consolidated; awaiting regional technical & compliance evaluation.'
-  },
-  Pending_RO_Admin: {
-    label: 'Pending RO Admin',
-    shortLabel: 'RO Executive',
-    requiredRole: 'RO Admin',
     stageNumber: 6,
     badgeStyle: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
-    description: 'Evaluated; awaiting final regional executive publishing approval.'
+    description: 'Reviewed; awaiting final regional executive evaluation & publishing approval.'
   },
-  Approved_RO_Admin: {
+  Approved_RO_Evaluator: {
     label: 'Approved & Published',
     shortLabel: 'Published',
     requiredRole: 'Published',
@@ -88,20 +99,30 @@ export const TIER_CONFIG: Record<ApprovalTier, {
  * Returns the effective approval tier of a report, resolving backwards compatibility
  */
 export function getEffectiveReportTier(report: FieldReport): ApprovalTier {
-  if (report.currentTier && TIER_CONFIG[report.currentTier]) {
-    return report.currentTier;
+  const current = report.currentTier as string | undefined;
+  if (current) {
+    if (TIER_CONFIG[current as ApprovalTier]) {
+      return current as ApprovalTier;
+    }
+    // Backward compatibility mapping for stored tier names
+    if (current === 'Pending_NIS_Preparer') return 'Pending_IMO_Preparer';
+    if (current === 'Pending_NIS_InCharge') return 'Pending_IMO_Reviewer';
+    if (current === 'Pending_IMO_Admin') return 'Pending_IMO_Evaluator';
+    if (current === 'Pending_RO_Evaluator') return 'Pending_RO_Reviewer';
+    if (current === 'Pending_RO_Admin') return 'Pending_RO_Evaluator';
+    if (current === 'Approved_RO_Admin') return 'Approved_RO_Evaluator';
   }
   // Fallbacks for legacy reports
   if (report.approvalStatus === 'Approved') {
-    return 'Approved_RO_Admin';
+    return 'Approved_RO_Evaluator';
   }
   if (report.approvalStatus === 'PreApproved') {
-    return 'Pending_IMO_Admin';
+    return 'Pending_IMO_Evaluator';
   }
   if (report.approvalStatus === 'Rejected') {
     return 'Returned_For_Revision';
   }
-  return 'Pending_NIS_Preparer';
+  return 'Pending_IMO_Preparer';
 }
 
 export function getTierLabel(tier: ApprovalTier): string {
@@ -118,13 +139,13 @@ export function getTierBadgeStyle(tier: ApprovalTier): string {
 
 export function getNextTier(tier: ApprovalTier): ApprovalTier | null {
   switch (tier) {
-    case 'Pending_NIS_Preparer': return 'Pending_NIS_InCharge';
-    case 'Pending_NIS_InCharge': return 'Pending_IMO_Admin';
-    case 'Pending_IMO_Admin': return 'Pending_RO_Preparer';
-    case 'Pending_RO_Preparer': return 'Pending_RO_Evaluator';
-    case 'Pending_RO_Evaluator': return 'Pending_RO_Admin';
-    case 'Pending_RO_Admin': return 'Approved_RO_Admin';
-    case 'Returned_For_Revision': return 'Pending_NIS_Preparer';
+    case 'Pending_IMO_Preparer': return 'Pending_IMO_Reviewer';
+    case 'Pending_IMO_Reviewer': return 'Pending_IMO_Evaluator';
+    case 'Pending_IMO_Evaluator': return 'Pending_RO_Preparer';
+    case 'Pending_RO_Preparer': return 'Pending_RO_Reviewer';
+    case 'Pending_RO_Reviewer': return 'Pending_RO_Evaluator';
+    case 'Pending_RO_Evaluator': return 'Approved_RO_Evaluator';
+    case 'Returned_For_Revision': return 'Pending_IMO_Preparer';
     default: return null;
   }
 }
@@ -133,9 +154,10 @@ export function getNextTier(tier: ApprovalTier): ApprovalTier | null {
  * Checks if a user has permission to view the report
  */
 export function canUserViewReport(report: FieldReport, user: AuthUser | null, role: UserRole): boolean {
+  const normRole = normalizeUserRole(role);
   const effectiveTier = getEffectiveReportTier(report);
-  if (role === 'Viewer') {
-    return effectiveTier === 'Approved_RO_Admin';
+  if (normRole === 'Viewer') {
+    return effectiveTier === 'Approved_RO_Evaluator';
   }
   return true;
 }
@@ -148,14 +170,15 @@ export function canUserEditReport(
   user: AuthUser | null,
   activeRole: UserRole
 ): { allowed: boolean; mode: 'direct_edit' | 'create_revision' | 'locked'; reason?: string } {
-  if (activeRole === 'Developer') {
+  const normRole = normalizeUserRole(activeRole);
+  if (normRole === 'Developer') {
     return { allowed: true, mode: 'direct_edit' };
   }
 
   const effectiveTier = getEffectiveReportTier(report);
 
   // If already published, direct editing is prohibited for everyone except Developer
-  if (effectiveTier === 'Approved_RO_Admin') {
+  if (effectiveTier === 'Approved_RO_Evaluator') {
     return {
       allowed: false,
       mode: 'locked',
@@ -164,7 +187,7 @@ export function canUserEditReport(
   }
 
   // 1. Field Personnel Rules
-  if (activeRole === 'Field Personnel') {
+  if (normRole === 'Field Personnel') {
     const isOriginalAuthor = Boolean(
       (user?.id && report.submittedByUserId === user.id) ||
       (user?.username && report.submittedByUsername === user.username) ||
@@ -179,11 +202,11 @@ export function canUserEditReport(
       };
     }
 
-    if (effectiveTier === 'Pending_NIS_Preparer' || effectiveTier === 'Returned_For_Revision') {
+    if (effectiveTier === 'Pending_IMO_Preparer' || effectiveTier === 'Returned_For_Revision') {
       return { allowed: true, mode: 'direct_edit' };
     }
 
-    // Report has already been advanced beyond NIS Preparer
+    // Report has already been advanced beyond IMO Preparer
     return {
       allowed: true,
       mode: 'create_revision',
@@ -191,9 +214,9 @@ export function canUserEditReport(
     };
   }
 
-  // 2. NIS Preparer Rules
-  if (activeRole === 'NIS Preparer') {
-    if (effectiveTier === 'Pending_NIS_Preparer' || effectiveTier === 'Returned_For_Revision') {
+  // 2. IMO Preparer Rules
+  if (normRole === 'IMO Preparer') {
+    if (effectiveTier === 'Pending_IMO_Preparer' || effectiveTier === 'Returned_For_Revision') {
       return { allowed: true, mode: 'direct_edit' };
     }
     return {
@@ -203,12 +226,9 @@ export function canUserEditReport(
     };
   }
 
-  // 3. NIS In-Charge Rules
-  if (activeRole === 'NIS In-Charge') {
-    if (effectiveTier === 'Pending_NIS_InCharge') {
-      return { allowed: true, mode: 'direct_edit' };
-    }
-    if (effectiveTier === 'Pending_NIS_Preparer') {
+  // 3. IMO Reviewer Rules
+  if (normRole === 'IMO Reviewer') {
+    if (effectiveTier === 'Pending_IMO_Reviewer' || effectiveTier === 'Pending_IMO_Preparer') {
       return { allowed: true, mode: 'direct_edit' };
     }
     return {
@@ -218,9 +238,9 @@ export function canUserEditReport(
     };
   }
 
-  // 4. IMO Admin Rules
-  if (activeRole === 'IMO Admin') {
-    if (effectiveTier === 'Pending_IMO_Admin' || effectiveTier === 'Pending_NIS_InCharge' || effectiveTier === 'Pending_NIS_Preparer') {
+  // 4. IMO Evaluator Rules
+  if (normRole === 'IMO Evaluator') {
+    if (effectiveTier === 'Pending_IMO_Evaluator' || effectiveTier === 'Pending_IMO_Reviewer' || effectiveTier === 'Pending_IMO_Preparer') {
       return { allowed: true, mode: 'direct_edit' };
     }
     return {
@@ -231,8 +251,8 @@ export function canUserEditReport(
   }
 
   // 5. RO Preparer Rules
-  if (activeRole === 'RO Preparer') {
-    if (effectiveTier === 'Pending_RO_Preparer' || effectiveTier === 'Pending_IMO_Admin') {
+  if (normRole === 'RO Preparer') {
+    if (effectiveTier === 'Pending_RO_Preparer' || effectiveTier === 'Pending_IMO_Evaluator') {
       return { allowed: true, mode: 'direct_edit' };
     }
     return {
@@ -242,9 +262,9 @@ export function canUserEditReport(
     };
   }
 
-  // 6. RO Evaluator Rules
-  if (activeRole === 'RO Evaluator') {
-    if (effectiveTier === 'Pending_RO_Evaluator' || effectiveTier === 'Pending_RO_Preparer') {
+  // 6. RO Reviewer Rules
+  if (normRole === 'RO Reviewer') {
+    if (effectiveTier === 'Pending_RO_Reviewer' || effectiveTier === 'Pending_RO_Preparer') {
       return { allowed: true, mode: 'direct_edit' };
     }
     return {
@@ -254,8 +274,8 @@ export function canUserEditReport(
     };
   }
 
-  // 7. RO Admin Rules
-  if (activeRole === 'RO Admin') {
+  // 7. RO Evaluator Rules
+  if (normRole === 'RO Evaluator') {
     return { allowed: true, mode: 'direct_edit' };
   }
 
@@ -275,40 +295,41 @@ export function canUserAdvanceTier(
   user: AuthUser | null,
   activeRole: UserRole
 ): { allowed: boolean; nextTier?: ApprovalTier; actionLabel?: string } {
+  const normRole = normalizeUserRole(activeRole);
   const effectiveTier = getEffectiveReportTier(report);
 
-  if (activeRole === 'Developer') {
+  if (normRole === 'Developer') {
     const next = getNextTier(effectiveTier);
     return {
       allowed: Boolean(next),
       nextTier: next || undefined,
-      actionLabel: next === 'Approved_RO_Admin' ? 'Final Regional Approval (Publish)' : `Advance to ${getTierShortLabel(next || effectiveTier)}`
+      actionLabel: next === 'Approved_RO_Evaluator' ? 'Final Regional Approval (Publish)' : `Advance to ${getTierShortLabel(next || effectiveTier)}`
     };
   }
 
   switch (effectiveTier) {
-    case 'Pending_NIS_Preparer':
-      if (activeRole === 'NIS Preparer' || activeRole === 'NIS In-Charge' || activeRole.startsWith('RO') || activeRole === 'IMO Admin') {
+    case 'Pending_IMO_Preparer':
+      if (normRole === 'IMO Preparer' || normRole === 'IMO Reviewer' || normRole.startsWith('RO') || normRole === 'IMO Evaluator') {
         return {
           allowed: true,
-          nextTier: 'Pending_NIS_InCharge',
-          actionLabel: 'Pre-Approve & Advance to NIS In-Charge'
+          nextTier: 'Pending_IMO_Reviewer',
+          actionLabel: 'Pre-Approve & Advance to IMO Reviewer'
         };
       }
       break;
 
-    case 'Pending_NIS_InCharge':
-      if (activeRole === 'NIS In-Charge' || activeRole === 'IMO Admin' || activeRole.startsWith('RO')) {
+    case 'Pending_IMO_Reviewer':
+      if (normRole === 'IMO Reviewer' || normRole === 'IMO Evaluator' || normRole.startsWith('RO')) {
         return {
           allowed: true,
-          nextTier: 'Pending_IMO_Admin',
-          actionLabel: 'Approve & Advance to IMO Admin'
+          nextTier: 'Pending_IMO_Evaluator',
+          actionLabel: 'Approve & Advance to IMO Evaluator'
         };
       }
       break;
 
-    case 'Pending_IMO_Admin':
-      if (activeRole === 'IMO Admin' || activeRole.startsWith('RO')) {
+    case 'Pending_IMO_Evaluator':
+      if (normRole === 'IMO Evaluator' || normRole.startsWith('RO')) {
         return {
           allowed: true,
           nextTier: 'Pending_RO_Preparer',
@@ -318,41 +339,41 @@ export function canUserAdvanceTier(
       break;
 
     case 'Pending_RO_Preparer':
-      if (activeRole === 'RO Preparer' || activeRole === 'RO Evaluator' || activeRole === 'RO Admin') {
+      if (normRole === 'RO Preparer' || normRole === 'RO Reviewer' || normRole === 'RO Evaluator') {
+        return {
+          allowed: true,
+          nextTier: 'Pending_RO_Reviewer',
+          actionLabel: 'Consolidate & Forward to RO Reviewer'
+        };
+      }
+      break;
+
+    case 'Pending_RO_Reviewer':
+      if (normRole === 'RO Reviewer' || normRole === 'RO Evaluator') {
         return {
           allowed: true,
           nextTier: 'Pending_RO_Evaluator',
-          actionLabel: 'Consolidate & Forward to RO Evaluator'
+          actionLabel: 'Review & Forward to RO Evaluator'
         };
       }
       break;
 
     case 'Pending_RO_Evaluator':
-      if (activeRole === 'RO Evaluator' || activeRole === 'RO Admin') {
+      if (normRole === 'RO Evaluator') {
         return {
           allowed: true,
-          nextTier: 'Pending_RO_Admin',
-          actionLabel: 'Evaluate & Forward to RO Admin'
-        };
-      }
-      break;
-
-    case 'Pending_RO_Admin':
-      if (activeRole === 'RO Admin') {
-        return {
-          allowed: true,
-          nextTier: 'Approved_RO_Admin',
+          nextTier: 'Approved_RO_Evaluator',
           actionLabel: 'Grant Final Regional Approval (Publish)'
         };
       }
       break;
 
     case 'Returned_For_Revision':
-      if (activeRole === 'Field Personnel' || activeRole === 'NIS Preparer') {
+      if (normRole === 'Field Personnel' || normRole === 'IMO Preparer') {
         return {
           allowed: true,
-          nextTier: 'Pending_NIS_Preparer',
-          actionLabel: 'Re-Submit for NIS Preparer Review'
+          nextTier: 'Pending_IMO_Preparer',
+          actionLabel: 'Re-Submit for IMO Preparer Review'
         };
       }
       break;

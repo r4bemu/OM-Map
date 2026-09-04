@@ -168,12 +168,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   // Role Definitions (Institutional 9-Tier Architecture)
   const allRoles: { role: UserRole; label: string; desc: string; badgeColor: string }[] = [
     { role: 'Developer', label: 'Developer', desc: 'Master developer control, user management & unrestricted scope', badgeColor: 'bg-rose-500/15 text-rose-800 dark:text-rose-300 border-rose-500/30 font-mono' },
-    { role: 'RO Admin', label: 'RO Admin', desc: 'Regional Division Admin, final regional approval & unrestricted scope', badgeColor: 'bg-purple-500/15 text-purple-800 dark:text-purple-300 border-purple-500/30' },
-    { role: 'RO Evaluator', label: 'RO Evaluator', desc: 'Evaluates submitted field reports, verifies compliance & data accuracy', badgeColor: 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-500/30' },
+    { role: 'RO Evaluator', label: 'RO Evaluator', desc: 'Regional Division Manager, final regional approval & unrestricted scope', badgeColor: 'bg-purple-500/15 text-purple-800 dark:text-purple-300 border-purple-500/30' },
+    { role: 'RO Reviewer', label: 'RO Reviewer', desc: 'Reviews submitted field reports, verifies regional compliance & data accuracy', badgeColor: 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-500/30' },
     { role: 'RO Preparer', label: 'RO Preparer', desc: 'Prepares regional packages, consolidates regional reports & tracks deadlines', badgeColor: 'bg-indigo-500/15 text-indigo-800 dark:text-indigo-300 border-indigo-500/30' },
-    { role: 'IMO Admin', label: 'IMO Admin', desc: 'IMO Division management, final approvals & publishing authority', badgeColor: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30' },
-    { role: 'NIS In-Charge', label: 'NIS In-Charge', desc: 'System in-charge, pre-approves field personnel submissions', badgeColor: 'bg-emerald-600/15 text-emerald-800 dark:text-emerald-300 border-emerald-600/30' },
-    { role: 'NIS Preparer', label: 'NIS Preparer', desc: 'NIS-level report preparer for system accomplishments & maintenance logs', badgeColor: 'bg-teal-500/15 text-teal-800 dark:text-teal-300 border-teal-500/30' },
+    { role: 'IMO Evaluator', label: 'IMO Evaluator', desc: 'IMO Division management, final approvals & forwarding authority', badgeColor: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30' },
+    { role: 'IMO Reviewer', label: 'IMO Reviewer', desc: 'IMO System reviewer & O&M engineer, reviews & endorses field submissions', badgeColor: 'bg-cyan-500/15 text-cyan-800 dark:text-cyan-300 border-cyan-500/30' },
+    { role: 'IMO Preparer', label: 'IMO Preparer', desc: 'IMO-level report preparer for system accomplishments & maintenance logs', badgeColor: 'bg-teal-500/15 text-teal-800 dark:text-teal-300 border-teal-500/30' },
     { role: 'Field Personnel', label: 'Field Personnel', desc: 'Submits field maintenance/operational reports (Pending Approval)', badgeColor: 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/30' },
     { role: 'Viewer', label: 'Viewer', desc: 'Read-only inspection of approved layers & records', badgeColor: 'bg-slate-500/15 text-slate-800 dark:text-slate-300 border-slate-500/30' }
   ];
@@ -222,17 +222,17 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const isPrivilegedUser = 
     authenticatedUser?.role === 'Developer' || 
-    authenticatedUser?.role === 'RO Admin' || 
     authenticatedUser?.role === 'RO Evaluator' || 
+    authenticatedUser?.role === 'RO Reviewer' || 
     authenticatedUser?.role === 'RO Preparer' || 
-    authenticatedUser?.role === 'IMO Admin';
+    authenticatedUser?.role === 'IMO Evaluator';
   
   const availableSimulationRoles = authenticatedUser?.role === 'Developer'
     ? allRoles
-    : authenticatedUser?.role === 'RO Admin'
+    : authenticatedUser?.role === 'RO Evaluator'
     ? allRoles.filter(r => r.role !== 'Developer')
-    : (authenticatedUser?.role === 'RO Evaluator' || authenticatedUser?.role === 'RO Preparer')
-    ? allRoles.filter(r => r.role !== 'Developer' && r.role !== 'RO Admin')
+    : (authenticatedUser?.role === 'RO Reviewer' || authenticatedUser?.role === 'RO Preparer')
+    ? allRoles.filter(r => r.role !== 'Developer' && r.role !== 'RO Evaluator')
     : allRoles.filter(r => !r.role.startsWith('RO') && r.role !== 'Developer');
 
   const currentRoleObj = allRoles.find(r => r.role === activeRole) || allRoles[0];
