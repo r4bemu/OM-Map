@@ -113,24 +113,15 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
   useEffect(() => {
     if (!selectedFeatureProps && !selectedReport) return;
 
-    const handleOutsideInteraction = (event: Event) => {
-      const target = event.target as Node | null;
-      if (inspectorRef.current && target && !inspectorRef.current.contains(target)) {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
         onClose();
       }
     };
 
-    const timer = setTimeout(() => {
-      document.addEventListener('pointerdown', handleOutsideInteraction, true);
-      document.addEventListener('touchstart', handleOutsideInteraction, true);
-      document.addEventListener('wheel', handleOutsideInteraction, true);
-    }, 100);
-
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      clearTimeout(timer);
-      document.removeEventListener('pointerdown', handleOutsideInteraction, true);
-      document.removeEventListener('touchstart', handleOutsideInteraction, true);
-      document.removeEventListener('wheel', handleOutsideInteraction, true);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [selectedFeatureProps, selectedReport, onClose]);
 

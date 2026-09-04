@@ -877,8 +877,6 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               }
               setActivePopupProps(null);
               setActivePopupCoords(null);
-              // Notify parent to clear stale feature selection & coordinates
-              onDeselectFeature?.();
             });
 
             leafletLayer.on('popupopen', (e) => {
