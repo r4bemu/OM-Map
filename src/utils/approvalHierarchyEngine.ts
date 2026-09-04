@@ -13,9 +13,8 @@ export const ORDERED_APPROVAL_TIERS: ApprovalTier[] = [
 export function normalizeUserRole(role?: string | null): UserRole {
   if (!role) return 'Viewer';
   const r = role.trim();
-  if (r === 'RO Admin') return 'RO Evaluator';
-  if (r === 'RO Evaluator') return 'RO Reviewer';
-  if (r === 'IMO Admin') return 'IMO Evaluator';
+  if (r === 'RO Admin') return 'RO Admin';
+  if (r === 'IMO Admin') return 'IMO Admin';
   if (r === 'NIS In-Charge' || r === 'NIS In-charge') return 'IMO Reviewer';
   if (r === 'NIS Preparer') return 'IMO Preparer';
   return r as UserRole;
@@ -238,8 +237,8 @@ export function canUserEditReport(
     };
   }
 
-  // 4. IMO Evaluator Rules
-  if (normRole === 'IMO Evaluator') {
+  // 4. IMO Evaluator & IMO Admin Rules
+  if (normRole === 'IMO Evaluator' || normRole === 'IMO Admin') {
     if (effectiveTier === 'Pending_IMO_Evaluator' || effectiveTier === 'Pending_IMO_Reviewer' || effectiveTier === 'Pending_IMO_Preparer') {
       return { allowed: true, mode: 'direct_edit' };
     }
@@ -274,8 +273,8 @@ export function canUserEditReport(
     };
   }
 
-  // 7. RO Evaluator Rules
-  if (normRole === 'RO Evaluator') {
+  // 7. RO Evaluator & RO Admin Rules
+  if (normRole === 'RO Evaluator' || normRole === 'RO Admin') {
     return { allowed: true, mode: 'direct_edit' };
   }
 
@@ -309,7 +308,7 @@ export function canUserAdvanceTier(
 
   switch (effectiveTier) {
     case 'Pending_IMO_Preparer':
-      if (normRole === 'IMO Preparer' || normRole === 'IMO Reviewer' || normRole.startsWith('RO') || normRole === 'IMO Evaluator') {
+      if (normRole === 'IMO Preparer' || normRole === 'IMO Reviewer' || normRole.startsWith('RO') || normRole === 'IMO Evaluator' || normRole === 'IMO Admin') {
         return {
           allowed: true,
           nextTier: 'Pending_IMO_Reviewer',
@@ -319,7 +318,7 @@ export function canUserAdvanceTier(
       break;
 
     case 'Pending_IMO_Reviewer':
-      if (normRole === 'IMO Reviewer' || normRole === 'IMO Evaluator' || normRole.startsWith('RO')) {
+      if (normRole === 'IMO Reviewer' || normRole === 'IMO Evaluator' || normRole === 'IMO Admin' || normRole.startsWith('RO')) {
         return {
           allowed: true,
           nextTier: 'Pending_IMO_Evaluator',
@@ -329,7 +328,7 @@ export function canUserAdvanceTier(
       break;
 
     case 'Pending_IMO_Evaluator':
-      if (normRole === 'IMO Evaluator' || normRole.startsWith('RO')) {
+      if (normRole === 'IMO Evaluator' || normRole === 'IMO Admin' || normRole.startsWith('RO')) {
         return {
           allowed: true,
           nextTier: 'Pending_RO_Preparer',
@@ -339,7 +338,7 @@ export function canUserAdvanceTier(
       break;
 
     case 'Pending_RO_Preparer':
-      if (normRole === 'RO Preparer' || normRole === 'RO Reviewer' || normRole === 'RO Evaluator') {
+      if (normRole === 'RO Preparer' || normRole === 'RO Reviewer' || normRole === 'RO Evaluator' || normRole === 'RO Admin') {
         return {
           allowed: true,
           nextTier: 'Pending_RO_Reviewer',
@@ -349,7 +348,7 @@ export function canUserAdvanceTier(
       break;
 
     case 'Pending_RO_Reviewer':
-      if (normRole === 'RO Reviewer' || normRole === 'RO Evaluator') {
+      if (normRole === 'RO Reviewer' || normRole === 'RO Evaluator' || normRole === 'RO Admin') {
         return {
           allowed: true,
           nextTier: 'Pending_RO_Evaluator',
@@ -359,7 +358,7 @@ export function canUserAdvanceTier(
       break;
 
     case 'Pending_RO_Evaluator':
-      if (normRole === 'RO Evaluator') {
+      if (normRole === 'RO Evaluator' || normRole === 'RO Admin') {
         return {
           allowed: true,
           nextTier: 'Approved_RO_Evaluator',

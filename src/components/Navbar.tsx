@@ -165,12 +165,14 @@ export const Navbar: React.FC<NavbarProps> = ({
     };
   }, [isHamburgerOpen]);
 
-  // Role Definitions (Institutional 9-Tier Architecture)
+  // Role Definitions (Institutional Multi-Tier Architecture)
   const allRoles: { role: UserRole; label: string; desc: string; badgeColor: string }[] = [
     { role: 'Developer', label: 'Developer', desc: 'Master developer control, user management & unrestricted scope', badgeColor: 'bg-rose-500/15 text-rose-800 dark:text-rose-300 border-rose-500/30 font-mono' },
+    { role: 'RO Admin', label: 'RO Admin', desc: 'Regional Executive Administrator, user admissions & gatekeeper access', badgeColor: 'bg-fuchsia-500/15 text-fuchsia-800 dark:text-fuchsia-300 border-fuchsia-500/30 font-bold' },
     { role: 'RO Evaluator', label: 'RO Evaluator', desc: 'Regional Division Manager, final regional approval & unrestricted scope', badgeColor: 'bg-purple-500/15 text-purple-800 dark:text-purple-300 border-purple-500/30' },
     { role: 'RO Reviewer', label: 'RO Reviewer', desc: 'Reviews submitted field reports, verifies regional compliance & data accuracy', badgeColor: 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-500/30' },
     { role: 'RO Preparer', label: 'RO Preparer', desc: 'Prepares regional packages, consolidates regional reports & tracks deadlines', badgeColor: 'bg-indigo-500/15 text-indigo-800 dark:text-indigo-300 border-indigo-500/30' },
+    { role: 'IMO Admin', label: 'IMO Admin', desc: 'IMO Administrator, IMO user admissions & gatekeeper access', badgeColor: 'bg-orange-500/15 text-orange-800 dark:text-orange-300 border-orange-500/30 font-bold' },
     { role: 'IMO Evaluator', label: 'IMO Evaluator', desc: 'IMO Division management, final approvals & forwarding authority', badgeColor: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30' },
     { role: 'IMO Reviewer', label: 'IMO Reviewer', desc: 'IMO System reviewer & O&M engineer, reviews & endorses field submissions', badgeColor: 'bg-cyan-500/15 text-cyan-800 dark:text-cyan-300 border-cyan-500/30' },
     { role: 'IMO Preparer', label: 'IMO Preparer', desc: 'IMO-level report preparer for system accomplishments & maintenance logs', badgeColor: 'bg-teal-500/15 text-teal-800 dark:text-teal-300 border-teal-500/30' },
@@ -222,18 +224,24 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const isPrivilegedUser = 
     authenticatedUser?.role === 'Developer' || 
+    authenticatedUser?.role === 'RO Admin' ||
     authenticatedUser?.role === 'RO Evaluator' || 
     authenticatedUser?.role === 'RO Reviewer' || 
     authenticatedUser?.role === 'RO Preparer' || 
+    authenticatedUser?.role === 'IMO Admin' ||
     authenticatedUser?.role === 'IMO Evaluator';
   
   const availableSimulationRoles = authenticatedUser?.role === 'Developer'
     ? allRoles
-    : authenticatedUser?.role === 'RO Evaluator'
+    : authenticatedUser?.role === 'RO Admin'
     ? allRoles.filter(r => r.role !== 'Developer')
+    : authenticatedUser?.role === 'RO Evaluator'
+    ? allRoles.filter(r => r.role !== 'Developer' && r.role !== 'RO Admin')
     : (authenticatedUser?.role === 'RO Reviewer' || authenticatedUser?.role === 'RO Preparer')
-    ? allRoles.filter(r => r.role !== 'Developer' && r.role !== 'RO Evaluator')
-    : allRoles.filter(r => !r.role.startsWith('RO') && r.role !== 'Developer');
+    ? allRoles.filter(r => r.role !== 'Developer' && r.role !== 'RO Admin' && r.role !== 'RO Evaluator')
+    : authenticatedUser?.role === 'IMO Admin'
+    ? allRoles.filter(r => !r.role.startsWith('RO') && r.role !== 'Developer')
+    : allRoles.filter(r => !r.role.startsWith('RO') && r.role !== 'Developer' && r.role !== 'IMO Admin');
 
   const currentRoleObj = allRoles.find(r => r.role === activeRole) || allRoles[0];
   const isSimulating = Boolean(simulatedRole || (simulatedImo && simulatedImo !== authenticatedUser?.imoOffice) || (simulatedNis && simulatedNis !== authenticatedUser?.nisBinding));
@@ -582,17 +590,35 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* 6. Developer Account Management (Developer only) */}
-            {authenticatedUser?.role === 'Developer' && onOpenDevPanel && (
+            {/* 6. Account & Access Gatekeeper Management */}
+            {(authenticatedUser?.role === 'Developer' || authenticatedUser?.role === 'RO Admin' || authenticatedUser?.role === 'IMO Admin') && onOpenDevPanel && (
               <button
                 onClick={() => {
                   setIsHamburgerOpen(false);
                   onOpenDevPanel();
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-800 dark:text-rose-300 border border-rose-500/30 rounded-xl transition cursor-pointer text-xs font-bold"
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl transition cursor-pointer text-xs font-bold border ${
+                  authenticatedUser?.role === 'Developer'
+                    ? 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-500/30'
+                    : authenticatedUser?.role === 'RO Admin'
+                    ? 'bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-800 dark:text-fuchsia-300 border-fuchsia-500/30'
+                    : 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-800 dark:text-orange-300 border-orange-500/30'
+                }`}
               >
-                <ShieldCheck className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
-                <span>Manage 69 Accounts &amp; Passcodes</span>
+                <ShieldCheck className={`w-4 h-4 shrink-0 ${
+                  authenticatedUser?.role === 'Developer'
+                    ? 'text-rose-600 dark:text-rose-400'
+                    : authenticatedUser?.role === 'RO Admin'
+                    ? 'text-fuchsia-600 dark:text-fuchsia-400'
+                    : 'text-orange-600 dark:text-orange-400'
+                }`} />
+                <span>
+                  {authenticatedUser?.role === 'Developer'
+                    ? 'Manage Accounts & Admissions'
+                    : authenticatedUser?.role === 'RO Admin'
+                    ? 'Manage Regional Accounts & Admissions'
+                    : 'Manage IMO Accounts & Admissions'}
+                </span>
               </button>
             )}
 

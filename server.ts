@@ -49,6 +49,7 @@ const PHOTOS_DIR = path.join(DATA_DIR, 'photos');
 const LAYERS_FILE = path.join(DATA_DIR, 'persistent_layers.json');
 const REPORTS_FILE = path.join(DATA_DIR, 'persistent_reports.json');
 const USERS_FILE = path.join(DATA_DIR, 'persistent_users.json');
+const PENDING_USERS_FILE = path.join(DATA_DIR, 'pending_users.json');
 
 function ensureDataDir() {
   try {
@@ -61,8 +62,43 @@ function ensureDataDir() {
     if (!fs.existsSync(PHOTOS_DIR)) {
       fs.mkdirSync(PHOTOS_DIR, { recursive: true });
     }
+  } catch (err) {
+    console.error('Failed to create data directories:', err);
+  }
+}
 
-    // Seed initial dataset files from bundled app directories if not yet in USER_DATA_DIR
+function normalizeServerUserRole(role?: string | null): string {
+  if (!role) return 'Viewer';
+  const r = role.trim();
+  if (r === 'RO Admin') return 'RO Admin';
+  if (r === 'IMO Admin') return 'IMO Admin';
+  if (r === 'NIS In-Charge' || r === 'NIS In-charge') return 'IMO Reviewer';
+  if (r === 'NIS Preparer') return 'IMO Preparer';
+  return r;
+}
+
+function loadPendingUsers(): any[] {
+  ensureDataDir();
+  if (fs.existsSync(PENDING_USERS_FILE)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(PENDING_USERS_FILE, 'utf-8'));
+      if (Array.isArray(data)) return data;
+    } catch (_) {}
+  }
+  return [];
+}
+
+function savePendingUsersToFile(pendingList: any[]) {
+  try {
+    safeWriteJsonSync(PENDING_USERS_FILE, pendingList);
+  } catch (err) {
+    console.error('Failed to save pending users to file:', err);
+  }
+}
+
+// Seed initial dataset files from bundled app directories if not yet in USER_DATA_DIR
+function seedInitialData() {
+  try {
     const seedCandidates = [
       path.join(__dirname, '../data'),
       path.join(__dirname, 'data'),
@@ -93,6 +129,8 @@ function ensureDataDir() {
     }
   } catch (e) {}
 }
+
+seedInitialData();
 
 function saveBase64PhotoToDisk(photoId: string, base64Url: string, driveFileId?: string) {
   if (!base64Url || !base64Url.startsWith('data:image/')) return;
@@ -233,17 +271,6 @@ function saveReportsToFile(reportsList: any[]) {
   }
 }
 
-function normalizeServerUserRole(role?: string | null): string {
-  if (!role) return 'Viewer';
-  const r = role.trim();
-  if (r === 'RO Admin') return 'RO Evaluator';
-  if (r === 'RO Evaluator') return 'RO Reviewer';
-  if (r === 'IMO Admin') return 'IMO Evaluator';
-  if (r === 'NIS In-Charge' || r === 'NIS In-charge') return 'IMO Reviewer';
-  if (r === 'NIS Preparer') return 'IMO Preparer';
-  return r;
-}
-
 function loadSavedUsers(): any[] {
   ensureDataDir();
   if (fs.existsSync(USERS_FILE)) {
@@ -257,9 +284,7 @@ function loadSavedUsers(): any[] {
             hasChanges = true;
             return {
               ...u,
-              role: normRole,
-              name: typeof u.name === 'string' ? u.name.replace(/NIS In-Charge/g, 'IMO Reviewer').replace(/NIS Preparer/g, 'IMO Preparer').replace(/RO Admin/g, 'RO Evaluator').replace(/IMO Admin/g, 'IMO Evaluator') : u.name,
-              designation: typeof u.designation === 'string' ? u.designation.replace(/NIS In-Charge/g, 'IMO Reviewer').replace(/NIS Report Preparer/g, 'IMO Report Preparer').replace(/NIS Preparer/g, 'IMO Preparer').replace(/RO Admin/g, 'RO Evaluator').replace(/IMO Admin/g, 'IMO Evaluator') : u.designation
+              role: normRole
             };
           }
           return u;
@@ -412,6 +437,74 @@ export async function createApp() {
       res.json({ success: true, message: 'All accounts reset to factory defaults.', users: DEFAULT_AUTH_USERS });
     } catch (err: any) {
       res.status(500).json({ error: err.message || 'Failed to reset users' });
+    }
+  });
+
+  // Pending Google Account Admissions Endpoints
+  app.get('/api/users/pending', (req, res) => {
+    try {
+      const pending = loadPendingUsers();
+      res.json({ pending });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to load pending users' });
+    }
+  });
+
+  app.post('/api/users/pending', (req, res) => {
+    try {
+      const pendingUser = req.body;
+      if (!pendingUser || !pendingUser.email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+      const pending = loadPendingUsers();
+      const existingIdx = pending.findIndex((u: any) => u.email?.toLowerCase() === pendingUser.email.toLowerCase());
+      if (existingIdx !== -1) {
+        pending[existingIdx] = { ...pending[existingIdx], ...pendingUser };
+      } else {
+        pending.unshift(pendingUser);
+      }
+      savePendingUsersToFile(pending);
+      res.json({ success: true, pendingUser, pending });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to save pending user' });
+    }
+  });
+
+  app.post('/api/users/admit', (req, res) => {
+    try {
+      const admittedUser = req.body;
+      if (!admittedUser || !admittedUser.role || !admittedUser.name) {
+        return res.status(400).json({ error: 'User data is required' });
+      }
+      // Remove from pending
+      const pending = loadPendingUsers();
+      const filteredPending = pending.filter((u: any) => u.id !== admittedUser.id && (!admittedUser.email || u.email?.toLowerCase() !== admittedUser.email.toLowerCase()));
+      savePendingUsersToFile(filteredPending);
+
+      // Add/update active users
+      const currentUsers = loadSavedUsers();
+      const idx = currentUsers.findIndex((u: any) => u.id === admittedUser.id || (admittedUser.email && u.email?.toLowerCase() === admittedUser.email.toLowerCase()));
+      if (idx !== -1) {
+        currentUsers[idx] = { ...currentUsers[idx], ...admittedUser, isAdmitted: true };
+      } else {
+        currentUsers.push({ ...admittedUser, isAdmitted: true });
+      }
+      saveUsersToFile(currentUsers);
+      res.json({ success: true, user: admittedUser, users: currentUsers, pending: filteredPending });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to admit user' });
+    }
+  });
+
+  app.delete('/api/users/pending/:id', (req, res) => {
+    const { id } = req.params;
+    try {
+      const pending = loadPendingUsers();
+      const filtered = pending.filter((u: any) => u.id !== id);
+      savePendingUsersToFile(filtered);
+      res.json({ success: true, message: `Pending user ${id} removed.`, pending: filtered });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to remove pending user' });
     }
   });
 

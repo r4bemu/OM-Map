@@ -49,8 +49,8 @@ export function canUserEditReport(user: AuthUser | null | undefined, role: UserR
   // Master Developer has unrestricted edit authority over all reports
   if (role === 'Developer' || user?.role === 'Developer') return true;
 
-  // Regional Evaluator / Reviewer (Access to all IMOs) has unrestricted edit authority over reports
-  const isRegionalAuthority = (role === 'RO Evaluator' || role === 'RO Reviewer' || user?.role === 'RO Evaluator' || user?.role === 'RO Reviewer') && 
+  // Regional Evaluator / Reviewer / Admin (Access to all IMOs) has unrestricted edit authority over reports
+  const isRegionalAuthority = (role === 'RO Admin' || role === 'RO Evaluator' || role === 'RO Reviewer' || user?.role === 'RO Admin' || user?.role === 'RO Evaluator' || user?.role === 'RO Reviewer') && 
     (!user?.imoOffice || user.imoOffice === 'All IMOs' || user.imoOffice === 'Regional Office IV-B' || user.imoOffice === 'Regional Office');
   if (isRegionalAuthority) return true;
 
@@ -72,8 +72,8 @@ export function canUserEditReport(user: AuthUser | null | undefined, role: UserR
 
   const approval = report.approvalStatus || 'Pending_PreApproval';
 
-  // IMO Evaluator & IMO Reviewer can edit until Approved & Published
-  if (role === 'IMO Evaluator' || role === 'IMO Reviewer') {
+  // IMO Admin, IMO Evaluator & IMO Reviewer can edit until Approved & Published
+  if (role === 'IMO Admin' || role === 'IMO Evaluator' || role === 'IMO Reviewer') {
     return approval !== 'Approved';
   }
 
@@ -195,8 +195,8 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
   const badge = getApprovalBadge(approvalStatus);
 
   // Determine if active user can perform approvals
-  const canPreApprove = (currentRole === 'NIS In-Charge' || currentRole === 'RO Evaluator' || currentRole === 'IMO Admin' || currentRole === 'Developer') && (approvalStatus === 'Pending_PreApproval' || !selectedReport?.approvalStatus);
-  const canFinalApprove = (currentRole === 'RO Admin' || currentRole === 'IMO Admin' || currentRole === 'Developer') && (approvalStatus === 'PreApproved' || approvalStatus === 'Pending_PreApproval' || !selectedReport?.approvalStatus);
+  const canPreApprove = (currentRole === 'IMO Reviewer' || currentRole === 'IMO Evaluator' || currentRole === 'IMO Admin' || currentRole === 'RO Reviewer' || currentRole === 'RO Evaluator' || currentRole === 'RO Admin' || currentRole === 'Developer') && (approvalStatus === 'Pending_PreApproval' || !selectedReport?.approvalStatus);
+  const canFinalApprove = (currentRole === 'RO Admin' || currentRole === 'RO Evaluator' || currentRole === 'IMO Admin' || currentRole === 'IMO Evaluator' || currentRole === 'Developer') && (approvalStatus === 'PreApproved' || approvalStatus === 'Pending_PreApproval' || !selectedReport?.approvalStatus);
 
   const handlePreApprove = () => {
     if (selectedReport && onApproveReport) {

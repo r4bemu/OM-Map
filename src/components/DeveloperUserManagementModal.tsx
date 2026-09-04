@@ -16,7 +16,10 @@ import {
   UserPlus,
   Trash2,
   Lock,
-  Sparkles
+  Sparkles,
+  Mail,
+  Clock,
+  UserX
 } from 'lucide-react';
 import { AuthUser, UserRole } from '../types';
 import { 
@@ -28,7 +31,10 @@ import {
   deleteUserAccount,
   resetAuthUsersToDefault,
   CANONICAL_IMO_OFFICES,
-  getNisOptionsForImo
+  getNisOptionsForImo,
+  getPendingGoogleAdmissions,
+  admitGoogleUser,
+  rejectPendingGoogleAdmission
 } from '../config/authUsers';
 
 interface DeveloperUserManagementModalProps {
@@ -39,6 +45,7 @@ interface DeveloperUserManagementModalProps {
 }
 
 function getShortImoName(imo: string): string {
+  if (!imo) return 'Regional';
   if (imo.includes('MOMARO') || imo.includes('Mindoro Oriental')) return 'MOMARO';
   if (imo.includes('Occidental')) return 'Occ. Mindoro';
   if (imo.includes('Palawan')) return 'Palawan';
@@ -51,6 +58,12 @@ function generateDefaultTitle(role: UserRole, imo: string, nis: string, count: n
   const safeImoKey = shortImo.toLowerCase().replace(/[^a-z0-9]/g, '');
 
   switch (role) {
+    case 'RO Admin':
+      return {
+        name: 'Regional Executive Administrator',
+        username: 'ro_admin',
+        designation: 'Regional Office Executive Admin & Access Gatekeeper'
+      };
     case 'RO Evaluator':
       return {
         name: 'Division Manager (Regional Office)',
@@ -68,6 +81,12 @@ function generateDefaultTitle(role: UserRole, imo: string, nis: string, count: n
         name: 'Regional Report Preparer',
         username: 'ro_preparer',
         designation: 'Regional O&M Report Preparer'
+      };
+    case 'IMO Admin':
+      return {
+        name: `IMO Administrator (${shortImo} IMO)`,
+        username: `admin_${safeImoKey}`,
+        designation: `${shortImo} IMO Administrator & Access Gatekeeper`
       };
     case 'IMO Evaluator':
       return {
@@ -115,6 +134,7 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
   currentUser,
   onUserUpdated
 }) => {
+  const [activeTab, setActiveTab] = useState<'registered' | 'pending_google'>('registered');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>('All');
   const [selectedImoFilter, setSelectedImoFilter] = useState<string>('All');
@@ -131,25 +151,54 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Create User Form State (Developer Exclusive)
+  // Role Access Levels
+  const isDeveloper = currentUser?.role === 'Developer';
+  const isRoAdmin = currentUser?.role === 'RO Admin';
+  const isImoAdmin = currentUser?.role === 'IMO Admin';
+  const isAdmin = isDeveloper || isRoAdmin || isImoAdmin;
+
+  // Available roles to assign based on admin tier
+  const availableRolesForAdmin: UserRole[] = isDeveloper
+    ? ['Developer', 'RO Admin', 'RO Evaluator', 'RO Reviewer', 'RO Preparer', 'IMO Admin', 'IMO Evaluator', 'IMO Reviewer', 'IMO Preparer', 'Field Personnel', 'Viewer']
+    : isRoAdmin
+    ? ['RO Admin', 'RO Evaluator', 'RO Reviewer', 'RO Preparer', 'IMO Admin', 'IMO Evaluator', 'IMO Reviewer', 'IMO Preparer', 'Field Personnel', 'Viewer']
+    : ['IMO Admin', 'IMO Evaluator', 'IMO Reviewer', 'IMO Preparer', 'Field Personnel', 'Viewer'];
+
+  // Allowed IMO options based on admin scope
+  const availableImoOptions = isImoAdmin && currentUser?.imoOffice
+    ? [currentUser.imoOffice]
+    : CANONICAL_IMO_OFFICES;
+
+  const defaultImoSelection = isImoAdmin && currentUser?.imoOffice
+    ? currentUser.imoOffice
+    : CANONICAL_IMO_OFFICES[0];
+
+  // Create User Form State
   const [isCreatingNewUser, setIsCreatingNewUser] = useState(false);
   const [newName, setNewName] = useState('');
   const [newUsername, setNewUsername] = useState('');
-  const [newRole, setNewRole] = useState<UserRole>('Field Personnel');
-  const [newImo, setNewImo] = useState<string>(CANONICAL_IMO_OFFICES[0]); // Default to MOMARO IMO
+  const [newRole, setNewRole] = useState<UserRole>(isImoAdmin ? 'IMO Preparer' : 'Field Personnel');
+  const [newImo, setNewImo] = useState<string>(defaultImoSelection);
   const [newNis, setNewNis] = useState<string>('Baco-Bucayao RIS');
   const [newPasscode, setNewPasscode] = useState('');
   const [newDesignation, setNewDesignation] = useState('');
   const [isSubmittingNew, setIsSubmittingNew] = useState(false);
 
+  // Pending Google Admissions Inline Assignment State
+  const [admitRoleMap, setAdmitRoleMap] = useState<Record<string, UserRole>>({});
+  const [admitImoMap, setAdmitImoMap] = useState<Record<string, string>>({});
+  const [admitNisMap, setAdmitNisMap] = useState<Record<string, string>>({});
+  const [admitDesignationMap, setAdmitDesignationMap] = useState<Record<string, string>>({});
+  const [isAdmittingId, setIsAdmittingId] = useState<string | null>(null);
+
   // Sync users with server whenever modal opens
   useEffect(() => {
-    if (isOpen && currentUser?.role === 'Developer') {
+    if (isOpen && isAdmin) {
       fetchRemoteAuthUsers().then(() => {
         setUsersVersion(v => v + 1);
       });
     }
-  }, [isOpen, currentUser]);
+  }, [isOpen, isAdmin]);
 
   // Keep NIS synchronized with selected IMO in Create Form (Lock to All NIS when All IMOs selected)
   useEffect(() => {
@@ -175,11 +224,20 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
     }
   }, [editImo]);
 
-  if (!isOpen || !currentUser || currentUser.role !== 'Developer') return null;
+  if (!isOpen || !currentUser || !isAdmin) return null;
 
   const users = getAuthUsers();
+  const pendingUsers = getPendingGoogleAdmissions();
 
-  const filteredUsers = users.filter(u => {
+  // Scoped users list for IMO Admin (or full list for RO Admin / Developer)
+  const scopedUsers = users.filter(u => {
+    if (isImoAdmin && currentUser?.imoOffice) {
+      return u.imoOffice === currentUser.imoOffice || u.role === 'Developer';
+    }
+    return true;
+  });
+
+  const filteredUsers = scopedUsers.filter(u => {
     if (selectedRoleFilter !== 'All' && u.role !== selectedRoleFilter) return false;
     if (selectedImoFilter !== 'All' && !u.imoOffice.includes(selectedImoFilter) && u.imoOffice !== 'All IMOs') return false;
     if (searchQuery.trim()) {
@@ -187,12 +245,17 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
       return u.name.toLowerCase().includes(q) ||
              u.username.toLowerCase().includes(q) ||
              u.passcode.toLowerCase().includes(q) ||
-             (u.nisBinding && u.nisBinding.toLowerCase().includes(q));
+             (u.nisBinding && u.nisBinding.toLowerCase().includes(q)) ||
+             (u.email && u.email.toLowerCase().includes(q));
     }
     return true;
   });
 
   const handleStartEdit = (user: AuthUser) => {
+    if (isImoAdmin && (user.role === 'Developer' || user.role.startsWith('RO'))) {
+      setErrorMessage('IMO Administrators cannot modify Regional or Developer accounts.');
+      return;
+    }
     setEditingUserId(user.id);
     setEditPasscode(user.passcode);
     setEditName(user.name);
@@ -232,7 +295,7 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
   };
 
   const handleGeneratePasscode = () => {
-    const prefix = newRole === 'RO Evaluator' ? 'ROE' : newRole === 'RO Reviewer' ? 'ROR' : newRole === 'RO Preparer' ? 'ROP' : newRole === 'IMO Evaluator' ? 'IOE' : newRole === 'IMO Reviewer' ? 'IOR' : newRole === 'IMO Preparer' ? 'IOP' : newRole === 'Field Personnel' ? 'FLD' : newRole === 'Viewer' ? 'VIEW' : 'DEV';
+    const prefix = newRole === 'RO Admin' ? 'ROA' : newRole === 'RO Evaluator' ? 'ROE' : newRole === 'RO Reviewer' ? 'ROR' : newRole === 'RO Preparer' ? 'ROP' : newRole === 'IMO Admin' ? 'ADM' : newRole === 'IMO Evaluator' ? 'IOE' : newRole === 'IMO Reviewer' ? 'IOR' : newRole === 'IMO Preparer' ? 'IOP' : newRole === 'Field Personnel' ? 'FLD' : newRole === 'Viewer' ? 'VIEW' : 'DEV';
     const rand = Math.floor(1000 + Math.random() * 9000);
     const suffix = newImo.includes('MOMARO') ? 'M' : newImo.includes('Occidental') ? 'O' : newImo.includes('Palawan') ? 'P' : 'R';
     setNewPasscode(`${prefix}${rand}${suffix}`);
@@ -296,6 +359,11 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
       return;
     }
 
+    if (isImoAdmin && (user.role.startsWith('RO') || user.role === 'Developer')) {
+      alert('IMO Administrators cannot delete Regional or Developer accounts.');
+      return;
+    }
+
     if (window.confirm(`Are you sure you want to permanently delete account @${user.username} (${user.name})?`)) {
       try {
         await deleteUserAccount(user.id);
@@ -310,6 +378,10 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
   };
 
   const handleResetDefaults = async () => {
+    if (!isDeveloper) {
+      alert('Only Developer account can perform a full factory reset.');
+      return;
+    }
     if (window.confirm('Reset all accounts to default factory state? Custom added accounts will be restored.')) {
       await resetAuthUsersToDefault();
       setUsersVersion(v => v + 1);
@@ -319,12 +391,54 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
     }
   };
 
+  const handleAdmitUser = async (pendingUser: AuthUser) => {
+    const role = admitRoleMap[pendingUser.id] || (isImoAdmin ? 'IMO Preparer' : 'Field Personnel');
+    const imo = isImoAdmin && currentUser?.imoOffice ? currentUser.imoOffice : (admitImoMap[pendingUser.id] || defaultImoSelection);
+    const validNis = getNisOptionsForImo(imo);
+    const nis = imo === 'All IMOs' ? 'All NIS' : (admitNisMap[pendingUser.id] || validNis[0] || 'All NIS');
+    const designation = admitDesignationMap[pendingUser.id] || `${role} - ${nis}`;
+
+    setIsAdmittingId(pendingUser.id);
+    try {
+      await admitGoogleUser(pendingUser.id, {
+        role,
+        imoOffice: imo,
+        nisBinding: nis,
+        designation
+      });
+      setUsersVersion(v => v + 1);
+      setSaveSuccessMsg(`Admitted ${pendingUser.name} (${pendingUser.email || pendingUser.username}) as ${role} for ${imo}!`);
+      setTimeout(() => setSaveSuccessMsg(''), 4500);
+      onUserUpdated?.();
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Failed to admit user.');
+    } finally {
+      setIsAdmittingId(null);
+    }
+  };
+
+  const handleRejectUser = async (pendingUser: AuthUser) => {
+    if (window.confirm(`Reject admission request for ${pendingUser.name} (${pendingUser.email || pendingUser.username})?`)) {
+      try {
+        await rejectPendingGoogleAdmission(pendingUser.id);
+        setUsersVersion(v => v + 1);
+        setSaveSuccessMsg(`Rejected admission request for ${pendingUser.name}.`);
+        setTimeout(() => setSaveSuccessMsg(''), 3000);
+        onUserUpdated?.();
+      } catch (err: any) {
+        setErrorMessage(err?.message || 'Failed to reject user.');
+      }
+    }
+  };
+
   const getRoleBadgeStyle = (role: UserRole) => {
     switch (role) {
       case 'Developer': return 'bg-rose-500/20 text-rose-300 border-rose-500/30 font-mono';
+      case 'RO Admin': return 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30 font-bold';
       case 'RO Evaluator': return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
       case 'RO Reviewer': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
       case 'RO Preparer': return 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30';
+      case 'IMO Admin': return 'bg-orange-500/20 text-orange-300 border-orange-500/30 font-bold';
       case 'IMO Evaluator': return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
       case 'IMO Reviewer': return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
       case 'IMO Preparer': return 'bg-teal-500/20 text-teal-300 border-teal-500/30';
@@ -334,6 +448,30 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
     }
   };
 
+  const getModalTitleInfo = () => {
+    if (isDeveloper) {
+      return {
+        title: 'Developer Account & Gatekeeper Control',
+        badge: 'MASTER CONTROL',
+        subtitle: 'Manage credentials, RBAC permissions, and Google account admissions across NIA Region IV-B.'
+      };
+    }
+    if (isRoAdmin) {
+      return {
+        title: 'Regional Office Access & Gatekeeper Control',
+        badge: 'REGIONAL ADMIN',
+        subtitle: 'Manage personnel credentials, RBAC roles, and Google admissions across Region IV-B.'
+      };
+    }
+    return {
+      title: `${currentUser?.imoOffice ? getShortImoName(currentUser.imoOffice) + ' IMO' : 'IMO'} Access & Gatekeeper Control`,
+      badge: 'IMO ADMIN',
+      subtitle: `Manage personnel credentials and Google admissions for ${currentUser?.imoOffice || 'assigned IMO'}.`
+    };
+  };
+
+  const headerInfo = getModalTitleInfo();
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-xl animate-in fade-in overflow-y-auto">
       <div className="w-full max-w-6xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto">
@@ -341,20 +479,32 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-800 bg-slate-900/90 sticky top-0 z-10">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-rose-500/20 text-rose-400 rounded-xl border border-rose-500/30 shadow-inner">
+            <div className={`p-2.5 rounded-xl border shadow-inner ${
+              isDeveloper 
+                ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' 
+                : isRoAdmin
+                ? 'bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30'
+                : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+            }`}>
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base sm:text-lg font-bold text-white font-heading">
-                  Developer Account Management
+                  {headerInfo.title}
                 </h2>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                  MASTER CONTROL
+                <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                  isDeveloper 
+                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' 
+                    : isRoAdmin
+                    ? 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30'
+                    : 'bg-orange-500/20 text-orange-300 border-orange-500/30'
+                }`}>
+                  {headerInfo.badge}
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Manage credentials, RBAC permissions, and IMO/NIS bindings across NIA Region IV-B accounts.
+                {headerInfo.subtitle}
               </p>
             </div>
           </div>
@@ -376,14 +526,16 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
               <span>{isCreatingNewUser ? 'Hide Form' : 'Create New Account'}</span>
             </button>
 
-            <button
-              onClick={handleResetDefaults}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer"
-              title="Reset accounts to default passcodes and scopes"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Reset Defaults</span>
-            </button>
+            {isDeveloper && (
+              <button
+                onClick={handleResetDefaults}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer"
+                title="Reset accounts to default passcodes and scopes"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Reset Defaults</span>
+              </button>
+            )}
             <button
               onClick={onClose}
               className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition cursor-pointer"
@@ -391,6 +543,47 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
               <X className="w-5 h-5" />
             </button>
           </div>
+        </div>
+
+        {/* Tab Navigation Bar */}
+        <div className="flex items-center gap-2 px-5 pt-3 border-b border-slate-800 bg-slate-900/90">
+          <button
+            type="button"
+            onClick={() => setActiveTab('registered')}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition cursor-pointer ${
+              activeTab === 'registered'
+                ? 'border-cyan-400 text-cyan-300'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            <span>Registered Personnel</span>
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300 border border-slate-700">
+              {filteredUsers.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('pending_google')}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition cursor-pointer ${
+              activeTab === 'pending_google'
+                ? 'border-amber-400 text-amber-300'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Mail className="w-4 h-4" />
+            <span>Pending Google Admissions</span>
+            {pendingUsers.length > 0 ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
+                {pendingUsers.length} PENDING
+              </span>
+            ) : (
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-400 border border-slate-700">
+                0
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Success Alert Banner */}
@@ -409,7 +602,7 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
           </div>
         )}
 
-        {/* CREATE NEW ACCOUNT FORM CARD (Developer Exclusive) */}
+        {/* CREATE NEW ACCOUNT FORM CARD */}
         {isCreatingNewUser && (
           <div className="p-4 bg-slate-950/80 border-b border-emerald-500/30 animate-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between mb-3">
@@ -494,15 +687,9 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
                     }}
                     className="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-emerald-500 cursor-pointer"
                   >
-                    <option value="RO Evaluator">RO Evaluator (Regional Division Manager &amp; Final Approval)</option>
-                    <option value="RO Reviewer">RO Reviewer (Regional Report Reviewer &amp; Verification)</option>
-                    <option value="RO Preparer">RO Preparer (Regional Package Preparer &amp; Consolidation)</option>
-                    <option value="IMO Evaluator">IMO Evaluator (IMO Division Manager &amp; Approvals)</option>
-                    <option value="IMO Reviewer">IMO Reviewer (IMO System Reviewer &amp; O&amp;M Engineer)</option>
-                    <option value="IMO Preparer">IMO Preparer (IMO Report Preparer &amp; Accomplishments)</option>
-                    <option value="Field Personnel">Field Personnel (Submit Field Reports)</option>
-                    <option value="Viewer">Viewer (Read-Only Public Audit)</option>
-                    <option value="Developer">Developer (Master Systems Administrator)</option>
+                    {availableRolesForAdmin.map(role => (
+                      <option key={role} value={role}>{role}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -530,13 +717,14 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
                   />
                 </div>
 
-                {/* IMO Office Dropdown (Strict without Regional Office IV-B) */}
+                {/* IMO Office Dropdown */}
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-300 mb-1">
                     IMO Office Access <span className="text-rose-400">*</span>
                   </label>
                   <select
                     value={newImo}
+                    disabled={isImoAdmin}
                     onChange={(e) => {
                       const imo = e.target.value;
                       setNewImo(imo);
@@ -544,15 +732,19 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
                       setNewNis(targetNis);
                       handleAutoSuggestFields(newRole, imo, targetNis);
                     }}
-                    className="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-emerald-500 cursor-pointer"
+                    className={`w-full border text-xs rounded-lg px-3 py-2 ${
+                      isImoAdmin 
+                        ? 'bg-slate-950 border-slate-800 text-slate-400 cursor-not-allowed'
+                        : 'bg-slate-900 border-slate-700 text-white focus:outline-none focus:border-emerald-500 cursor-pointer'
+                    }`}
                   >
-                    {CANONICAL_IMO_OFFICES.map(imo => (
+                    {availableImoOptions.map(imo => (
                       <option key={imo} value={imo}>{imo}</option>
                     ))}
                   </select>
                 </div>
 
-                {/* NIS Scope Dropdown (Locked & disabled when All IMOs is selected) */}
+                {/* NIS Scope Dropdown */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-[11px] font-semibold text-slate-300">
@@ -624,273 +816,491 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
           </div>
         )}
 
-        {/* Filters & Search Toolbar */}
-        <div className="p-4 border-b border-slate-800 bg-slate-900/60 flex flex-wrap items-center justify-between gap-3">
-          {/* Search Input */}
-          <div className="relative flex-1 min-w-[200px] max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search by name, username, passcode, or NIS..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 text-white text-xs rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition placeholder-slate-500"
-            />
-          </div>
+        {/* TAB 1: REGISTERED PERSONNEL VIEW */}
+        {activeTab === 'registered' && (
+          <>
+            {/* Filters & Search Toolbar */}
+            <div className="p-4 border-b border-slate-800 bg-slate-900/60 flex flex-wrap items-center justify-between gap-3">
+              {/* Search Input */}
+              <div className="relative flex-1 min-w-[200px] max-w-md">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search by name, username, passcode, NIS, or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 text-white text-xs rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition placeholder-slate-500"
+                />
+              </div>
 
-          {/* Role & IMO Filters */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <select
-              value={selectedRoleFilter}
-              onChange={(e) => setSelectedRoleFilter(e.target.value)}
-              className="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-cyan-500 cursor-pointer"
-            >
-              <option value="All">All Roles ({users.length})</option>
-              <option value="Developer">Developer</option>
-              <option value="RO Evaluator">RO Evaluator</option>
-              <option value="RO Reviewer">RO Reviewer</option>
-              <option value="RO Preparer">RO Preparer</option>
-              <option value="IMO Evaluator">IMO Evaluator</option>
-              <option value="IMO Reviewer">IMO Reviewer</option>
-              <option value="IMO Preparer">IMO Preparer</option>
-              <option value="Field Personnel">Field Personnel</option>
-              <option value="Viewer">Viewer</option>
-            </select>
+              {/* Role & IMO Filters */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <select
+                  value={selectedRoleFilter}
+                  onChange={(e) => setSelectedRoleFilter(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-cyan-500 cursor-pointer"
+                >
+                  <option value="All">All Roles ({filteredUsers.length})</option>
+                  <option value="Developer">Developer</option>
+                  <option value="RO Admin">RO Admin</option>
+                  <option value="RO Evaluator">RO Evaluator</option>
+                  <option value="RO Reviewer">RO Reviewer</option>
+                  <option value="RO Preparer">RO Preparer</option>
+                  <option value="IMO Admin">IMO Admin</option>
+                  <option value="IMO Evaluator">IMO Evaluator</option>
+                  <option value="IMO Reviewer">IMO Reviewer</option>
+                  <option value="IMO Preparer">IMO Preparer</option>
+                  <option value="Field Personnel">Field Personnel</option>
+                  <option value="Viewer">Viewer</option>
+                </select>
 
-            <select
-              value={selectedImoFilter}
-              onChange={(e) => setSelectedImoFilter(e.target.value)}
-              className="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-cyan-500 cursor-pointer"
-            >
-              <option value="All">All IMOs / Regional</option>
-              {CANONICAL_IMO_OFFICES.map(imo => (
-                <option key={imo} value={imo}>{imo}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+                <select
+                  value={selectedImoFilter}
+                  onChange={(e) => setSelectedImoFilter(e.target.value)}
+                  disabled={isImoAdmin}
+                  className={`border text-xs rounded-lg px-2.5 py-1.5 ${
+                    isImoAdmin 
+                      ? 'bg-slate-950 border-slate-800 text-slate-400 cursor-not-allowed'
+                      : 'bg-slate-800 border-slate-700 text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer'
+                  }`}
+                >
+                  <option value="All">All IMOs / Regional</option>
+                  {CANONICAL_IMO_OFFICES.map(imo => (
+                    <option key={imo} value={imo}>{imo}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-        {/* Users Table */}
-        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px] font-mono tracking-wider bg-slate-950/40">
-                  <th className="py-2.5 px-3">User &amp; Designation</th>
-                  <th className="py-2.5 px-3">Role</th>
-                  <th className="py-2.5 px-3">Username</th>
-                  <th className="py-2.5 px-3">Passcode</th>
-                  <th className="py-2.5 px-3">IMO Office Access</th>
-                  <th className="py-2.5 px-3">NIS Binding / Scope</th>
-                  <th className="py-2.5 px-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {filteredUsers.map((u) => {
-                  const isEditing = editingUserId === u.id;
+            {/* Users Table */}
+            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px] font-mono tracking-wider bg-slate-950/40">
+                      <th className="py-2.5 px-3">User &amp; Designation</th>
+                      <th className="py-2.5 px-3">Role</th>
+                      <th className="py-2.5 px-3">Username / Email</th>
+                      <th className="py-2.5 px-3">Passcode / Auth</th>
+                      <th className="py-2.5 px-3">IMO Office Access</th>
+                      <th className="py-2.5 px-3">NIS Binding / Scope</th>
+                      <th className="py-2.5 px-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {filteredUsers.map((u) => {
+                      const isEditing = editingUserId === u.id;
+
+                      return (
+                        <tr key={u.id} className="hover:bg-slate-800/40 transition">
+                          {/* Name & Designation */}
+                          <td className="py-3 px-3">
+                            {isEditing ? (
+                              <div className="space-y-1">
+                                <input
+                                  type="text"
+                                  value={editName}
+                                  onChange={(e) => setEditName(e.target.value)}
+                                  className="bg-slate-800 border border-cyan-500 text-white text-xs px-2 py-1 rounded w-full"
+                                  placeholder="Full Name"
+                                />
+                                <input
+                                  type="text"
+                                  value={editDesignation}
+                                  onChange={(e) => setEditDesignation(e.target.value)}
+                                  className="bg-slate-800 border border-slate-700 text-slate-300 text-[10px] px-2 py-0.5 rounded w-full"
+                                  placeholder="Official Designation"
+                                />
+                              </div>
+                            ) : (
+                              <div>
+                                <div className="font-bold text-white flex items-center gap-1.5">
+                                  <span>{u.name}</span>
+                                  {u.googleId && (
+                                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                                      Google
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-[10px] text-slate-400">{u.designation || u.id}</span>
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Role */}
+                          <td className="py-3 px-3">
+                            {isEditing ? (
+                              <select
+                                value={editRole}
+                                onChange={(e) => setEditRole(e.target.value as UserRole)}
+                                className="bg-slate-800 border border-cyan-500 text-white text-xs px-2 py-1 rounded cursor-pointer"
+                              >
+                                {availableRolesForAdmin.map(role => (
+                                  <option key={role} value={role}>{role}</option>
+                                ))}
+                              </select>
+                            ) : (
+                              <span className={`text-[9px] px-2 py-0.5 rounded-full font-mono border ${getRoleBadgeStyle(u.role)}`}>
+                                {u.role}
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Username */}
+                          <td className="py-3 px-3 font-mono text-cyan-400">
+                            <div>@{u.username}</div>
+                            {u.email && (
+                              <div className="text-[10px] text-slate-400 font-sans">{u.email}</div>
+                            )}
+                          </td>
+
+                          {/* Passcode */}
+                          <td className="py-3 px-3">
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={editPasscode}
+                                onChange={(e) => setEditPasscode(e.target.value)}
+                                className="bg-slate-800 border border-cyan-500 text-amber-300 font-mono text-xs px-2 py-1 rounded w-28"
+                              />
+                            ) : (
+                              <span className="font-mono text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                                {u.passcode}
+                              </span>
+                            )}
+                          </td>
+
+                          {/* IMO Dropdown */}
+                          <td className="py-3 px-3 text-slate-300">
+                            {isEditing ? (
+                              <select
+                                value={editImo}
+                                disabled={isImoAdmin}
+                                onChange={(e) => {
+                                  const imo = e.target.value;
+                                  setEditImo(imo);
+                                  if (imo === 'All IMOs') {
+                                    setEditNis('All NIS');
+                                  }
+                                }}
+                                className="bg-slate-800 border border-cyan-500 text-white text-xs px-2 py-1 rounded w-full cursor-pointer"
+                              >
+                                {availableImoOptions.map(imo => (
+                                  <option key={imo} value={imo}>{imo}</option>
+                                ))}
+                              </select>
+                            ) : (
+                              <span className="text-[11px] truncate max-w-[180px] block">
+                                {u.imoOffice}
+                              </span>
+                            )}
+                          </td>
+
+                          {/* NIS Binding Dropdown */}
+                          <td className="py-3 px-3 text-slate-400">
+                            {isEditing ? (
+                              <div className="space-y-0.5">
+                                <select
+                                  value={editImo === 'All IMOs' ? 'All NIS' : editNis}
+                                  disabled={editImo === 'All IMOs'}
+                                  onChange={(e) => setEditNis(e.target.value)}
+                                  className={`text-xs px-2 py-1 rounded w-full border ${
+                                    editImo === 'All IMOs'
+                                      ? 'bg-slate-950 border-slate-800 text-slate-500 cursor-not-allowed font-mono'
+                                      : 'bg-slate-800 border-cyan-500 text-white cursor-pointer'
+                                  }`}
+                                >
+                                  {editImo === 'All IMOs' ? (
+                                    <option value="All NIS">All NIS (Locked)</option>
+                                  ) : (
+                                    getNisOptionsForImo(editImo).map(nis => (
+                                      <option key={nis} value={nis}>{nis}</option>
+                                    ))
+                                  )}
+                                </select>
+                                {editImo === 'All IMOs' && (
+                                  <span className="text-[9px] text-amber-400/80 font-mono block">
+                                    Automatically locked to All NIS
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-[11px] font-mono text-teal-300">
+                                {u.nisBinding || '—'}
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Actions */}
+                          <td className="py-3 px-3 text-right">
+                            {isEditing ? (
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleSaveEdit(u.id)}
+                                  className="p-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded transition cursor-pointer shadow"
+                                  title="Save Changes"
+                                >
+                                  <Save className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingUserId(null)}
+                                  className="p-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded transition cursor-pointer"
+                                  title="Cancel"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-end gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEdit(u)}
+                                  className="p-1.5 text-slate-400 hover:text-cyan-300 hover:bg-slate-800 rounded transition cursor-pointer"
+                                  title="Edit Credentials & Scope"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+
+                                {u.role !== 'Developer' && !(isImoAdmin && u.role.startsWith('RO')) && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteUser(u)}
+                                    className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded transition cursor-pointer"
+                                    title="Delete Account"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* TAB 2: PENDING GOOGLE ADMISSIONS VIEW */}
+        {activeTab === 'pending_google' && (
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-300 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>
+                  <strong>Google Account Admission Gate:</strong> Newly registered Google accounts require an Admin or Developer to designate an Institutional Role and IMO office before they can access the GIS platform.
+                </span>
+              </div>
+              <span className="font-mono font-bold bg-amber-500/20 px-2 py-0.5 rounded text-[11px] shrink-0">
+                {pendingUsers.length} Pending Requests
+              </span>
+            </div>
+
+            {pendingUsers.length === 0 ? (
+              <div className="py-16 text-center text-slate-500 flex flex-col items-center justify-center">
+                <CheckCircle2 className="w-12 h-12 text-emerald-500/40 mb-3" />
+                <h4 className="text-sm font-bold text-slate-300">All Google Accounts Admitted</h4>
+                <p className="text-xs text-slate-500 mt-1 max-w-md">
+                  There are currently no pending Google account admission requests. When new personnel sign in with Google, their requests will appear here for review and role assignment.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {pendingUsers.map((pending) => {
+                  const assignedRole = admitRoleMap[pending.id] || (isImoAdmin ? 'IMO Preparer' : 'Field Personnel');
+                  const assignedImo = isImoAdmin && currentUser?.imoOffice ? currentUser.imoOffice : (admitImoMap[pending.id] || defaultImoSelection);
+                  const validNisList = getNisOptionsForImo(assignedImo);
+                  const assignedNis = assignedImo === 'All IMOs' ? 'All NIS' : (admitNisMap[pending.id] || validNisList[0] || 'All NIS');
+                  const assignedDesignation = admitDesignationMap[pending.id] || `${assignedRole} - ${assignedNis}`;
+                  const isAdmitting = isAdmittingId === pending.id;
 
                   return (
-                    <tr key={u.id} className="hover:bg-slate-800/40 transition">
-                      {/* Name & Designation */}
-                      <td className="py-3 px-3">
-                        {isEditing ? (
-                          <div className="space-y-1">
-                            <input
-                              type="text"
-                              value={editName}
-                              onChange={(e) => setEditName(e.target.value)}
-                              className="bg-slate-800 border border-cyan-500 text-white text-xs px-2 py-1 rounded w-full"
-                              placeholder="Full Name"
-                            />
-                            <input
-                              type="text"
-                              value={editDesignation}
-                              onChange={(e) => setEditDesignation(e.target.value)}
-                              className="bg-slate-800 border border-slate-700 text-slate-300 text-[10px] px-2 py-0.5 rounded w-full"
-                              placeholder="Official Designation"
-                            />
-                          </div>
-                        ) : (
-                          <div>
-                            <div className="font-bold text-white flex items-center gap-1.5">
-                              <span>{u.name}</span>
-                            </div>
-                            <span className="text-[10px] text-slate-400">{u.designation || u.id}</span>
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Role */}
-                      <td className="py-3 px-3">
-                        {isEditing ? (
-                          <select
-                            value={editRole}
-                            onChange={(e) => setEditRole(e.target.value as UserRole)}
-                            className="bg-slate-800 border border-cyan-500 text-white text-xs px-2 py-1 rounded cursor-pointer"
-                          >
-                            <option value="RO Evaluator">RO Evaluator</option>
-                            <option value="RO Reviewer">RO Reviewer</option>
-                            <option value="RO Preparer">RO Preparer</option>
-                            <option value="IMO Evaluator">IMO Evaluator</option>
-                            <option value="IMO Reviewer">IMO Reviewer</option>
-                            <option value="IMO Preparer">IMO Preparer</option>
-                            <option value="Field Personnel">Field Personnel</option>
-                            <option value="Viewer">Viewer</option>
-                            <option value="Developer">Developer</option>
-                          </select>
-                        ) : (
-                          <span className={`text-[9px] px-2 py-0.5 rounded-full font-mono border ${getRoleBadgeStyle(u.role)}`}>
-                            {u.role}
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Username */}
-                      <td className="py-3 px-3 font-mono text-cyan-400">
-                        @{u.username}
-                      </td>
-
-                      {/* Passcode */}
-                      <td className="py-3 px-3">
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editPasscode}
-                            onChange={(e) => setEditPasscode(e.target.value)}
-                            className="bg-slate-800 border border-cyan-500 text-amber-300 font-mono text-xs px-2 py-1 rounded w-28"
+                    <div 
+                      key={pending.id} 
+                      className="p-4 bg-slate-950/60 border border-slate-800 rounded-xl hover:border-amber-500/40 transition flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4"
+                    >
+                      {/* User Profile Info */}
+                      <div className="flex items-center gap-3 min-w-[220px]">
+                        {pending.avatar ? (
+                          <img 
+                            src={pending.avatar} 
+                            alt={pending.name} 
+                            className="w-10 h-10 rounded-full border border-slate-700 object-cover" 
                           />
                         ) : (
-                          <span className="font-mono text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                            {u.passcode}
-                          </span>
+                          <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center justify-center font-bold text-sm">
+                            {pending.name.charAt(0)}
+                          </div>
                         )}
-                      </td>
+                        <div>
+                          <div className="font-bold text-white text-xs flex items-center gap-2">
+                            <span>{pending.name}</span>
+                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              Pending
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 font-mono mt-0.5">
+                            {pending.email}
+                          </div>
+                          <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                            <Clock className="w-3 h-3" />
+                            <span>Requested: {new Date(pending.createdAt || '').toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </div>
 
-                      {/* IMO Dropdown (Without Regional Office IV-B) */}
-                      <td className="py-3 px-3 text-slate-300">
-                        {isEditing ? (
+                      {/* Inline Assignment Controls */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 flex-1 w-full">
+                        {/* Assign Role */}
+                        <div>
+                          <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">
+                            Assign Role:
+                          </label>
                           <select
-                            value={editImo}
+                            value={assignedRole}
                             onChange={(e) => {
-                              const imo = e.target.value;
-                              setEditImo(imo);
-                              if (imo === 'All IMOs') {
-                                setEditNis('All NIS');
-                              }
+                              const newR = e.target.value as UserRole;
+                              setAdmitRoleMap(prev => ({ ...prev, [pending.id]: newR }));
+                              const nextImo = newR.startsWith('RO') ? 'All IMOs' : assignedImo;
+                              setAdmitImoMap(prev => ({ ...prev, [pending.id]: nextImo }));
+                              setAdmitDesignationMap(prev => ({ ...prev, [pending.id]: `${newR} - ${assignedNis}` }));
                             }}
-                            className="bg-slate-800 border border-cyan-500 text-white text-xs px-2 py-1 rounded w-full cursor-pointer"
+                            className="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:border-amber-500"
                           >
-                            {CANONICAL_IMO_OFFICES.map(imo => (
+                            {availableRolesForAdmin.map(role => (
+                              <option key={role} value={role}>{role}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Assign IMO Office */}
+                        <div>
+                          <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">
+                            Assign IMO:
+                          </label>
+                          <select
+                            value={assignedImo}
+                            disabled={isImoAdmin}
+                            onChange={(e) => {
+                              const nextImo = e.target.value;
+                              setAdmitImoMap(prev => ({ ...prev, [pending.id]: nextImo }));
+                              const nextNis = nextImo === 'All IMOs' ? 'All NIS' : (getNisOptionsForImo(nextImo)[0] || 'All NIS');
+                              setAdmitNisMap(prev => ({ ...prev, [pending.id]: nextNis }));
+                              setAdmitDesignationMap(prev => ({ ...prev, [pending.id]: `${assignedRole} - ${nextNis}` }));
+                            }}
+                            className={`w-full border text-xs rounded-lg px-2 py-1.5 ${
+                              isImoAdmin
+                                ? 'bg-slate-950 border-slate-800 text-slate-400 cursor-not-allowed'
+                                : 'bg-slate-900 border-slate-700 text-white focus:outline-none focus:border-amber-500'
+                            }`}
+                          >
+                            {availableImoOptions.map(imo => (
                               <option key={imo} value={imo}>{imo}</option>
                             ))}
                           </select>
-                        ) : (
-                          <span className="text-[11px] truncate max-w-[180px] block">
-                            {u.imoOffice}
-                          </span>
-                        )}
-                      </td>
+                        </div>
 
-                      {/* NIS Binding Dropdown (Locked if All IMOs is selected) */}
-                      <td className="py-3 px-3 text-slate-400">
-                        {isEditing ? (
-                          <div className="space-y-0.5">
-                            <select
-                              value={editImo === 'All IMOs' ? 'All NIS' : editNis}
-                              disabled={editImo === 'All IMOs'}
-                              onChange={(e) => setEditNis(e.target.value)}
-                              className={`text-xs px-2 py-1 rounded w-full border ${
-                                editImo === 'All IMOs'
-                                  ? 'bg-slate-950 border-slate-800 text-slate-500 cursor-not-allowed font-mono'
-                                  : 'bg-slate-800 border-cyan-500 text-white cursor-pointer'
-                              }`}
-                            >
-                              {editImo === 'All IMOs' ? (
-                                <option value="All NIS">All NIS (Locked)</option>
-                              ) : (
-                                getNisOptionsForImo(editImo).map(nis => (
-                                  <option key={nis} value={nis}>{nis}</option>
-                                ))
-                              )}
-                            </select>
-                            {editImo === 'All IMOs' && (
-                              <span className="text-[9px] text-amber-400/80 font-mono block">
-                                Automatically locked to All NIS
-                              </span>
+                        {/* Assign NIS */}
+                        <div>
+                          <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">
+                            NIS Scope:
+                          </label>
+                          <select
+                            value={assignedImo === 'All IMOs' ? 'All NIS' : assignedNis}
+                            disabled={assignedImo === 'All IMOs'}
+                            onChange={(e) => {
+                              const nextNis = e.target.value;
+                              setAdmitNisMap(prev => ({ ...prev, [pending.id]: nextNis }));
+                              setAdmitDesignationMap(prev => ({ ...prev, [pending.id]: `${assignedRole} - ${nextNis}` }));
+                            }}
+                            className={`w-full border text-xs rounded-lg px-2 py-1.5 ${
+                              assignedImo === 'All IMOs'
+                                ? 'bg-slate-950 border-slate-800 text-slate-500 cursor-not-allowed font-mono'
+                                : 'bg-slate-900 border-slate-700 text-white focus:outline-none focus:border-amber-500'
+                            }`}
+                          >
+                            {assignedImo === 'All IMOs' ? (
+                              <option value="All NIS">All NIS (Locked)</option>
+                            ) : (
+                              validNisList.map(nis => (
+                                <option key={nis} value={nis}>{nis}</option>
+                              ))
                             )}
-                          </div>
-                        ) : (
-                          <span className="text-[11px] font-mono text-teal-300">
-                            {u.nisBinding || '—'}
-                          </span>
-                        )}
-                      </td>
+                          </select>
+                        </div>
 
-                      {/* Actions */}
-                      <td className="py-3 px-3 text-right">
-                        {isEditing ? (
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => handleSaveEdit(u.id)}
-                              className="p-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded transition cursor-pointer shadow"
-                              title="Save Changes"
-                            >
-                              <Save className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setEditingUserId(null)}
-                              className="p-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded transition cursor-pointer"
-                              title="Cancel"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-end gap-1">
-                            <button
-                              type="button"
-                              onClick={() => handleStartEdit(u)}
-                              className="p-1.5 text-slate-400 hover:text-cyan-300 hover:bg-slate-800 rounded transition cursor-pointer"
-                              title="Edit Credentials & Scope"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
+                        {/* Title / Designation */}
+                        <div>
+                          <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">
+                            Title / Designation:
+                          </label>
+                          <input
+                            type="text"
+                            value={assignedDesignation}
+                            onChange={(e) => {
+                              const nextDes = e.target.value;
+                              setAdmitDesignationMap(prev => ({ ...prev, [pending.id]: nextDes }));
+                            }}
+                            className="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:border-amber-500"
+                            placeholder="Designation"
+                          />
+                        </div>
+                      </div>
 
-                            {u.role !== 'Developer' && (
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteUser(u)}
-                                className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded transition cursor-pointer"
-                                title="Delete Account"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          disabled={isAdmitting}
+                          onClick={() => handleAdmitUser(pending)}
+                          className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer disabled:opacity-50 active:scale-95"
+                          title="Admit user and grant app access with specified role"
+                        >
+                          <Check className="w-4 h-4" />
+                          <span>{isAdmitting ? 'Admitting...' : 'Admit & Grant Access'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={isAdmitting}
+                          onClick={() => handleRejectUser(pending)}
+                          className="p-2 bg-slate-800 hover:bg-rose-900/60 text-slate-400 hover:text-rose-300 border border-slate-700 rounded-xl transition cursor-pointer"
+                          title="Reject admission request"
+                        >
+                          <UserX className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
                   );
                 })}
-              </tbody>
-            </table>
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
         {/* Footer Summary */}
         <div className="p-3 sm:p-4 border-t border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
           <div className="flex items-center gap-2">
             <span className="font-mono text-cyan-400 font-bold">{filteredUsers.length}</span>
-            <span>accounts showing ({users.length} total)</span>
+            <span>registered accounts ({users.length} total across Region IV-B)</span>
           </div>
           <div className="flex items-center gap-3 text-[11px] flex-wrap">
             <span className="flex items-center gap-1 text-slate-400">
               <span className="w-2 h-2 rounded-full bg-rose-500"></span> {users.filter(u => u.role === 'Developer').length} Dev
             </span>
             <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-purple-500"></span> {users.filter(u => u.role.startsWith('RO')).length} Regional Office
+              <span className="w-2 h-2 rounded-full bg-fuchsia-500"></span> {users.filter(u => u.role === 'RO Admin').length} RO Admin
+            </span>
+            <span className="flex items-center gap-1 text-slate-400">
+              <span className="w-2 h-2 rounded-full bg-purple-500"></span> {users.filter(u => u.role === 'RO Evaluator').length} RO Evaluators
+            </span>
+            <span className="flex items-center gap-1 text-slate-400">
+              <span className="w-2 h-2 rounded-full bg-orange-500"></span> {users.filter(u => u.role === 'IMO Admin').length} IMO Admin
             </span>
             <span className="flex items-center gap-1 text-slate-400">
               <span className="w-2 h-2 rounded-full bg-amber-500"></span> {users.filter(u => u.role === 'IMO Evaluator').length} IMO Evaluators
@@ -902,7 +1312,7 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
               <span className="w-2 h-2 rounded-full bg-teal-500"></span> {users.filter(u => u.role === 'IMO Preparer').length} IMO Preparers
             </span>
             <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span> {users.filter(u => u.role === 'Field Personnel').length} Field Personnel
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span> {users.filter(u => u.role === 'Field Personnel').length} Field
             </span>
             <span className="flex items-center gap-1 text-slate-400">
               <span className="w-2 h-2 rounded-full bg-slate-500"></span> {users.filter(u => u.role === 'Viewer').length} Viewers

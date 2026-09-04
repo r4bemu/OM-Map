@@ -170,7 +170,7 @@ export const Form691WeeklyReport: React.FC<Form691WeeklyReportProps> = ({
   // Determine user's role and assigned scope
   const userAssignedImo = currentUser?.imoOffice || activeImo;
   const userAssignedNis = currentUser?.nisBinding || activeNis;
-  const isRegionalRole = !userAssignedImo || userAssignedImo === 'All IMOs' || userAssignedImo === 'Regional Office IV-B' || ['Developer', 'RO Evaluator', 'RO Reviewer', 'RO Preparer'].includes(currentUser?.role || currentRole || '');
+  const isRegionalRole = !userAssignedImo || userAssignedImo === 'All IMOs' || userAssignedImo === 'Regional Office IV-B' || ['Developer', 'RO Admin', 'RO Evaluator', 'RO Reviewer', 'RO Preparer'].includes(currentUser?.role || currentRole || '');
 
   const [selectedImo, setSelectedImo] = useState<string>(() => {
     if (isRegionalRole) return activeImo && activeImo !== 'All IMOs' ? activeImo : 'All IMOs';

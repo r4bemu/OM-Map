@@ -1235,7 +1235,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
       initialApprovalStatus = 'PreApproved';
       preApprovedBy = reporterName.trim();
       preApprovedAt = new Date().toISOString();
-    } else if (currentRole === 'IMO Evaluator' || currentRole === 'RO Evaluator' || currentRole === 'Developer') {
+    } else if (currentRole === 'IMO Admin' || currentRole === 'IMO Evaluator' || currentRole === 'RO Admin' || currentRole === 'RO Evaluator' || currentRole === 'Developer') {
       initialApprovalStatus = 'Approved';
       approvedBy = reporterName.trim();
       approvedAt = new Date().toISOString();
@@ -1342,7 +1342,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
         // Institutional Multi-Tier State Assignment
         currentTier: isRevisionMode
           ? 'Pending_IMO_Preparer'
-          : (editingReport?.currentTier || (currentRole === 'RO Evaluator' ? 'Approved_RO_Evaluator' : 'Pending_IMO_Preparer')),
+          : (editingReport?.currentTier || ((currentRole === 'RO Evaluator' || currentRole === 'RO Admin') ? 'Approved_RO_Evaluator' : 'Pending_IMO_Preparer')),
         submittedByUserId: editingReport?.submittedByUserId || currentUser?.id,
         submittedByUsername: editingReport?.submittedByUsername || currentUser?.username,
         submittedByRole: editingReport?.submittedByRole || currentRole,

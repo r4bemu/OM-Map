@@ -1,8 +1,10 @@
 export type UserRole = 
-  | 'Developer' 
+  | 'Developer'
+  | 'RO Admin'
   | 'RO Evaluator' 
   | 'RO Reviewer' 
   | 'RO Preparer' 
+  | 'IMO Admin'
   | 'IMO Evaluator' 
   | 'IMO Reviewer' 
   | 'IMO Preparer' 
@@ -62,6 +64,10 @@ export interface AuthUser {
   nisBinding?: string; // e.g. 'Baco-Bucayao RIS' | 'Mag-asawang Tubig RIS' | 'All NIS'
   avatar?: string;
   designation?: string;
+  email?: string;
+  googleId?: string;
+  isAdmitted?: boolean;
+  createdAt?: string;
 }
 
 export type BasemapType = 'satellite' | 'dark' | 'streets';

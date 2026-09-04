@@ -78,8 +78,18 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
   },
 
   // ==========================================
-  // 2. REGIONAL OFFICE (RO) ACCOUNTS (3 Accounts)
+  // 2. REGIONAL OFFICE (RO) ACCOUNTS (4 Accounts)
   // ==========================================
+  {
+    id: 'usr-ro-admin-01',
+    username: 'ro_admin',
+    name: 'Executive Administrator (Regional Office)',
+    role: 'RO Admin',
+    passcode: 'ROA9910R',
+    imoOffice: 'All IMOs',
+    nisBinding: 'All NIS',
+    designation: 'Regional Office Executive Admin & Access Gatekeeper'
+  },
   {
     id: 'usr-ro-adm-01',
     username: 'ro_evaluator',
@@ -112,8 +122,18 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
   },
 
   // ==========================================
-  // 3. IMO EVALUATOR ACCOUNTS (3 Accounts: 1 per IMO)
+  // 3. IMO ADMIN & EVALUATOR ACCOUNTS (6 Accounts: 2 per IMO)
   // ==========================================
+  {
+    id: 'usr-imo-adm-momaro',
+    username: 'admin_momaro',
+    name: 'IMO Administrator (MOMARO IMO)',
+    role: 'IMO Admin',
+    passcode: 'ADM8810M',
+    imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
+    nisBinding: 'All NIS',
+    designation: 'MOMARO IMO Administrator & Access Gatekeeper'
+  },
   {
     id: 'usr-adm-02',
     username: 'evaluator_momaro',
@@ -125,6 +145,16 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
     designation: 'MOMARO IMO Division Manager & Evaluator'
   },
   {
+    id: 'usr-imo-adm-occmindoro',
+    username: 'admin_occmindoro',
+    name: 'IMO Administrator (Occ. Mindoro IMO)',
+    role: 'IMO Admin',
+    passcode: 'ADM4410O',
+    imoOffice: 'Occidental Mindoro IMO',
+    nisBinding: 'All NIS',
+    designation: 'Occidental Mindoro IMO Administrator & Access Gatekeeper'
+  },
+  {
     id: 'usr-adm-03',
     username: 'evaluator_occmindoro',
     name: 'Division Manager (Occ. Mindoro IMO)',
@@ -133,6 +163,16 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
     imoOffice: 'Occidental Mindoro IMO',
     nisBinding: 'Occidental Mindoro Systems',
     designation: 'Occidental Mindoro IMO Division Manager & Evaluator'
+  },
+  {
+    id: 'usr-imo-adm-palawan',
+    username: 'admin_palawan',
+    name: 'IMO Administrator (Palawan IMO)',
+    role: 'IMO Admin',
+    passcode: 'ADM5510P',
+    imoOffice: 'Palawan IMO',
+    nisBinding: 'All NIS',
+    designation: 'Palawan IMO Administrator & Access Gatekeeper'
   },
   {
     id: 'usr-adm-04',
@@ -559,10 +599,12 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
   }
 ];
 
-export const STORAGE_USERS_KEY = 'ommap_registered_users_v3';
+export const STORAGE_USERS_KEY = 'ommap_registered_users_v4';
 export const STORAGE_SESSION_KEY = 'ommap_auth_session';
+export const STORAGE_PENDING_KEY = 'ommap_pending_google_admissions';
 
 let memoryUsersCache: AuthUser[] | null = null;
+let memoryPendingCache: AuthUser[] | null = null;
 
 export function getAuthUsers(): AuthUser[] {
   if (memoryUsersCache && memoryUsersCache.length > 0) {
@@ -572,6 +614,7 @@ export function getAuthUsers(): AuthUser[] {
   try {
     // Clean out legacy storage versions to prevent stale role names
     try {
+      localStorage.removeItem('ommap_registered_users_v3');
       localStorage.removeItem('ommap_registered_users_v2');
       localStorage.removeItem('ommap_registered_users');
     } catch (_) {}
@@ -595,9 +638,11 @@ export function getAuthUsers(): AuthUser[] {
               ...def,
               passcode: u.passcode || def.passcode,
               imoOffice: u.imoOffice || def.imoOffice,
-              nisBinding: u.nisBinding || def.nisBinding
+              nisBinding: u.nisBinding || def.nisBinding,
+              email: u.email || def.email,
+              googleId: u.googleId || def.googleId
             });
-          } else if (u.id.startsWith('usr-custom-')) {
+          } else if (u.id.startsWith('usr-custom-') || u.id.startsWith('usr-google-')) {
             result.push({
               ...u,
               role: normalizeUserRole(u.role)
@@ -828,3 +873,186 @@ export function clearAuthSession(): void {
     localStorage.removeItem(STORAGE_SESSION_KEY);
   } catch (e) {}
 }
+
+/**
+ * Finds if an admitted user exists matching the Google account's email or googleId
+ */
+export function findUserByGoogleAuth(email: string, googleId?: string): AuthUser | null {
+  if (!email && !googleId) return null;
+  const cleanEmail = (email || '').trim().toLowerCase();
+  const cleanGId = (googleId || '').trim();
+  const users = getAuthUsers();
+
+  const matched = users.find(u => {
+    if (cleanEmail && u.email && u.email.toLowerCase() === cleanEmail) return true;
+    if (cleanGId && u.googleId && u.googleId === cleanGId) return true;
+    // Also match if username equals email or email username prefix matches username
+    if (cleanEmail && (u.username.toLowerCase() === cleanEmail || u.id.toLowerCase() === cleanEmail)) return true;
+    return false;
+  });
+
+  return matched || null;
+}
+
+/**
+ * Retrieves pending Google admission requests
+ */
+export function getPendingGoogleAdmissions(): AuthUser[] {
+  if (memoryPendingCache) return memoryPendingCache;
+  try {
+    const raw = localStorage.getItem(STORAGE_PENDING_KEY);
+    if (raw) {
+      const list = JSON.parse(raw);
+      if (Array.isArray(list)) {
+        memoryPendingCache = list;
+        return list;
+      }
+    }
+  } catch (_) {}
+  memoryPendingCache = [];
+  return [];
+}
+
+export function savePendingGoogleAdmissions(pending: AuthUser[]): void {
+  memoryPendingCache = pending;
+  try {
+    localStorage.setItem(STORAGE_PENDING_KEY, JSON.stringify(pending));
+  } catch (_) {}
+}
+
+/**
+ * Handles incoming Google Sign-In: returns admitted user or creates a pending admission request
+ */
+export async function requestGoogleAdmission(googleInfo: {
+  email: string;
+  name: string;
+  avatar?: string;
+  googleId?: string;
+}): Promise<{ status: 'admitted' | 'pending'; user: AuthUser }> {
+  // 1. Check if user is already admitted
+  const existing = findUserByGoogleAuth(googleInfo.email, googleInfo.googleId);
+  if (existing) {
+    // Update avatar/googleId if missing
+    if (googleInfo.avatar && !existing.avatar) {
+      existing.avatar = googleInfo.avatar;
+      saveAuthUsers(getAuthUsers());
+    }
+    return { status: 'admitted', user: existing };
+  }
+
+  // 2. Check or create in pending admissions list
+  const pendingList = getPendingGoogleAdmissions();
+  const cleanEmail = googleInfo.email.trim().toLowerCase();
+  let pendingUser = pendingList.find(u => u.email?.toLowerCase() === cleanEmail || (googleInfo.googleId && u.googleId === googleInfo.googleId));
+
+  if (!pendingUser) {
+    const safeUsername = cleanEmail.split('@')[0].replace(/[^a-z0-9_]/gi, '_').toLowerCase();
+    pendingUser = {
+      id: `usr-google-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
+      username: safeUsername,
+      name: googleInfo.name || safeUsername,
+      role: 'Viewer',
+      passcode: 'GOOGLE_AUTH',
+      imoOffice: 'Pending Assignment',
+      nisBinding: 'Pending Assignment',
+      avatar: googleInfo.avatar,
+      designation: 'Google Account (Pending Admission)',
+      email: googleInfo.email,
+      googleId: googleInfo.googleId,
+      isAdmitted: false,
+      createdAt: new Date().toISOString()
+    };
+    pendingList.unshift(pendingUser);
+    savePendingGoogleAdmissions(pendingList);
+
+    // Sync pending admission to server if available
+    try {
+      await fetch('/api/users/pending', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pendingUser)
+      });
+    } catch (_) {}
+  }
+
+  return { status: 'pending', user: pendingUser };
+}
+
+/**
+ * Admits a pending Google account and assigns role, IMO, and NIS bindings
+ */
+export async function admitGoogleUser(
+  userId: string,
+  assignment: {
+    role: UserRole;
+    imoOffice: string;
+    nisBinding?: string;
+    designation?: string;
+    passcode?: string;
+  }
+): Promise<AuthUser> {
+  const pendingList = getPendingGoogleAdmissions();
+  const pendingIdx = pendingList.findIndex(u => u.id === userId);
+  const pending = pendingIdx !== -1 ? pendingList[pendingIdx] : null;
+
+  const users = getAuthUsers();
+  const admittedUser: AuthUser = {
+    id: pending ? pending.id : userId,
+    username: pending?.username || `user_${Date.now()}`,
+    name: pending?.name || 'Authorized User',
+    role: normalizeUserRole(assignment.role),
+    passcode: assignment.passcode || pending?.passcode || 'GOOGLE_AUTH',
+    imoOffice: assignment.imoOffice,
+    nisBinding: assignment.nisBinding || 'All NIS',
+    designation: assignment.designation || `${assignment.role} - ${assignment.imoOffice}`,
+    avatar: pending?.avatar,
+    email: pending?.email,
+    googleId: pending?.googleId,
+    isAdmitted: true,
+    createdAt: pending?.createdAt || new Date().toISOString()
+  };
+
+  // Remove from pending
+  if (pendingIdx !== -1) {
+    pendingList.splice(pendingIdx, 1);
+    savePendingGoogleAdmissions(pendingList);
+  }
+
+  // Add to active users
+  const existingIdx = users.findIndex(u => u.id === admittedUser.id || (admittedUser.email && u.email?.toLowerCase() === admittedUser.email.toLowerCase()));
+  if (existingIdx !== -1) {
+    users[existingIdx] = admittedUser;
+  } else {
+    users.push(admittedUser);
+  }
+  saveAuthUsers(users);
+
+  // Sync to server
+  try {
+    await fetch('/api/users/admit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(admittedUser)
+    });
+  } catch (_) {}
+
+  return admittedUser;
+}
+
+/**
+ * Rejects / removes a pending Google account admission request
+ */
+export async function rejectPendingGoogleAdmission(userId: string): Promise<boolean> {
+  const pendingList = getPendingGoogleAdmissions();
+  const filtered = pendingList.filter(u => u.id !== userId);
+  savePendingGoogleAdmissions(filtered);
+
+  try {
+    await fetch(`/api/users/pending/${userId}`, {
+      method: 'DELETE'
+    });
+  } catch (_) {}
+
+  return true;
+}
+

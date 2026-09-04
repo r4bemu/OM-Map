@@ -23,19 +23,21 @@ export const RoleSimulationBanner: React.FC<RoleSimulationBannerProps> = ({
 }) => {
   if (!authenticatedUser) return null;
 
-  // Display if user is Developer, RO Role, or IMO Evaluator AND actively simulating a role, IMO, or NIS
+  // Display if user is Developer, RO Role, IMO Admin, or IMO Evaluator AND actively simulating a role, IMO, or NIS
   const isSimulating = isSimulatingProp !== undefined
     ? isSimulatingProp
-    : (authenticatedUser.role === 'Developer' || authenticatedUser.role.startsWith('RO') || authenticatedUser.role === 'IMO Evaluator') && 
+    : (authenticatedUser.role === 'Developer' || authenticatedUser.role.startsWith('RO') || authenticatedUser.role === 'IMO Admin' || authenticatedUser.role === 'IMO Evaluator') && 
       (activeRole !== authenticatedUser.role || (activeImo && activeImo !== authenticatedUser.imoOffice) || (activeNis && activeNis !== authenticatedUser.nisBinding));
 
   if (!isSimulating) return null;
 
   const getRoleBadgeStyle = (role: UserRole) => {
     switch (role) {
+      case 'RO Admin': return 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/40 font-bold';
       case 'RO Evaluator': return 'bg-purple-500/20 text-purple-300 border-purple-500/40';
       case 'RO Reviewer': return 'bg-blue-500/20 text-blue-300 border-blue-500/40';
       case 'RO Preparer': return 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40';
+      case 'IMO Admin': return 'bg-orange-500/20 text-orange-300 border-orange-500/40 font-bold';
       case 'IMO Evaluator': return 'bg-amber-500/20 text-amber-300 border-amber-500/40';
       case 'IMO Reviewer': return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40';
       case 'IMO Preparer': return 'bg-teal-500/20 text-teal-300 border-teal-500/40';
