@@ -1087,7 +1087,7 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
 
       const buffer = await getOrFetchDriveFileBuffer(fileId, accessToken);
       res.setHeader('Content-Type', 'application/octet-stream');
-      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
       res.send(buffer);
     } catch (err: any) {
       console.error(`Error streaming Drive file ${req.params.fileId}:`, err);
@@ -1107,7 +1107,7 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
         return res.status(404).send('Photo not found on Drive');
       }
       res.setHeader('Content-Type', 'image/jpeg');
-      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
       res.send(buffer);
     } catch (err: any) {
       console.error(`Error streaming Drive photo ${req.params.fileId}:`, err);

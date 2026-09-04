@@ -649,6 +649,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
       try {
         const geoJsonLayer = L.geoJSON(layer.data, {
+          smoothFactor: 1.2,
           filter: (feature: any) => {
             const geomType = feature?.geometry?.type || '';
 
