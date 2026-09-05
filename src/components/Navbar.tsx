@@ -22,7 +22,10 @@ import {
   Moon,
   MapPin,
   Download,
-  Smartphone
+  Smartphone,
+  ExternalLink,
+  FileSpreadsheet,
+  Globe
 } from 'lucide-react';
 import { UserRole, GISLayer, FieldReport, AuthUser, AvailableCloudWeek } from '../types';
 
@@ -396,6 +399,55 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="mt-2 pt-2 border-t border-slate-700/80 text-[10px] text-slate-400 flex items-center gap-1.5">
                 <Building className="w-3 h-3 text-[#166534] dark:text-emerald-400 shrink-0" />
                 <span className="truncate">{authenticatedUser?.nisBinding || authenticatedUser?.imoOffice || 'Regional Office IV-B'}</span>
+              </div>
+            </div>
+
+            {/* 1.5. NIA Unified App Switcher */}
+            <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-2.5 space-y-2">
+              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <span className="flex items-center gap-1 text-emerald-400">
+                  <Layers className="w-3 h-3" />
+                  <span>NIA R4B App Hub</span>
+                </span>
+                <span className="text-[9px] font-mono text-slate-400">Live Linked</span>
+              </div>
+
+              <div className="space-y-1.5">
+                <a
+                  href="https://nia4b-intervention-137196978824.asia-southeast1.run.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-2 rounded-lg bg-slate-900/90 hover:bg-slate-850 border border-slate-700 hover:border-emerald-500/50 transition text-xs group"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-slate-200 font-semibold truncate group-hover:text-emerald-300">
+                        Interventions Report Generator
+                      </div>
+                      <div className="text-[9.5px] text-slate-400 truncate">IDU Matrix &amp; PDF/Excel</div>
+                    </div>
+                  </div>
+                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-emerald-400 shrink-0" />
+                </a>
+
+                <a
+                  href="https://nia4b-oie-login-518397636928.asia-southeast1.run.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-2 rounded-lg bg-slate-900/90 hover:bg-slate-850 border border-slate-700 hover:border-emerald-500/50 transition text-xs group"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Globe className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-slate-200 font-semibold truncate group-hover:text-cyan-300">
+                        Central Login Portal
+                      </div>
+                      <div className="text-[9.5px] text-slate-400 truncate">SSO Gateway &amp; User Directory</div>
+                    </div>
+                  </div>
+                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-cyan-400 shrink-0" />
+                </a>
               </div>
             </div>
 

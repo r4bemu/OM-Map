@@ -64,6 +64,7 @@ export interface AuthUser {
   nisBinding?: string; // e.g. 'Baco-Bucayao RIS' | 'Mag-asawang Tubig RIS' | 'All NIS'
   avatar?: string;
   designation?: string;
+  contactNumber?: string;
   email?: string;
   googleId?: string;
   isAdmitted?: boolean;

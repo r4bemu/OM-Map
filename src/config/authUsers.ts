@@ -833,7 +833,112 @@ export function resetDefaultUsers(): void {
 
 export const resetAuthUsersToDefault = resetDefaultUsers;
 
+/**
+ * Detects and ingests incoming SSO tokens from the Central Login Portal
+ */
+export function consumeIncomingAuthToken(): AuthUser | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const authToken = params.get('auth_token');
+    const authUserParam = params.get('auth_user');
+    const authRoleParam = params.get('auth_role');
+    const authNameParam = params.get('auth_name');
+    const authOfficeParam = params.get('auth_office');
+    const authDesigParam = params.get('auth_desig');
+    const authPhoneParam = params.get('auth_phone');
+    const authEmailParam = params.get('auth_email');
+
+    let ingestedUser: AuthUser | null = null;
+
+    if (authToken) {
+      try {
+        const jsonStr = decodeURIComponent(
+          atob(authToken)
+            .split('')
+            .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('')
+        );
+        const payload = JSON.parse(jsonStr);
+        if (payload && (payload.u || payload.id)) {
+          const matchedUser = getAuthUsers().find(
+            u => u.username.toLowerCase() === (payload.u || '').toLowerCase() || u.id === payload.id
+          );
+          if (matchedUser) {
+            ingestedUser = {
+              ...matchedUser,
+              name: payload.name || matchedUser.name,
+              role: normalizeUserRole(payload.role || payload.r || matchedUser.role),
+              imoOffice: payload.imo || matchedUser.imoOffice,
+              nisBinding: payload.nis || matchedUser.nisBinding,
+              designation: payload.desig || matchedUser.designation,
+              contactNumber: payload.phone || matchedUser.contactNumber,
+              email: payload.email || matchedUser.email,
+              avatar: payload.avatar || matchedUser.avatar
+            };
+          } else {
+            // Provision user from SSO payload
+            ingestedUser = {
+              id: payload.id || `usr-sso-${Date.now()}`,
+              username: payload.u || (payload.email ? payload.email.split('@')[0] : 'sso_user'),
+              name: payload.name || 'Authorized NIA Personnel',
+              role: normalizeUserRole(payload.role || payload.r || 'Viewer'),
+              passcode: 'SSO_AUTHORIZED',
+              imoOffice: payload.imo || 'Regional Office IV-B',
+              nisBinding: payload.nis || 'All NIS',
+              designation: payload.desig || 'NIA Officer',
+              contactNumber: payload.phone || '',
+              email: payload.email || '',
+              avatar: payload.avatar || ''
+            };
+          }
+        }
+      } catch (tokenErr) {
+        console.warn('[SSO Ingestion] Failed to decode token:', tokenErr);
+      }
+    } else if (authUserParam) {
+      const matchedUser = getAuthUsers().find(
+        u => u.username.toLowerCase() === authUserParam.toLowerCase() || u.id === authUserParam
+      );
+      if (matchedUser) {
+        ingestedUser = {
+          ...matchedUser,
+          role: authRoleParam ? normalizeUserRole(authRoleParam) : matchedUser.role,
+          name: authNameParam || matchedUser.name,
+          imoOffice: authOfficeParam || matchedUser.imoOffice,
+          designation: authDesigParam || matchedUser.designation,
+          contactNumber: authPhoneParam || matchedUser.contactNumber,
+          email: authEmailParam || matchedUser.email
+        };
+      }
+    }
+
+    if (ingestedUser) {
+      saveAuthSession(ingestedUser);
+      // Clean URL params without reloading
+      const url = new URL(window.location.href);
+      url.searchParams.delete('auth_token');
+      url.searchParams.delete('auth_user');
+      url.searchParams.delete('auth_role');
+      url.searchParams.delete('auth_name');
+      url.searchParams.delete('auth_office');
+      url.searchParams.delete('auth_desig');
+      url.searchParams.delete('auth_phone');
+      url.searchParams.delete('auth_email');
+      window.history.replaceState({}, document.title, url.pathname + (url.search ? url.search : ''));
+      return ingestedUser;
+    }
+  } catch (e) {
+    console.warn('[SSO Ingestion] Exception:', e);
+  }
+  return null;
+}
+
 export function getSavedAuthSession(): AuthUser | null {
+  // Check for incoming SSO token first
+  const ssoUser = consumeIncomingAuthToken();
+  if (ssoUser) return ssoUser;
+
   try {
     const raw = localStorage.getItem(STORAGE_SESSION_KEY);
     if (raw) {
