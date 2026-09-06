@@ -187,6 +187,7 @@ export interface LocationPick {
   stationing?: string;
   featureName?: string;
   featureCode?: string;
+  referenceContext?: string;
 }
 
 export interface FieldReport {
@@ -204,6 +205,7 @@ export interface FieldReport {
   secondLng?: number;
   locationName?: string; // e.g. "Main Canal 0+150" or "Main Canal 0+150 to 0+450"
   pathCoords?: [number, number][]; // Line coordinates along canal network
+  referenceContext?: string; // Calibration provenance & tolerance (e.g. "Calibrated: Turnout 1 (Direct Match)")
   
   // Auto-detected details from map
   canalSegment?: string;

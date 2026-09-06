@@ -187,6 +187,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
   const [detectedCanalCode, setDetectedCanalCode] = useState<string | undefined>(initialCanalSegment);
   const [detectedParcelId, setDetectedParcelId] = useState<string | undefined>(initialParcelId);
   const [detectedPathCoords, setDetectedPathCoords] = useState<[number, number][] | undefined>(undefined);
+  const [detectedReferenceContext, setDetectedReferenceContext] = useState<string | undefined>(editingReport?.referenceContext);
 
   // Status: In Progress, Completed, or Suspended (No pre-select: User must choose)
   const [status, setStatus] = useState<'In Progress' | 'Completed' | 'Suspended' | ''>('');
@@ -422,6 +423,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
     setDetectedCanalCode(undefined);
     setDetectedParcelId(undefined);
     setDetectedPathCoords(undefined);
+    setDetectedReferenceContext(undefined);
     setStatus('');
     setReporterName('');
     setPhotos([]);
@@ -608,6 +610,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
         setDetectedCanalCode(editingReport.canalSegment);
         setDetectedParcelId(editingReport.parcelId);
         setDetectedPathCoords(editingReport.pathCoords);
+        setDetectedReferenceContext(editingReport.referenceContext);
 
         setStatus(editingReport.status as any || 'In Progress');
         setSuspensionReason(editingReport.suspensionReason || '');
@@ -651,6 +654,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
         const resolvedParcel = (!isSyntheticFeatureId(feat.parcelId) && feat.parcelId) || (!isSyntheticFeatureId(initialParcelId) && initialParcelId) || undefined;
         setDetectedParcelId(resolvedParcel);
         setDetectedPathCoords([[feat.snappedCoords[0], feat.snappedCoords[1]]]);
+        setDetectedReferenceContext(feat.referenceContext);
       } else if (lat2 !== undefined && lng2 !== undefined) {
         const pathRes = calculateCanalPathBetweenPoints(
           { lat: lat1, lng: lng1 },
@@ -663,12 +667,14 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
         const resolvedParcel = (!isSyntheticFeatureId(pathRes.parcelId) && pathRes.parcelId) || (!isSyntheticFeatureId(initialParcelId) && initialParcelId) || undefined;
         setDetectedParcelId(resolvedParcel);
         setDetectedPathCoords(pathRes.pathCoords);
+        setDetectedReferenceContext(pathRes.referenceContext);
       }
     } else {
       setDetectedLocationName('');
       if (!initialCanalSegment) setDetectedCanalCode(undefined);
       if (!initialParcelId) setDetectedParcelId(undefined);
       setDetectedPathCoords(undefined);
+      setDetectedReferenceContext(undefined);
     }
   }, [lat1, lng1, lat2, lng2, locationMode, layers, initialCanalSegment, initialParcelId]);
 
@@ -1303,6 +1309,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
         secondLng: (locationMode === 'double' && typeof lng2 === 'number') ? lng2 : undefined,
         locationName: locName,
         pathCoords: detectedPathCoords,
+        referenceContext: detectedReferenceContext || editingReport?.referenceContext,
 
         canalSegment: cleanCanalSegment,
         parcelId: detectedParcelId,
@@ -1967,6 +1974,13 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                         <p className="text-[10px] text-slate-400 font-mono">
                           Pt 1: ({lat1.toFixed(5)}, {lng1.toFixed(5)}) → Pt 2: ({lat2.toFixed(5)}, {lng2.toFixed(5)})
                         </p>
+                        {detectedReferenceContext && (
+                          <div className="pt-0.5">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9.5px] font-mono bg-cyan-950/60 text-cyan-300 border border-cyan-500/30">
+                              🎯 {detectedReferenceContext}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="space-y-0.5">
@@ -1977,6 +1991,13 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                         <p className="text-[10.5px] text-slate-300 font-mono">
                           Coordinates: <span className="font-bold text-white">{lat1.toFixed(6)}, {lng1.toFixed(6)}</span>
                         </p>
+                        {detectedReferenceContext && (
+                          <div className="pt-0.5">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9.5px] font-mono bg-cyan-950/60 text-cyan-300 border border-cyan-500/30">
+                              🎯 {detectedReferenceContext}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )
                   ) : (
