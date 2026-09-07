@@ -19,7 +19,9 @@ import {
   Sparkles,
   Mail,
   Clock,
-  UserX
+  UserX,
+  ShieldAlert,
+  CheckCircle2
 } from 'lucide-react';
 import { AuthUser, UserRole } from '../types';
 import { 
@@ -359,7 +361,7 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
       return;
     }
 
-    if (isImoAdmin && (user.role.startsWith('RO') || user.role === 'Developer')) {
+    if (isImoAdmin && user.role.startsWith('RO')) {
       alert('IMO Administrators cannot delete Regional or Developer accounts.');
       return;
     }

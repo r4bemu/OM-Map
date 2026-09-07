@@ -152,6 +152,22 @@ export function getCanalReferenceAnchors(
   const anchors: ReferenceStructureAnchor[] = [];
   if (!lineCoords || lineCoords.length < 2) return anchors;
 
+  // Bounding-box calculation for early rejection of distant structures
+  let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+  for (let i = 0; i < lineCoords.length; i++) {
+    const pt = lineCoords[i];
+    if (pt[0] < minLat) minLat = pt[0];
+    if (pt[0] > maxLat) maxLat = pt[0];
+    if (pt[1] < minLng) minLng = pt[1];
+    if (pt[1] > maxLng) maxLng = pt[1];
+  }
+  // Margin in degrees (1 deg ~ 111km; safe margin of ~110m for anchor scanning)
+  const marginDeg = Math.max(0.001, (maxDistMeters * 2) / 111000);
+  const bboxMinLat = minLat - marginDeg;
+  const bboxMaxLat = maxLat + marginDeg;
+  const bboxMinLng = minLng - marginDeg;
+  const bboxMaxLng = maxLng + marginDeg;
+
   // Calculate cumulative distance map for line
   const cumDists: number[] = [0];
   for (let i = 0; i < lineCoords.length - 1; i++) {
@@ -170,13 +186,17 @@ export function getCanalReferenceAnchors(
       const props = feature.properties || {};
       if (!geom) return;
 
-      const titleStr = `${props.name || ''} ${props.station_code || ''} ${props.description || ''}`;
-      const stationVal = parseStationingFromText(titleStr) ?? parseStationingFromText(props.station_code);
-
-      if (stationVal === null) return;
-
       if (geom.type === 'Point' && geom.coordinates) {
         const [fLng, fLat] = geom.coordinates;
+        // Fast bounding-box check: skip structures far from line without parsing strings or projecting
+        if (fLat < bboxMinLat || fLat > bboxMaxLat || fLng < bboxMinLng || fLng > bboxMaxLng) {
+          return;
+        }
+
+        const titleStr = `${props.name || ''} ${props.station_code || ''} ${props.description || ''}`;
+        const stationVal = parseStationingFromText(titleStr) ?? parseStationingFromText(props.station_code);
+        if (stationVal === null) return;
+
         let minDist = Infinity;
         let lineDist = 0;
 
@@ -479,6 +499,7 @@ export function detectNearestGISFeature(
   const validLng = (!isNaN(numLng) && isFinite(numLng)) ? numLng : 121.3000;
 
   let minDistance = Infinity;
+  let isLineWinner = false;
   let bestResult: NearestGISFeatureResult = {
     locationName: `Site Location (${validLat.toFixed(4)}, ${validLng.toFixed(4)})`,
     stationingLabel: `0+000`,
@@ -486,6 +507,17 @@ export function detectNearestGISFeature(
     distanceAlongLineMeters: 0,
     referenceContext: 'Geometric 0+000'
   };
+
+  let bestLineCandidate: {
+    minDist: number;
+    lineCoords: [number, number][];
+    props: any;
+    featureImo?: string;
+    featureNis?: string;
+    featureProv?: string;
+    featureMuni?: string;
+    featureBrgy?: string;
+  } | null = null;
 
   layers.forEach((layer) => {
     if (!layer.visible || !layer.data || !layer.data.features) return;
@@ -523,9 +555,16 @@ export function detectNearestGISFeature(
 
       if (geom.type === 'Point' && geom.coordinates) {
         const [fLng, fLat] = geom.coordinates;
+        // Bounding box filter: structures must be within ~500m (0.005 deg) to consider
+        if (Math.abs(fLat - lat) > 0.005 || Math.abs(fLng - lng) > 0.005) {
+          return;
+        }
+
         const dist = haversineDistanceMeters(lat, lng, fLat, fLng);
         if (dist < minDistance && dist < 25) {
           minDistance = dist;
+          isLineWinner = false;
+
           const name = getFeatureName(props, props.station_code || 'Structure Gate');
           const titleStr = `${name} ${props.station_code || ''}`;
           const parsedSt = parseStationingFromText(titleStr);
@@ -548,7 +587,6 @@ export function detectNearestGISFeature(
             let nearestCanalDist = Infinity;
             let nearestCanalLine: [number, number][] | null = null;
             let nearestCanalName = '';
-            let nearestDistOnCanal = 0;
 
             layers.forEach((l) => {
               if (!l.visible || !l.data || !l.data.features) return;
@@ -561,12 +599,24 @@ export function detectNearestGISFeature(
 
                 lines.forEach((lCoords) => {
                   if (lCoords.length < 2) return;
+                  // Fast bbox check for structure-to-canal line proximity (0.002 deg ~ 220m)
+                  let lMinLat = Infinity, lMaxLat = -Infinity, lMinLng = Infinity, lMaxLng = -Infinity;
+                  for (let i = 0; i < lCoords.length; i++) {
+                    const p = lCoords[i];
+                    if (p[0] < lMinLat) lMinLat = p[0];
+                    if (p[0] > lMaxLat) lMaxLat = p[0];
+                    if (p[1] < lMinLng) lMinLng = p[1];
+                    if (p[1] > lMaxLng) lMaxLng = p[1];
+                  }
+                  if (fLat < lMinLat - 0.002 || fLat > lMaxLat + 0.002 || fLng < lMinLng - 0.002 || fLng > lMaxLng + 0.002) {
+                    return;
+                  }
+
                   const proj = projectPointOnPolyline(fLat, fLng, lCoords);
                   if (proj.distanceMeters < nearestCanalDist && proj.distanceMeters < 100) {
                     nearestCanalDist = proj.distanceMeters;
                     nearestCanalLine = lCoords;
                     nearestCanalName = getFeatureName(feat.properties || {}, 'Main Canal');
-                    nearestDistOnCanal = proj.distanceAlongLineMeters;
                     if (feat.properties?.canal_code) canalCode = feat.properties.canal_code;
                   }
                 });
@@ -604,64 +654,109 @@ export function detectNearestGISFeature(
             barangay: featureBrgy
           };
         }
-      } else if (geom.type === 'LineString' && geom.coordinates) {
-        const lineCoords: [number, number][] = geom.coordinates.map((c: any) => [c[1], c[0]]);
-        const rawName = getFeatureName(props, 'Main Canal');
-        const canalName = cleanCanalBaseName(rawName);
+      } else if ((geom.type === 'LineString' || geom.type === 'MultiLineString') && geom.coordinates) {
+        const polylines: [number, number][][] = geom.type === 'LineString'
+          ? [geom.coordinates.map((c: any) => [c[1], c[0]])]
+          : geom.coordinates.map((line: any) => line.map((c: any) => [c[1], c[0]]));
 
-        // Orient linestring downstream (vertex 0 at intake 0+000)
-        const { orientedCoords, isReversed } = orientLinestringDownstream(lineCoords, canalName, layers);
+        polylines.forEach((lineCoords) => {
+          if (lineCoords.length < 2) return;
 
-        let cumulativeDist = 0;
-        let lineMinDist = Infinity;
-        let bestPointAlongLine: [number, number] = orientedCoords[0];
-        let bestDistAlongLine = 0;
-
-        for (let i = 0; i < orientedCoords.length - 1; i++) {
-          const segStart = orientedCoords[i];
-          const segEnd = orientedCoords[i + 1];
-          const segLength = haversineDistanceMeters(segStart[0], segStart[1], segEnd[0], segEnd[1]);
-
-          const proj = projectPointOnSegment([lat, lng], segStart, segEnd);
-
-          if (proj.distMeters < lineMinDist) {
-            lineMinDist = proj.distMeters;
-            bestPointAlongLine = proj.point;
-            bestDistAlongLine = cumulativeDist + (proj.t * segLength);
+          // Fast bounding box check on linestring: skip lines further than ~2.2km (0.02 deg) from click
+          let lineMinLat = Infinity, lineMaxLat = -Infinity, lineMinLng = Infinity, lineMaxLng = -Infinity;
+          for (let i = 0; i < lineCoords.length; i++) {
+            const pt = lineCoords[i];
+            if (pt[0] < lineMinLat) lineMinLat = pt[0];
+            if (pt[0] > lineMaxLat) lineMaxLat = pt[0];
+            if (pt[1] < lineMinLng) lineMinLng = pt[1];
+            if (pt[1] > lineMaxLng) lineMaxLng = pt[1];
+          }
+          if (lat < lineMinLat - 0.02 || lat > lineMaxLat + 0.02 || lng < lineMinLng - 0.02 || lng > lineMaxLng + 0.02) {
+            return;
           }
 
-          cumulativeDist += segLength;
-        }
+          // Compute raw distance to line segments without downstream orientation yet
+          let lineMinDist = Infinity;
+          for (let i = 0; i < lineCoords.length - 1; i++) {
+            const segStart = lineCoords[i];
+            const segEnd = lineCoords[i + 1];
+            const proj = projectPointOnSegment([lat, lng], segStart, segEnd);
+            if (proj.distMeters < lineMinDist) {
+              lineMinDist = proj.distMeters;
+            }
+          }
 
-        if (lineMinDist < minDistance) {
-          minDistance = lineMinDist;
-          const rawCode = props.canal_code || props.canal_id || props.station_code;
-          const canalCode = (rawCode && !isSyntheticFeatureId(rawCode)) ? rawCode : (canalName !== 'Main Canal' ? canalName : 'CNL-MAIN');
-
-          // Calculate 3-tier validated canal stationing
-          const stationInfo = calculateCanalStationing(bestDistAlongLine, orientedCoords, canalName, layers, isReversed);
-
-          bestResult = {
-            locationName: `${canalName} (${stationInfo.stationingLabel})`,
-            stationingLabel: stationInfo.stationingLabel,
-            canalCode,
-            nearestFeatureName: canalName,
-            nearestFeatureType: 'Canal Line',
-            snappedCoords: bestPointAlongLine,
-            distanceAlongLineMeters: Math.round(stationInfo.stationMeters),
-            featureCoordinates: orientedCoords,
-            referenceContext: stationInfo.referenceContext,
-            calibrationMethod: stationInfo.calibrationMethod,
-            imo: featureImo,
-            nis: featureNis,
-            province: featureProv,
-            municipality: featureMuni,
-            barangay: featureBrgy
-          };
-        }
+          if (lineMinDist < minDistance) {
+            minDistance = lineMinDist;
+            isLineWinner = true;
+            bestLineCandidate = {
+              minDist: lineMinDist,
+              lineCoords,
+              props,
+              featureImo,
+              featureNis,
+              featureProv,
+              featureMuni,
+              featureBrgy
+            };
+          }
+        });
       }
     });
   });
+
+  // If the closest candidate is a canal line, orient downstream & calculate stationing ONCE
+  if (isLineWinner && bestLineCandidate) {
+    const rawName = getFeatureName(bestLineCandidate.props, 'Main Canal');
+    const canalName = cleanCanalBaseName(rawName);
+
+    const { orientedCoords, isReversed } = orientLinestringDownstream(bestLineCandidate.lineCoords, canalName, layers);
+
+    let cumulativeDist = 0;
+    let lineMinDist = Infinity;
+    let bestPointAlongLine: [number, number] = orientedCoords[0];
+    let bestDistAlongLine = 0;
+
+    for (let i = 0; i < orientedCoords.length - 1; i++) {
+      const segStart = orientedCoords[i];
+      const segEnd = orientedCoords[i + 1];
+      const segLength = haversineDistanceMeters(segStart[0], segStart[1], segEnd[0], segEnd[1]);
+
+      const proj = projectPointOnSegment([lat, lng], segStart, segEnd);
+
+      if (proj.distMeters < lineMinDist) {
+        lineMinDist = proj.distMeters;
+        bestPointAlongLine = proj.point;
+        bestDistAlongLine = cumulativeDist + (proj.t * segLength);
+      }
+
+      cumulativeDist += segLength;
+    }
+
+    const rawCode = bestLineCandidate.props.canal_code || bestLineCandidate.props.canal_id || bestLineCandidate.props.station_code;
+    const canalCode = (rawCode && !isSyntheticFeatureId(rawCode)) ? rawCode : (canalName !== 'Main Canal' ? canalName : 'CNL-MAIN');
+
+    // Calculate 3-tier validated canal stationing once for the winning line
+    const stationInfo = calculateCanalStationing(bestDistAlongLine, orientedCoords, canalName, layers, isReversed);
+
+    bestResult = {
+      locationName: `${canalName} (${stationInfo.stationingLabel})`,
+      stationingLabel: stationInfo.stationingLabel,
+      canalCode,
+      nearestFeatureName: canalName,
+      nearestFeatureType: 'Canal Line',
+      snappedCoords: bestPointAlongLine,
+      distanceAlongLineMeters: Math.round(stationInfo.stationMeters),
+      featureCoordinates: orientedCoords,
+      referenceContext: stationInfo.referenceContext,
+      calibrationMethod: stationInfo.calibrationMethod,
+      imo: bestLineCandidate.featureImo,
+      nis: bestLineCandidate.featureNis,
+      province: bestLineCandidate.featureProv,
+      municipality: bestLineCandidate.featureMuni,
+      barangay: bestLineCandidate.featureBrgy
+    };
+  }
 
   return bestResult;
 }
@@ -682,6 +777,7 @@ export function calculateCanalPathBetweenPoints(
   canalCode?: string;
   parcelId?: string;
   distanceMeters: number;
+  totalDistanceMeters?: number;
   referenceContext?: string;
 } {
   const l1Lat = (!isNaN(Number(loc1?.lat)) && isFinite(Number(loc1?.lat))) ? Number(loc1.lat) : 13.1000;
@@ -695,45 +791,58 @@ export function calculateCanalPathBetweenPoints(
   let canalCode = pt1Props?.canal_code || pt2Props?.canal_code || feat1.canalCode || feat2.canalCode;
   let parcelId = pt1Props?.parcel_id || pt2Props?.parcel_id || feat1.parcelId || feat2.parcelId;
 
-  const lineFeatures: {
-    id: string;
-    name: string;
-    canalCode?: string;
-    coords: [number, number][];
-  }[] = [];
+  // Localized bounding box (+/- ~3.3km) for ultra-fast localized Dijkstra pathfinding
+  const minLat = Math.min(l1Lat, l2Lat) - 0.03;
+  const maxLat = Math.max(l1Lat, l2Lat) + 0.03;
+  const minLng = Math.min(l1Lng, l2Lng) - 0.03;
+  const maxLng = Math.max(l1Lng, l2Lng) + 0.03;
 
-  layers.forEach((layer) => {
-    if (!layer.visible || !layer.data || !layer.data.features) return;
-    layer.data.features.forEach((feature: any) => {
-      const geom = feature.geometry;
-      const props = feature.properties || {};
-      if (!geom) return;
+  const collectLines = (filterBbox: boolean) => {
+    const list: { id: string; name: string; canalCode?: string; coords: [number, number][] }[] = [];
+    layers.forEach((layer) => {
+      if (!layer.visible || !layer.data || !layer.data.features) return;
+      layer.data.features.forEach((feature: any) => {
+        const geom = feature.geometry;
+        const props = feature.properties || {};
+        if (!geom) return;
 
-      if (geom.type === 'LineString' && geom.coordinates) {
-        const lineCoords: [number, number][] = geom.coordinates.map((c: any) => [c[1], c[0]]);
-        if (lineCoords.length >= 2) {
-          lineFeatures.push({
-            id: props.canal_code || feature.id || `line-${lineFeatures.length}`,
+        const addCandidate = (coords: [number, number][], id: string) => {
+          if (coords.length < 2) return;
+          if (filterBbox) {
+            let inBbox = false;
+            for (let i = 0; i < coords.length; i++) {
+              const pt = coords[i];
+              if (pt[0] >= minLat && pt[0] <= maxLat && pt[1] >= minLng && pt[1] <= maxLng) {
+                inBbox = true;
+                break;
+              }
+            }
+            if (!inBbox) return;
+          }
+          list.push({
+            id,
             name: getFeatureName(props, 'Main Canal'),
             canalCode: props.canal_code,
-            coords: lineCoords
+            coords
+          });
+        };
+
+        if (geom.type === 'LineString' && geom.coordinates) {
+          addCandidate(geom.coordinates.map((c: any) => [c[1], c[0]]), props.canal_code || feature.id || `line-${list.length}`);
+        } else if (geom.type === 'MultiLineString' && geom.coordinates) {
+          geom.coordinates.forEach((line: any, idx: number) => {
+            addCandidate(line.map((c: any) => [c[1], c[0]]), `${props.canal_code || feature.id || 'multiline'}-${idx}`);
           });
         }
-      } else if (geom.type === 'MultiLineString' && geom.coordinates) {
-        geom.coordinates.forEach((line: any, idx: number) => {
-          const lineCoords: [number, number][] = line.map((c: any) => [c[1], c[0]]);
-          if (lineCoords.length >= 2) {
-            lineFeatures.push({
-              id: `${props.canal_code || feature.id || 'multiline'}-${idx}`,
-              name: getFeatureName(props, 'Main Canal'),
-              canalCode: props.canal_code,
-              coords: lineCoords
-            });
-          }
-        });
-      }
+      });
     });
-  });
+    return list;
+  };
+
+  let lineFeatures = collectLines(true);
+  if (lineFeatures.length === 0) {
+    lineFeatures = collectLines(false);
+  }
 
   // Calculate Point 1 & Point 2 display names
   let name1 = feat1.locationName;
@@ -791,6 +900,7 @@ export function calculateCanalPathBetweenPoints(
       canalCode,
       parcelId,
       distanceMeters: Math.round(directDist),
+      totalDistanceMeters: Math.round(directDist),
       referenceContext: refContext
     };
   }
@@ -837,6 +947,7 @@ export function calculateCanalPathBetweenPoints(
     canalCode,
     parcelId,
     distanceMeters: Math.round(totalDistanceMeters),
+    totalDistanceMeters: Math.round(totalDistanceMeters),
     referenceContext: refContext
   };
 }

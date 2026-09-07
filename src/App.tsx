@@ -70,7 +70,6 @@ import { SyncDataModal } from './components/SyncDataModal';
 import { ConfigurationsModal } from './components/ConfigurationsModal';
 import { SyncOverlay, SyncStep } from './components/SyncOverlay';
 import { useMobileBackStack, WindowId } from './hooks/useMobileBackStack';
-import { MobileBottomNav } from './components/MobileBottomNav';
 import { PwaUpdateToast } from './components/PwaUpdateToast';
 
 function deduplicateItems<T extends { id: string }>(items: T[]): T[] {
@@ -1739,43 +1738,6 @@ export default function App() {
         isSyncingDrive={isSyncingDrive}
       />
 
-      {/* Mobile Bottom Navigation Bar (Dedicated Mobile Native Bar) */}
-      <MobileBottomNav
-        currentRole={activeRole}
-        isLayerPanelOpen={isLayerPanelOpen}
-        onToggleLayerPanel={() => {
-          const willOpen = !isLayerPanelOpen;
-          closeAllModals();
-          setIsLayerPanelOpen(willOpen);
-        }}
-        onOpenReportModal={() => {
-          closeAllModals();
-          setEditingReport(null);
-          setReportPrefill({});
-          setIsReportModalOpen(true);
-        }}
-        onOpenReportsSummary={(tab) => {
-          closeAllModals();
-          setSummaryModalInitialTab(tab || 'ledger');
-          setIsSummaryModalOpen(true);
-        }}
-        onOpenSyncModal={() => {
-          closeAllModals();
-          setIsSyncDataModalOpen(true);
-        }}
-        isSyncing={isSyncing}
-        unsyncedCount={unsyncedCount}
-        isOffline={isOffline}
-        onOpenFilterModal={() => {
-          const willOpen = !isFilterModalOpen;
-          closeAllModals();
-          setIsFilterModalOpen(willOpen);
-        }}
-        isFilterActive={isFilterActive}
-        isFilterModalOpen={isFilterModalOpen}
-        activeLayerCount={layers.filter(l => l.visible).length}
-        isMapPickerActive={isMapPickerActive}
-      />
 
       {/* Selected Feature / Report Attribute Inspector Drawer */}
       <AttributeInspector
@@ -2104,7 +2066,7 @@ export default function App() {
           setIsSummaryModalOpen(true);
         }}
         isSummaryModalOpen={isSummaryModalOpen}
-        onToggleMenu={() => {
+        onOpenMenu={() => {
           setIsMenuOpen(prev => !prev);
         }}
         isMenuOpen={isMenuOpen}

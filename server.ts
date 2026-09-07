@@ -10,7 +10,10 @@ const __dirname = __filename ? path.dirname(__filename) : (typeof (globalThis as
 // Ensure environment variables are loaded on server startup
 if (typeof (process as any).loadEnvFile === 'function') {
   try {
-    (process as any).loadEnvFile();
+    (process as any).loadEnvFile('.env.local');
+  } catch (e) {}
+  try {
+    (process as any).loadEnvFile('.env');
   } catch (e) {}
 }
 

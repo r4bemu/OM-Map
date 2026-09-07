@@ -632,7 +632,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {onOpenConfigurations && (
               <button
                 onClick={() => {
-                  setIsHamburgerOpen(false);
+                  closeHamburger();
                   onOpenConfigurations();
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/80 rounded-xl transition cursor-pointer text-xs font-semibold"
@@ -646,7 +646,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {(authenticatedUser?.role === 'Developer' || authenticatedUser?.role === 'RO Admin' || authenticatedUser?.role === 'IMO Admin') && onOpenDevPanel && (
               <button
                 onClick={() => {
-                  setIsHamburgerOpen(false);
+                  closeHamburger();
                   onOpenDevPanel();
                 }}
                 className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl transition cursor-pointer text-xs font-bold border ${
@@ -677,7 +677,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* 7. Help & Documentation */}
             <button
               onClick={() => {
-                setIsHamburgerOpen(false);
+                closeHamburger();
                 onOpenHelp();
               }}
               className="w-full flex items-center gap-2 px-3 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/80 rounded-xl transition cursor-pointer text-xs font-semibold"
@@ -690,7 +690,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {onLogout && (
               <button
                 onClick={() => {
-                  setIsHamburgerOpen(false);
+                  closeHamburger();
                   onLogout();
                 }}
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-rose-500/15 hover:bg-rose-500/25 text-rose-800 dark:text-rose-300 border border-rose-500/30 rounded-xl transition cursor-pointer text-xs font-bold mt-1"

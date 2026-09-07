@@ -436,7 +436,7 @@ export const ReportRevisionDiffViewer: React.FC<ReportRevisionDiffViewerProps> =
           </div>
 
           <div className="flex items-center gap-2">
-            {onRequestRevision && effectiveTier !== 'Approved_RO_Admin' && currentRole !== 'Viewer' && currentRole !== 'Field Personnel' && (
+            {onRequestRevision && effectiveTier !== 'Approved_RO_Evaluator' && currentRole !== 'Viewer' && currentRole !== 'Field Personnel' && (
               <button
                 type="button"
                 onClick={() => setShowReturnModal(true)}

@@ -180,6 +180,14 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const [pickerLocationName, setPickerLocationName] = useState<string>('');
   const [pickerCanalCode, setPickerCanalCode] = useState<string | undefined>(undefined);
   const [pickerParcelId, setPickerParcelId] = useState<string | undefined>(undefined);
+  const [pickerPathResult, setPickerPathResult] = useState<{
+    pathCoords: [number, number][];
+    locationName: string;
+    canalCode?: string;
+    parcelId?: string;
+    distanceMeters: number;
+  } | null>(null);
+  const calculationSeqRef = useRef<number>(0);
   const [activePopupCoords, setActivePopupCoords] = useState<[number, number] | null>(null);
   const [activePopupProps, setActivePopupProps] = useState<any>(null);
 
@@ -221,73 +229,130 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   useEffect(() => { onTriggerReportFromMapRef.current = onTriggerReportFromMap; }, [onTriggerReportFromMap]);
   useEffect(() => { onSelectReportRef.current = onSelectReport; }, [onSelectReport]);
 
-  // Update picker state when initial coordinates change
+  // Update picker state when initial coordinates change or picker opens/closes
   useEffect(() => {
     if (isMapPickerActive) {
-      if (isValidCoord(initialPickerLat1, initialPickerLng1)) {
-        setPickerPt1([Number(initialPickerLat1), Number(initialPickerLng1)]);
+      const hasPt1 = isValidCoord(initialPickerLat1, initialPickerLng1);
+      const hasPt2 = isValidCoord(initialPickerLat2, initialPickerLng2);
+
+      if (hasPt1) {
+        const p1: [number, number] = [Number(initialPickerLat1), Number(initialPickerLng1)];
+        setPickerPt1(p1);
         setIsPoint1Set(true);
+        isPoint1SetRef.current = true;
+        pickerPt1Ref.current = p1;
       } else {
         setPickerPt1(undefined);
         setIsPoint1Set(false);
+        isPoint1SetRef.current = false;
+        pickerPt1Ref.current = undefined;
       }
-      if (isValidCoord(initialPickerLat2, initialPickerLng2)) {
-        setPickerPt2([Number(initialPickerLat2), Number(initialPickerLng2)]);
+
+      if (hasPt2) {
+        const p2: [number, number] = [Number(initialPickerLat2), Number(initialPickerLng2)];
+        setPickerPt2(p2);
         setIsPoint2Set(true);
+        isPoint2SetRef.current = true;
+        pickerPt2Ref.current = p2;
       } else {
         setPickerPt2(undefined);
         setIsPoint2Set(false);
+        isPoint2SetRef.current = false;
+        pickerPt2Ref.current = undefined;
+      }
+
+      if (hasPt1 && hasPt2) {
+        const p1: [number, number] = [Number(initialPickerLat1), Number(initialPickerLng1)];
+        const p2: [number, number] = [Number(initialPickerLat2), Number(initialPickerLng2)];
+        const seq = ++calculationSeqRef.current;
+        requestAnimationFrame(() => {
+          if (seq !== calculationSeqRef.current) return;
+          const pathRes = calculateCanalPathBetweenPoints(
+            { lat: p1[0], lng: p1[1] },
+            { lat: p2[0], lng: p2[1] },
+            layers
+          );
+          if (seq !== calculationSeqRef.current) return;
+          setPickerPathResult(pathRes);
+          setPickerLocationName(pathRes.locationName);
+          setPickerCanalCode(pathRes.canalCode);
+          setPickerParcelId(pathRes.parcelId);
+        });
+      } else if (hasPt1) {
+        const p1: [number, number] = [Number(initialPickerLat1), Number(initialPickerLng1)];
+        const seq = ++calculationSeqRef.current;
+        requestAnimationFrame(() => {
+          if (seq !== calculationSeqRef.current) return;
+          const feat = detectNearestGISFeature(p1[0], p1[1], layers);
+          if (seq !== calculationSeqRef.current) return;
+          setPickerLocationName(feat.locationName);
+          setPickerCanalCode(feat.canalCode);
+          setPickerParcelId(feat.parcelId);
+        });
       }
     } else {
       setPickerPt1(undefined);
       setPickerPt2(undefined);
       setIsPoint1Set(false);
       setIsPoint2Set(false);
+      isPoint1SetRef.current = false;
+      isPoint2SetRef.current = false;
+      pickerPt1Ref.current = undefined;
+      pickerPt2Ref.current = undefined;
       setPickerLocationName('');
+      setPickerCanalCode(undefined);
+      setPickerParcelId(undefined);
+      setPickerPathResult(null);
     }
   }, [isMapPickerActive, initialPickerLat1, initialPickerLng1, initialPickerLat2, initialPickerLng2]);
-
-  // Recalculate picker location details
-  useEffect(() => {
-    if (!isMapPickerActive || !isPoint1Set || !pickerPt1) return;
-
-    if (!isPoint2Set || !pickerPt2) {
-      const feat = detectNearestGISFeature(pickerPt1[0], pickerPt1[1], layers);
-      setPickerLocationName(feat.locationName);
-      setPickerCanalCode(feat.canalCode);
-      setPickerParcelId(feat.parcelId);
-    } else {
-      const pathRes = calculateCanalPathBetweenPoints(
-        { lat: pickerPt1[0], lng: pickerPt1[1] },
-        { lat: pickerPt2[0], lng: pickerPt2[1] },
-        layers
-      );
-      setPickerLocationName(pathRes.locationName);
-      setPickerCanalCode(pathRes.canalCode);
-      setPickerParcelId(pathRes.parcelId);
-    }
-  }, [pickerPt1, pickerPt2, isPoint1Set, isPoint2Set, isMapPickerActive, layers]);
 
   const point1PropsRef = useRef<any>(null);
   const point2PropsRef = useRef<any>(null);
 
   const handleClearPoint2 = () => {
     setIsPoint2Set(false);
-    setPickerPt2(null);
+    setPickerPt2(undefined);
     isPoint2SetRef.current = false;
-    pickerPt2Ref.current = null;
+    pickerPt2Ref.current = undefined;
     point2PropsRef.current = null;
+    setPickerPathResult(null);
+
     if (pickerPt1Ref.current) {
-      const feat = detectNearestGISFeature(pickerPt1Ref.current[0], pickerPt1Ref.current[1], layers);
-      const customName = point1PropsRef.current ? getFeatureName(point1PropsRef.current, '') : '';
-      setPickerLocationName(customName || feat.locationName);
-      setPickerCanalCode(point1PropsRef.current?.canal_code || feat.canalCode);
-      setPickerParcelId(point1PropsRef.current?.parcel_id || feat.parcelId);
+      const coords = pickerPt1Ref.current;
+      const seq = ++calculationSeqRef.current;
+      requestAnimationFrame(() => {
+        if (seq !== calculationSeqRef.current) return;
+        const feat = detectNearestGISFeature(coords[0], coords[1], layers);
+        if (seq !== calculationSeqRef.current) return;
+        const customName = point1PropsRef.current ? getFeatureName(point1PropsRef.current, '') : '';
+        setPickerLocationName(customName || feat.locationName);
+        setPickerCanalCode(point1PropsRef.current?.canal_code || feat.canalCode);
+        setPickerParcelId(point1PropsRef.current?.parcel_id || feat.parcelId);
+      });
     }
+  };
+
+  const handleResetPoints = () => {
+    setIsPoint1Set(false);
+    setIsPoint2Set(false);
+    setPickerPt1(undefined);
+    setPickerPt2(undefined);
+    isPoint1SetRef.current = false;
+    isPoint2SetRef.current = false;
+    pickerPt1Ref.current = undefined;
+    pickerPt2Ref.current = undefined;
+    point1PropsRef.current = null;
+    point2PropsRef.current = null;
+    setPickerLocationName('');
+    setPickerCanalCode(undefined);
+    setPickerParcelId(undefined);
+    setPickerPathResult(null);
   };
 
   const handleSetPoint1 = (coords: [number, number], featureProps?: any) => {
     if (!coords || !isValidCoord(coords[0], coords[1])) return;
+
+    // 1. Optimistic instant state update (0ms UI latency)
     setPickerPt1(coords);
     setIsPoint1Set(true);
     isPoint1SetRef.current = true;
@@ -300,29 +365,59 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       mapRef.current.panTo(coords);
     }
 
+    const seq = ++calculationSeqRef.current;
+
+    // 2. Non-blocking asynchronous calculation in animation frame
     if (isPoint2SetRef.current && pickerPt2Ref.current) {
-      const pathRes = calculateCanalPathBetweenPoints(
-        { lat: coords[0], lng: coords[1] },
-        { lat: pickerPt2Ref.current[0], lng: pickerPt2Ref.current[1] },
-        layers,
-        featureProps || point1PropsRef.current,
-        point2PropsRef.current
-      );
-      setPickerLocationName(pathRes.locationName);
-      setPickerCanalCode(pathRes.canalCode);
-      setPickerParcelId(pathRes.parcelId);
+      const pt2 = pickerPt2Ref.current;
+      const straightDist = Math.round(haversineDistanceMeters(coords[0], coords[1], pt2[0], pt2[1]));
+      setPickerPathResult(prev => ({
+        pathCoords: [coords, pt2],
+        locationName: prev?.locationName || 'Canal Segment (Calculating...)',
+        distanceMeters: straightDist
+      }));
+
+      requestAnimationFrame(() => {
+        if (seq !== calculationSeqRef.current) return;
+        const pathRes = calculateCanalPathBetweenPoints(
+          { lat: coords[0], lng: coords[1] },
+          { lat: pt2[0], lng: pt2[1] },
+          layers,
+          featureProps || point1PropsRef.current,
+          point2PropsRef.current
+        );
+        if (seq !== calculationSeqRef.current) return;
+        setPickerPathResult(pathRes);
+        setPickerLocationName(pathRes.locationName);
+        setPickerCanalCode(pathRes.canalCode);
+        setPickerParcelId(pathRes.parcelId);
+      });
     } else {
-      const feat = detectNearestGISFeature(coords[0], coords[1], layers);
-      const customName = featureProps ? getFeatureName(featureProps, '') : '';
-      const name = customName || feat.locationName;
-      setPickerLocationName(name);
-      setPickerCanalCode(featureProps?.canal_code || feat.canalCode);
-      setPickerParcelId(featureProps?.parcel_id || feat.parcelId);
+      setPickerPathResult(null);
+      const optName = featureProps ? getFeatureName(featureProps, '') : '';
+      if (optName) {
+        setPickerLocationName(optName);
+        setPickerCanalCode(featureProps?.canal_code);
+        setPickerParcelId(featureProps?.parcel_id);
+      }
+
+      requestAnimationFrame(() => {
+        if (seq !== calculationSeqRef.current) return;
+        const feat = detectNearestGISFeature(coords[0], coords[1], layers);
+        if (seq !== calculationSeqRef.current) return;
+        const customName = featureProps ? getFeatureName(featureProps, '') : '';
+        const name = customName || feat.locationName;
+        setPickerLocationName(name);
+        setPickerCanalCode(featureProps?.canal_code || feat.canalCode);
+        setPickerParcelId(featureProps?.parcel_id || feat.parcelId);
+      });
     }
   };
 
   const handleSetPoint2 = (coords: [number, number], featureProps?: any) => {
     if (!coords || !isValidCoord(coords[0], coords[1])) return;
+
+    // 1. Optimistic instant state update (0ms UI latency)
     setPickerPt2(coords);
     setIsPoint2Set(true);
     isPoint2SetRef.current = true;
@@ -337,18 +432,36 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
     if (!isPoint1SetRef.current || !pickerPt1Ref.current) {
       handleSetPoint1(coords, featureProps);
-    } else {
+      return;
+    }
+
+    const pt1 = pickerPt1Ref.current;
+    const seq = ++calculationSeqRef.current;
+
+    // Optimistic straight line path & distance
+    const straightDist = Math.round(haversineDistanceMeters(pt1[0], pt1[1], coords[0], coords[1]));
+    setPickerPathResult(prev => ({
+      pathCoords: [pt1, coords],
+      locationName: prev?.locationName || 'Canal Segment (Calculating...)',
+      distanceMeters: straightDist
+    }));
+
+    // 2. Non-blocking asynchronous calculation in animation frame
+    requestAnimationFrame(() => {
+      if (seq !== calculationSeqRef.current) return;
       const pathRes = calculateCanalPathBetweenPoints(
-        { lat: pickerPt1Ref.current[0], lng: pickerPt1Ref.current[1] },
+        { lat: pt1[0], lng: pt1[1] },
         { lat: coords[0], lng: coords[1] },
         layers,
         point1PropsRef.current,
         featureProps || point2PropsRef.current
       );
+      if (seq !== calculationSeqRef.current) return;
+      setPickerPathResult(pathRes);
       setPickerLocationName(pathRes.locationName);
       setPickerCanalCode(pathRes.canalCode);
       setPickerParcelId(pathRes.parcelId);
-    }
+    });
   };
 
   // Initialize Leaflet Map
@@ -661,7 +774,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       const isStructureLayer = layer.category === 'Structures' || layer.geometryType === 'Point' || layer.name.toLowerCase().includes('structure');
 
       try {
-        const geoJsonLayer = L.geoJSON(layer.data, {
+        const geoJsonLayer = (L as any).geoJSON(layer.data, {
           smoothFactor: 1.2,
           filter: (feature: any) => {
             const geomType = feature?.geometry?.type || '';
@@ -782,21 +895,29 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 L.DomEvent.stopPropagation(e);
               }
               if (isMapPickerActiveRef.current) {
-                const isPt1Set = isPoint1SetRef.current && pickerPt1Ref.current && isValidCoord(pickerPt1Ref.current[0], pickerPt1Ref.current[1]);
-                if (!isPt1Set) {
-                  // Automatic direct assignment of Point 1 on first click without prompt
-                  const curLatlng = e.latlng || (typeof (leafletLayer as any).getLatLng === 'function' ? (leafletLayer as any).getLatLng() : null);
-                  if (curLatlng && isValidCoord(curLatlng.lat, curLatlng.lng)) {
+                const curLatlng = e.latlng || (typeof (leafletLayer as any).getLatLng === 'function' ? (leafletLayer as any).getLatLng() : null);
+                if (curLatlng && isValidCoord(curLatlng.lat, curLatlng.lng)) {
+                  const isPt1Set = isPoint1SetRef.current && pickerPt1Ref.current && isValidCoord(pickerPt1Ref.current[0], pickerPt1Ref.current[1]);
+                  if (!isPt1Set) {
                     handleSetPoint1([curLatlng.lat, curLatlng.lng], props);
-                    leafletLayer.closePopup();
-                    return;
+                  } else {
+                    handleSetPoint2([curLatlng.lat, curLatlng.lng], props);
                   }
+                  try {
+                    if (typeof (leafletLayer as any).closePopup === 'function') {
+                      (leafletLayer as any).closePopup();
+                    }
+                  } catch (_) {}
+                  return;
                 }
               }
             });
 
             // LAZY ON-DEMAND POPUP: Generates HTML only when the user clicks this exact feature!
             leafletLayer.bindPopup(() => {
+              if (isMapPickerActiveRef.current) {
+                return '';
+              }
               const inspectId = Math.random().toString(36).substring(2, 9);
               (leafletLayer as any)._activeInspectId = inspectId;
 
@@ -894,6 +1015,12 @@ export const MapContainer: React.FC<MapContainerProps> = ({
             });
 
             leafletLayer.on('popupopen', (e) => {
+              if (isMapPickerActiveRef.current) {
+                try {
+                  leafletLayer.closePopup();
+                } catch (_) {}
+                return;
+              }
               const inspectId = (leafletLayer as any)._activeInspectId;
               // Revert previous highlighted layer if different
               if (highlightedLayerRef.current && highlightedLayerRef.current.layer !== leafletLayer) {
@@ -1314,16 +1441,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       });
       pickerLayerGroupRef.current.addLayer(marker2);
 
-      // Path connecting Pt 1 and Pt 2
-      const pathRes = calculateCanalPathBetweenPoints(
-        { lat: pickerPt1[0], lng: pickerPt1[1] },
-        { lat: pickerPt2[0], lng: pickerPt2[1] },
-        layers
-      );
-
-      const validPathCoords = pathRes.pathCoords.filter(
-        c => Array.isArray(c) && c.length >= 2 && isValidCoord(c[0], c[1])
-      );
+      // Polyline connecting Pt 1 and Pt 2 (drawn directly from pickerPathResult without rerunning Dijkstra)
+      const rawCoords = pickerPathResult?.pathCoords;
+      const validPathCoords = rawCoords && rawCoords.length >= 2
+        ? rawCoords.filter(c => Array.isArray(c) && c.length >= 2 && isValidCoord(c[0], c[1]))
+        : [pickerPt1, pickerPt2];
 
       if (validPathCoords.length >= 2) {
         const pathPolyline = L.polyline(validPathCoords, {
@@ -1335,108 +1457,17 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       }
     }
 
-    // Map click listener to set Point 1 directly or open popup for Point 2
+    // Direct 2-Click UX (Option 3): 1st click sets Point 1, 2nd click sets Point 2 instantly
     const handlePickerMapClick = (e: L.LeafletMouseEvent) => {
       if (!e || !e.latlng || !isValidCoord(e.latlng.lat, e.latlng.lng)) return;
-      const nearestFeat = detectNearestGISFeature(e.latlng.lat, e.latlng.lng, layers);
+      const coords: [number, number] = [e.latlng.lat, e.latlng.lng];
 
-      // Check if Point 1 is already set
       const isPt1Set = isPoint1SetRef.current && pickerPt1Ref.current && isValidCoord(pickerPt1Ref.current[0], pickerPt1Ref.current[1]);
       if (!isPt1Set) {
-        // Automatic assignment on 1st click: directly set Point 1 without showing popup
-        handleSetPoint1([e.latlng.lat, e.latlng.lng], nearestFeat);
-        return;
+        handleSetPoint1(coords);
+      } else {
+        handleSetPoint2(coords);
       }
-
-      // Subsequent clicks: open popup with Set Point 1 / Set Point 2 options
-      const popupId = Math.random().toString(36).substring(2, 9);
-      setActivePopupCoords([e.latlng.lat, e.latlng.lng]);
-      setActivePopupProps(nearestFeat);
-
-      if (mapRef.current) {
-        mapRef.current.panTo(e.latlng);
-      }
-
-      const mapPopupContent = `
-        <div class="p-3 space-y-2 min-w-[220px] max-w-xs font-sans text-xs text-slate-200">
-          <div class="border-b border-slate-700 pb-1.5 flex items-center justify-between gap-2">
-            <span class="font-black text-xs text-cyan-400 break-words leading-tight block">
-              ${nearestFeat.locationName || 'Selected Location'}
-            </span>
-            <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono font-bold shrink-0">
-              Sta. ${nearestFeat.stationingLabel || '0+000'}
-            </span>
-          </div>
-          <div class="space-y-1 bg-slate-950/80 p-2 rounded-lg border border-slate-800 text-[11px]">
-            <div class="flex justify-between gap-2">
-              <span class="text-slate-400 font-medium">Canal/Feature:</span>
-              <span class="font-bold text-amber-300 truncate">${nearestFeat.nearestFeatureName || 'Canal Network'}</span>
-            </div>
-            <div class="flex justify-between gap-2">
-              <span class="text-slate-400 font-medium">Stationing:</span>
-              <span class="font-mono font-extrabold text-cyan-400">${nearestFeat.stationingLabel || '0+000'}</span>
-            </div>
-            <div class="flex justify-between gap-2">
-              <span class="text-slate-400 font-medium">Latitude:</span>
-              <span class="font-semibold text-white font-mono">${e.latlng.lat.toFixed(6)}</span>
-            </div>
-            <div class="flex justify-between gap-2">
-              <span class="text-slate-400 font-medium">Longitude:</span>
-              <span class="font-semibold text-white font-mono">${e.latlng.lng.toFixed(6)}</span>
-            </div>
-          </div>
-          <div class="flex flex-col gap-1.5 mt-2 pt-2 border-t border-slate-700/60">
-            <button id="set-pt1-map-${popupId}" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-1.5 px-3 rounded-lg text-xs transition shadow cursor-pointer flex items-center justify-center gap-1">
-              <span class="w-4 h-4 rounded-full bg-slate-950 text-amber-400 font-extrabold text-[10px] flex items-center justify-center">1</span>
-              <span>Set Point 1</span>
-            </button>
-            <button id="set-pt2-map-${popupId}" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-1.5 px-3 rounded-lg text-xs transition shadow cursor-pointer flex items-center justify-center gap-1">
-              <span class="w-4 h-4 rounded-full bg-slate-950 text-cyan-400 font-extrabold text-[10px] flex items-center justify-center">2</span>
-              <span>Set Point 2</span>
-            </button>
-            ${isPoint2Set ? `
-              <button id="clear-pt2-map-${popupId}" class="w-full bg-slate-800 hover:bg-slate-700 text-rose-300 font-bold py-1 px-2.5 rounded-lg text-[11px] transition cursor-pointer flex items-center justify-center gap-1 border border-slate-700">
-                ✕ Clear Point 2 (Single Point Mode)
-              </button>
-            ` : ''}
-            <div class="text-[10px] text-cyan-300/90 italic mt-0.5 text-center font-medium">
-              💡 Drag pins 1 &amp; 2 on map to adjust location points
-            </div>
-          </div>
-        </div>
-      `;
-
-      const popup = L.popup({ closeButton: true, autoClose: true })
-        .setLatLng(e.latlng)
-        .setContent(mapPopupContent)
-        .openOn(map);
-
-      setTimeout(() => {
-        const b1 = document.getElementById(`set-pt1-map-${popupId}`);
-        if (b1) {
-          b1.onclick = (evt) => {
-            evt.stopPropagation();
-            handleSetPoint1([e.latlng.lat, e.latlng.lng], nearestFeat);
-            map.closePopup();
-          };
-        }
-        const b2 = document.getElementById(`set-pt2-map-${popupId}`);
-        if (b2) {
-          b2.onclick = (evt) => {
-            evt.stopPropagation();
-            handleSetPoint2([e.latlng.lat, e.latlng.lng], nearestFeat);
-            map.closePopup();
-          };
-        }
-        const clearPt2 = document.getElementById(`clear-pt2-map-${popupId}`);
-        if (clearPt2) {
-          clearPt2.onclick = (evt) => {
-            evt.stopPropagation();
-            handleClearPoint2();
-            map.closePopup();
-          };
-        }
-      }, 50);
     };
 
     map.on('click', handlePickerMapClick);
@@ -1444,7 +1475,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     return () => {
       map.off('click', handlePickerMapClick);
     };
-  }, [isMapPickerActive, isPoint1Set, isPoint2Set, pickerPt1, pickerPt2, layers]);
+  }, [isMapPickerActive, isPoint1Set, isPoint2Set, pickerPt1, pickerPt2, pickerPathResult]);
 
   const handleConfirmPick = () => {
     if (!isPoint1Set || !pickerPt1) return;
@@ -1589,27 +1620,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     return area;
   };
 
-  const pathDistanceMeters = React.useMemo(() => {
-    if (isPoint1Set && isPoint2Set && pickerPt1 && pickerPt2) {
-      const pathRes = calculateCanalPathBetweenPoints(
-        { lat: pickerPt1[0], lng: pickerPt1[1] },
-        { lat: pickerPt2[0], lng: pickerPt2[1] },
-        layers
-      );
-      if (pathRes.pathCoords && pathRes.pathCoords.length > 1) {
-        let total = 0;
-        for (let i = 0; i < pathRes.pathCoords.length - 1; i++) {
-          total += haversineDistanceMeters(
-            pathRes.pathCoords[i][0], pathRes.pathCoords[i][1],
-            pathRes.pathCoords[i+1][0], pathRes.pathCoords[i+1][1]
-          );
-        }
-        return Math.round(total);
-      }
-      return Math.round(haversineDistanceMeters(pickerPt1[0], pickerPt1[1], pickerPt2[0], pickerPt2[1]));
-    }
-    return 0;
-  }, [isPoint1Set, isPoint2Set, pickerPt1, pickerPt2, layers]);
+  const pathDistanceMeters = pickerPathResult?.distanceMeters ?? (
+    isPoint1Set && isPoint2Set && pickerPt1 && pickerPt2
+      ? Math.round(haversineDistanceMeters(pickerPt1[0], pickerPt1[1], pickerPt2[0], pickerPt2[1]))
+      : 0
+  );
 
   const formattedDistanceStr = React.useMemo(() => {
     if (pathDistanceMeters <= 0) return '';
@@ -1637,7 +1652,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                   Location Selector Mode
                 </span>
                 <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                  {isPoint1Set && isPoint2Set ? '2-Point Segment Mode' : isPoint1Set ? 'Point 1 Set' : 'Select Location'}
+                  {isPoint1Set && isPoint2Set ? '2-Point Segment Mode' : isPoint1Set ? 'Point 1 Set (Click for Pt 2)' : 'Click map to set Point 1'}
                 </span>
                 {isPoint1Set && isPoint2Set && formattedDistanceStr && (
                   <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono flex items-center gap-1">
@@ -1647,17 +1662,46 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 )}
               </div>
               <p className="text-xs font-bold text-white truncate">
-                {pickerLocationName || 'Click anywhere on map to view pop-up & set points'}
+                {pickerLocationName || 'Click anywhere on map to drop Pin 1'}
               </p>
               <p className="text-[11px] font-medium text-cyan-300/90 leading-tight">
-                💡 Drag pins 1 &amp; 2 on map to adjust location points. Click pop-ups to clear or set points.
+                {isPoint1Set && isPoint2Set
+                  ? '💡 Drag pins 1 & 2 on map to fine-tune endpoints, or click to reposition Point 2.'
+                  : isPoint1Set
+                  ? '💡 Point 1 placed! Click anywhere along canal to set Point 2 (or drag pin 1).'
+                  : '💡 Click anywhere on map to drop Point 1 immediately.'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 w-full md:w-auto shrink-0 justify-end">
+            {/* Clear Point 2 Button */}
+            {isPoint2Set && (
+              <button
+                type="button"
+                onClick={handleClearPoint2}
+                className="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                title="Revert to single-point mode"
+              >
+                <span>Clear Pt 2</span>
+              </button>
+            )}
+
+            {/* Reset Points Button */}
+            {isPoint1Set && (
+              <button
+                type="button"
+                onClick={handleResetPoints}
+                className="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                title="Clear all points and start fresh"
+              >
+                <span>Reset</span>
+              </button>
+            )}
+
             {/* Accept Button */}
             <button
+              type="button"
               onClick={handleConfirmPick}
               disabled={!isPoint1Set}
               className={`px-4 py-2.5 rounded-xl text-xs font-black shadow transition flex items-center justify-center gap-1.5 cursor-pointer ${
@@ -1672,6 +1716,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
             {/* Cancel Button */}
             <button
+              type="button"
               onClick={handleCancelPick}
               className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer"
             >
