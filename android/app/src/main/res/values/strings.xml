@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">O&amp;M Canal &amp; Structures</string>
+    <string name="title_activity_main">O&amp;M Canal &amp; Structures</string>
+    <string name="package_name">app.wmr</string>
+    <string name="custom_url_scheme">app.wmr</string>
+</resources>
