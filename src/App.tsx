@@ -71,6 +71,9 @@ import { ConfigurationsModal } from './components/ConfigurationsModal';
 import { SyncOverlay, SyncStep } from './components/SyncOverlay';
 import { useMobileBackStack, WindowId } from './hooks/useMobileBackStack';
 import { PwaUpdateToast } from './components/PwaUpdateToast';
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 function deduplicateItems<T extends { id: string }>(items: T[]): T[] {
   if (!Array.isArray(items)) return [];
@@ -302,10 +305,14 @@ export default function App() {
     const timeDiff = now - lastBackPressTimeRef.current;
 
     if (timeDiff < 2000) {
-      // 2nd Back press within 2 seconds -> Allow browser history exit
+      // 2nd Back press within 2 seconds -> Exit application
       if (exitToastTimeoutRef.current) clearTimeout(exitToastTimeoutRef.current);
       setShowExitToast(false);
-      window.history.back();
+      if (Capacitor.isNativePlatform()) {
+        CapApp.exitApp();
+      } else {
+        window.history.back();
+      }
     } else {
       // 1st Back press -> Show Android Toast and start 2-second window
       lastBackPressTimeRef.current = now;
@@ -328,6 +335,67 @@ export default function App() {
     onCloseWindow: handleCloseWindow,
     onExitAppRequested: handleExitAppRequested
   });
+
+  // Configure Android Native Status Bar & Hardware Back Button Lifecycle
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    // Apply dark navy background with light icons/text to match application palette
+    try {
+      StatusBar.setStyle({ style: Style.Dark });
+      StatusBar.setBackgroundColor({ color: '#0f172a' });
+    } catch (e) {
+      console.warn('Native StatusBar configuration error:', e);
+    }
+
+    // Android Hardware Back Button Listener via Capacitor App Plugin
+    const backListenerPromise = CapApp.addListener('backButton', () => {
+      // If any modal, drawer, picker, or inspector is active, close the topmost window via browser history stack
+      if (
+        isReportModalOpen ||
+        isMapPickerActive ||
+        isLayerPanelOpen ||
+        isSummaryModalOpen ||
+        isFilterModalOpen ||
+        isSyncDataModalOpen ||
+        isUploadOpen ||
+        isPdfPreviewOpen ||
+        isConfigurationsModalOpen ||
+        isSearchModalOpen ||
+        isDevPanelOpen ||
+        isHelpOpen ||
+        isMenuOpen ||
+        selectedFeatureProps ||
+        selectedReport
+      ) {
+        window.history.back();
+      } else {
+        // Base Map: Double-back-to-exit
+        handleExitAppRequested();
+      }
+    });
+
+    return () => {
+      backListenerPromise.then(l => l.remove()).catch(() => {});
+    };
+  }, [
+    isReportModalOpen,
+    isMapPickerActive,
+    isLayerPanelOpen,
+    isSummaryModalOpen,
+    isFilterModalOpen,
+    isSyncDataModalOpen,
+    isUploadOpen,
+    isPdfPreviewOpen,
+    isConfigurationsModalOpen,
+    isSearchModalOpen,
+    isDevPanelOpen,
+    isHelpOpen,
+    isMenuOpen,
+    selectedFeatureProps,
+    selectedReport,
+    handleExitAppRequested
+  ]);
 
   // Synchronize active windows with the Mobile LIFO Back Stack
   useEffect(() => {
@@ -1585,7 +1653,7 @@ export default function App() {
   }, [activeRole, fieldReports]);
 
   return (
-    <div className={`relative w-screen h-screen overflow-hidden select-none transition-colors duration-200 ${
+    <div className={`relative w-screen h-[100dvh] overflow-hidden select-none transition-colors duration-200 ${
       theme === 'light' ? 'bg-slate-100 text-slate-900 light' : 'bg-slate-950 text-slate-100 dark'
     }`}>
       {/* Top Navbar */}

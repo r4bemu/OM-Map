@@ -29,7 +29,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/90 px-3 pt-1.5 pb-3 shadow-2xl flex items-center justify-around select-none pointer-events-auto"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/90 px-3 pt-1.5 pb-3 pb-[env(safe-area-inset-bottom)] shadow-2xl flex items-center justify-around select-none pointer-events-auto"
     >
       {/* 1. Layers Button */}
       <button

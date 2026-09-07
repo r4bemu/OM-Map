@@ -252,7 +252,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   if (isMapPickerActive) return null;
 
   return (
-    <header className="absolute top-2 left-2 right-2 sm:top-3 sm:left-3 sm:right-3 z-30 flex flex-wrap items-center justify-between gap-2 sm:gap-3 pointer-events-none">
+    <header className="absolute top-2 left-2 right-2 sm:top-3 sm:left-3 sm:right-3 z-30 flex flex-wrap items-center justify-between gap-2 sm:gap-3 pointer-events-none pt-[env(safe-area-inset-top)]">
       {/* Connected Header Bar: Brand Logo & Title + Main Action Buttons */}
       <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-1 sm:p-1.5 shadow-2xl max-w-full overflow-x-auto custom-scrollbar">
         {/* Brand Logo & Heading Window */}
