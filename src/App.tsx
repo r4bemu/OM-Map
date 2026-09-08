@@ -7,7 +7,8 @@ import {
   LocationFilter,
   AuthUser,
   ReportTimeScope,
-  AvailableCloudWeek
+  AvailableCloudWeek,
+  AccessRequest
 } from './types';
 import { INITIAL_GIS_LAYERS, INITIAL_FIELD_REPORTS } from './data/sampleLayers';
 import { 
@@ -29,7 +30,7 @@ import {
 import { getIsoWeekInfo, getAvailableWeeksFromReports, isReportInWeek } from './utils/weekUtils';
 import { parseGISFile } from './utils/kmzParser';
 import { getAccessToken, uploadMaintenanceReportToDrive } from './lib/googleDriveService';
-import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers } from './config/authUsers';
+import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers, fetchAccessRequestsApi } from './config/authUsers';
 import { MOCK_FIELD_REPORTS_2026 } from './data/mockFieldReports2026';
 import { 
   MAINTENANCE_ACTIVITY_CONFIG, 
@@ -63,6 +64,8 @@ import {
 } from 'lucide-react';
 import { LoginModal } from './components/LoginModal';
 import { DeveloperUserManagementModal } from './components/DeveloperUserManagementModal';
+import { RoleMatrixModal } from './components/RoleMatrixModal';
+import { AccessRequestManagementModal } from './components/AccessRequestManagementModal';
 import { RoleSimulationBanner } from './components/RoleSimulationBanner';
 import { ReportsSummaryModal } from './components/ReportsSummaryModal';
 import { PdfPreviewModal } from './components/PdfPreviewModal';
@@ -223,6 +226,28 @@ export default function App() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isSyncDataModalOpen, setIsSyncDataModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isAccessRequestsModalOpen, setIsAccessRequestsModalOpen] = useState(false);
+  const [isRoleMatrixModalOpen, setIsRoleMatrixModalOpen] = useState(false);
+  const [accessRequests, setAccessRequests] = useState<AccessRequest[]>([]);
+
+  const loadAccessRequests = useCallback(async () => {
+    try {
+      const data = await fetchAccessRequestsApi();
+      setAccessRequests(data);
+    } catch (e) {
+      console.warn('Could not load access requests:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAccessRequests();
+    const interval = setInterval(loadAccessRequests, 30000);
+    return () => clearInterval(interval);
+  }, [loadAccessRequests]);
+
+  const pendingAccessRequestsCount = useMemo(() => {
+    return accessRequests.filter(r => r.status === 'pending').length;
+  }, [accessRequests]);
 
   // Option 3: Android Native Double-Back-to-Exit Toast State
   const [showExitToast, setShowExitToast] = useState(false);
@@ -242,6 +267,8 @@ export default function App() {
     setIsHelpOpen(false);
     setIsSearchModalOpen(false);
     setIsPdfPreviewOpen(false);
+    setIsAccessRequestsModalOpen(false);
+    setIsRoleMatrixModalOpen(false);
     setPreviewingPdfReport(null);
     setSelectedFeatureProps(null);
     setSelectedReport(undefined);
@@ -1744,6 +1771,15 @@ export default function App() {
           closeAllModals();
           setIsDevPanelOpen(true);
         }}
+        onOpenAccessRequests={() => {
+          closeAllModals();
+          setIsAccessRequestsModalOpen(true);
+        }}
+        pendingRequestsCount={pendingAccessRequestsCount}
+        onOpenRoleMatrix={() => {
+          closeAllModals();
+          setIsRoleMatrixModalOpen(true);
+        }}
         onLogout={handleLogout}
         isMapPickerActive={isMapPickerActive}
         currentTheme={theme}
@@ -2006,6 +2042,26 @@ export default function App() {
         onLogin={handleLogin}
         theme={theme}
         onToggleTheme={toggleTheme}
+      />
+
+      {/* 6-Tier Institutional Rights Matrix Modal */}
+      <RoleMatrixModal
+        isOpen={isRoleMatrixModalOpen}
+        onClose={() => setIsRoleMatrixModalOpen(false)}
+        isLight={theme === 'light'}
+      />
+
+      {/* Access Requests Management Queue Modal */}
+      <AccessRequestManagementModal
+        isOpen={isAccessRequestsModalOpen}
+        onClose={() => {
+          setIsAccessRequestsModalOpen(false);
+          loadAccessRequests();
+        }}
+        currentUser={authenticatedUser}
+        requests={accessRequests}
+        onRefreshRequests={loadAccessRequests}
+        isLight={theme === 'light'}
       />
 
       {/* Full-screen Sync Overlay — blocks all input during sync */}

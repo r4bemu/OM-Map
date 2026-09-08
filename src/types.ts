@@ -67,8 +67,35 @@ export interface AuthUser {
   contactNumber?: string;
   email?: string;
   googleId?: string;
-  isAdmitted?: boolean;
+  provider?: 'google' | 'local';
   createdAt?: string;
+}
+
+export interface AccessRequest {
+  id: string;
+  email: string;
+  firstName: string;
+  middleInitial?: string;
+  lastName: string;
+  extensionName?: string;
+  fullName: string;
+  contactNumber: string;
+  designation?: string;
+  requestedOffice: string;
+  requestedApps?: string[];
+  requestedRole?: UserRole;
+  requestedNisList?: string[];
+  status: 'pending' | 'approved' | 'rejected';
+  submittedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  reviewedByRole?: string;
+  assignedRole?: UserRole;
+  assignedOffice?: string;
+  assignedNis?: string;
+  rejectionReason?: string;
+  avatar?: string;
+  uid?: string;
 }
 
 export type BasemapType = 'satellite' | 'dark' | 'streets';

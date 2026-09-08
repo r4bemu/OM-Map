@@ -1,4 +1,4 @@
-import { AuthUser, UserRole } from '../types';
+import { AuthUser, UserRole, AccessRequest } from '../types';
 import { normalizeUserRole } from '../utils/approvalHierarchyEngine';
 
 export const IMO_LIST = [
@@ -681,32 +681,49 @@ export function authenticateUser(userIdOrUsername: string, passcode: string): Au
 
 export async function fetchRemoteAuthUsers(): Promise<AuthUser[]> {
   try {
-    const res = await fetch('/api/users');
-    if (res.ok) {
-      const data = await res.json();
-      const list = Array.isArray(data) ? data : (data && Array.isArray(data.users) ? data.users : []);
-      if (Array.isArray(list) && list.length > 0) {
-        const defaultMap = new Map<string, AuthUser>();
-        DEFAULT_AUTH_USERS.forEach(u => defaultMap.set(u.id, u));
+    const [resUsers, resApproved] = await Promise.all([
+      fetch('/api/users').catch(() => null),
+      fetch('/api/approved-users').catch(() => null)
+    ]);
 
-        const normalized = list.map((u: AuthUser) => {
-          const def = defaultMap.get(u.id);
-          if (def) {
-            return {
-              ...def,
-              passcode: u.passcode || def.passcode,
-              imoOffice: u.imoOffice || def.imoOffice,
-              nisBinding: u.nisBinding || def.nisBinding
-            };
+    let list: AuthUser[] = [];
+    if (resUsers && resUsers.ok) {
+      const data = await resUsers.json();
+      list = Array.isArray(data) ? data : (data && Array.isArray(data.users) ? data.users : []);
+    }
+
+    if (resApproved && resApproved.ok) {
+      const approvedUsers = await resApproved.json();
+      if (Array.isArray(approvedUsers)) {
+        approvedUsers.forEach((au: AuthUser) => {
+          if (!list.some(u => u.id === au.id || (au.email && u.email?.toLowerCase() === au.email.toLowerCase()))) {
+            list.push(au);
           }
-          return {
-            ...u,
-            role: normalizeUserRole(u.role)
-          };
         });
-        saveAuthUsers(normalized);
-        return normalized;
       }
+    }
+
+    if (Array.isArray(list) && list.length > 0) {
+      const defaultMap = new Map<string, AuthUser>();
+      DEFAULT_AUTH_USERS.forEach(u => defaultMap.set(u.id, u));
+
+      const normalized = list.map((u: AuthUser) => {
+        const def = defaultMap.get(u.id);
+        if (def) {
+          return {
+            ...def,
+            passcode: u.passcode || def.passcode,
+            imoOffice: u.imoOffice || def.imoOffice,
+            nisBinding: u.nisBinding || def.nisBinding
+          };
+        }
+        return {
+          ...u,
+          role: normalizeUserRole(u.role)
+        };
+      });
+      saveAuthUsers(normalized);
+      return normalized;
     }
   } catch (e) {}
   return getAuthUsers();
@@ -1159,5 +1176,253 @@ export async function rejectPendingGoogleAdmission(userId: string): Promise<bool
   } catch (_) {}
 
   return true;
+}
+
+// ==========================================
+// ACCESS REQUESTS & JURISDICTION HELPERS
+// ==========================================
+
+export function canUserManageRequests(user?: AuthUser | null): boolean {
+  if (!user) return false;
+  return (
+    user.role === 'Developer' ||
+    user.role === 'RO Admin' ||
+    user.role === 'RO Evaluator' ||
+    user.role === 'IMO Admin' ||
+    user.role === 'IMO Evaluator'
+  );
+}
+
+export function isMasterAdmin(user: AuthUser | null): boolean {
+  return user?.role === 'Developer';
+}
+
+export function isRegionalAdmin(user: AuthUser | null): boolean {
+  return user?.role === 'RO Admin' || user?.role === 'RO Evaluator';
+}
+
+export function isImoAdmin(user: AuthUser | null): boolean {
+  return user?.role === 'IMO Admin' || user?.role === 'IMO Evaluator';
+}
+
+export function getAdminJurisdictionLabel(user: AuthUser | null): string {
+  if (!user) return 'None';
+  if (user.role === 'Developer') return 'Master Jurisdiction (All Regional & IMOs)';
+  if (user.role === 'RO Admin' || user.role === 'RO Evaluator') return 'Regional Office & All IMOs Jurisdiction';
+  if (user.role === 'IMO Admin' || user.role === 'IMO Evaluator') {
+    return `${user.imoOffice || 'IMO'} Jurisdiction`;
+  }
+  return 'Standard User';
+}
+
+export function filterRequestsForAdmin(user: AuthUser | null, requests: AccessRequest[]): AccessRequest[] {
+  if (!user || !canUserManageRequests(user)) return [];
+  if (user.role === 'Developer' || user.role === 'RO Admin' || user.role === 'RO Evaluator') {
+    return requests;
+  }
+  // IMO Admin / Evaluator: only requests for their IMO
+  const adminImo = (user.imoOffice || '').toLowerCase();
+  return requests.filter(r => {
+    const reqOffice = (r.requestedOffice || '').toLowerCase();
+    return reqOffice.includes(adminImo) || adminImo.includes(reqOffice);
+  });
+}
+
+// Storage key for client-side offline sync
+const STORAGE_REQUESTS_KEY = 'ommap_access_requests_v3';
+
+export async function fetchAccessRequestsApi(): Promise<AccessRequest[]> {
+  try {
+    const res = await fetch('/api/access-requests');
+    if (res.ok) {
+      const data = await res.json();
+      try { localStorage.setItem(STORAGE_REQUESTS_KEY, JSON.stringify(data)); } catch (_) {}
+      return data;
+    }
+  } catch (e) {
+    console.warn('Network request failed, falling back to localStorage cache:', e);
+  }
+
+  try {
+    const cached = localStorage.getItem(STORAGE_REQUESTS_KEY);
+    if (cached) return JSON.parse(cached);
+  } catch (e) {}
+
+  return [];
+}
+
+export async function fetchUserAccessRequestApi(email: string): Promise<AccessRequest | null> {
+  if (!email) return null;
+  try {
+    const res = await fetch(`/api/access-requests/user/${encodeURIComponent(email.toLowerCase().trim())}`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (_) {}
+
+  const requests = await fetchAccessRequestsApi();
+  return requests.find(r => r.email?.toLowerCase().trim() === email.toLowerCase().trim()) || null;
+}
+
+export async function submitAccessRequestApi(payload: Partial<AccessRequest>): Promise<{ success: boolean; request?: AccessRequest; error?: string }> {
+  try {
+    const res = await fetch('/api/access-requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      await fetchAccessRequestsApi();
+      return data;
+    } else {
+      const err = await res.json();
+      return { success: false, error: err.error || 'Failed to submit access request' };
+    }
+  } catch (e: any) {
+    // Fallback: client-side mock save if offline
+    const requests = await fetchAccessRequestsApi();
+    const newReq: AccessRequest = {
+      id: `req-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      email: payload.email || '',
+      firstName: payload.firstName || '',
+      middleInitial: payload.middleInitial || '',
+      lastName: payload.lastName || '',
+      extensionName: payload.extensionName || '',
+      fullName: payload.fullName || `${payload.firstName} ${payload.lastName}`,
+      contactNumber: payload.contactNumber || '',
+      designation: payload.designation || 'Authorized NIA Personnel',
+      requestedOffice: payload.requestedOffice || 'Regional Office IV-B',
+      requestedRole: payload.requestedRole || 'Field Personnel',
+      requestedApps: payload.requestedApps || ['Maintenance and Status of Irrigation Facilities'],
+      requestedNisList: payload.requestedNisList || ['All NIS'],
+      status: 'pending',
+      submittedAt: new Date().toISOString(),
+      avatar: payload.avatar,
+      uid: payload.uid,
+    };
+    requests.unshift(newReq);
+    try { localStorage.setItem(STORAGE_REQUESTS_KEY, JSON.stringify(requests)); } catch (_) {}
+    return { success: true, request: newReq };
+  }
+}
+
+export async function approveAccessRequestApi(
+  id: string,
+  payload: {
+    assignedRole: UserRole;
+    assignedOffice: string;
+    assignedNis: string;
+    reviewerName: string;
+    reviewerRole: UserRole;
+  }
+): Promise<{ success: boolean; request?: AccessRequest; error?: string }> {
+  try {
+    const res = await fetch(`/api/access-requests/${id}/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      await fetchAccessRequestsApi();
+      await fetchRemoteAuthUsers();
+      return data;
+    }
+  } catch (e) {
+    console.warn('API error during approval:', e);
+  }
+
+  // Fallback client local storage
+  const requests = await fetchAccessRequestsApi();
+  const index = requests.findIndex(r => r.id === id);
+  if (index !== -1) {
+    requests[index] = {
+      ...requests[index],
+      status: 'approved',
+      assignedRole: payload.assignedRole,
+      assignedOffice: payload.assignedOffice,
+      assignedNis: payload.assignedNis,
+      reviewedAt: new Date().toISOString(),
+      reviewedBy: payload.reviewerName,
+      reviewedByRole: payload.reviewerRole,
+    };
+    try { localStorage.setItem(STORAGE_REQUESTS_KEY, JSON.stringify(requests)); } catch (_) {}
+    return { success: true, request: requests[index] };
+  }
+
+  return { success: false, error: 'Request not found' };
+}
+
+export async function rejectAccessRequestApi(
+  id: string,
+  payload: {
+    rejectionReason: string;
+    reviewerName: string;
+    reviewerRole: UserRole;
+  }
+): Promise<{ success: boolean; request?: AccessRequest; error?: string }> {
+  try {
+    const res = await fetch(`/api/access-requests/${id}/reject`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      await fetchAccessRequestsApi();
+      return data;
+    }
+  } catch (e) {}
+
+  const requests = await fetchAccessRequestsApi();
+  const index = requests.findIndex(r => r.id === id);
+  if (index !== -1) {
+    requests[index] = {
+      ...requests[index],
+      status: 'rejected',
+      rejectionReason: payload.rejectionReason,
+      reviewedAt: new Date().toISOString(),
+      reviewedBy: payload.reviewerName,
+      reviewedByRole: payload.reviewerRole,
+    };
+    try { localStorage.setItem(STORAGE_REQUESTS_KEY, JSON.stringify(requests)); } catch (_) {}
+    return { success: true, request: requests[index] };
+  }
+
+  return { success: false, error: 'Request not found' };
+}
+
+export async function revokeAccessRequestApi(id: string): Promise<{ success: boolean; request?: AccessRequest }> {
+  try {
+    const res = await fetch(`/api/access-requests/${id}/revoke`, { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      await fetchAccessRequestsApi();
+      return data;
+    }
+  } catch (e) {}
+
+  const requests = await fetchAccessRequestsApi();
+  const index = requests.findIndex(r => r.id === id);
+  if (index !== -1) {
+    requests[index].status = 'pending';
+    requests[index].reviewedAt = new Date().toISOString();
+    requests[index].rejectionReason = 'Access suspended pending review.';
+    try { localStorage.setItem(STORAGE_REQUESTS_KEY, JSON.stringify(requests)); } catch (_) {}
+    return { success: true, request: requests[index] };
+  }
+
+  return { success: false };
+}
+
+export async function fetchApprovedUsersApi(): Promise<AuthUser[]> {
+  try {
+    const res = await fetch('/api/approved-users');
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (_) {}
+  return [];
 }
 

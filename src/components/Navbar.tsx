@@ -63,6 +63,9 @@ interface NavbarProps {
   onOpenHelp: () => void;
   onOpenConfigurations?: () => void;
   onOpenDevPanel?: () => void;
+  onOpenAccessRequests?: () => void;
+  pendingRequestsCount?: number;
+  onOpenRoleMatrix?: () => void;
   onLogout?: () => void;
   isMapPickerActive?: boolean;
   currentTheme?: 'dark' | 'light';
@@ -97,6 +100,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenHelp,
   onOpenConfigurations,
   onOpenDevPanel,
+  onOpenAccessRequests,
+  pendingRequestsCount = 0,
+  onOpenRoleMatrix,
   onLogout,
   isMapPickerActive = false,
   currentTheme = 'dark',
@@ -671,6 +677,45 @@ export const Navbar: React.FC<NavbarProps> = ({
                     ? 'Manage Regional Accounts & Admissions'
                     : 'Manage IMO Accounts & Admissions'}
                 </span>
+              </button>
+            )}
+
+            {/* 6.5 Access Requests Review Queue */}
+            {onOpenAccessRequests && (
+              <button
+                onClick={() => {
+                  closeHamburger();
+                  onOpenAccessRequests();
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/80 rounded-xl transition cursor-pointer text-xs font-semibold"
+              >
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#009933] shrink-0" />
+                  <span>Access Requests Review Queue</span>
+                </div>
+                {pendingRequestsCount > 0 ? (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-amber-950 font-bold font-mono animate-pulse">
+                    {pendingRequestsCount} Pending
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-[9px]">
+                    All Done
+                  </span>
+                )}
+              </button>
+            )}
+
+            {/* 6.6 6-Tier Institutional Rights Matrix */}
+            {onOpenRoleMatrix && (
+              <button
+                onClick={() => {
+                  closeHamburger();
+                  onOpenRoleMatrix();
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/80 rounded-xl transition cursor-pointer text-xs font-semibold"
+              >
+                <HelpCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>6-Tier Institutional RBAC Matrix</span>
               </button>
             )}
 

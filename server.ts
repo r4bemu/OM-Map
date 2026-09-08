@@ -53,6 +53,91 @@ const LAYERS_FILE = path.join(DATA_DIR, 'persistent_layers.json');
 const REPORTS_FILE = path.join(DATA_DIR, 'persistent_reports.json');
 const USERS_FILE = path.join(DATA_DIR, 'persistent_users.json');
 const PENDING_USERS_FILE = path.join(DATA_DIR, 'pending_users.json');
+const REQUESTS_FILE = path.join(DATA_DIR, 'access_requests.json');
+
+const INITIAL_SEED_REQUESTS = [
+  {
+    id: 'req-sample-01',
+    email: 'engr.reyes.mimaropa@gmail.com',
+    firstName: 'Ronaldo',
+    middleInitial: 'P.',
+    lastName: 'Reyes',
+    extensionName: '',
+    fullName: 'Ronaldo P. Reyes',
+    contactNumber: '0917-542-8901',
+    designation: 'Senior Irrigation Engineer',
+    requestedOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
+    requestedRole: 'IMO Reviewer',
+    requestedNisList: ['Baco-Bucayao RIS', 'Mag-asawang Tubig RIS'],
+    status: 'pending',
+    submittedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&h=120&fit=crop&crop=face'
+  },
+  {
+    id: 'req-sample-02',
+    email: 'maria.santos.nia@gmail.com',
+    firstName: 'Maria Elena',
+    middleInitial: 'V.',
+    lastName: 'Santos',
+    extensionName: '',
+    fullName: 'Maria Elena V. Santos',
+    contactNumber: '0928-876-1234',
+    designation: 'Water Resources Facilities Technician',
+    requestedOffice: 'Occidental Mindoro IMO',
+    requestedRole: 'Field Personnel',
+    requestedNisList: ['Mamburao RIS', 'Amnay RIS', 'Patrick RIS'],
+    status: 'pending',
+    submittedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=face'
+  },
+  {
+    id: 'req-sample-03',
+    email: 'alvin.delacruz.palawan@gmail.com',
+    firstName: 'Alvin',
+    middleInitial: 'G.',
+    lastName: 'Dela Cruz',
+    extensionName: 'Jr.',
+    fullName: 'Alvin G. Dela Cruz, Jr.',
+    contactNumber: '0918-334-9988',
+    designation: 'Principal Engineer A',
+    requestedOffice: 'Palawan IMO',
+    requestedRole: 'IMO Reviewer',
+    requestedNisList: ['Malatgao RIS', 'Batang-Batang RIS'],
+    status: 'approved',
+    submittedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000).toISOString(),
+    reviewedBy: 'Division Manager (Palawan IMO)',
+    reviewedByRole: 'IMO Evaluator',
+    assignedRole: 'IMO Reviewer',
+    assignedOffice: 'Palawan IMO',
+    assignedNis: 'Malatgao RIS, Batang-Batang RIS',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop&crop=face'
+  }
+];
+
+function getAccessRequests(): any[] {
+  ensureDataDir();
+  try {
+    if (!fs.existsSync(REQUESTS_FILE)) {
+      safeWriteJsonSync(REQUESTS_FILE, INITIAL_SEED_REQUESTS);
+      return INITIAL_SEED_REQUESTS;
+    }
+    const raw = fs.readFileSync(REQUESTS_FILE, 'utf-8');
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed;
+  } catch (e) {
+    console.error('Failed to read access requests:', e);
+  }
+  return [];
+}
+
+function saveAccessRequests(requests: any[]) {
+  try {
+    safeWriteJsonSync(REQUESTS_FILE, requests);
+  } catch (e) {
+    console.error('Failed to save access requests:', e);
+  }
+}
 
 function ensureDataDir() {
   try {
@@ -508,6 +593,186 @@ export async function createApp() {
       res.json({ success: true, message: `Pending user ${id} removed.`, pending: filtered });
     } catch (err: any) {
       res.status(500).json({ error: err.message || 'Failed to remove pending user' });
+    }
+  });
+
+  // Access Requests Management Endpoints
+  app.get('/api/access-requests', (req, res) => {
+    try {
+      const requests = getAccessRequests();
+      res.json(requests);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to fetch access requests' });
+    }
+  });
+
+  app.get('/api/access-requests/user/:email', (req, res) => {
+    try {
+      const email = req.params.email.toLowerCase().trim();
+      const requests = getAccessRequests();
+      const reqItem = requests.find((r: any) => r.email?.toLowerCase().trim() === email);
+      if (!reqItem) {
+        return res.status(404).json({ error: 'No access request found for this email.' });
+      }
+      res.json(reqItem);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to fetch user access request' });
+    }
+  });
+
+  app.post('/api/access-requests', (req, res) => {
+    try {
+      const data = req.body;
+      if (!data.email || !data.firstName || !data.lastName || !data.contactNumber || !data.requestedOffice) {
+        return res.status(400).json({ error: 'Missing required fields: email, firstName, lastName, contactNumber, requestedOffice' });
+      }
+
+      const requests = getAccessRequests();
+      const email = data.email.toLowerCase().trim();
+      const existingIndex = requests.findIndex((r: any) => r.email?.toLowerCase().trim() === email);
+
+      const fn = data.firstName.trim();
+      const mi = data.middleInitial ? `${data.middleInitial.trim().replace('.', '')}.` : '';
+      const ln = data.lastName.trim();
+      const ext = data.extensionName?.trim() ? `, ${data.extensionName.trim()}` : '';
+      const fullName = [fn, mi, ln].filter(Boolean).join(' ') + ext;
+
+      const newRequest = {
+        id: existingIndex >= 0 ? requests[existingIndex].id : `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        email: email,
+        firstName: fn,
+        middleInitial: data.middleInitial?.trim() || '',
+        lastName: ln,
+        extensionName: data.extensionName?.trim() || '',
+        fullName: fullName,
+        contactNumber: data.contactNumber.trim(),
+        designation: data.designation?.trim() || 'Senior Irrigation Engineer',
+        requestedOffice: data.requestedOffice,
+        requestedApps: Array.isArray(data.requestedApps) ? data.requestedApps : ['Maintenance and Status of Irrigation Facilities'],
+        requestedRole: data.requestedRole || 'Field Personnel',
+        requestedNisList: Array.isArray(data.requestedNisList) ? data.requestedNisList : ['All NIS'],
+        status: 'pending',
+        submittedAt: new Date().toISOString(),
+        avatar: data.avatar || undefined,
+        uid: data.uid || undefined
+      };
+
+      if (existingIndex >= 0) {
+        requests[existingIndex] = { ...requests[existingIndex], ...newRequest, status: 'pending' };
+      } else {
+        requests.unshift(newRequest);
+      }
+
+      saveAccessRequests(requests);
+      res.json({ success: true, request: newRequest });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to submit access request' });
+    }
+  });
+
+  app.post('/api/access-requests/:id/approve', (req, res) => {
+    try {
+      const { id } = req.params;
+      const { assignedRole, assignedOffice, assignedNis, reviewerName, reviewerRole } = req.body;
+
+      const requests = getAccessRequests();
+      const index = requests.findIndex((r: any) => r.id === id);
+      if (index === -1) {
+        return res.status(404).json({ error: 'Request not found' });
+      }
+
+      const item = requests[index];
+      item.status = 'approved';
+      item.assignedRole = assignedRole || item.requestedRole || 'IMO Reviewer';
+      item.assignedOffice = assignedOffice || item.requestedOffice || 'Regional Office IV-B';
+      item.assignedNis = assignedNis || (item.requestedNisList?.length ? item.requestedNisList.join(', ') : 'All NIS');
+      item.reviewedAt = new Date().toISOString();
+      item.reviewedBy = reviewerName || 'Authorized Administrator';
+      item.reviewedByRole = reviewerRole || 'RO Admin';
+      item.rejectionReason = undefined;
+
+      requests[index] = item;
+      saveAccessRequests(requests);
+
+      res.json({ success: true, request: item });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to approve request' });
+    }
+  });
+
+  app.post('/api/access-requests/:id/reject', (req, res) => {
+    try {
+      const { id } = req.params;
+      const { rejectionReason, reviewerName, reviewerRole } = req.body;
+
+      const requests = getAccessRequests();
+      const index = requests.findIndex((r: any) => r.id === id);
+      if (index === -1) {
+        return res.status(404).json({ error: 'Request not found' });
+      }
+
+      const item = requests[index];
+      item.status = 'rejected';
+      item.rejectionReason = rejectionReason || 'Information verification incomplete or jurisdiction mismatch.';
+      item.reviewedAt = new Date().toISOString();
+      item.reviewedBy = reviewerName || 'Authorized Administrator';
+      item.reviewedByRole = reviewerRole || 'RO Admin';
+
+      requests[index] = item;
+      saveAccessRequests(requests);
+
+      res.json({ success: true, request: item });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to reject request' });
+    }
+  });
+
+  app.post('/api/access-requests/:id/revoke', (req, res) => {
+    try {
+      const { id } = req.params;
+      const requests = getAccessRequests();
+      const index = requests.findIndex((r: any) => r.id === id);
+      if (index === -1) {
+        return res.status(404).json({ error: 'Request not found' });
+      }
+
+      requests[index].status = 'pending';
+      requests[index].reviewedAt = new Date().toISOString();
+      requests[index].rejectionReason = 'Access suspended pending administrative re-evaluation.';
+      saveAccessRequests(requests);
+
+      res.json({ success: true, request: requests[index] });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to revoke request' });
+    }
+  });
+
+  app.get('/api/approved-users', (req, res) => {
+    try {
+      const requests = getAccessRequests();
+      const approved = requests.filter((r: any) => r.status === 'approved');
+      const users = approved.map((r: any) => {
+        const email = r.email.toLowerCase().trim();
+        const username = email.split('@')[0].replace(/[^a-z0-9_]/g, '_');
+        return {
+          id: `usr-gauth-${r.id}`,
+          username: username,
+          name: r.fullName,
+          role: r.assignedRole || r.requestedRole || 'Field Personnel',
+          passcode: 'GOOGLE_AUTH_SSO',
+          imoOffice: r.assignedOffice || r.requestedOffice,
+          nisBinding: r.assignedNis || (r.requestedNisList?.join(', ') || 'All NIS'),
+          designation: r.designation,
+          contactNumber: r.contactNumber,
+          avatar: r.avatar,
+          email: email,
+          provider: 'google',
+          createdAt: r.reviewedAt || r.submittedAt
+        };
+      });
+      res.json(users);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to get approved users' });
     }
   });
 
