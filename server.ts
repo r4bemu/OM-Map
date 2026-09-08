@@ -366,8 +366,22 @@ function loadSavedUsers(): any[] {
       const data = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
       if (Array.isArray(data) && data.length > 0) {
         let hasChanges = false;
+        const defaultMap = new Map();
+        DEFAULT_AUTH_USERS.forEach((u: any) => defaultMap.set(u.id, u));
+
         const normalized = data.map((u: any) => {
           const normRole = normalizeServerUserRole(u.role);
+          const def = defaultMap.get(u.id);
+          if (def) {
+            return {
+              ...def,
+              passcode: u.passcode || def.passcode,
+              imoOffice: u.imoOffice || def.imoOffice,
+              nisBinding: u.nisBinding || def.nisBinding,
+              email: u.email || def.email,
+              googleId: u.googleId || def.googleId
+            };
+          }
           if (normRole !== u.role) {
             hasChanges = true;
             return {
@@ -377,6 +391,15 @@ function loadSavedUsers(): any[] {
           }
           return u;
         });
+
+        const seenIds = new Set(normalized.map((u: any) => u.id));
+        DEFAULT_AUTH_USERS.forEach((u: any) => {
+          if (!seenIds.has(u.id)) {
+            normalized.push(u);
+            hasChanges = true;
+          }
+        });
+
         if (hasChanges) {
           saveUsersToFile(normalized);
         }
