@@ -28,6 +28,7 @@ import {
   Globe
 } from 'lucide-react';
 import { UserRole, GISLayer, FieldReport, AuthUser, AvailableCloudWeek } from '../types';
+import { canUserManageRequests } from '../config/authUsers';
 
 interface NavbarProps {
   authenticatedUser: AuthUser | null;
@@ -680,8 +681,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* 6.5 Access Requests Review Queue */}
-            {onOpenAccessRequests && (
+            {/* 6.5 Access Requests Review Queue - Only for Developer, RO Admin, IMO Admin */}
+            {canUserManageRequests(authenticatedUser) && onOpenAccessRequests && (
               <button
                 onClick={() => {
                   closeHamburger();
@@ -693,7 +694,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <ShieldCheck className="w-4 h-4 text-[#009933] shrink-0" />
                   <span>Access Requests Review Queue</span>
                 </div>
-                {pendingRequestsCount > 0 ? (
+                {pendingRequestsCount && pendingRequestsCount > 0 ? (
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-amber-950 font-bold font-mono animate-pulse">
                     {pendingRequestsCount} Pending
                   </span>

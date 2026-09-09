@@ -21,7 +21,8 @@ import {
   authenticateUser, 
   fetchRemoteAuthUsers,
   fetchAccessRequestsApi,
-  submitAccessRequestApi 
+  submitAccessRequestApi,
+  canUserManageRequests
 } from '../config/authUsers';
 import { triggerGoogleGisSignIn } from '../lib/googleIdentityAuth';
 import { QuickAccountPicker } from './QuickAccountPicker';
@@ -133,8 +134,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   const pendingRequestsCount = useMemo(() => {
-    return requests.filter(r => r.status === 'pending').length;
-  }, [requests]);
+    if (!selectedAccount || !canUserManageRequests(selectedAccount)) return 0;
+    if (selectedAccount.role === 'Developer' || selectedAccount.role === 'RO Admin') {
+      return requests.filter(r => r.status === 'pending').length;
+    }
+    const adminOffice = (selectedAccount.imoOffice || '').toLowerCase();
+    return requests.filter(r => {
+      const reqOffice = (r.requestedOffice || '').toLowerCase();
+      return r.status === 'pending' && (reqOffice.includes(adminOffice) || adminOffice.includes(reqOffice));
+    }).length;
+  }, [requests, selectedAccount]);
 
   if (!isOpen) return null;
 
@@ -500,35 +509,37 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
             </form>
 
-            {/* Administrative Access Request Queue Quick Access Banner */}
-            <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
-              <button
-                type="button"
-                onClick={() => setIsAccessRequestsManagerOpen(true)}
-                className={`w-full p-2.5 rounded-2xl border text-xs transition flex items-center justify-between cursor-pointer ${
-                  isLight
-                    ? 'bg-slate-100 hover:bg-slate-200/80 border-slate-300 text-slate-800'
-                    : 'bg-slate-800/80 hover:bg-slate-800 border-slate-700 text-slate-200'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#009933]" />
-                  <span className="font-semibold text-[11.5px]">Access Requests Review Queue</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  {pendingRequestsCount > 0 ? (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-amber-950 font-bold font-mono animate-pulse">
-                      {pendingRequestsCount} Pending
-                    </span>
-                  ) : (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-mono font-bold">
-                      All Reviewed
-                    </span>
-                  )}
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                </div>
-              </button>
-            </div>
+            {/* Administrative Access Request Queue Quick Access Banner - Only visible when an Admin or Developer is selected */}
+            {canUserManageRequests(selectedAccount) && (
+              <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 animate-in fade-in">
+                <button
+                  type="button"
+                  onClick={() => setIsAccessRequestsManagerOpen(true)}
+                  className={`w-full p-2.5 rounded-2xl border text-xs transition flex items-center justify-between cursor-pointer ${
+                    isLight
+                      ? 'bg-emerald-50 hover:bg-emerald-100/80 border-emerald-300 text-emerald-950'
+                      : 'bg-emerald-950/30 hover:bg-emerald-900/40 border-emerald-500/40 text-emerald-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-[#009933]" />
+                    <span className="font-semibold text-[11.5px]">Access Requests Review Queue</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {pendingRequestsCount > 0 ? (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-amber-950 font-bold font-mono animate-pulse">
+                        {pendingRequestsCount} Pending
+                      </span>
+                    ) : (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-mono font-bold">
+                        All Reviewed
+                      </span>
+                    )}
+                    <ArrowRight className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                </button>
+              </div>
+            )}
 
           </div>
 

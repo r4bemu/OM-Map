@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   X, 
   Users, 
@@ -31,6 +31,8 @@ import {
   isMasterAdmin, 
   isRegionalAdmin, 
   isImoAdmin,
+  canUserManageRequests,
+  getNisOptionsForImo,
   getAdminJurisdictionLabel,
   approveAccessRequestApi,
   rejectAccessRequestApi,
@@ -65,10 +67,54 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [isSubmittingAction, setIsSubmittingAction] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const isDev = isMasterAdmin(currentUser);
   const isRO = isRegionalAdmin(currentUser);
   const isIMO = isImoAdmin(currentUser);
+  const isAdmin = canUserManageRequests(currentUser);
+
+  // Available roles based on administrator tier
+  const availableRolesForApprover = useMemo(() => {
+    if (isDev) {
+      return [
+        { value: 'Developer', label: 'Developer (Master Architect)' },
+        { value: 'RO Admin', label: 'RO Admin (Regional Office Gatekeeper)' },
+        { value: 'RO Evaluator', label: 'RO Evaluator (Division Manager)' },
+        { value: 'RO Reviewer', label: 'RO Reviewer (Quality Review)' },
+        { value: 'RO Preparer', label: 'RO Preparer (Regional Preparer)' },
+        { value: 'IMO Admin', label: 'IMO Admin (Office Gatekeeper)' },
+        { value: 'IMO Evaluator', label: 'IMO Evaluator (IMO Manager)' },
+        { value: 'IMO Reviewer', label: 'IMO Reviewer (Supervising Engr)' },
+        { value: 'IMO Preparer', label: 'IMO Preparer (Report Preparer)' },
+        { value: 'Field Personnel', label: 'Field Personnel (Inspector)' },
+        { value: 'Viewer', label: 'Viewer (IA / Public Observer)' },
+      ];
+    }
+    if (isRO) {
+      return [
+        { value: 'RO Admin', label: 'RO Admin (Regional Office Gatekeeper)' },
+        { value: 'RO Evaluator', label: 'RO Evaluator (Division Manager)' },
+        { value: 'RO Reviewer', label: 'RO Reviewer (Quality Review)' },
+        { value: 'RO Preparer', label: 'RO Preparer (Regional Preparer)' },
+        { value: 'IMO Admin', label: 'IMO Admin (Office Gatekeeper)' },
+        { value: 'IMO Evaluator', label: 'IMO Evaluator (IMO Manager)' },
+        { value: 'IMO Reviewer', label: 'IMO Reviewer (Supervising Engr)' },
+        { value: 'IMO Preparer', label: 'IMO Preparer (Report Preparer)' },
+        { value: 'Field Personnel', label: 'Field Personnel (Inspector)' },
+        { value: 'Viewer', label: 'Viewer (IA / Public Observer)' },
+      ];
+    }
+    // IMO Admin (strictly within IMO jurisdiction)
+    return [
+      { value: 'IMO Admin', label: 'IMO Admin (Office Gatekeeper)' },
+      { value: 'IMO Evaluator', label: 'IMO Evaluator (IMO Manager)' },
+      { value: 'IMO Reviewer', label: 'IMO Reviewer (Supervising Engr)' },
+      { value: 'IMO Preparer', label: 'IMO Preparer (Report Preparer)' },
+      { value: 'Field Personnel', label: 'Field Personnel (Inspector)' },
+      { value: 'Viewer', label: 'Viewer (IA / Public Observer)' },
+    ];
+  }, [isDev, isRO]);
 
   // Determine allowed office filters based on admin role
   const availableOffices = useMemo(() => {
@@ -121,6 +167,27 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
 
   if (!isOpen) return null;
 
+  if (!isAdmin) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xl bg-slate-950/80">
+        <div className="bg-slate-900 border border-rose-500/40 rounded-3xl p-6 text-center max-w-md text-white shadow-2xl animate-in fade-in">
+          <AlertTriangle className="w-12 h-12 text-rose-500 mx-auto mb-3" />
+          <h3 className="text-base font-bold">Administrative Access Restricted</h3>
+          <p className="text-xs text-slate-400 mt-2">
+            The Access Requests Review Queue is strictly restricted to Regional / IMO Office Administrators and the Master Developer.
+          </p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-5 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl border border-slate-700 cursor-pointer"
+          >
+            Close Window
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Counts
   const pendingCount = requests.filter(r => {
     if (isIMO && currentUser?.imoOffice) {
@@ -147,25 +214,53 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
   };
 
   const handleApprove = async (req: AccessRequest) => {
-    setIsSubmittingAction(true);
-    const assignedRole = assignedRoles[req.id] || req.requestedRole || 'IMO Reviewer';
-    const assignedNis = assignedNisMap[req.id] || (Array.isArray(req.requestedNisList) ? req.requestedNisList.join(', ') : 'All NIS');
+    setActionError(null);
+    // Safety check: ensure IMO Admin only approves within their designated IMO Office
+    if (isIMO && currentUser?.imoOffice) {
+      const reqOffice = (req.requestedOffice || '').toLowerCase();
+      const adminOffice = currentUser.imoOffice.toLowerCase();
+      if (!reqOffice.includes(adminOffice) && !adminOffice.includes(reqOffice)) {
+        setActionError(`Access Denied: You are only authorized to grant access within ${currentUser.imoOffice}.`);
+        return;
+      }
+    }
 
-    await approveAccessRequestApi(req.id, {
+    setIsSubmittingAction(true);
+    const defaultRoleForApprover: UserRole = isIMO ? 'IMO Reviewer' : 'RO Reviewer';
+    const assignedRole = assignedRoles[req.id] || req.assignedRole || req.requestedRole || defaultRoleForApprover;
+    const assignedOffice = isIMO && currentUser?.imoOffice ? currentUser.imoOffice : (req.assignedOffice || req.requestedOffice || 'Regional Office IV-B');
+    const assignedNis = assignedNisMap[req.id] || req.assignedNis || (Array.isArray(req.requestedNisList) ? req.requestedNisList.join(', ') : 'All NIS');
+
+    const res = await approveAccessRequestApi(req.id, {
       assignedRole: assignedRole,
-      assignedOffice: req.requestedOffice,
+      assignedOffice: assignedOffice,
       assignedNis: assignedNis,
       reviewerName: currentUser?.name || 'Authorized Administrator',
       reviewerRole: currentUser?.role || 'RO Admin',
     });
 
     setIsSubmittingAction(false);
-    onRefreshRequests();
+    if (res.error) {
+      setActionError(res.error);
+    } else {
+      onRefreshRequests();
+    }
   };
 
   const handleReject = async (reqId: string) => {
+    setActionError(null);
+    const targetReq = requests.find(r => r.id === reqId);
+    if (isIMO && currentUser?.imoOffice && targetReq) {
+      const reqOffice = (targetReq.requestedOffice || '').toLowerCase();
+      const adminOffice = currentUser.imoOffice.toLowerCase();
+      if (!reqOffice.includes(adminOffice) && !adminOffice.includes(reqOffice)) {
+        setActionError(`Access Denied: You are only authorized to decline requests within ${currentUser.imoOffice}.`);
+        return;
+      }
+    }
+
     setIsSubmittingAction(true);
-    await rejectAccessRequestApi(reqId, {
+    const res = await rejectAccessRequestApi(reqId, {
       rejectionReason: rejectReason.trim() || 'Jurisdiction or credential verification incomplete.',
       reviewerName: currentUser?.name || 'Authorized Administrator',
       reviewerRole: currentUser?.role || 'RO Admin',
@@ -174,15 +269,34 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
     setRejectingId(null);
     setRejectReason('');
     setIsSubmittingAction(false);
-    onRefreshRequests();
+    if (res.error) {
+      setActionError(res.error);
+    } else {
+      onRefreshRequests();
+    }
   };
 
   const handleRevoke = async (reqId: string) => {
+    setActionError(null);
+    const targetReq = requests.find(r => r.id === reqId);
+    if (isIMO && currentUser?.imoOffice && targetReq) {
+      const reqOffice = (targetReq.requestedOffice || targetReq.assignedOffice || '').toLowerCase();
+      const adminOffice = currentUser.imoOffice.toLowerCase();
+      if (!reqOffice.includes(adminOffice) && !adminOffice.includes(reqOffice)) {
+        setActionError(`Access Denied: You are only authorized to revoke access within ${currentUser.imoOffice}.`);
+        return;
+      }
+    }
+
     if (window.confirm('Are you sure you want to suspend/revoke access for this user?')) {
       setIsSubmittingAction(true);
-      await revokeAccessRequestApi(reqId);
+      const res = await revokeAccessRequestApi(reqId);
       setIsSubmittingAction(false);
-      onRefreshRequests();
+      if (res.error) {
+        setActionError(res.error);
+      } else {
+        onRefreshRequests();
+      }
     }
   };
 
@@ -344,6 +458,23 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
           </div>
         </div>
 
+        {/* Action Error Alert */}
+        {actionError && (
+          <div className="mx-4 sm:mx-5 mt-3 p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs flex items-center justify-between animate-in fade-in">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500" />
+              <span>{actionError}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActionError(null)}
+              className="p-1 hover:bg-rose-500/20 rounded text-rose-500 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
         {/* Requests List */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 custom-scrollbar">
           {filteredRequests.length === 0 ? (
@@ -498,14 +629,26 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                                 isLight ? 'bg-white border-slate-300 text-slate-800' : 'bg-slate-800 border-slate-700 text-white'
                               }`}
                             >
-                              <option value="IMO Reviewer">IMO Reviewer (Supervising Engr)</option>
-                              <option value="IMO Preparer">IMO Preparer (Report Preparer)</option>
-                              <option value="Field Personnel">Field Personnel (Inspector)</option>
-                              <option value="RO Reviewer">RO Reviewer (Quality Review)</option>
-                              <option value="RO Preparer">RO Preparer (Regional Preparer)</option>
-                              <option value="RO Evaluator">RO Evaluator (Division Manager)</option>
-                              <option value="IMO Evaluator">IMO Evaluator (IMO Manager)</option>
-                              <option value="Viewer">Viewer (IA / Public)</option>
+                              {availableRolesForApprover.map(opt => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
+                              Assign NIS System Scope:
+                            </label>
+                            <select
+                              value={assignedNisMap[req.id] || req.assignedNis || (Array.isArray(req.requestedNisList) && req.requestedNisList.length ? req.requestedNisList[0] : 'All NIS')}
+                              onChange={(e) => setAssignedNisMap(prev => ({ ...prev, [req.id]: e.target.value }))}
+                              className={`w-full text-xs rounded-xl px-2.5 py-1.5 border font-semibold transition focus:outline-none ${
+                                isLight ? 'bg-white border-slate-300 text-slate-800' : 'bg-slate-800 border-slate-700 text-white'
+                              }`}
+                            >
+                              {getNisOptionsForImo(req.requestedOffice || currentUser?.imoOffice).map(nis => (
+                                <option key={nis} value={nis}>{nis}</option>
+                              ))}
                             </select>
                           </div>
 

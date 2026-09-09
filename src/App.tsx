@@ -30,7 +30,7 @@ import {
 import { getIsoWeekInfo, getAvailableWeeksFromReports, isReportInWeek } from './utils/weekUtils';
 import { parseGISFile } from './utils/kmzParser';
 import { getAccessToken, uploadMaintenanceReportToDrive } from './lib/googleDriveService';
-import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers, fetchAccessRequestsApi } from './config/authUsers';
+import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers, fetchAccessRequestsApi, canUserManageRequests } from './config/authUsers';
 import { MOCK_FIELD_REPORTS_2026 } from './data/mockFieldReports2026';
 import { 
   MAINTENANCE_ACTIVITY_CONFIG, 
@@ -246,8 +246,17 @@ export default function App() {
   }, [loadAccessRequests]);
 
   const pendingAccessRequestsCount = useMemo(() => {
-    return accessRequests.filter(r => r.status === 'pending').length;
-  }, [accessRequests]);
+    if (!authenticatedUser || !canUserManageRequests(authenticatedUser)) return 0;
+    if (authenticatedUser.role === 'Developer' || authenticatedUser.role === 'RO Admin') {
+      return accessRequests.filter(r => r.status === 'pending').length;
+    }
+    // IMO Admin: only pending requests within their designated IMO office
+    const adminOffice = (authenticatedUser.imoOffice || '').toLowerCase();
+    return accessRequests.filter(r => {
+      const reqOffice = (r.requestedOffice || '').toLowerCase();
+      return r.status === 'pending' && (reqOffice.includes(adminOffice) || adminOffice.includes(reqOffice));
+    }).length;
+  }, [accessRequests, authenticatedUser]);
 
   // Option 3: Android Native Double-Back-to-Exit Toast State
   const [showExitToast, setShowExitToast] = useState(false);

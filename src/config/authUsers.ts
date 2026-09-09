@@ -1187,9 +1187,7 @@ export function canUserManageRequests(user?: AuthUser | null): boolean {
   return (
     user.role === 'Developer' ||
     user.role === 'RO Admin' ||
-    user.role === 'RO Evaluator' ||
-    user.role === 'IMO Admin' ||
-    user.role === 'IMO Evaluator'
+    user.role === 'IMO Admin'
   );
 }
 
@@ -1198,29 +1196,29 @@ export function isMasterAdmin(user: AuthUser | null): boolean {
 }
 
 export function isRegionalAdmin(user: AuthUser | null): boolean {
-  return user?.role === 'RO Admin' || user?.role === 'RO Evaluator';
+  return user?.role === 'RO Admin';
 }
 
 export function isImoAdmin(user: AuthUser | null): boolean {
-  return user?.role === 'IMO Admin' || user?.role === 'IMO Evaluator';
+  return user?.role === 'IMO Admin';
 }
 
 export function getAdminJurisdictionLabel(user: AuthUser | null): string {
   if (!user) return 'None';
   if (user.role === 'Developer') return 'Master Jurisdiction (All Regional & IMOs)';
-  if (user.role === 'RO Admin' || user.role === 'RO Evaluator') return 'Regional Office & All IMOs Jurisdiction';
-  if (user.role === 'IMO Admin' || user.role === 'IMO Evaluator') {
+  if (user.role === 'RO Admin') return 'Regional Office & All IMOs Jurisdiction';
+  if (user.role === 'IMO Admin') {
     return `${user.imoOffice || 'IMO'} Jurisdiction`;
   }
-  return 'Standard User';
+  return 'Unauthorized / Non-Admin Role';
 }
 
 export function filterRequestsForAdmin(user: AuthUser | null, requests: AccessRequest[]): AccessRequest[] {
   if (!user || !canUserManageRequests(user)) return [];
-  if (user.role === 'Developer' || user.role === 'RO Admin' || user.role === 'RO Evaluator') {
+  if (user.role === 'Developer' || user.role === 'RO Admin') {
     return requests;
   }
-  // IMO Admin / Evaluator: only requests for their IMO
+  // IMO Admin: only requests for their designated IMO
   const adminImo = (user.imoOffice || '').toLowerCase();
   return requests.filter(r => {
     const reqOffice = (r.requestedOffice || '').toLowerCase();

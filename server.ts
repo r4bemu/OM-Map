@@ -698,6 +698,11 @@ export async function createApp() {
       const { id } = req.params;
       const { assignedRole, assignedOffice, assignedNis, reviewerName, reviewerRole } = req.body;
 
+      const normRole = normalizeServerUserRole(reviewerRole);
+      if (normRole !== 'Developer' && normRole !== 'RO Admin' && normRole !== 'IMO Admin') {
+        return res.status(403).json({ error: 'Access Denied: Only Office Administrators and the Developer can grant access requests.' });
+      }
+
       const requests = getAccessRequests();
       const index = requests.findIndex((r: any) => r.id === id);
       if (index === -1) {
@@ -705,6 +710,14 @@ export async function createApp() {
       }
 
       const item = requests[index];
+
+      // Disallow IMO Admin from granting Regional or Developer roles
+      if (normRole === 'IMO Admin') {
+        if (assignedRole === 'RO Admin' || assignedRole === 'RO Evaluator' || assignedRole === 'RO Reviewer' || assignedRole === 'RO Preparer' || assignedRole === 'Developer') {
+          return res.status(403).json({ error: 'Access Denied: IMO Administrators can only grant roles within their IMO office jurisdiction.' });
+        }
+      }
+
       item.status = 'approved';
       item.assignedRole = assignedRole || item.requestedRole || 'IMO Reviewer';
       item.assignedOffice = assignedOffice || item.requestedOffice || 'Regional Office IV-B';
@@ -727,6 +740,11 @@ export async function createApp() {
     try {
       const { id } = req.params;
       const { rejectionReason, reviewerName, reviewerRole } = req.body;
+
+      const normRole = normalizeServerUserRole(reviewerRole);
+      if (normRole !== 'Developer' && normRole !== 'RO Admin' && normRole !== 'IMO Admin') {
+        return res.status(403).json({ error: 'Access Denied: Only Office Administrators and the Developer can decline access requests.' });
+      }
 
       const requests = getAccessRequests();
       const index = requests.findIndex((r: any) => r.id === id);
