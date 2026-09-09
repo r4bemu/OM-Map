@@ -62,6 +62,29 @@ export function getNisOptionsForImo(imoOffice?: string): string[] {
   return ['All NIS', ...getPermittedNisList(imoOffice)];
 }
 
+export function isImoScopedRole(role?: UserRole): boolean {
+  if (!role) return false;
+  return ['IMO Admin', 'IMO Evaluator', 'IMO Reviewer', 'IMO Preparer', 'Field Personnel'].includes(role);
+}
+
+export function matchesImoOffice(itemImo?: string, targetImo?: string): boolean {
+  if (!targetImo || targetImo === 'All IMOs' || targetImo === 'Regional Office IV-B') return true;
+  if (!itemImo) return true;
+
+  const r = itemImo.toLowerCase();
+  const t = targetImo.toLowerCase();
+
+  const isMOMARO = (str: string) => str.includes('momaro') || str.includes('oriental') || str.includes('marinduque') || str.includes('romblon');
+  const isOccidental = (str: string) => str.includes('occidental') || str.includes('omimo');
+  const isPalawan = (str: string) => str.includes('palawan') || str.includes('pimo') || str.includes('palimo');
+
+  if (isMOMARO(t) && isMOMARO(r)) return true;
+  if (isOccidental(t) && isOccidental(r)) return true;
+  if (isPalawan(t) && isPalawan(r)) return true;
+
+  return r.includes(t) || t.includes(r);
+}
+
 export const DEFAULT_AUTH_USERS: AuthUser[] = [
   // ==========================================
   // 1. MASTER DEVELOPER ACCOUNT (1 Account)

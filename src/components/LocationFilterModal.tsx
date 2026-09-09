@@ -21,6 +21,8 @@ interface LocationFilterModalProps {
   onResetFilter: () => void;
   layers: GISLayer[];
   fieldReports?: FieldReport[];
+  isImoLocked?: boolean;
+  userImoOffice?: string;
 }
 
 // Standard Activity Categories Roster (12 Official Categories + Filters)
@@ -63,10 +65,12 @@ export const LocationFilterModal: React.FC<LocationFilterModalProps> = ({
   onApplyFilter,
   onResetFilter,
   layers,
-  fieldReports = []
+  fieldReports = [],
+  isImoLocked = false,
+  userImoOffice
 }) => {
   const [filterState, setFilterState] = useState<LocationFilter>({
-    imo: activeFilter.imo || 'All IMOs',
+    imo: isImoLocked && userImoOffice ? userImoOffice : (activeFilter.imo || 'All IMOs'),
     nis: activeFilter.nis || 'All NIS',
     province: activeFilter.province || 'All Provinces',
     activityCategory: activeFilter.activityCategory || 'All Activities'
@@ -74,12 +78,12 @@ export const LocationFilterModal: React.FC<LocationFilterModalProps> = ({
 
   useEffect(() => {
     setFilterState({
-      imo: activeFilter.imo || 'All IMOs',
+      imo: isImoLocked && userImoOffice ? userImoOffice : (activeFilter.imo || 'All IMOs'),
       nis: activeFilter.nis || 'All NIS',
       province: activeFilter.province || 'All Provinces',
       activityCategory: activeFilter.activityCategory || 'All Activities'
     });
-  }, [activeFilter, isOpen]);
+  }, [activeFilter, isOpen, isImoLocked, userImoOffice]);
 
   // Extract all feature entries from active GIS layers
   const featureList = useMemo(() => {
@@ -274,7 +278,7 @@ export const LocationFilterModal: React.FC<LocationFilterModalProps> = ({
 
   const handleReset = () => {
     const emptyFilter: LocationFilter = {
-      imo: 'All IMOs',
+      imo: isImoLocked && userImoOffice ? userImoOffice : 'All IMOs',
       nis: 'All NIS',
       province: 'All Provinces',
       activityCategory: 'All Activities'
@@ -322,14 +326,21 @@ export const LocationFilterModal: React.FC<LocationFilterModalProps> = ({
               <Building2 className="w-3.5 h-3.5" />
               <span>1. IMO Office Partition</span>
             </span>
-            {filterState.imo && filterState.imo !== 'All IMOs' && (
+            {isImoLocked ? (
+              <span className="text-[9px] bg-amber-500/15 border border-amber-500/30 text-amber-300 px-1.5 py-0.5 rounded font-semibold flex items-center gap-1">
+                🔒 Jurisdiction Locked
+              </span>
+            ) : filterState.imo && filterState.imo !== 'All IMOs' ? (
               <span className="text-[9px] bg-[#166534]/15 border border-[#166534]/30 text-[#166534] dark:text-emerald-300 px-1.5 py-0.2 rounded font-semibold">Active IMO</span>
-            )}
+            ) : null}
           </label>
           <select
             value={filterState.imo || 'All IMOs'}
             onChange={(e) => handleIMOChange(e.target.value)}
-            className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-[#166534] focus:ring-1 focus:ring-[#166534] transition cursor-pointer"
+            disabled={isImoLocked}
+            className={`w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-[#166534] focus:ring-1 focus:ring-[#166534] transition ${
+              isImoLocked ? 'opacity-80 cursor-not-allowed bg-slate-800/40 text-emerald-300 font-semibold' : 'cursor-pointer'
+            }`}
           >
             {imoOptions.map((opt) => (
               <option key={opt} value={opt}>

@@ -845,12 +845,24 @@ export async function createApp() {
     }
   });
 
-  // Get all GIS Layers
+  // Get all GIS Layers (Scoped by IMO if user is assigned to an IMO)
   app.get('/api/layers', async (req, res) => {
     try {
+      const requestedImo = req.query.imo as string | undefined;
+      const userRole = (req.query.role as string) || 'Viewer';
+
       const localBackup = loadSavedLayers();
       const firestoreLayers = await getFirestoreLayers(localBackup);
-      res.json({ layers: firestoreLayers });
+      let allLayers = firestoreLayers && firestoreLayers.length > 0 ? firestoreLayers : localBackup;
+
+      if (requestedImo && requestedImo !== 'All IMOs' && requestedImo !== 'Regional Office IV-B') {
+        allLayers = allLayers.filter((l: any) => {
+          if (!l.imoOffice) return true; // Keep non-IMO custom layers
+          return matchesImoOffice(l.imoOffice, requestedImo);
+        });
+      }
+
+      res.json({ layers: allLayers });
     } catch (err: any) {
       console.warn('Falling back to local layers:', err);
       res.json({ layers: loadSavedLayers() });
@@ -930,7 +942,7 @@ export async function createApp() {
       const firestoreReports = await getFirestoreReports(localBackup);
       let driveReports: any[] = [];
       try {
-        driveReports = await fetchReportsFromAllDriveFolders(clientToken);
+        driveReports = await fetchReportsFromAllDriveFolders(clientToken, false, requestedImo);
       } catch (dErr) {
         console.warn('Google Drive reports fetch fallback:', dErr);
       }
@@ -1355,7 +1367,7 @@ export async function createApp() {
     {
       id: '1xqXBkJAscqqCDgQRFbCAyQh46baehrQ1',
       name: 'Palawan IMO',
-      shortCode: 'PIMO'
+      shortCode: 'PALIMO'
     }
   ];
 
@@ -1368,8 +1380,8 @@ export async function createApp() {
     if (lower.includes('occidental') || lower.includes('omimo')) {
       return 'OMIMO';
     }
-    if (lower.includes('palawan') || lower.includes('pimo')) {
-      return 'PIMO';
+    if (lower.includes('palawan') || lower.includes('pimo') || lower.includes('palimo')) {
+      return 'PALIMO';
     }
     return imoName;
   };
@@ -1383,19 +1395,20 @@ export async function createApp() {
 
       const accessToken = await getOrRefreshServerDriveToken(clientToken);
 
-      // RBAC Permission Logic:
-      // - Viewer: Restricted to Folder 1 (MOMARO IMO) only
-      // - Field Engineer, Analyst, Admin, Developer: Unrestricted access to all 3 IMO folders
+      // RBAC & Jurisdiction Permission Logic:
+      // - IMO Users (IMO Admin, IMO Evaluator, IMO Reviewer, IMO Preparer, Field Personnel): Strictly restricted to their designated IMO folder
+      // - Regional Roles (Developer, RO Admin, RO Evaluator, RO Reviewer, RO Preparer): Permitted across all 3 IMO folders, or filtered by requested IMO
+      // - Viewer: Restricted to MOMARO IMO by default or specific requested IMO
       let permittedFolders = [...IMO_DRIVE_FOLDERS];
-      if (userRole === 'Viewer') {
-        permittedFolders = IMO_DRIVE_FOLDERS.filter(f => f.shortCode === 'MOMARO IMO' || f.name.includes('Mindoro Oriental'));
-      }
+      const isImoScopedRole = ['IMO Admin', 'IMO Evaluator', 'IMO Reviewer', 'IMO Preparer', 'Field Personnel'].includes(userRole);
 
-      if (requestedImo && requestedImo !== 'All IMOs') {
-        const filtered = permittedFolders.filter(f => f.name === requestedImo || f.shortCode === requestedImo || getShortImoName(requestedImo) === f.shortCode);
+      if (requestedImo && requestedImo !== 'All IMOs' && requestedImo !== 'Regional Office IV-B') {
+        const filtered = permittedFolders.filter(f => matchesImoOffice(f.name, requestedImo) || matchesImoOffice(f.shortCode, requestedImo));
         if (filtered.length > 0) {
           permittedFolders = filtered;
         }
+      } else if (isImoScopedRole || userRole === 'Viewer') {
+        permittedFolders = IMO_DRIVE_FOLDERS.filter(f => f.shortCode === 'MOMARO IMO');
       }
 
       const allDriveLayers: any[] = [];
@@ -1704,7 +1717,8 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
   app.post('/api/drive/sync-reports', async (req, res) => {
     try {
       const clientToken = req.headers['x-google-drive-token'] as string | undefined;
-      const driveReports = await fetchReportsFromAllDriveFolders(clientToken, true);
+      const targetImo = (req.query.imo as string) || req.body?.imo || req.body?.targetImo;
+      const driveReports = await fetchReportsFromAllDriveFolders(clientToken, true, targetImo);
       const localBackup = loadSavedReports();
       const merged = deduplicateById([...driveReports, ...localBackup]);
       saveReportsToFile(merged);

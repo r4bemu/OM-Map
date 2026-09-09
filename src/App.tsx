@@ -30,7 +30,7 @@ import {
 import { getIsoWeekInfo, getAvailableWeeksFromReports, isReportInWeek } from './utils/weekUtils';
 import { parseGISFile } from './utils/kmzParser';
 import { getAccessToken, uploadMaintenanceReportToDrive } from './lib/googleDriveService';
-import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers, fetchAccessRequestsApi, canUserManageRequests } from './config/authUsers';
+import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers, fetchAccessRequestsApi, canUserManageRequests, isImoScopedRole, matchesImoOffice } from './config/authUsers';
 import { MOCK_FIELD_REPORTS_2026 } from './data/mockFieldReports2026';
 import { 
   MAINTENANCE_ACTIVITY_CONFIG, 
@@ -504,6 +504,42 @@ export default function App() {
     activityCategory: 'All Activities'
   });
 
+  // Strict IMO Scoping Resolution
+  const isImoScoped = useMemo(() => {
+    if (isImoScopedRole(activeRole)) return true;
+    if (authenticatedUser?.imoOffice && authenticatedUser.imoOffice !== 'All IMOs' && authenticatedUser.imoOffice !== 'Regional Office IV-B' && !simulatedRole) {
+      return true;
+    }
+    return false;
+  }, [activeRole, authenticatedUser, simulatedRole]);
+
+  const userAssignedImo = useMemo(() => {
+    if (simulatedImo) return simulatedImo;
+    if (authenticatedUser?.imoOffice && authenticatedUser.imoOffice !== 'All IMOs' && authenticatedUser.imoOffice !== 'Regional Office IV-B') {
+      return authenticatedUser.imoOffice;
+    }
+    return 'All IMOs';
+  }, [simulatedImo, authenticatedUser]);
+
+  const effectiveImo = useMemo(() => {
+    if (isImoScoped && userAssignedImo !== 'All IMOs') {
+      return userAssignedImo;
+    }
+    return locationFilter.imo !== 'All IMOs' ? locationFilter.imo : (activeImo !== 'All IMOs' ? activeImo : 'All IMOs');
+  }, [isImoScoped, userAssignedImo, locationFilter.imo, activeImo]);
+
+  // Keep locationFilter synchronized to user's assigned IMO when scoped
+  useEffect(() => {
+    if (isImoScoped && userAssignedImo !== 'All IMOs') {
+      if (locationFilter.imo !== userAssignedImo) {
+        setLocationFilter(prev => ({
+          ...prev,
+          imo: userAssignedImo
+        }));
+      }
+    }
+  }, [isImoScoped, userAssignedImo, locationFilter.imo]);
+
   // Google Drive Submission / Saved Toast Notification State
   const [driveToast, setDriveToast] = useState<{
     id: string;
@@ -531,8 +567,10 @@ export default function App() {
     setIsSyncingDrive(true);
     setSyncProgress(null);
     try {
-      const effectiveImo = targetImo || (authenticatedUser?.imoOffice && authenticatedUser.imoOffice !== 'All IMOs' && authenticatedUser.imoOffice !== 'Regional Office IV-B' ? authenticatedUser.imoOffice : 'All IMOs');
-      const res = await fetch(`/api/drive/imo-layers?role=${encodeURIComponent(role)}&imo=${encodeURIComponent(effectiveImo)}`);
+      const imoToFetch = (isImoScoped && userAssignedImo !== 'All IMOs')
+        ? userAssignedImo
+        : (targetImo || effectiveImo);
+      const res = await fetch(`/api/drive/imo-layers?role=${encodeURIComponent(role)}&imo=${encodeURIComponent(imoToFetch)}`);
       if (res.ok) {
         const data = await res.json();
         if (data.layers && Array.isArray(data.layers)) {
@@ -564,8 +602,8 @@ export default function App() {
             if (lower.includes('occidental') || lower.includes('omimo')) {
               return 'OMIMO';
             }
-            if (lower.includes('palawan') || lower.includes('pimo')) {
-              return 'PIMO';
+            if (lower.includes('palawan') || lower.includes('pimo') || lower.includes('palimo')) {
+              return 'PALIMO';
             }
             return imoName;
           };
@@ -670,7 +708,10 @@ export default function App() {
             for (const dl of validLayers) {
               existingMap.set(dl.id, dl);
             }
-            const merged: GISLayer[] = Array.from(existingMap.values()) as GISLayer[];
+            let merged: GISLayer[] = Array.from(existingMap.values()) as GISLayer[];
+            if (isImoScoped && imoToFetch !== 'All IMOs') {
+              merged = merged.filter(l => !l.imoOffice || matchesImoOffice(l.imoOffice, imoToFetch));
+            }
             saveCachedLayersDB(merged).catch(() => {});
             return merged;
           });
@@ -682,27 +723,27 @@ export default function App() {
       setIsSyncingDrive(false);
       setSyncProgress(null);
     }
-  }, [authenticatedUser, setLayers]);
+  }, [authenticatedUser, setLayers, isImoScoped, userAssignedImo, effectiveImo]);
 
   // Re-trigger Drive layer sync when authenticated user, role, or IMO location filter changes
   useEffect(() => {
     if (!authenticatedUser) return;
-    const targetImo = locationFilter.imo !== 'All IMOs' ? locationFilter.imo : (activeImo !== 'All IMOs' ? activeImo : 'All IMOs');
+    const targetImo = effectiveImo;
     syncIMOFolderLayers(activeRole, targetImo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authenticatedUser?.id, activeRole, locationFilter.imo, activeImo]);
+  }, [authenticatedUser?.id, activeRole, effectiveImo]);
 
   // 1. Scoped Load from Backend API or Offline Storage (Runs strictly after user is authenticated)
   useEffect(() => {
     if (!authenticatedUser) return;
 
     async function loadData() {
-      const targetImo = locationFilter.imo !== 'All IMOs' ? locationFilter.imo : (activeImo !== 'All IMOs' ? activeImo : 'All IMOs');
+      const targetImo = effectiveImo;
 
       // Try loading layers from Express server
       let serverLayers: GISLayer[] | null = null;
       try {
-        const res = await fetch('/api/layers');
+        const res = await fetch(`/api/layers?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`);
         if (res.ok) {
           const data = await res.json();
           if (data.layers && data.layers.length > 0) {
@@ -715,7 +756,13 @@ export default function App() {
 
       // Try loading from IndexedDB
       const rawLocalCached = await getCachedLayersDB();
-      const localCached = rawLocalCached ? rawLocalCached.filter(l => !isMockLayer(l) && l.geometryType !== ('Polygon' as any) && (l as any).category !== 'Parcels') : null;
+      const localCached = rawLocalCached ? rawLocalCached.filter(l => {
+        if (isMockLayer(l) || l.geometryType === ('Polygon' as any) || (l as any).category === 'Parcels') return false;
+        if (isImoScoped && targetImo !== 'All IMOs') {
+          return !l.imoOffice || matchesImoOffice(l.imoOffice, targetImo);
+        }
+        return true;
+      }) : null;
 
       if (serverLayers && serverLayers.length > 0) {
         // Clean out polygon layers from server response
@@ -726,7 +773,10 @@ export default function App() {
           const localOnly = localCached.filter(l => !serverIds.has(l.id));
           if (localOnly.length > 0) {
             console.log(`Found ${localOnly.length} local-only layer(s). Auto-syncing to cloud database...`);
-            const merged = [...cleanServerLayers, ...localOnly];
+            let merged = [...cleanServerLayers, ...localOnly];
+            if (isImoScoped && targetImo !== 'All IMOs') {
+              merged = merged.filter(l => !l.imoOffice || matchesImoOffice(l.imoOffice, targetImo));
+            }
             setLayers(merged);
             await saveCachedLayersDB(merged);
             for (const missingLayer of localOnly) {
@@ -743,8 +793,12 @@ export default function App() {
             return;
           }
         }
-        setLayers(cleanServerLayers);
-        await saveCachedLayersDB(cleanServerLayers);
+        let finalLayers = cleanServerLayers;
+        if (isImoScoped && targetImo !== 'All IMOs') {
+          finalLayers = finalLayers.filter(l => !l.imoOffice || matchesImoOffice(l.imoOffice, targetImo));
+        }
+        setLayers(finalLayers);
+        await saveCachedLayersDB(finalLayers);
       } else if (localCached && localCached.length > 0) {
         setLayers(localCached);
         for (const missingLayer of localCached) {
@@ -765,7 +819,10 @@ export default function App() {
         if (!cached || cached.length === 0) {
           cached = getOfflineReports();
         }
-        const cleanCached = (cached || []).filter(r => !r.id?.startsWith('mock-') && r.id !== 'report-1' && !(r as any).isMock);
+        let cleanCached = (cached || []).filter(r => !r.id?.startsWith('mock-') && r.id !== 'report-1' && !(r as any).isMock);
+        if (isImoScoped && targetImo !== 'All IMOs') {
+          cleanCached = cleanCached.filter(r => !r.imoOffice || matchesImoOffice(r.imoOffice, targetImo));
+        }
         setFieldReports(cleanCached);
         if (cleanCached.length > 0) {
           saveOfflineReports(cleanCached);
@@ -795,7 +852,10 @@ export default function App() {
           const data = await res.json();
           if (Array.isArray(data.reports)) {
             setFieldReports(prev => {
-              const combined = deduplicateItems([...data.reports, ...prev]);
+              let combined = deduplicateItems([...data.reports, ...prev]);
+              if (isImoScoped && targetImo !== 'All IMOs') {
+                combined = combined.filter(r => !r.imoOffice || matchesImoOffice(r.imoOffice, targetImo));
+              }
               saveOfflineReports(combined);
               return combined;
             });
@@ -807,12 +867,13 @@ export default function App() {
     }
 
     loadData();
-  }, [authenticatedUser?.id, activeRole, locationFilter.imo, activeImo, setFieldReports, setLayers]);
+  }, [authenticatedUser?.id, activeRole, effectiveImo, isImoScoped, setFieldReports, setLayers]);
 
   // Fetch available report weeks for the user's IMO & role scope
   const fetchAvailableCloudWeeks = useCallback(async (role: UserRole, targetImo?: string) => {
     try {
-      const res = await fetch(`/api/reports/available-weeks?role=${encodeURIComponent(role)}&imo=${encodeURIComponent(targetImo || 'All IMOs')}`);
+      const imoToFetch = targetImo || effectiveImo;
+      const res = await fetch(`/api/reports/available-weeks?role=${encodeURIComponent(role)}&imo=${encodeURIComponent(imoToFetch)}`);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.weeks)) {
@@ -822,44 +883,50 @@ export default function App() {
     } catch (err) {
       console.warn('Failed to fetch available cloud weeks:', err);
     }
-  }, []);
+  }, [effectiveImo]);
 
   // Download a specific weekly batch into local cache
   const handleDownloadWeek = useCallback(async (weekKey: string) => {
     if (isOffline) return;
     try {
       setIsDownloadingWeek(weekKey);
-      const res = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(locationFilter.imo || 'All IMOs')}&weekKey=${encodeURIComponent(weekKey)}`);
+      const res = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(effectiveImo)}&weekKey=${encodeURIComponent(weekKey)}`);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.reports)) {
           setFieldReports(prev => {
-            const combined = deduplicateItems([...prev, ...data.reports]);
+            let combined = deduplicateItems([...prev, ...data.reports]);
+            if (isImoScoped && effectiveImo !== 'All IMOs') {
+              combined = combined.filter(r => !r.imoOffice || matchesImoOffice(r.imoOffice, effectiveImo));
+            }
             saveOfflineReports(combined);
             return combined;
           });
           markWeekDownloaded(weekKey);
         }
       }
-      await fetchAvailableCloudWeeks(activeRole, locationFilter.imo);
+      await fetchAvailableCloudWeeks(activeRole, effectiveImo);
     } catch (err) {
       console.error('Failed to download weekly batch:', err);
     } finally {
       setIsDownloadingWeek(null);
     }
-  }, [activeRole, isOffline, locationFilter.imo, fetchAvailableCloudWeeks]);
+  }, [activeRole, isOffline, effectiveImo, isImoScoped, fetchAvailableCloudWeeks, setFieldReports]);
 
   // Download all available historical weeks into local cache
   const handleDownloadAllWeeks = useCallback(async () => {
     if (isOffline) return;
     try {
       setIsDownloadingWeek('all');
-      const res = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(locationFilter.imo || 'All IMOs')}&timeScope=all`);
+      const res = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(effectiveImo)}&timeScope=all`);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.reports)) {
           setFieldReports(prev => {
-            const combined = deduplicateItems([...prev, ...data.reports]);
+            let combined = deduplicateItems([...prev, ...data.reports]);
+            if (isImoScoped && effectiveImo !== 'All IMOs') {
+              combined = combined.filter(r => !r.imoOffice || matchesImoOffice(r.imoOffice, effectiveImo));
+            }
             saveOfflineReports(combined);
             return combined;
           });
@@ -868,13 +935,13 @@ export default function App() {
           }
         }
       }
-      await fetchAvailableCloudWeeks(activeRole, locationFilter.imo);
+      await fetchAvailableCloudWeeks(activeRole, effectiveImo);
     } catch (err) {
       console.error('Failed to download all weekly batches:', err);
     } finally {
       setIsDownloadingWeek(null);
     }
-  }, [activeRole, availableCloudWeeks, isOffline, locationFilter.imo, fetchAvailableCloudWeeks]);
+  }, [activeRole, availableCloudWeeks, isOffline, effectiveImo, isImoScoped, fetchAvailableCloudWeeks, setFieldReports]);
 
   // Ensure Maintenance Activity Category Vector Layers & Operational Status Reports layer categories exist in GIS Layers state
   useEffect(() => {
@@ -963,12 +1030,15 @@ export default function App() {
         setIsSyncing(true);
         const result = await syncOfflineQueueToServer();
         if (result.syncedCount > 0) {
-          const res = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(locationFilter.imo || 'All IMOs')}`);
+          const res = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(effectiveImo)}`);
           if (res.ok) {
             const data = await res.json();
             if (Array.isArray(data.reports)) {
               setFieldReports(prev => {
-                const combined = deduplicateItems([...prev, ...data.reports]);
+                let combined = deduplicateItems([...prev, ...data.reports]);
+                if (isImoScoped && effectiveImo !== 'All IMOs') {
+                  combined = combined.filter(r => !r.imoOffice || matchesImoOffice(r.imoOffice, effectiveImo));
+                }
                 saveOfflineReports(combined);
                 return combined;
               });
@@ -993,14 +1063,16 @@ export default function App() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [activeRole, locationFilter.imo, setFieldReports]);  // Relaxed 30-Minute Automatic Background Sync (Runs strictly when user is authenticated)
+  }, [activeRole, effectiveImo, isImoScoped, setFieldReports]);
+
+  // Relaxed 30-Minute Automatic Background Sync (Runs strictly when user is authenticated)
   useEffect(() => {
     let isCancelled = false;
 
     const performBackgroundSync = async () => {
       if (!authenticatedUser || isOffline) return;
       try {
-        const targetImo = locationFilter.imo !== 'All IMOs' ? locationFilter.imo : (activeImo !== 'All IMOs' ? activeImo : 'All IMOs');
+        const targetImo = effectiveImo;
 
         // 1. Fetch latest field reports for 2-week operational window
         const res = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}&timeScope=current_and_prev_week`);
@@ -1008,7 +1080,10 @@ export default function App() {
           const data = await res.json();
           if (Array.isArray(data.reports)) {
             setFieldReports(prev => {
-              const combined = deduplicateItems([...data.reports, ...prev]);
+              let combined = deduplicateItems([...data.reports, ...prev]);
+              if (isImoScoped && targetImo !== 'All IMOs') {
+                combined = combined.filter(r => !r.imoOffice || matchesImoOffice(r.imoOffice, targetImo));
+              }
               saveOfflineReports(combined);
               return combined;
             });
@@ -1031,7 +1106,7 @@ export default function App() {
       isCancelled = true;
       clearInterval(intervalId);
     };
-  }, [authenticatedUser, activeRole, locationFilter.imo, activeImo, isOffline, setFieldReports, syncIMOFolderLayers]);
+  }, [authenticatedUser, activeRole, effectiveImo, isImoScoped, isOffline, setFieldReports, syncIMOFolderLayers]);
 
   // Stable Refs for Active Context to guarantee zero sync cancellation on re-renders
   const activeRoleRef = useRef(activeRole);
@@ -1053,7 +1128,7 @@ export default function App() {
       setSyncSteps(INITIAL_SYNC_STEPS);
 
       const curRole = customRole || activeRoleRef.current;
-      const curImo = customImo || (imoFilterRef.current && imoFilterRef.current !== 'All IMOs' ? imoFilterRef.current : (authenticatedUser?.imoOffice && authenticatedUser.imoOffice !== 'All IMOs' && authenticatedUser.imoOffice !== 'Regional Office IV-B' ? authenticatedUser.imoOffice : 'All IMOs'));
+      const curImo = customImo || (isImoScoped && userAssignedImo !== 'All IMOs' ? userAssignedImo : (imoFilterRef.current && imoFilterRef.current !== 'All IMOs' ? imoFilterRef.current : (authenticatedUser?.imoOffice && authenticatedUser.imoOffice !== 'All IMOs' && authenticatedUser.imoOffice !== 'Regional Office IV-B' ? authenticatedUser.imoOffice : 'All IMOs')));
 
       // FAST 3-TRACK PARALLEL SYNC PIPELINE
       setSyncStatusMessage(`Synchronizing data in parallel for ${curImo}...`);
@@ -1080,7 +1155,7 @@ export default function App() {
           if (driveToken) headers['x-google-drive-token'] = driveToken;
 
           const [driveSyncRes, repRes, weeksRes] = await Promise.allSettled([
-            fetch('/api/drive/sync-reports', { method: 'POST', headers }).catch(() => {}),
+            fetch(`/api/drive/sync-reports?imo=${encodeURIComponent(curImo)}`, { method: 'POST', headers }).catch(() => {}),
             fetch(`/api/reports?role=${encodeURIComponent(curRole)}&imo=${encodeURIComponent(curImo)}&timeScope=${timeScope}`, { headers }),
             fetchAvailableCloudWeeks(curRole, curImo)
           ]);
@@ -1089,7 +1164,10 @@ export default function App() {
             const data = await repRes.value.json();
             if (Array.isArray(data.reports)) {
               setFieldReports(prev => {
-                const combined = deduplicateItems([...data.reports, ...prev]);
+                let combined = deduplicateItems([...data.reports, ...prev]);
+                if (isImoScoped && curImo !== 'All IMOs') {
+                  combined = combined.filter(r => !r.imoOffice || matchesImoOffice(r.imoOffice, curImo));
+                }
                 saveOfflineReports(combined);
                 return combined;
               });
@@ -1128,7 +1206,7 @@ export default function App() {
         setSyncSteps(INITIAL_SYNC_STEPS);
       }, 750);
     }
-  }, [authenticatedUser, setFieldReports, fetchAvailableCloudWeeks, syncIMOFolderLayers]);
+  }, [authenticatedUser, setFieldReports, fetchAvailableCloudWeeks, syncIMOFolderLayers, isImoScoped, userAssignedImo]);
 
   // Expose as handleSyncNow for manual navbar trigger
   const handleSyncNow = performFullSync;
@@ -1978,13 +2056,15 @@ export default function App() {
           activeFilter={locationFilter}
           onApplyFilter={(newFilter) => setLocationFilter(newFilter)}
           onResetFilter={() => setLocationFilter({
-            imo: 'All IMOs',
+            imo: isImoScoped && userAssignedImo !== 'All IMOs' ? userAssignedImo : 'All IMOs',
             nis: 'All NIS',
             province: 'All Provinces',
             activityCategory: 'All Activities'
           })}
           layers={layers}
           fieldReports={fieldReports}
+          isImoLocked={isImoScoped && userAssignedImo !== 'All IMOs'}
+          userImoOffice={userAssignedImo}
         />
       )}
 

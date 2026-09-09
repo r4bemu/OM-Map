@@ -802,25 +802,59 @@ const CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes cache
 // Discover and fetch field reports from Google Drive with 1-Request Manifest Verification
 export async function fetchReportsFromAllDriveFolders(
   providedToken?: string,
-  forceRefresh: boolean = false
+  forceRefresh: boolean = false,
+  targetImo?: string
 ): Promise<any[]> {
+  const isImoSpecific = Boolean(targetImo && targetImo !== 'All IMOs' && targetImo !== 'Regional Office IV-B');
+
+  const filterByImo = (list: any[]) => {
+    if (!isImoSpecific || !targetImo) return list;
+    const lower = targetImo.toLowerCase();
+    const isMOMARO = (str: string) => str.includes('momaro') || str.includes('oriental') || str.includes('marinduque') || str.includes('romblon');
+    const isOccidental = (str: string) => str.includes('occidental') || str.includes('omimo');
+    const isPalawan = (str: string) => str.includes('palawan') || str.includes('pimo') || str.includes('palimo');
+
+    return list.filter(r => {
+      const rImo = (r.imoOffice || '').toLowerCase();
+      if (isMOMARO(lower) && isMOMARO(rImo)) return true;
+      if (isOccidental(lower) && isOccidental(rImo)) return true;
+      if (isPalawan(lower) && isPalawan(rImo)) return true;
+      return rImo.includes(lower) || lower.includes(rImo);
+    });
+  };
+
   const now = Date.now();
   if (!forceRefresh && driveReportsCache.length > 0 && (now - driveReportsCacheTime < CACHE_TTL_MS)) {
-    return driveReportsCache;
+    return filterByImo(driveReportsCache);
   }
 
   const token = await getOrRefreshServerDriveToken(providedToken);
   if (!token) {
     console.warn('⚠️ No Google Drive token available to fetch reports.');
-    return driveReportsCache;
+    return filterByImo(driveReportsCache);
   }
 
   try {
-    const folders: Record<string, string> = {
+    let folders: Record<string, string> = {
       'Mindoro Oriental-Marinduque-Romblon IMO': '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb',
       'Occidental Mindoro IMO': '1EUAFseU-S5laT0oxRIEwBuXRgppqOUUf',
       'Palawan IMO': '1bzraus7QiL8U3ZDSwLfgfLvdc1G5yMKB'
     };
+
+    if (isImoSpecific && targetImo) {
+      const lower = targetImo.toLowerCase();
+      const filtered: Record<string, string> = {};
+      if (lower.includes('momaro') || lower.includes('oriental') || lower.includes('marinduque') || lower.includes('romblon')) {
+        filtered['Mindoro Oriental-Marinduque-Romblon IMO'] = '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb';
+      } else if (lower.includes('occidental') || lower.includes('omimo')) {
+        filtered['Occidental Mindoro IMO'] = '1EUAFseU-S5laT0oxRIEwBuXRgppqOUUf';
+      } else if (lower.includes('palawan') || lower.includes('pimo') || lower.includes('palimo')) {
+        filtered['Palawan IMO'] = '1bzraus7QiL8U3ZDSwLfgfLvdc1G5yMKB';
+      }
+      if (Object.keys(filtered).length > 0) {
+        folders = filtered;
+      }
+    }
 
     const localBackup = loadServerReportsInternal();
     const localManifest = loadLocalManifest();
@@ -926,11 +960,11 @@ export async function fetchReportsFromAllDriveFolders(
           reportsIndex: combinedReportsIndex
         });
 
-        return driveReportsCache;
+        return filterByImo(driveReportsCache);
       } else {
         driveReportsCache = localBackup;
         driveReportsCacheTime = Date.now();
-        return driveReportsCache;
+        return filterByImo(driveReportsCache);
       }
     }
 
@@ -1048,9 +1082,9 @@ export async function fetchReportsFromAllDriveFolders(
     });
 
     console.log(`✅ Created and uploaded initial Drive Manifest with ${initialManifest.totalReports} reports.`);
-    return driveReportsCache;
+    return filterByImo(driveReportsCache);
   } catch (err) {
     console.error('Error fetching reports from Google Drive:', err);
-    return driveReportsCache;
+    return filterByImo(driveReportsCache);
   }
 }
