@@ -1,4 +1,4 @@
-import { FieldReport, GISLayer } from '../types';
+import { FieldReport, GISLayer, UserRole } from '../types';
 
 const OFFLINE_REPORTS_KEY = 'geopulse_offline_field_reports_v2';
 const DOWNLOADED_WEEKS_KEY = 'geopulse_downloaded_week_keys_v1';
@@ -336,15 +336,16 @@ export function setLastOverhaulTimestamp(timestampIso: string = new Date().toISO
   } catch (_) {}
 }
 
-export function isOverhaulAllowedToday(): { allowed: boolean; lastRun: string | null; formattedDate: string | null } {
+export function isOverhaulAllowedToday(userRole?: UserRole): { allowed: boolean; lastRun: string | null; formattedDate: string | null; isExempt: boolean } {
   try {
+    const isExempt = Boolean(userRole && ['Developer', 'RO Admin', 'RO Evaluator'].includes(userRole));
     const lastIso = getLastOverhaulTimestamp();
     if (!lastIso) {
-      return { allowed: true, lastRun: null, formattedDate: null };
+      return { allowed: true, lastRun: null, formattedDate: null, isExempt };
     }
     const lastDate = new Date(lastIso);
     if (isNaN(lastDate.getTime())) {
-      return { allowed: true, lastRun: null, formattedDate: null };
+      return { allowed: true, lastRun: null, formattedDate: null, isExempt };
     }
     const now = new Date();
     const isSameDay = lastDate.getFullYear() === now.getFullYear() &&
@@ -360,12 +361,13 @@ export function isOverhaulAllowedToday(): { allowed: boolean; lastRun: string | 
     });
 
     return {
-      allowed: !isSameDay,
+      allowed: isExempt ? true : !isSameDay,
       lastRun: lastIso,
-      formattedDate
+      formattedDate,
+      isExempt
     };
   } catch (_) {
-    return { allowed: true, lastRun: null, formattedDate: null };
+    return { allowed: true, lastRun: null, formattedDate: null, isExempt: false };
   }
 }
 

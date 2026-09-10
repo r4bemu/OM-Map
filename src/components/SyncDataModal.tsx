@@ -12,7 +12,7 @@ import {
   ShieldAlert,
   Calendar
 } from 'lucide-react';
-import { AvailableCloudWeek } from '../types';
+import { AvailableCloudWeek, UserRole } from '../types';
 import { isOverhaulAllowedToday } from '../utils/offlineStorage';
 
 interface SyncDataModalProps {
@@ -28,6 +28,7 @@ interface SyncDataModalProps {
   isDownloadingWeek?: string | null;
   cachedWeekKeys?: Set<string>;
   cachedReportsCount?: number;
+  currentRole?: UserRole;
 }
 
 export const SyncDataModal: React.FC<SyncDataModalProps> = ({
@@ -42,12 +43,13 @@ export const SyncDataModal: React.FC<SyncDataModalProps> = ({
   onDownloadAllWeeks,
   isDownloadingWeek = null,
   cachedWeekKeys = new Set(),
-  cachedReportsCount = 0
+  cachedReportsCount = 0,
+  currentRole
 }) => {
   const [isOverhaulModalOpen, setIsOverhaulModalOpen] = useState<boolean>(false);
   const [isExecutingOverhaul, setIsExecutingOverhaul] = useState<boolean>(false);
 
-  const overhaulStatus = isOverhaulAllowedToday();
+  const overhaulStatus = isOverhaulAllowedToday(currentRole);
 
   const handleConfirmOverhaul = async () => {
     if (!onFullOverhaul || !overhaulStatus.allowed || isExecutingOverhaul) return;
@@ -322,6 +324,15 @@ export const SyncDataModal: React.FC<SyncDataModalProps> = ({
                 </span>
                 <span className="font-semibold text-emerald-400">~10 MB - 12 MB (Full GeoJSON &amp; Reports)</span>
               </div>
+              {overhaulStatus.isExempt && (
+                <div className="flex items-center justify-between pt-1 border-t border-slate-700/60 text-slate-300">
+                  <span className="text-slate-400">Rate Limit Status:</span>
+                  <span className="text-[10px] px-2 py-0.5 bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 rounded font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                    <span>Unlimited Overhaul Access ({currentRole})</span>
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Unsynced Reports Warning */}

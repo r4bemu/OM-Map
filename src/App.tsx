@@ -2237,6 +2237,7 @@ export default function App() {
           isDownloadingWeek={isDownloadingWeek}
           cachedWeekKeys={cachedWeekKeys}
           cachedReportsCount={fieldReports.length}
+          currentRole={activeRole}
         />
       )}
 
