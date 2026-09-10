@@ -252,6 +252,14 @@ function deduplicateById<T extends { id: string }>(items: T[]): T[] {
   return Array.from(map.values());
 }
 
+function getImageMimeType(buf: Buffer): string {
+  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'image/jpeg';
+  if (buf.length >= 8 && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return 'image/png';
+  if (buf.length >= 12 && buf.subarray(0, 4).toString() === 'RIFF' && buf.subarray(8, 12).toString() === 'WEBP') return 'image/webp';
+  if (buf.length >= 6 && (buf.subarray(0, 6).toString() === 'GIF87a' || buf.subarray(0, 6).toString() === 'GIF89a')) return 'image/gif';
+  return 'image/jpeg';
+}
+
 function matchesImoOffice(reportImo?: string, targetImo?: string): boolean {
   if (!targetImo || targetImo === 'All IMOs' || targetImo === 'Regional Office IV-B') return true;
   if (!reportImo) return true;
@@ -947,8 +955,8 @@ export async function createApp() {
         console.warn('Google Drive reports fetch fallback:', dErr);
       }
 
-      // Combine cloud Drive reports, Firestore cloud database reports, and local backup reports
-      let filteredReports = deduplicateById([...driveReports, ...firestoreReports, ...localBackup]);
+      // Combine cloud Drive reports, Firestore cloud database reports, and local backup reports (Drive reports take precedence)
+      let filteredReports = deduplicateById([...localBackup, ...firestoreReports, ...driveReports]);
 
       if (userRole === 'Viewer') {
         filteredReports = filteredReports.filter((r: any) => {
@@ -1535,16 +1543,18 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
     }
   });
 
-  // Clear server-side Drive feature cache while PRESERVING custom layer configurations
+  // Clear server-side Drive feature cache while PRESERVING custom layer configurations and inspection photos
   app.post('/api/drive/clear-cache', (req, res) => {
     try {
-      // 1. Delete cached raw files in DRIVE_CACHE_DIR
+      // 1. Delete cached raw vector files in DRIVE_CACHE_DIR (preserve photo_*.bin files)
       if (fs.existsSync(DRIVE_CACHE_DIR)) {
         const files = fs.readdirSync(DRIVE_CACHE_DIR);
         for (const file of files) {
-          try {
-            fs.unlinkSync(path.join(DRIVE_CACHE_DIR, file));
-          } catch (e) {}
+          if (!file.startsWith('photo_')) {
+            try {
+              fs.unlinkSync(path.join(DRIVE_CACHE_DIR, file));
+            } catch (e) {}
+          }
         }
       }
 
@@ -1584,10 +1594,10 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
       const { photoId } = req.params;
       ensureDataDir();
       const possiblePaths = [
+        path.join(DRIVE_CACHE_DIR, `photo_${photoId}.bin`),
         path.join(PHOTOS_DIR, `${photoId}.jpg`),
         path.join(PHOTOS_DIR, `${photoId}.png`),
         path.join(PHOTOS_DIR, `${photoId}.bin`),
-        path.join(DRIVE_CACHE_DIR, `photo_${photoId}.bin`),
         path.join(DRIVE_CACHE_DIR, `${photoId}.bin`)
       ];
 
@@ -1595,9 +1605,12 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
         if (fs.existsSync(p)) {
           const stats = fs.statSync(p);
           if (stats.size > 0) {
-            res.setHeader('Content-Type', p.endsWith('.png') ? 'image/png' : 'image/jpeg');
+            const buf = fs.readFileSync(p);
+            const mimeType = getImageMimeType(buf);
+            res.setHeader('Content-Type', mimeType);
+            res.setHeader('Access-Control-Allow-Origin', '*');
             res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
-            return fs.createReadStream(p).pipe(res);
+            return res.send(buf);
           }
         }
       }
@@ -1619,7 +1632,8 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
         path.join(DRIVE_CACHE_DIR, `photo_${fileId}.bin`),
         path.join(DRIVE_CACHE_DIR, `${fileId}.bin`),
         path.join(PHOTOS_DIR, `${fileId}.jpg`),
-        path.join(PHOTOS_DIR, `${fileId}.png`)
+        path.join(PHOTOS_DIR, `${fileId}.png`),
+        path.join(PHOTOS_DIR, `${fileId}.bin`)
       ];
 
       for (const cachedPath of possibleDiskPaths) {
@@ -1627,9 +1641,12 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
           try {
             const stats = fs.statSync(cachedPath);
             if (stats.size > 0) {
-              res.setHeader('Content-Type', 'image/jpeg');
+              const buf = fs.readFileSync(cachedPath);
+              const mimeType = getImageMimeType(buf);
+              res.setHeader('Content-Type', mimeType);
+              res.setHeader('Access-Control-Allow-Origin', '*');
               res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
-              return fs.createReadStream(cachedPath).pipe(res);
+              return res.send(buf);
             }
           } catch (_) {}
         }
@@ -1644,9 +1661,12 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
               saveBase64PhotoToDisk(fileId, p.url, fileId);
               const cached = path.join(DRIVE_CACHE_DIR, `photo_${fileId}.bin`);
               if (fs.existsSync(cached)) {
-                res.setHeader('Content-Type', 'image/jpeg');
+                const buf = fs.readFileSync(cached);
+                const mimeType = getImageMimeType(buf);
+                res.setHeader('Content-Type', mimeType);
+                res.setHeader('Access-Control-Allow-Origin', '*');
                 res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
-                return fs.createReadStream(cached).pipe(res);
+                return res.send(buf);
               }
             }
           }
@@ -1655,9 +1675,12 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
           saveBase64PhotoToDisk(fileId, r.photoUrl, fileId);
           const cached = path.join(DRIVE_CACHE_DIR, `photo_${fileId}.bin`);
           if (fs.existsSync(cached)) {
-            res.setHeader('Content-Type', 'image/jpeg');
+            const buf = fs.readFileSync(cached);
+            const mimeType = getImageMimeType(buf);
+            res.setHeader('Content-Type', mimeType);
+            res.setHeader('Access-Control-Allow-Origin', '*');
             res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
-            return fs.createReadStream(cached).pipe(res);
+            return res.send(buf);
           }
         }
       }
@@ -1674,7 +1697,9 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
             try {
               fs.writeFileSync(cachedPhotoPath, buffer);
             } catch (_) {}
-            res.setHeader('Content-Type', 'image/jpeg');
+            const mimeType = getImageMimeType(buffer);
+            res.setHeader('Content-Type', mimeType);
+            res.setHeader('Access-Control-Allow-Origin', '*');
             res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
             return res.send(buffer);
           }
@@ -1697,7 +1722,7 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
       const targetImo = (req.query.imo as string) || req.body?.imo || req.body?.targetImo;
       const driveReports = await fetchReportsFromAllDriveFolders(clientToken, true, targetImo);
       const localBackup = loadSavedReports();
-      const merged = deduplicateById([...driveReports, ...localBackup]);
+      const merged = deduplicateById([...localBackup, ...driveReports]);
       saveReportsToFile(merged);
       res.json({ success: true, count: merged.length, reports: merged });
     } catch (err: any) {

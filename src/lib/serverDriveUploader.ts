@@ -457,28 +457,30 @@ ${report.remarks || 'No additional remarks provided.'}
 6. ATTACHED INSPECTION PHOTOS
 -------------------------------------------------------------------
 Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)}
-(Photos are uploaded as separate image files in this Google Drive subfolder)
 ===================================================================
-`.trim();
+`;
 
-    // 3. Upload Human-Readable Audit Summary Text File & Raw Data JSON
-    const summaryFileName = `Summary_${report.id}.txt`;
-    await uploadTextFileToFolder(accessToken, reportFolderId, summaryFileName, textSummary, 'text/plain');
-
-    const jsonFileName = `Data_${report.id}.json`;
-    await uploadTextFileToFolder(accessToken, reportFolderId, jsonFileName, JSON.stringify(report, null, 2), 'application/json');
-
-    // 4. Upload ALL Attached High-Resolution Inspection Photos
+    // 3. Upload ALL Attached High-Resolution Inspection Photos FIRST & Pre-Cache on Disk
     let photoCount = 0;
     const photosList = Array.isArray(report.photos) && report.photos.length > 0 
       ? report.photos 
       : (report.photoUrl ? [{ id: 'p1', url: report.photoUrl, stage: 'Photo' }] : []);
 
-    for (let i = 0; i < photosList.length; i++) {
-      const photo = photosList[i];
-      if (!photo || !photo.url) continue;
+    const DRIVE_CACHE_DIR = path.join(DATA_DIR, 'drive_cache');
+    if (!fs.existsSync(DRIVE_CACHE_DIR)) {
+      try { fs.mkdirSync(DRIVE_CACHE_DIR, { recursive: true }); } catch (e) {}
+    }
 
-      const stageName = (photo.stage || `Stage_${i + 1}`).replace(/[^a-zA-Z0-9]/g, '');
+    const updatedPhotos: any[] = [];
+
+    for (let i = 0; i < photosList.length; i++) {
+      const photo = { ...photosList[i] };
+      if (!photo || !photo.url) {
+        updatedPhotos.push(photo);
+        continue;
+      }
+
+      const stageName = ((photo.stage || ('Stage_' + (i + 1))) as string).replace(/[^a-zA-Z0-9]/g, '');
       const photoImo = photo.imoOffice || report.imoOffice || imoOffice;
       const photoLoc = photo.locationName || report.locationName || 'Irrigation Facility';
       const photoCanal = photo.canalSegment || report.canalSegment || '';
@@ -487,7 +489,7 @@ Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)
       const photoLng = photo.lng ?? report.lng ?? '';
       const capturedDate = photo.capturedAt || report.createdAt || new Date().toISOString();
 
-      const photoDescription = `NIA O&M Field Photo | IMO: ${photoImo} | Location: ${photoLoc}${photoCanal ? ` | Canal: ${photoCanal}` : ''}${photoParcel ? ` | Parcel: ${photoParcel}` : ''} | GPS: ${photoLat}, ${photoLng} | Stage: ${photo.stage || 'During'} | Captured: ${capturedDate}`;
+      const photoDescription = 'NIA O&M Field Photo | IMO: ' + photoImo + ' | Location: ' + photoLoc + (photoCanal ? ' | Canal: ' + photoCanal : '') + (photoParcel ? ' | Parcel: ' + photoParcel : '') + ' | GPS: ' + photoLat + ', ' + photoLng + ' | Stage: ' + (photo.stage || 'During') + ' | Captured: ' + capturedDate;
 
       const photoAppProps: Record<string, string> = {
         imoOffice: String(photoImo),
@@ -501,13 +503,16 @@ Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)
         capturedAt: String(capturedDate)
       };
 
+      let uploadedDriveFile: any = null;
+      let rawImageBuffer: Buffer | null = null;
+
       if (photo.url.startsWith('data:image/')) {
         try {
           const matches = photo.url.match(/^data:(image\/[^;]+);base64,([\s\S]+)$/);
           if (matches) {
             const rawMime = matches[1].toLowerCase();
             const cleanBase64 = matches[2].replace(/[\r\n\s]/g, '');
-            const imageBuffer = Buffer.from(cleanBase64, 'base64');
+            rawImageBuffer = Buffer.from(cleanBase64, 'base64');
             
             let ext = 'jpeg';
             if (rawMime.includes('png')) ext = 'png';
@@ -516,41 +521,68 @@ Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)
             else if (rawMime.includes('heic')) ext = 'heic';
             else if (rawMime.includes('jpg') || rawMime.includes('jpeg')) ext = 'jpg';
 
-            const photoFileName = `Photo_${i + 1}_${stageName}.${ext}`;
-            await uploadBinaryToFolder(accessToken, reportFolderId, photoFileName, imageBuffer, rawMime, {
+            const photoFileName = 'Photo_' + (i + 1) + '_' + stageName + '.' + ext;
+            uploadedDriveFile = await uploadBinaryToFolder(accessToken, reportFolderId, photoFileName, rawImageBuffer, rawMime, {
               description: photoDescription,
               appProperties: photoAppProps
             });
             photoCount++;
-            console.log(`📸 Successfully uploaded Photo ${i + 1}/${photosList.length} (${stageName}) [IMO: ${photoImo}, Loc: ${photoLoc}] to Google Drive folder ${reportFolderId}`);
-          } else {
-            console.warn(`Photo ${i + 1} did not match base64 pattern, skipping.`);
+            console.log('[Photo Upload] Successfully uploaded Photo ' + (i + 1) + '/' + photosList.length + ' (' + stageName + ') to Drive folder ' + reportFolderId);
           }
         } catch (e) {
-          console.warn(`Failed to upload base64 photo ${i + 1} to Drive:`, e);
+          console.warn('[Photo Upload] Failed to upload base64 photo ' + (i + 1) + ' to Drive:', e);
         }
       } else if (photo.url.startsWith('http://') || photo.url.startsWith('https://')) {
         try {
           const imgRes = await fetch(photo.url);
           if (imgRes.ok) {
             const arrayBuffer = await imgRes.arrayBuffer();
-            const imageBuffer = Buffer.from(arrayBuffer);
+            rawImageBuffer = Buffer.from(arrayBuffer);
             const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
             let ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
 
-            const photoFileName = `Photo_${i + 1}_${stageName}.${ext}`;
-            await uploadBinaryToFolder(accessToken, reportFolderId, photoFileName, imageBuffer, contentType, {
+            const photoFileName = 'Photo_' + (i + 1) + '_' + stageName + '.' + ext;
+            uploadedDriveFile = await uploadBinaryToFolder(accessToken, reportFolderId, photoFileName, rawImageBuffer, contentType, {
               description: photoDescription,
               appProperties: photoAppProps
             });
             photoCount++;
-            console.log(`📸 Successfully downloaded and uploaded remote photo ${i + 1}/${photosList.length} to Google Drive folder ${reportFolderId}`);
+            console.log('[Photo Upload] Successfully uploaded remote photo ' + (i + 1) + '/' + photosList.length + ' to Drive folder ' + reportFolderId);
           }
         } catch (e) {
-          console.warn(`Failed to download/upload remote photo ${i + 1} to Drive:`, e);
+          console.warn('[Photo Upload] Failed to upload remote photo ' + (i + 1) + ' to Drive:', e);
         }
       }
+
+      if (uploadedDriveFile && uploadedDriveFile.id) {
+        const fileId = uploadedDriveFile.id;
+        photo.id = fileId;
+        photo.driveFileId = fileId;
+        photo.url = '/api/drive/photo/' + fileId;
+        photo.thumbnailUrl = uploadedDriveFile.thumbnailLink || photo.thumbnailUrl;
+
+        // Pre-cache on disk immediately
+        if (rawImageBuffer && rawImageBuffer.length > 0) {
+          try {
+            fs.writeFileSync(path.join(DRIVE_CACHE_DIR, 'photo_' + fileId + '.bin'), rawImageBuffer);
+          } catch (_) {}
+        }
+      }
+
+      updatedPhotos.push(photo);
     }
+
+    report.photos = updatedPhotos;
+    if (updatedPhotos[0]?.url) {
+      report.photoUrl = updatedPhotos[0].url;
+    }
+
+    // 4. Upload Human-Readable Audit Summary Text File & Raw Data JSON (with populated Drive File IDs)
+    const summaryFileName = 'Summary_' + report.id + '.txt';
+    await uploadTextFileToFolder(accessToken, reportFolderId, summaryFileName, textSummary, 'text/plain');
+
+    const jsonFileName = 'Data_' + report.id + '.json';
+    await uploadTextFileToFolder(accessToken, reportFolderId, jsonFileName, JSON.stringify(report, null, 2), 'application/json');
 
     // 5. Update local and remote Drive Manifest for instant single-request sync
     try {
@@ -565,7 +597,7 @@ Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)
       localManifest.reportsIndex[report.id] = {
         id: report.id,
         folderId: reportFolderId,
-        folderName: `wmr-${report.id}`,
+        folderName: 'wmr-' + report.id,
         imoOffice: String(report.imoOffice || imoOffice),
         nisBinding: report.nisBinding,
         modifiedTime: new Date().toISOString(),
@@ -588,12 +620,12 @@ Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)
       console.warn('Local manifest update notice:', mErr);
     }
 
-    console.log(`✅ Completed Google Drive sync for Report "${report.title}". Folder ID: ${reportFolderId}, Uploaded Photos: ${photoCount}`);
+    console.log('[Drive Sync] Completed Google Drive sync for Report ' + report.title + '. Folder ID: ' + reportFolderId + ', Uploaded Photos: ' + photoCount);
     return {
       success: true,
       reportFolderId,
       photoCount,
-      message: `Report and ${photoCount} photo(s) successfully backed up to designated Google Drive folder for ${imoOffice}.`
+      message: 'Report and ' + photoCount + ' photo(s) successfully backed up to designated Google Drive folder for ' + imoOffice + '.'
     };
   } catch (err: any) {
     console.error('❌ Error uploading report to Google Drive:', err);
@@ -601,7 +633,7 @@ Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)
       success: false,
       reportFolderId: '',
       photoCount: 0,
-      message: `Failed to upload to Google Drive: ${err.message || err}`
+      message: 'Failed to upload to Google Drive: ' + (err.message || err)
     };
   }
 }
@@ -611,16 +643,16 @@ export async function listDriveGISFilesInFolder(
   accessToken: string,
   folderId: string
 ): Promise<Array<{ id: string; name: string; mimeType: string; size?: string; modifiedTime?: string }>> {
-  const query = `'${folderId}' in parents and trashed = false`;
-  const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,mimeType,size,modifiedTime)&pageSize=100&supportsAllDrives=true&includeItemsFromAllDrives=true`;
+  const query = "'" + folderId + "' in parents and trashed = false";
+  const url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(query) + '&fields=files(id,name,mimeType,size,modifiedTime)&pageSize=100&supportsAllDrives=true&includeItemsFromAllDrives=true';
 
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${accessToken}` }
+    headers: { Authorization: 'Bearer ' + accessToken }
   });
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Drive list error: ${err}`);
+    throw new Error('Drive list error: ' + err);
   }
 
   const data = await res.json();
@@ -644,14 +676,14 @@ export async function downloadDriveBinaryBuffer(
   accessToken: string,
   fileId: string
 ): Promise<Buffer> {
-  const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&supportsAllDrives=true`;
+  const url = 'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media&supportsAllDrives=true';
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${accessToken}` }
+    headers: { Authorization: 'Bearer ' + accessToken }
   });
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Failed to download Drive file ${fileId}: ${err}`);
+    throw new Error('Failed to download Drive file ' + fileId + ': ' + err);
   }
 
   const arrayBuffer = await res.arrayBuffer();
@@ -663,14 +695,14 @@ export async function downloadDriveFileText(
   accessToken: string,
   fileId: string
 ): Promise<string> {
-  const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&supportsAllDrives=true`;
+  const url = 'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media&supportsAllDrives=true';
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${accessToken}` }
+    headers: { Authorization: 'Bearer ' + accessToken }
   });
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Failed to download Drive text file ${fileId}: ${err}`);
+    throw new Error('Failed to download Drive text file ' + fileId + ': ' + err);
   }
 
   return await res.text();
@@ -761,8 +793,11 @@ export function parseSummaryToReport(
   }
 
   // Parse attached photos
-  const photoFiles = files.filter(f => f.mimeType?.startsWith('image/') || f.name.match(/\.(jpg|jpeg|png|webp|heic)$/i));
-  const photos = photoFiles.map((pf) => {
+  const photoFiles = files
+    .filter(f => f.mimeType?.startsWith('image/') || /\.(jpe?g|png|webp|heic)$/i.test(f.name))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+  const photos = photoFiles.map((pf, idx) => {
     let stage: 'Before' | 'During' | 'After' = 'During';
     const lowerName = pf.name.toLowerCase();
     if (lowerName.includes('before')) stage = 'Before';
@@ -770,11 +805,11 @@ export function parseSummaryToReport(
 
     return {
       id: pf.id,
-      url: `/api/drive/photo/${pf.id}`,
+      url: '/api/drive/photo/' + pf.id,
       driveFileId: pf.id,
       thumbnailUrl: pf.thumbnailLink,
       stage,
-      caption: `${stage} Activity Documentation`,
+      caption: stage + ' Activity Documentation #' + (idx + 1),
       capturedAt: createdAt,
       locationName,
       canalSegment,
@@ -903,6 +938,11 @@ export async function fetchReportsFromAllDriveFolders(
     return filterByImo(driveReportsCache);
   }
 
+  const DRIVE_CACHE_DIR = path.join(DATA_DIR, 'drive_cache');
+  if (!fs.existsSync(DRIVE_CACHE_DIR)) {
+    try { fs.mkdirSync(DRIVE_CACHE_DIR, { recursive: true }); } catch (e) {}
+  }
+
   try {
     let folders: Record<string, string> = {
       'Mindoro Oriental-Marinduque-Romblon IMO': '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb',
@@ -929,131 +969,63 @@ export async function fetchReportsFromAllDriveFolders(
     const localManifest = loadLocalManifest();
 
     // -------------------------------------------------------------
-    // STEP 1: FAST 1-REQUEST MANIFEST VERIFICATION ACROSS DRIVE
+    // STEP 1: FAST 1-REQUEST MANIFEST VERIFICATION ACROSS DRIVE (if NOT forceRefresh)
     // -------------------------------------------------------------
-    const manifestResults = await Promise.all(
-      Object.entries(folders).map(async ([imoName, folderId]) => {
-        const remote = await findRemoteManifestInFolder(token, folderId);
-        if (remote) {
-          const downloaded = await downloadRemoteManifest(token, remote.id);
-          return { imoName, folderId, remoteManifest: downloaded, remoteFileId: remote.id };
+    if (!forceRefresh) {
+      const manifestResults = await Promise.all(
+        Object.entries(folders).map(async ([imoName, folderId]) => {
+          const remote = await findRemoteManifestInFolder(token, folderId);
+          if (remote) {
+            const downloaded = await downloadRemoteManifest(token, remote.id);
+            return { imoName, folderId, remoteManifest: downloaded, remoteFileId: remote.id };
+          }
+          return { imoName, folderId, remoteManifest: null, remoteFileId: undefined };
+        })
+      );
+
+      const validRemoteManifests = manifestResults.filter(r => r.remoteManifest !== null);
+
+      if (validRemoteManifests.length > 0) {
+        const combinedReportsIndex: Record<string, ReportManifestEntry> = {};
+        for (const vm of validRemoteManifests) {
+          if (vm.remoteManifest && vm.remoteManifest.reportsIndex) {
+            Object.assign(combinedReportsIndex, vm.remoteManifest.reportsIndex);
+          }
         }
-        return { imoName, folderId, remoteManifest: null, remoteFileId: undefined };
-      })
-    );
 
-    const validRemoteManifests = manifestResults.filter(r => r.remoteManifest !== null);
+        const remoteHash = computeManifestHash(combinedReportsIndex);
+        const localHash = localManifest?.hash;
+        const localReportIds = new Set(localBackup.map((r: any) => r.id));
 
-    if (validRemoteManifests.length > 0) {
-      // Aggregate all reports from discovered IMO manifests
-      const combinedReportsIndex: Record<string, ReportManifestEntry> = {};
-      for (const vm of validRemoteManifests) {
-        if (vm.remoteManifest && vm.remoteManifest.reportsIndex) {
-          Object.assign(combinedReportsIndex, vm.remoteManifest.reportsIndex);
+        // Fast Path: Hashes match & all reports present in local disk cache
+        if (remoteHash === localHash && localBackup.length >= Object.keys(combinedReportsIndex).length) {
+          console.log('⚡ Instant Sync: Drive manifest hash (' + remoteHash + ') matches local cache. 0 deep API calls needed!');
+          driveReportsCache = localBackup;
+          driveReportsCacheTime = Date.now();
+          return filterByImo(driveReportsCache);
         }
-      }
-
-      const remoteHash = computeManifestHash(combinedReportsIndex);
-      const localHash = localManifest?.hash;
-      const localReportIds = new Set(localBackup.map((r: any) => r.id));
-
-      // Fast Path: Hashes match & all reports present in local disk cache
-      if (remoteHash === localHash && localBackup.length >= Object.keys(combinedReportsIndex).length) {
-        console.log(`⚡ Instant Sync: Drive manifest hash (${remoteHash}) matches local cache. 0 deep API calls needed!`);
-        driveReportsCache = localBackup;
-        driveReportsCacheTime = Date.now();
-        return driveReportsCache;
-      }
-
-      // Hash mismatch or missing reports -> Identify only missing entries
-      const missingReportEntries: ReportManifestEntry[] = [];
-      for (const repEntry of Object.values(combinedReportsIndex)) {
-        if (!localReportIds.has(repEntry.id)) {
-          missingReportEntries.push(repEntry);
-        }
-      }
-
-      if (missingReportEntries.length > 0) {
-        console.log(`📥 Fetching ${missingReportEntries.length} new/missing reports via manifest pointers...`);
-        const newReports: any[] = [];
-        await Promise.all(
-          missingReportEntries.map(async (entry) => {
-            try {
-              const subQ = `'${entry.folderId}' in parents and trashed = false`;
-              const subUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(subQ)}&fields=files(id,name,mimeType,thumbnailLink,size)&pageSize=50&supportsAllDrives=true&includeItemsFromAllDrives=true`;
-              const subRes = await fetch(subUrl, { headers: { Authorization: `Bearer ${token}` } });
-              if (!subRes.ok) return;
-              const subData = await subRes.json();
-              const files = subData.files || [];
-
-              const dataJson = files.find((f: any) => f.name.startsWith('Data_') && f.name.endsWith('.json'));
-              if (dataJson) {
-                const jsonText = await downloadDriveFileText(token, dataJson.id);
-                const parsed = JSON.parse(jsonText);
-                if (parsed && parsed.id) {
-                  if (Array.isArray(parsed.photos)) {
-                    parsed.photos = parsed.photos.map((p: any) => {
-                      const matchingFile = files.find((f: any) => f.id === p.driveFileId || f.name.includes(p.stage || ''));
-                      if (!p.url) {
-                        if (matchingFile) {
-                          return { ...p, url: `/api/drive/photo/${matchingFile.id}`, driveFileId: matchingFile.id };
-                        }
-                      } else if (matchingFile) {
-                        return { ...p, driveFileId: matchingFile.id };
-                      }
-                      return p;
-                    });
-                  }
-                  newReports.push(parsed);
-                }
-              }
-            } catch (err) {
-              console.warn(`Failed incremental fetch for report ${entry.id}:`, err);
-            }
-          })
-        );
-
-        const mergedMap = new Map<string, any>();
-        [...newReports, ...localBackup].forEach(r => { if (r && r.id) mergedMap.set(r.id, r); });
-        const merged = Array.from(mergedMap.values());
-        saveServerReportsInternal(merged);
-        driveReportsCache = merged;
-        driveReportsCacheTime = Date.now();
-
-        // Update local manifest
-        saveLocalManifest({
-          version: (localManifest?.version || 0) + 1,
-          lastUpdated: new Date().toISOString(),
-          hash: remoteHash,
-          totalReports: Object.keys(combinedReportsIndex).length,
-          reportsIndex: combinedReportsIndex
-        });
-
-        return filterByImo(driveReportsCache);
-      } else {
-        driveReportsCache = localBackup;
-        driveReportsCacheTime = Date.now();
-        return filterByImo(driveReportsCache);
       }
     }
 
     // -------------------------------------------------------------
-    // STEP 2: FALLBACK INITIAL CRAWL IF NO MANIFEST EXISTS YET
+    // STEP 2: COMPLETE DRIVE CRAWL & PHOTO LOCAL CACHING
     // -------------------------------------------------------------
-    console.log('🔄 First-time setup: No remote manifest found on Drive. Building initial manifest index...');
+    console.log('🔄 Performing thorough Google Drive folder inspection & photo cache synchronization...');
     const fetchedReports: any[] = [];
     const newManifestIndex: Record<string, ReportManifestEntry> = {};
 
     await Promise.all(Object.entries(folders).map(async ([imoName, folderId]) => {
       try {
-        const q = `'${folderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-        const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&pageSize=100&supportsAllDrives=true&includeItemsFromAllDrives=true`;
-        const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        const q = "'" + folderId + "' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
+        const url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id,name)&pageSize=100&supportsAllDrives=true&includeItemsFromAllDrives=true';
+        const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
         if (!res.ok) return;
         const data = await res.json();
         const subfolders = (data.files || []).filter((f: any) => 
           f.name.startsWith('wmr-') || 
+          f.name.startsWith('WMR-') || 
           f.name.startsWith('rep-') || 
+          f.name.startsWith('Report_') || 
           f.name.toLowerCase().includes('report') || 
           /^\d{6,}_/.test(f.name) ||
           f.name.includes('_')
@@ -1061,32 +1033,59 @@ export async function fetchReportsFromAllDriveFolders(
 
         await Promise.all(subfolders.map(async (sub: any) => {
           try {
-            const subQ = `'${sub.id}' in parents and trashed = false`;
-            const subUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(subQ)}&fields=files(id,name,mimeType,thumbnailLink,size)&pageSize=50&supportsAllDrives=true&includeItemsFromAllDrives=true`;
-            const subRes = await fetch(subUrl, { headers: { Authorization: `Bearer ${token}` } });
+            const subQ = "'" + sub.id + "' in parents and trashed = false";
+            const subUrl = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(subQ) + '&fields=files(id,name,mimeType,thumbnailLink,size)&pageSize=50&supportsAllDrives=true&includeItemsFromAllDrives=true';
+            const subRes = await fetch(subUrl, { headers: { Authorization: 'Bearer ' + token } });
             if (!subRes.ok) return;
             const subData = await subRes.json();
             const files = subData.files || [];
+
+            const imageFiles = files
+              .filter((f: any) => f.mimeType?.startsWith('image/') || /\.(jpe?g|png|webp|heic)$/i.test(f.name))
+              .sort((a: any, b: any) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+            // Pre-cache all discovered images to disk asynchronously if missing
+            imageFiles.forEach(async (img: any) => {
+              const cacheDest = path.join(DRIVE_CACHE_DIR, 'photo_' + img.id + '.bin');
+              if (!fs.existsSync(cacheDest) || fs.statSync(cacheDest).size === 0) {
+                try {
+                  const buf = await downloadDriveBinaryBuffer(token, img.id);
+                  if (buf && buf.length > 0) {
+                    fs.writeFileSync(cacheDest, buf);
+                  }
+                } catch (_) {}
+              }
+            });
 
             const dataJson = files.find((f: any) => f.name.startsWith('Data_') && f.name.endsWith('.json'));
             if (dataJson) {
               const jsonText = await downloadDriveFileText(token, dataJson.id);
               const parsed = JSON.parse(jsonText);
               if (parsed && parsed.id) {
-                if (Array.isArray(parsed.photos)) {
-                  parsed.photos = parsed.photos.map((p: any) => {
-                    const matchingFile = files.find((f: any) => f.id === p.driveFileId || f.name.includes(p.stage || ''));
-                    if (!p.url) {
-                      if (matchingFile) {
-                        return { ...p, url: `/api/drive/photo/${matchingFile.id}`, driveFileId: matchingFile.id };
-                      }
-                    } else if (matchingFile) {
-                      return { ...p, driveFileId: matchingFile.id };
-                    }
-                    return p;
-                  });
-                }
+                parsed.photos = imageFiles.map((pf: any, idx: number) => {
+                  let stage: 'Before' | 'During' | 'After' = 'During';
+                  const lowerName = pf.name.toLowerCase();
+                  if (lowerName.includes('before')) stage = 'Before';
+                  else if (lowerName.includes('after')) stage = 'After';
+
+                  return {
+                    id: pf.id,
+                    url: '/api/drive/photo/' + pf.id,
+                    driveFileId: pf.id,
+                    thumbnailUrl: pf.thumbnailLink,
+                    stage,
+                    caption: stage + ' Activity Documentation #' + (idx + 1),
+                    capturedAt: parsed.createdAt || new Date().toISOString(),
+                    locationName: parsed.locationName,
+                    canalSegment: parsed.canalSegment,
+                    lat: parsed.lat,
+                    lng: parsed.lng
+                  };
+                });
+                parsed.photoUrl = parsed.photos[0]?.url;
+                parsed.synced = true;
                 fetchedReports.push(parsed);
+
                 newManifestIndex[parsed.id] = {
                   id: parsed.id,
                   folderId: sub.id,
@@ -1121,36 +1120,36 @@ export async function fetchReportsFromAllDriveFolders(
               }
             }
           } catch (subErr) {
-            console.warn(`Error reading subfolder ${sub.name}:`, subErr);
+            console.warn('Error reading subfolder ' + sub.name + ':', subErr);
           }
         }));
       } catch (fErr) {
-        console.warn(`Error reading IMO folder ${imoName}:`, fErr);
+        console.warn('Error reading IMO folder ' + imoName + ':', fErr);
       }
     }));
 
     const mergedMap = new Map<string, any>();
-    [...fetchedReports, ...localBackup].forEach(r => { if (r && r.id) mergedMap.set(r.id, r); });
+    [...localBackup, ...fetchedReports].forEach(r => { if (r && r.id) mergedMap.set(r.id, r); });
     const merged = Array.from(mergedMap.values());
     saveServerReportsInternal(merged);
     driveReportsCache = merged;
     driveReportsCacheTime = Date.now();
 
-    // Create and upload initial manifest
-    const initialManifest: DriveManifest = {
-      version: 1,
+    // Create and upload manifest
+    const manifest: DriveManifest = {
+      version: (localManifest?.version || 0) + 1,
       lastUpdated: new Date().toISOString(),
       hash: computeManifestHash(newManifestIndex),
       totalReports: Object.keys(newManifestIndex).length,
       reportsIndex: newManifestIndex
     };
-    saveLocalManifest(initialManifest);
+    saveLocalManifest(manifest);
 
     Object.values(folders).forEach(fId => {
-      uploadOrUpdateRemoteManifest(token, fId, initialManifest).catch(e => console.warn('Drive manifest initial upload notice:', e));
+      uploadOrUpdateRemoteManifest(token, fId, manifest).catch(e => console.warn('Drive manifest upload notice:', e));
     });
 
-    console.log(`✅ Created and uploaded initial Drive Manifest with ${initialManifest.totalReports} reports.`);
+    console.log('✅ Google Drive sync complete with ' + merged.length + ' total reports.');
     return filterByImo(driveReportsCache);
   } catch (err) {
     console.error('Error fetching reports from Google Drive:', err);
