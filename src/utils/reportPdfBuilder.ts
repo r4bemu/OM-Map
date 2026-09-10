@@ -413,7 +413,8 @@ export async function generateReportPdf(report: FieldReport): Promise<jsPDF> {
         doc.rect(x + 0.3, y + 0.3, photoCardWidth - 0.6, photoCardHeight - 0.6, 'F');
 
         // Embed Image fitted into 4:3 frame without stretching or compression
-        const imgObj = await getBase64ImageFromUrl(p.url);
+        const resolvedPhotoUrl = p.dataUrl || p.sourceDataUrl || p.url || (p.driveFileId ? `/api/drive/photo/${p.driveFileId}` : '') || (p.id ? `/api/drive/photo/${p.id}` : '');
+        const imgObj = await getBase64ImageFromUrl(resolvedPhotoUrl);
         if (imgObj && imgObj.dataUrl) {
           try {
             const containerW = photoCardWidth - 0.6;
@@ -1662,11 +1663,12 @@ export async function generatePhotoDocsPdf(
       doc.rect(photoX + 0.3, photoY + 0.3, photoW - 0.6, photoH - 0.6, 'F');
 
       // Image embed — 4:3 aspect ratio fit
-      if (photo.url) {
+      const resolvedWeeklyPhotoUrl = (photo as any).dataUrl || (photo as any).sourceDataUrl || photo.url || ((photo as any).driveFileId ? `/api/drive/photo/${(photo as any).driveFileId}` : '') || (photo.id ? `/api/drive/photo/${photo.id}` : '');
+      if (resolvedWeeklyPhotoUrl) {
         try {
           const containerW = photoW - 0.6;
           const containerH = photoH - 0.6;
-          const imgObj = await getBase64ImageFromUrl(photo.url);
+          const imgObj = await getBase64ImageFromUrl(resolvedWeeklyPhotoUrl);
           if (imgObj && imgObj.dataUrl) {
             const natW = imgObj.width || 4;
             const natH = imgObj.height || 3;

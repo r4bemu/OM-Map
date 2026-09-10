@@ -400,40 +400,49 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                 <span className="text-[10px] font-bold text-slate-400 uppercase">Site Inspection Photos</span>
                 <div className="grid grid-cols-1 gap-2">
                   {selectedReport.photos && selectedReport.photos.length > 0 ? (
-                    selectedReport.photos.map((p, i) => (
-                      <div key={p.id || i} className="relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 min-h-[144px] flex items-center justify-center">
-                        <img 
-                          src={p.url} 
-                          alt="Inspection site" 
-                          className="w-full h-36 object-cover" 
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            target.style.display = 'none';
-                            const parent = target.parentElement;
-                            if (parent && !parent.querySelector('.img-fallback')) {
-                              const fallback = document.createElement('div');
-                              fallback.className = 'img-fallback w-full h-36 flex flex-col items-center justify-center text-slate-500 text-xs p-3 text-center bg-slate-900/90';
-                              fallback.innerHTML = '<span class="text-lg mb-1">📷</span><span>Inspection photo preview not accessible offline</span>';
-                              parent.prepend(fallback);
-                            }
-                          }}
-                        />
-                        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold shadow-md ${
-                            p.stage === 'Before' 
-                              ? 'bg-amber-500 text-slate-950 font-black' 
-                              : p.stage === 'During'
-                              ? 'bg-cyan-500 text-slate-950 font-black'
-                              : 'bg-emerald-500 text-slate-950 font-black'
-                          }`}>
-                            {p.caption || (p.stage ? `${p.stage} #${i + 1}` : 'Inspection')}
-                          </span>
-                          <span className="text-[9px] bg-slate-900/80 text-slate-300 px-1.5 py-0.5 rounded font-mono">
-                            {p.capturedAt || 'Captured'}
-                          </span>
+                    selectedReport.photos.map((p, i) => {
+                      const resolvedSrc = p.dataUrl || (p as any).sourceDataUrl || p.url || (p.driveFileId ? `/api/drive/photo/${p.driveFileId}` : '') || (p.id ? `/api/drive/photo/${p.id}` : '') || p.thumbnailUrl;
+                      return (
+                        <div key={p.id || i} className="relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 min-h-[144px] flex items-center justify-center">
+                          <img 
+                            src={resolvedSrc} 
+                            alt="Inspection site" 
+                            className="w-full h-36 object-cover" 
+                            loading="lazy"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              // Try fallback to driveFileId if initial url failed
+                              if (p.driveFileId && target.src && !target.src.includes(p.driveFileId)) {
+                                target.src = `/api/drive/photo/${p.driveFileId}`;
+                                return;
+                              }
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent && !parent.querySelector('.img-fallback')) {
+                                const fallback = document.createElement('div');
+                                fallback.className = 'img-fallback w-full h-36 flex flex-col items-center justify-center text-slate-500 text-xs p-3 text-center bg-slate-900/90';
+                                fallback.innerHTML = '<span class="text-lg mb-1">📷</span><span>Inspection photo preview not accessible offline</span>';
+                                parent.prepend(fallback);
+                              }
+                            }}
+                          />
+                          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold shadow-md ${
+                              p.stage === 'Before' 
+                                ? 'bg-amber-500 text-slate-950 font-black' 
+                                : p.stage === 'During'
+                                ? 'bg-cyan-500 text-slate-950 font-black'
+                                : 'bg-emerald-500 text-slate-950 font-black'
+                            }`}>
+                              {p.caption || (p.stage ? `${p.stage} #${i + 1}` : 'Inspection')}
+                            </span>
+                            <span className="text-[9px] bg-slate-900/80 text-slate-300 px-1.5 py-0.5 rounded font-mono">
+                              {p.capturedAt || 'Captured'}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 min-h-[144px] flex items-center justify-center">
                       <img
