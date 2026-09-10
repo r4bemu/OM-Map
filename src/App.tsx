@@ -158,9 +158,25 @@ export default function App() {
 
   const [isDevPanelOpen, setIsDevPanelOpen] = useState(false);
 
-  // App State
-  const [layers, setLayersState] = useState<GISLayer[]>([]);
-  const [fieldReports, setFieldReportsState] = useState<FieldReport[]>([]);
+  // App State (Instantly seeded from local storage on frame 0)
+  const [layers, setLayersState] = useState<GISLayer[]>(() => {
+    try {
+      const cached = getCachedLayers();
+      if (Array.isArray(cached) && cached.length > 0) {
+        return cached.filter(l => !isMockLayer(l) && l.geometryType !== 'Polygon' && (l as any).category !== 'Parcels');
+      }
+    } catch (_) {}
+    return [];
+  });
+  const [fieldReports, setFieldReportsState] = useState<FieldReport[]>(() => {
+    try {
+      const cached = getOfflineReports();
+      if (Array.isArray(cached) && cached.length > 0) {
+        return cached.filter(r => !r.id?.startsWith('mock-') && r.id !== 'report-1' && !(r as any).isMock);
+      }
+    } catch (_) {}
+    return [];
+  });
 
   const setLayers = useCallback((action: React.SetStateAction<GISLayer[]>) => {
     setLayersState(prev => {
@@ -731,13 +747,6 @@ export default function App() {
     }
   }, [authenticatedUser, setLayers, isImoScoped, userAssignedImo, effectiveImo]);
 
-  // Re-trigger Drive layer sync when authenticated user, role, or IMO location filter changes
-  useEffect(() => {
-    if (!authenticatedUser) return;
-    const targetImo = effectiveImo;
-    syncIMOFolderLayers(activeRole, targetImo);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authenticatedUser?.id, activeRole, effectiveImo]);
 
   // 1. Scoped Instant Hydration & Micro-Manifest Caching (Runs strictly after user is authenticated)
   useEffect(() => {
@@ -1219,17 +1228,6 @@ export default function App() {
   // Expose as handleSyncNow for manual navbar trigger
   const handleSyncNow = performFullSync;
 
-  // Only trigger Full Sync upon launch if user already has an active authenticated session
-  useEffect(() => {
-    const saved = getSavedAuthSession();
-    if (saved) {
-      const userImo = (saved.imoOffice && saved.imoOffice !== 'All IMOs' && saved.imoOffice !== 'Regional Office IV-B')
-        ? saved.imoOffice
-        : 'All IMOs';
-      performFullSync(saved.role, userImo);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Auth Handlers
   const handleLogin = (user: AuthUser) => {
