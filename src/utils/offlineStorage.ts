@@ -201,11 +201,13 @@ export function saveCachedLayers(layers: GISLayer[]): void {
   }
 }
 
-// IndexedDB for large GIS Layer vector datasets (500MB+) and Field Reports
+// IndexedDB for large GIS Layer vector datasets (500MB+), Field Reports, and Manifest Metadata
 const DB_NAME = 'GeoPulseGISDB_v4';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_LAYERS = 'gis_layers';
 const STORE_REPORTS = 'offline_reports';
+const STORE_METADATA = 'manifest_metadata';
+const LAST_OVERHAUL_KEY = 'nia_last_system_overhaul_timestamp';
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -221,10 +223,150 @@ function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(STORE_REPORTS)) {
         db.createObjectStore(STORE_REPORTS, { keyPath: 'id' });
       }
+      if (!db.objectStoreNames.contains(STORE_METADATA)) {
+        db.createObjectStore(STORE_METADATA, { keyPath: 'key' });
+      }
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
+}
+
+export async function getManifestMetadataDB(key: string = 'master_manifest'): Promise<any | null> {
+  try {
+    const db = await openDB();
+    if (!db.objectStoreNames.contains(STORE_METADATA)) return null;
+    const tx = db.transaction(STORE_METADATA, 'readonly');
+    const store = tx.objectStore(STORE_METADATA);
+    return new Promise((resolve) => {
+      const req = store.get(key);
+      req.onsuccess = () => {
+        resolve(req.result ? req.result.data : null);
+      };
+      req.onerror = () => resolve(null);
+    });
+  } catch (err) {
+    return null;
+  }
+}
+
+export async function saveManifestMetadataDB(key: string, data: any): Promise<void> {
+  try {
+    const db = await openDB();
+    if (!db.objectStoreNames.contains(STORE_METADATA)) return;
+    const tx = db.transaction(STORE_METADATA, 'readwrite');
+    const store = tx.objectStore(STORE_METADATA);
+    await new Promise<void>((resolve, reject) => {
+      const req = store.put({ key, data, updatedAt: new Date().toISOString() });
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.warn('Failed to save manifest metadata to IndexedDB:', err);
+  }
+}
+
+export async function deleteCachedReportDB(reportId: string): Promise<void> {
+  try {
+    // 1. Remove from in-memory cache
+    if (inMemoryReportsCache) {
+      inMemoryReportsCache = inMemoryReportsCache.filter(r => r.id !== reportId);
+    }
+    // 2. Remove from localStorage
+    const local = getOfflineReports().filter(r => r.id !== reportId);
+    try {
+      localStorage.setItem(OFFLINE_REPORTS_KEY, JSON.stringify(createLightweightReports(local)));
+    } catch (_) {}
+    // 3. Remove from IndexedDB
+    const db = await openDB();
+    if (!db.objectStoreNames.contains(STORE_REPORTS)) return;
+    const tx = db.transaction(STORE_REPORTS, 'readwrite');
+    const store = tx.objectStore(STORE_REPORTS);
+    await new Promise<void>((resolve, reject) => {
+      const req = store.delete(reportId);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.warn('Failed to delete report from IndexedDB:', err);
+  }
+}
+
+export async function clearAllLocalDataDB(): Promise<void> {
+  try {
+    inMemoryReportsCache = [];
+    try {
+      localStorage.removeItem(OFFLINE_REPORTS_KEY);
+      localStorage.removeItem(DOWNLOADED_WEEKS_KEY);
+      localStorage.removeItem(CACHED_LAYERS_KEY);
+      localStorage.removeItem('ommap_cached_gis_layers');
+    } catch (_) {}
+
+    const db = await openDB();
+    const stores = [STORE_LAYERS, STORE_REPORTS, STORE_METADATA];
+    for (const s of stores) {
+      if (db.objectStoreNames.contains(s)) {
+        try {
+          const tx = db.transaction(s, 'readwrite');
+          const store = tx.objectStore(s);
+          await new Promise<void>((resolve) => {
+            const req = store.clear();
+            req.onsuccess = () => resolve();
+            req.onerror = () => resolve();
+          });
+        } catch (_) {}
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to completely clear local IndexedDB:', err);
+  }
+}
+
+export function getLastOverhaulTimestamp(): string | null {
+  try {
+    return localStorage.getItem(LAST_OVERHAUL_KEY);
+  } catch (_) {
+    return null;
+  }
+}
+
+export function setLastOverhaulTimestamp(timestampIso: string = new Date().toISOString()): void {
+  try {
+    localStorage.setItem(LAST_OVERHAUL_KEY, timestampIso);
+  } catch (_) {}
+}
+
+export function isOverhaulAllowedToday(): { allowed: boolean; lastRun: string | null; formattedDate: string | null } {
+  try {
+    const lastIso = getLastOverhaulTimestamp();
+    if (!lastIso) {
+      return { allowed: true, lastRun: null, formattedDate: null };
+    }
+    const lastDate = new Date(lastIso);
+    if (isNaN(lastDate.getTime())) {
+      return { allowed: true, lastRun: null, formattedDate: null };
+    }
+    const now = new Date();
+    const isSameDay = lastDate.getFullYear() === now.getFullYear() &&
+                      lastDate.getMonth() === now.getMonth() &&
+                      lastDate.getDate() === now.getDate();
+
+    const formattedDate = lastDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    return {
+      allowed: !isSameDay,
+      lastRun: lastIso,
+      formattedDate
+    };
+  } catch (_) {
+    return { allowed: true, lastRun: null, formattedDate: null };
+  }
 }
 
 export async function getCachedReportsDB(): Promise<FieldReport[] | null> {

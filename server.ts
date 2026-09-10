@@ -872,6 +872,114 @@ export async function createApp() {
     }
   });
 
+  // Generate Lightweight GIS Layers Manifest for Instant Startup Validation (< 1.5 KB)
+  const getLayersManifest = (requestedImo?: string) => {
+    const rawLayers = loadSavedLayers();
+    let layers = rawLayers.filter((l: any) => !isMockLayer(l));
+    if (requestedImo && requestedImo !== 'All IMOs' && requestedImo !== 'Regional Office IV-B') {
+      layers = layers.filter((l: any) => !l.imoOffice || matchesImoOffice(l.imoOffice, requestedImo));
+    }
+    let lastModified = '2026-01-01T00:00:00.000Z';
+    let totalFeatures = 0;
+    const layerSummaries = layers.map((l: any) => {
+      const fCount = l.featureCount || (l.data?.features ? l.data.features.length : 0);
+      totalFeatures += fCount;
+      const lm = l.uploadedAt || l.lastModified || '2026-01-01T00:00:00.000Z';
+      if (lm > lastModified) lastModified = lm;
+      return {
+        id: l.id,
+        name: l.name,
+        category: l.category,
+        featureCount: fCount,
+        lastModified: lm
+      };
+    });
+    const checksumData = `${layers.length}-${totalFeatures}-${lastModified}-${layers.map(l => l.id).sort().join(',')}`;
+    return {
+      version: '1.0',
+      lastModified,
+      layerCount: layers.length,
+      totalFeatures,
+      checksum: Buffer.from(checksumData).toString('base64').substring(0, 24),
+      layers: layerSummaries
+    };
+  };
+
+  // Generate Lightweight Reports Manifest for Instant Startup Validation (< 1.5 KB)
+  const getReportsManifest = (userRole: string = 'Viewer', requestedImo?: string) => {
+    const rawReports = loadSavedReports();
+    let reports = rawReports.filter((r: any) => !isDeveloperTestReport(r));
+    
+    if (userRole === 'Viewer') {
+      reports = reports.filter((r: any) => {
+        const isApproved = r.approvalStatus === 'Approved' || (!r.approvalStatus && r.status === 'Completed');
+        if (!isApproved) return false;
+        if (requestedImo && requestedImo !== 'All IMOs' && requestedImo !== 'Regional Office IV-B') {
+          return matchesImoOffice(r.imoOffice, requestedImo);
+        }
+        return true;
+      });
+    } else if (requestedImo && requestedImo !== 'All IMOs' && requestedImo !== 'Regional Office IV-B') {
+      reports = reports.filter((r: any) => matchesImoOffice(r.imoOffice, requestedImo));
+    }
+
+    const weeklyLedger: Record<string, { count: number; lastModified: string; hash: string }> = {};
+    let latestReportId = reports[0]?.id || null;
+    let lastModified = '2026-01-01T00:00:00.000Z';
+
+    reports.forEach((r: any) => {
+      const rTime = r.updatedAt || r.createdAt || '2026-01-01T00:00:00.000Z';
+      if (rTime > lastModified) lastModified = rTime;
+      if (!r.createdAt) return;
+      const info = getFridayEndingWeekInfo(r.createdAt);
+      if (!weeklyLedger[info.key]) {
+        weeklyLedger[info.key] = { count: 0, lastModified: rTime, hash: '' };
+      }
+      weeklyLedger[info.key].count += 1;
+      if (rTime > weeklyLedger[info.key].lastModified) {
+        weeklyLedger[info.key].lastModified = rTime;
+      }
+    });
+
+    Object.keys(weeklyLedger).forEach(k => {
+      const w = weeklyLedger[k];
+      w.hash = `${k}-${w.count}-${w.lastModified}`;
+    });
+
+    const checksumData = `${reports.length}-${lastModified}-${latestReportId}`;
+    return {
+      version: '1.0',
+      lastModified,
+      totalReports: reports.length,
+      latestReportId,
+      checksum: Buffer.from(checksumData).toString('base64').substring(0, 24),
+      weeklyLedger
+    };
+  };
+
+  // Get GIS Layers Checksum Manifest
+  app.get('/api/layers/manifest', (req, res) => {
+    try {
+      const requestedImo = req.query.imo as string | undefined;
+      const manifest = getLayersManifest(requestedImo);
+      res.json(manifest);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to generate layers manifest' });
+    }
+  });
+
+  // Get Reports Checksum Manifest
+  app.get('/api/reports/manifest', (req, res) => {
+    try {
+      const userRole = (req.query.role as string) || 'Viewer';
+      const requestedImo = req.query.imo as string | undefined;
+      const manifest = getReportsManifest(userRole, requestedImo);
+      res.json(manifest);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to generate reports manifest' });
+    }
+  });
+
   // Get all GIS Layers (Scoped by IMO if user is assigned to an IMO)
   app.get('/api/layers', async (req, res) => {
     try {
@@ -1749,7 +1857,65 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
     }
   });
 
-  // Create Field Report (Unauthenticated user submission allowed)
+  // Delete Field Report with RBAC & Disk Photo Cleanup
+  app.delete('/api/reports/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userRole = (req.query.role as string) || (req.body?.userRole as string) || 'Viewer';
+      const userImo = (req.query.userImo as string) || (req.body?.userImo as string);
+      
+      const allowedRoles = ['Developer', 'RO Admin', 'RO Evaluator', 'IMO Admin'];
+      if (!allowedRoles.includes(userRole)) {
+        return res.status(403).json({ error: 'Access Denied: You do not have permission to delete field reports.' });
+      }
+
+      const currentReports = loadSavedReports();
+      const reportIndex = currentReports.findIndex((r: any) => r.id === id);
+      if (reportIndex === -1) {
+        return res.status(404).json({ error: 'Report not found' });
+      }
+
+      const target = currentReports[reportIndex];
+
+      // IMO Admin is strictly forbidden from deleting Approved reports
+      if (userRole === 'IMO Admin') {
+        const isApproved = target.approvalStatus === 'Approved' || target.currentTier === 'Approved_RO_Admin';
+        if (isApproved) {
+          return res.status(403).json({ error: 'Access Denied: Approved reports cannot be deleted by IMO Administrators.' });
+        }
+        if (userImo && target.imoOffice && !matchesImoOffice(target.imoOffice, userImo)) {
+          return res.status(403).json({ error: 'Access Denied: You can only delete reports within your assigned IMO office.' });
+        }
+      }
+
+      // Remove from server store
+      const updatedReports = currentReports.filter((r: any) => r.id !== id);
+      saveReportsToFile(updatedReports);
+
+      // Clean local photos from disk cache
+      if (Array.isArray(target.photos)) {
+        target.photos.forEach((p: any, idx: number) => {
+          const photoKey = p.id || `${id}_${idx + 1}`;
+          const paths = [
+            path.join(PHOTOS_DIR, `${photoKey}.jpg`),
+            path.join(PHOTOS_DIR, `${photoKey}.png`),
+            path.join(PHOTOS_DIR, `${photoKey}.bin`),
+            path.join(DRIVE_CACHE_DIR, `photo_${photoKey}.bin`),
+            p.driveFileId ? path.join(DRIVE_CACHE_DIR, `photo_${p.driveFileId}.bin`) : null
+          ].filter(Boolean);
+          paths.forEach(pth => {
+            try { if (pth && fs.existsSync(pth)) fs.unlinkSync(pth); } catch (_) {}
+          });
+        });
+      }
+
+      res.json({ success: true, message: `Report ${id} permanently deleted.`, remainingCount: updatedReports.length });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to delete report' });
+    }
+  });
+
+  // Create Field Report (with Cross-IMO Jurisdiction Enforcement)
   app.post('/api/reports', async (req, res) => {
     try {
       const reportData = req.body;
@@ -1757,6 +1923,21 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
 
       const reportId = reportData.id || generateWmrReportId(reportData.nisBinding, reportData.imoOffice);
       const fullReport = { ...reportData, id: reportId };
+
+      // Jurisdiction Check: Prevent cross-IMO submissions from IMO-scoped roles
+      const submitterRole = fullReport.createdRole || fullReport.submittedByRole || (req.query.role as string) || '';
+      const submitterImo = fullReport.submittedByImo || fullReport.reporterImo || (req.query.userImo as string) || '';
+      const isImoScoped = ['IMO Admin', 'IMO Evaluator', 'IMO Reviewer', 'IMO Preparer', 'Field Personnel'].includes(submitterRole);
+
+      if (isImoScoped && submitterImo && submitterImo !== 'All IMOs' && submitterImo !== 'Regional Office IV-B') {
+        const targetReportImo = fullReport.imoOffice || '';
+        if (targetReportImo && !matchesImoOffice(targetReportImo, submitterImo)) {
+          return res.status(403).json({
+            error: 'Jurisdiction Mismatch',
+            message: `You are registered under ${submitterImo}. You do not have authorization to submit field reports for irrigation systems outside your assigned IMO jurisdiction (${targetReportImo}). If your assignment has changed, contact your Regional focal person.`
+          });
+        }
+      }
 
       // Cache all attached base64 photos to server disk immediately
       if (Array.isArray(fullReport.photos)) {

@@ -15,6 +15,7 @@ import {
   getOfflineReports, 
   saveOfflineReports,
   getCachedReportsDB,
+  saveCachedReportsDB,
   getDownloadedWeekKeys,
   markWeekDownloaded,
   markWeeksDownloaded,
@@ -25,7 +26,12 @@ import {
   getCachedLayersDB,
   saveCachedLayersDB,
   syncOfflineQueueToServer,
-  isMockLayer
+  isMockLayer,
+  getManifestMetadataDB,
+  saveManifestMetadataDB,
+  deleteCachedReportDB,
+  clearAllLocalDataDB,
+  setLastOverhaulTimestamp
 } from './utils/offlineStorage';
 import { getIsoWeekInfo, getAvailableWeeksFromReports, isReportInWeek } from './utils/weekUtils';
 import { parseGISFile } from './utils/kmzParser';
@@ -733,140 +739,142 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticatedUser?.id, activeRole, effectiveImo]);
 
-  // 1. Scoped Load from Backend API or Offline Storage (Runs strictly after user is authenticated)
+  // 1. Scoped Instant Hydration & Micro-Manifest Caching (Runs strictly after user is authenticated)
   useEffect(() => {
     if (!authenticatedUser) return;
+    let isCancelled = false;
 
     async function loadData() {
       const targetImo = effectiveImo;
 
-      // Try loading layers from Express server
-      let serverLayers: GISLayer[] | null = null;
+      // STEP 1: INSTANT LOCAL HYDRATION (0ms - 15ms)
+      // Read local IndexedDB layers and reports immediately so map and UI render with zero blocking!
+      let localLayers: GISLayer[] | null = null;
+      let localReports: FieldReport[] | null = null;
+
       try {
-        const res = await fetch(`/api/layers?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.layers && data.layers.length > 0) {
-            serverLayers = data.layers.filter((l: any) => !isMockLayer(l));
-          }
-        }
-      } catch (err) {
-        console.warn('Backend server offline or unreachable for layers.', err);
-      }
-
-      // Try loading from IndexedDB
-      const rawLocalCached = await getCachedLayersDB();
-      const localCached = rawLocalCached ? rawLocalCached.filter(l => {
-        if (isMockLayer(l) || l.geometryType === ('Polygon' as any) || (l as any).category === 'Parcels') return false;
-        if (isImoScoped && targetImo !== 'All IMOs') {
-          return !l.imoOffice || matchesImoOffice(l.imoOffice, targetImo);
-        }
-        return true;
-      }) : null;
-
-      if (serverLayers && serverLayers.length > 0) {
-        // Clean out polygon layers from server response
-        const cleanServerLayers = serverLayers.filter(l => l.geometryType !== ('Polygon' as any) && (l as any).category !== 'Parcels');
-        // If server layers exist, merge with any local custom layers in IndexedDB
-        if (localCached && localCached.length > 0) {
-          const serverIds = new Set(cleanServerLayers.map(l => l.id));
-          const localOnly = localCached.filter(l => !serverIds.has(l.id));
-          if (localOnly.length > 0) {
-            console.log(`Found ${localOnly.length} local-only layer(s). Auto-syncing to cloud database...`);
-            let merged = [...cleanServerLayers, ...localOnly];
+        const rawCachedLayers = await getCachedLayersDB();
+        if (rawCachedLayers && rawCachedLayers.length > 0) {
+          localLayers = rawCachedLayers.filter(l => {
+            if (isMockLayer(l) || l.geometryType === ('Polygon' as any) || (l as any).category === 'Parcels') return false;
             if (isImoScoped && targetImo !== 'All IMOs') {
-              merged = merged.filter(l => !l.imoOffice || matchesImoOffice(l.imoOffice, targetImo));
+              return !l.imoOffice || matchesImoOffice(l.imoOffice, targetImo);
             }
-            setLayers(merged);
-            await saveCachedLayersDB(merged);
-            for (const missingLayer of localOnly) {
-              try {
-                await fetch('/api/layers', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(missingLayer)
-                });
-              } catch (e) {
-                console.warn('Sync missing layer to server error', e);
-              }
-            }
-            return;
-          }
-        }
-        let finalLayers = cleanServerLayers;
-        if (isImoScoped && targetImo !== 'All IMOs') {
-          finalLayers = finalLayers.filter(l => !l.imoOffice || matchesImoOffice(l.imoOffice, targetImo));
-        }
-        setLayers(finalLayers);
-        await saveCachedLayersDB(finalLayers);
-      } else if (localCached && localCached.length > 0) {
-        setLayers(localCached);
-        for (const missingLayer of localCached) {
-          fetch('/api/layers', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(missingLayer)
-          }).catch(e => console.warn('Sync cached layer error', e));
-        }
-      } else {
-        setLayers(INITIAL_GIS_LAYERS);
-        await saveCachedLayersDB(INITIAL_GIS_LAYERS);
-      }
-
-      // Load reports: 1. Always load all locally cached reports first so they are immediately active
-      try {
-        let cached = await getCachedReportsDB();
-        if (!cached || cached.length === 0) {
-          cached = getOfflineReports();
-        }
-        let cleanCached = (cached || []).filter(r => !r.id?.startsWith('mock-') && r.id !== 'report-1' && !(r as any).isMock);
-        if (isImoScoped && targetImo !== 'All IMOs') {
-          cleanCached = cleanCached.filter(r => !r.imoOffice || matchesImoOffice(r.imoOffice, targetImo));
-        }
-        setFieldReports(cleanCached);
-        if (cleanCached.length > 0) {
-          saveOfflineReports(cleanCached);
-        }
-      } catch (err) {
-        console.warn('Initial offline reports load fallback:', err);
-        setFieldReports([]);
-      }
-
-      // 2. Fetch available cloud weeks on server for user scope
-      try {
-        const resWeeks = await fetch(`/api/reports/available-weeks?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`);
-        if (resWeeks.ok) {
-          const wData = await resWeeks.json();
-          if (Array.isArray(wData.weeks)) {
-            setAvailableCloudWeeks(wData.weeks);
+            return true;
+          });
+          if (localLayers.length > 0 && !isCancelled) {
+            setLayers(localLayers);
           }
         }
       } catch (e) {
-        console.warn('Could not fetch cloud weeks:', e);
+        console.warn('Initial layers hydration notice:', e);
       }
 
-      // 3. Online sync: fetch reports scoped to user's permitted IMO
       try {
-        const res = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}&timeScope=all`);
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data.reports)) {
-            setFieldReports(prev => {
-              let combined = deduplicateItems([...data.reports, ...prev]);
-              if (isImoScoped && targetImo !== 'All IMOs') {
-                combined = combined.filter(r => !r.imoOffice || matchesImoOffice(r.imoOffice, targetImo));
-              }
-              saveOfflineReports(combined);
-              return combined;
-            });
+        const rawCachedReports = await getCachedReportsDB();
+        const initialReports = (rawCachedReports && rawCachedReports.length > 0) ? rawCachedReports : getOfflineReports();
+        if (initialReports && initialReports.length > 0) {
+          let cleanReports = initialReports.filter(r => !r.id?.startsWith('mock-') && r.id !== 'report-1' && !(r as any).isMock);
+          if (isImoScoped && targetImo !== 'All IMOs') {
+            cleanReports = cleanReports.filter(r => !r.imoOffice || matchesImoOffice(r.imoOffice, targetImo));
+          }
+          localReports = cleanReports;
+          if (!isCancelled) {
+            setFieldReports(cleanReports);
           }
         }
+      } catch (e) {
+        console.warn('Initial reports hydration notice:', e);
+      }
+
+      if (isOfflineRef.current) return;
+
+      // STEP 2: MICRO-MANIFEST INTEGRITY CHECK (Parallel, ~1.5 KB payload)
+      try {
+        const cachedMeta = await getManifestMetadataDB('master_manifest');
+        const [layerManifestRes, reportManifestRes, availableWeeksRes] = await Promise.allSettled([
+          fetch(`/api/layers/manifest?imo=${encodeURIComponent(targetImo)}`),
+          fetch(`/api/reports/manifest?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`),
+          fetch(`/api/reports/available-weeks?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`)
+        ]);
+
+        if (availableWeeksRes.status === 'fulfilled' && availableWeeksRes.value.ok) {
+          const wData = await availableWeeksRes.value.json();
+          if (Array.isArray(wData.weeks) && !isCancelled) {
+            setAvailableCloudWeeks(wData.weeks);
+          }
+        }
+
+        const layerManifest = (layerManifestRes.status === 'fulfilled' && layerManifestRes.value.ok)
+          ? await layerManifestRes.value.json()
+          : null;
+        const reportManifest = (reportManifestRes.status === 'fulfilled' && reportManifestRes.value.ok)
+          ? await reportManifestRes.value.json()
+          : null;
+
+        // Check if GIS layers require download
+        const layersNeedSync = !localLayers || localLayers.length === 0 || !cachedMeta?.layerChecksum || cachedMeta.layerChecksum !== layerManifest?.checksum;
+        if (layersNeedSync) {
+          try {
+            const res = await fetch(`/api/layers?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data.layers) && data.layers.length > 0 && !isCancelled) {
+                const clean = data.layers.filter((l: any) => !isMockLayer(l) && l.geometryType !== 'Polygon' && l.category !== 'Parcels');
+                setLayers(clean);
+                await saveCachedLayersDB(clean);
+              }
+            }
+          } catch (lErr) {
+            console.warn('Background layers fetch notice:', lErr);
+          }
+        }
+
+        // Check if Field Reports require download
+        const isHighTierRole = ['Developer', 'RO Admin', 'RO Evaluator', 'RO Reviewer', 'RO Preparer', 'IMO Admin', 'IMO Head', 'IMO Evaluator'].includes(activeRole);
+        const syncTimeScope = isHighTierRole ? 'all' : 'current_and_prev_week';
+
+        const reportsNeedSync = !localReports || localReports.length === 0 || !cachedMeta?.reportChecksum || cachedMeta.reportChecksum !== reportManifest?.checksum;
+        if (reportsNeedSync) {
+          try {
+            const res = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}&timeScope=${syncTimeScope}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data.reports) && !isCancelled) {
+                setFieldReports(prev => {
+                  let combined = deduplicateItems([...data.reports, ...prev]);
+                  if (isImoScoped && targetImo !== 'All IMOs') {
+                    combined = combined.filter(r => !r.imoOffice || matchesImoOffice(r.imoOffice, targetImo));
+                  }
+                  saveOfflineReports(combined);
+                  saveCachedReportsDB(combined);
+                  return combined;
+                });
+              }
+            }
+          } catch (rErr) {
+            console.warn('Background reports fetch notice:', rErr);
+          }
+        }
+
+        // Save updated manifest checksums in IndexedDB
+        if (layerManifest && reportManifest) {
+          await saveManifestMetadataDB('master_manifest', {
+            layerChecksum: layerManifest.checksum,
+            reportChecksum: reportManifest.checksum,
+            lastSync: new Date().toISOString()
+          });
+        }
       } catch (err) {
-        console.warn('Loading field reports from local offline storage.', err);
+        console.warn('Background manifest validation notice:', err);
       }
     }
 
     loadData();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [authenticatedUser?.id, activeRole, effectiveImo, isImoScoped, setFieldReports, setLayers]);
 
   // Fetch available report weeks for the user's IMO & role scope
@@ -1551,6 +1559,95 @@ export default function App() {
     }
   };
 
+  const handleDeleteReport = useCallback(async (reportId: string) => {
+    // 1. Instantly remove from in-memory reports state
+    setFieldReports(prev => prev.filter(r => r.id !== reportId));
+    if (selectedReport && selectedReport.id === reportId) {
+      setSelectedReport(null);
+    }
+
+    // 2. Remove from local IndexedDB & localStorage
+    await deleteCachedReportDB(reportId);
+
+    // 3. Notify backend server
+    if (!isOfflineRef.current) {
+      try {
+        const res = await fetch(`/api/reports/${reportId}?role=${encodeURIComponent(activeRole)}&userImo=${encodeURIComponent(effectiveImo)}`, {
+          method: 'DELETE'
+        });
+        if (res.ok) {
+          console.log(`✅ Report ${reportId} deleted successfully on server and cloud.`);
+        }
+      } catch (err) {
+        console.warn('Delete report request warning:', err);
+      }
+    }
+  }, [activeRole, effectiveImo, selectedReport, setFieldReports]);
+
+  const handleFullSystemOverhaul = useCallback(async () => {
+    try {
+      setIsSyncing(true);
+      setSyncStatusMessage('Executing full overhaul: Clearing local cache...');
+      
+      // 1. Wipe local IndexedDB & localStorage
+      await clearAllLocalDataDB();
+
+      // 2. Mark overhaul timestamp
+      setLastOverhaulTimestamp();
+
+      // 3. Re-download fresh layers and reports
+      const targetImo = effectiveImo;
+      const layerRes = await fetch(`/api/layers?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`);
+      if (layerRes.ok) {
+        const lData = await layerRes.json();
+        if (Array.isArray(lData.layers) && lData.layers.length > 0) {
+          const clean = lData.layers.filter((l: any) => !isMockLayer(l) && l.geometryType !== 'Polygon' && l.category !== 'Parcels');
+          setLayers(clean);
+          await saveCachedLayersDB(clean);
+        }
+      }
+
+      const repRes = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}&timeScope=all`);
+      if (repRes.ok) {
+        const rData = await repRes.json();
+        if (Array.isArray(rData.reports)) {
+          setFieldReports(rData.reports);
+          await saveCachedReportsDB(rData.reports);
+          saveOfflineReports(rData.reports);
+        }
+      }
+
+      // 4. Update manifest metadata
+      const [lMan, rMan] = await Promise.all([
+        fetch(`/api/layers/manifest?imo=${encodeURIComponent(targetImo)}`).then(r => r.json()).catch(() => null),
+        fetch(`/api/reports/manifest?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`).then(r => r.json()).catch(() => null)
+      ]);
+
+      if (lMan && rMan) {
+        await saveManifestMetadataDB('master_manifest', {
+          layerChecksum: lMan.checksum,
+          reportChecksum: rMan.checksum,
+          lastSync: new Date().toISOString()
+        });
+      }
+
+      setDriveToast({
+        id: `toast-${Date.now()}`,
+        type: 'success',
+        title: 'System Overhaul Complete',
+        message: 'Local cache reset and all GIS layers & field reports freshly synchronized.'
+      });
+      setTimeout(() => {
+        setDriveToast(current => current?.type === 'success' ? null : current);
+      }, 5000);
+    } catch (err) {
+      console.error('System overhaul error:', err);
+    } finally {
+      setIsSyncing(false);
+      setSyncStatusMessage('');
+    }
+  }, [activeRole, effectiveImo, setFieldReports, setLayers]);
+
   // Search Autocomplete List
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -1983,6 +2080,7 @@ export default function App() {
             try { sessionStorage.removeItem('om_active_report_draft'); } catch (_) {}
           }}
           onSubmitReport={handleSubmitReport}
+          onDeleteReport={handleDeleteReport}
           editingReport={editingReport}
           onPreviewReportPdf={handleOpenPdfPreview}
           initialLat={reportPrefill.lat}
@@ -2076,6 +2174,7 @@ export default function App() {
           isOffline={isOffline}
           unsyncedCount={unsyncedCount}
           onSyncNow={handleSyncNow}
+          onFullOverhaul={handleFullSystemOverhaul}
           availableCloudWeeks={availableCloudWeeks}
           onDownloadWeek={handleDownloadWeek}
           onDownloadAllWeeks={handleDownloadAllWeeks}

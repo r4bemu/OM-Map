@@ -71,6 +71,7 @@ interface FieldReportModalProps {
   isPickingLocation?: boolean;
   onClose: () => void;
   onSubmitReport: (report: FieldReport) => void;
+  onDeleteReport?: (reportId: string) => Promise<void> | void;
   editingReport?: FieldReport | null;
   onPreviewReportPdf?: (report: FieldReport) => void;
   initialLat?: number;
@@ -110,6 +111,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
   isPickingLocation = false,
   onClose,
   onSubmitReport,
+  onDeleteReport,
   editingReport,
   onPreviewReportPdf,
   initialLat,
@@ -129,6 +131,33 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
   onStartMapPicking
 }) => {
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [jurisdictionMismatch, setJurisdictionMismatch] = useState<{ userImo: string; targetImo: string } | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [isDeletingReport, setIsDeletingReport] = useState<boolean>(false);
+
+  // Helper to match IMO office names
+  const matchesImo = (officeA?: string, officeB?: string): boolean => {
+    if (!officeA || !officeB) return true;
+    if (officeA === 'All IMOs' || officeA === 'Regional Office IV-B' || officeB === 'All IMOs' || officeB === 'Regional Office IV-B') return true;
+    const a = officeA.toLowerCase();
+    const b = officeB.toLowerCase();
+    const isMOMARO = (s: string) => s.includes('momaro') || s.includes('oriental') || s.includes('marinduque') || s.includes('romblon');
+    const isOccidental = (s: string) => s.includes('occidental') || s.includes('omimo');
+    const isPalawan = (s: string) => s.includes('palawan') || s.includes('pimo') || s.includes('palimo');
+    if (isMOMARO(a) && isMOMARO(b)) return true;
+    if (isOccidental(a) && isOccidental(b)) return true;
+    if (isPalawan(a) && isPalawan(b)) return true;
+    return a.includes(b) || b.includes(a);
+  };
+
+  const canDeleteReport = Boolean(
+    editingReport && (
+      currentRole === 'Developer' ||
+      currentRole === 'RO Admin' ||
+      currentRole === 'RO Evaluator' ||
+      (currentRole === 'IMO Admin' && editingReport.approvalStatus !== 'Approved' && editingReport.currentTier !== 'Approved_RO_Admin')
+    )
+  );
 
   // Category Mode: Maintenance or Operational Status
   const [categoryMode, setCategoryMode] = useState<ReportCategoryMode>(initialReportType);
@@ -1428,6 +1457,17 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
       newReport.activeRevisionNumber = 1;
     }
 
+    // Check IMO jurisdiction for IMO-scoped users
+    const userAssignedImo = currentUser?.imoOffice;
+    const isImoScoped = ['IMO Admin', 'IMO Evaluator', 'IMO Reviewer', 'IMO Preparer', 'Field Personnel'].includes(currentRole);
+    if (isImoScoped && userAssignedImo && userAssignedImo !== 'All IMOs' && userAssignedImo !== 'Regional Office IV-B') {
+      const targetImo = newReport.imoOffice || '';
+      if (targetImo && !matchesImo(targetImo, userAssignedImo)) {
+        setJurisdictionMismatch({ userImo: userAssignedImo, targetImo });
+        return;
+      }
+    }
+
     try {
       localStorage.setItem('nia_saved_reporter_name', reporterName.trim());
       localStorage.setItem('nia_saved_reporter_designation', reporterDesignation.trim());
@@ -2698,11 +2738,11 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
             />
           </div>
 
-          {/* EDITING REPORT PDF ACTIONS (PREVIEW & DIRECT DOWNLOAD) */}
+          {/* EDITING REPORT PDF & DELETION ACTIONS */}
           {editingReport && (
             <div className="pt-2 border-t border-slate-800 space-y-1.5">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Official Document Actions</span>
-              <div className="grid grid-cols-2 gap-2">
+              <div className={`grid ${canDeleteReport ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
                 {onPreviewReportPdf && (
                   <button
                     type="button"
@@ -2742,6 +2782,18 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                     </>
                   )}
                 </button>
+
+                {canDeleteReport && (
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="py-2.5 px-3 bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 hover:text-rose-100 border border-rose-600/40 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer shadow-sm"
+                    title="Permanently delete this report"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                    <span>Delete Report</span>
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -2974,6 +3026,119 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                   Close Preview
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* JURISDICTION MISMATCH REJECTION MODAL */}
+      {jurisdictionMismatch && (
+        <div 
+          className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in"
+          onClick={() => setJurisdictionMismatch(null)}
+        >
+          <div 
+            className="w-full max-w-md bg-slate-900 border border-rose-500/50 rounded-2xl shadow-2xl p-5 space-y-4 text-left pointer-events-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/30 shrink-0">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-bold text-rose-300 font-heading">Submission Blocked: Jurisdiction Mismatch</h3>
+                <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+                  You are currently registered under <strong className="text-white">{jurisdictionMismatch.userImo}</strong>. You do not have authorization to submit field reports for irrigation systems under <strong className="text-amber-300">{jurisdictionMismatch.targetImo}</strong>.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-950/80 rounded-xl border border-slate-800 space-y-1.5 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5 text-slate-300">
+                <span>• Please choose an irrigation network within your assigned office.</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-slate-300">
+                <span>• If your assignment has changed, contact your Regional focal person.</span>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <button
+                type="button"
+                onClick={() => setJurisdictionMismatch(null)}
+                className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition cursor-pointer"
+              >
+                OK / Edit Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PERMANENT REPORT DELETION CONFIRMATION MODAL */}
+      {isDeleteModalOpen && editingReport && (
+        <div 
+          className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm animate-in fade-in"
+          onClick={() => setIsDeleteModalOpen(false)}
+        >
+          <div 
+            className="w-full max-w-md bg-slate-900 border border-rose-600/60 rounded-2xl shadow-2xl p-5 space-y-4 text-left pointer-events-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/30 shrink-0">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-bold text-slate-100 font-heading">Confirm Permanent Report Deletion</h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Report ID: <span className="font-mono text-rose-300 font-bold">{editingReport.id}</span>
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Are you sure you want to permanently delete this report? This will remove the report record, engineering measurements, and all attached inspection photos from the database and Google Drive. <strong className="text-rose-400">This action cannot be undone.</strong>
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setIsDeleteModalOpen(false)}
+                disabled={isDeletingReport}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!onDeleteReport || !editingReport) return;
+                  try {
+                    setIsDeletingReport(true);
+                    await onDeleteReport(editingReport.id);
+                    setIsDeleteModalOpen(false);
+                    onClose();
+                  } catch (err) {
+                    console.error('Failed to delete report:', err);
+                  } finally {
+                    setIsDeletingReport(false);
+                  }
+                }}
+                disabled={isDeletingReport}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-lg shadow-rose-950/50"
+              >
+                {isDeletingReport ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting Report...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Confirm Delete</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
