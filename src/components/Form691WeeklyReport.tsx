@@ -13,7 +13,7 @@ import {
 import { FieldReport, AuthUser, UserRole } from '../types';
 import { downloadWmrPdf } from '../utils/reportPdfBuilder';
 import { getAvailableWeeksFromReports, isReportInWeek, FridayWeekInfo } from '../utils/weekUtils';
-import { getUserSignatories, saveUserSignatories } from '../utils/signatoriesConfig';
+import { getUserSignatories, saveUserSignatories, getDefaultWmrSignatories } from '../utils/signatoriesConfig';
 
 interface Form691WeeklyReportProps {
   reports: FieldReport[];
@@ -233,28 +233,28 @@ export const Form691WeeklyReport: React.FC<Form691WeeklyReportProps> = ({
     return availableWeeks.find(w => w.key === selectedWeekKey) || availableWeeks[0];
   }, [availableWeeks, selectedWeekKey]);
 
-  // Signatory State (Configurable per user profile)
-  const initialUserSig = useMemo(() => getUserSignatories(currentUser?.id, currentUser).wmr, [currentUser]);
-  const [preparedByName, setPreparedByName] = useState(initialUserSig.preparedByName);
-  const [preparedByTitle, setPreparedByTitle] = useState(initialUserSig.preparedByTitle);
-  const [reviewedByName, setReviewedByName] = useState(initialUserSig.reviewedByName);
-  const [reviewedByTitle, setReviewedByTitle] = useState(initialUserSig.reviewedByTitle);
-  const [notedByName, setNotedByName] = useState(initialUserSig.notedByName);
-  const [notedByTitle, setNotedByTitle] = useState(initialUserSig.notedByTitle);
-  const [initialsNote, setInitialsNote] = useState(initialUserSig.initialsNote || 'MLRN -\nLMM -');
+  // Signatory State (Configurable per user profile and scoped IMO/NIS)
+  const initialDefaults = useMemo(() => getDefaultWmrSignatories(selectedImo, selectedNis), [selectedImo, selectedNis]);
+  const [preparedByName, setPreparedByName] = useState(initialDefaults.preparedByName);
+  const [preparedByTitle, setPreparedByTitle] = useState(initialDefaults.preparedByTitle);
+  const [reviewedByName, setReviewedByName] = useState(initialDefaults.reviewedByName);
+  const [reviewedByTitle, setReviewedByTitle] = useState(initialDefaults.reviewedByTitle);
+  const [notedByName, setNotedByName] = useState(initialDefaults.notedByName);
+  const [notedByTitle, setNotedByTitle] = useState(initialDefaults.notedByTitle);
+  const [initialsNote, setInitialsNote] = useState(initialDefaults.initialsNote || 'MLRN -\nLMM -');
   const [isEditingSignatories, setIsEditingSignatories] = useState(false);
 
-  // Sync if currentUser changes or custom event fired
+  // Sync when selectedImo, selectedNis, or currentUser changes
   useEffect(() => {
-    const sig = getUserSignatories(currentUser?.id, currentUser).wmr;
-    setPreparedByName(sig.preparedByName);
-    setPreparedByTitle(sig.preparedByTitle);
-    setReviewedByName(sig.reviewedByName);
-    setReviewedByTitle(sig.reviewedByTitle);
-    setNotedByName(sig.notedByName);
-    setNotedByTitle(sig.notedByTitle);
-    if (sig.initialsNote) setInitialsNote(sig.initialsNote);
-  }, [currentUser]);
+    const defaults = getDefaultWmrSignatories(selectedImo, selectedNis);
+    setPreparedByName(defaults.preparedByName);
+    setPreparedByTitle(defaults.preparedByTitle);
+    setReviewedByName(defaults.reviewedByName);
+    setReviewedByTitle(defaults.reviewedByTitle);
+    setNotedByName(defaults.notedByName);
+    setNotedByTitle(defaults.notedByTitle);
+    if (defaults.initialsNote) setInitialsNote(defaults.initialsNote);
+  }, [selectedImo, selectedNis, currentUser]);
 
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
@@ -997,8 +997,8 @@ export const Form691WeeklyReport: React.FC<Form691WeeklyReportProps> = ({
           </tbody>
         </table>
 
-        {/* Signatories Block */}
-        <div className="grid grid-cols-3 gap-6 pt-6 pb-4 text-[11px] font-sans">
+        {/* Signatories Block (Dynamic 3-Column or 2-Column layout) */}
+        <div className={`grid ${reviewedByName?.trim() ? 'grid-cols-3' : 'grid-cols-2 max-w-2xl'} gap-6 pt-6 pb-4 text-[11px] font-sans`}>
           {/* Prepared By */}
           <div className="space-y-4">
             <span className="text-slate-700 font-semibold block">Prepared by:</span>
@@ -1015,18 +1015,20 @@ export const Form691WeeklyReport: React.FC<Form691WeeklyReportProps> = ({
             </div>
           </div>
 
-          {/* Reviewed By */}
-          <div className="space-y-4">
-            <span className="text-slate-700 font-semibold block">Reviewed by:</span>
-            <div className="pt-6 border-b border-transparent">
-              <div className="font-bold uppercase tracking-wide text-slate-950 font-heading">
-                {reviewedByName}
-              </div>
-              <div className="text-[10px] text-slate-600 font-medium">
-                {reviewedByTitle}
+          {/* Reviewed By (if applicable) */}
+          {reviewedByName?.trim() && (
+            <div className="space-y-4">
+              <span className="text-slate-700 font-semibold block">Reviewed by:</span>
+              <div className="pt-6 border-b border-transparent">
+                <div className="font-bold uppercase tracking-wide text-slate-950 font-heading">
+                  {reviewedByName}
+                </div>
+                <div className="text-[10px] text-slate-600 font-medium">
+                  {reviewedByTitle}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Noted By */}
           <div className="space-y-4">

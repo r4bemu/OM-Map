@@ -6,7 +6,7 @@ import { NIA_LOGO_BASE64 } from './niaLogoBase64';
 import { HEADER_LEFT_LOGO_BASE64, HEADER_RIGHT_LOGO_BASE64 } from './headerLogosBase64';
 import { FOOTER_BACKGROUND_BASE64, FOOTER_ISO_LOGO_BASE64 } from './footerAssetsBase64';
 import { registerWmrCustomFonts } from './reportFontLoader';
-import { getUserSignatories } from './signatoriesConfig';
+import { getUserSignatories, getDefaultFieldReportSignatories, getDefaultWmrSignatories } from './signatoriesConfig';
 import { formatReportId } from './reportIdGenerator';
 
 // Helper to safely load an image URL into a base64 Data URL
@@ -565,33 +565,49 @@ export async function generateReportPdf(report: FieldReport): Promise<jsPDF> {
 
   currentY = Math.max(currentY, pageHeight - 34);
 
+  const defaultFieldSigs = getDefaultFieldReportSignatories(
+    report.imoOffice,
+    report.nisBinding,
+    report.reporterName,
+    report.reporterDesignation || report.reporterRole
+  );
+
   const userSig = getUserSignatories(report.submittedByUserId).inspectionReport;
-  const resolvedReporterName = report.reporterName || userSig.preparedByName || 'Field Personnel';
-  const resolvedReporterDesig = report.reporterDesignation || report.reporterRole || userSig.preparedByTitle || 'Water Resource Officer';
-  const rawVerifier = (report.verifierName || userSig.verifiedByName || '').trim();
-  const rawVerifierDesig = (report.verifierDesignation || userSig.verifiedByTitle || 'Supervising Engineer A').trim();
-  const isGenericPlaceholder = !rawVerifier || 
+  const resolvedReporterName = report.reporterName || userSig.preparedByName || defaultFieldSigs.preparedByName || 'Field Personnel';
+  const resolvedReporterDesig = report.reporterDesignation || report.reporterRole || userSig.preparedByTitle || defaultFieldSigs.preparedByTitle || 'Water Resource Officer';
+
+  let rawVerifier = (report.verifierName || '').trim();
+  let rawVerifierDesig = (report.verifierDesignation || '').trim();
+  const isVerifierPlaceholder = !rawVerifier || 
     rawVerifier.toLowerCase() === 'immediate supervisor' || 
     rawVerifier.toLowerCase() === 'n/a' ||
     rawVerifier.toLowerCase() === 'none';
 
-  const hasVerifier = !isGenericPlaceholder;
+  if (isVerifierPlaceholder) {
+    rawVerifier = defaultFieldSigs.reviewedByName;
+    rawVerifierDesig = defaultFieldSigs.reviewedByTitle;
+  }
+
+  let rawApprover = (report.approvedBy || '').trim();
+  let rawApproverDesig = (userSig.approvedByTitle || defaultFieldSigs.approvedByTitle || 'Division Manager A').trim();
+  const isApproverPlaceholder = !rawApprover ||
+    rawApprover.toLowerCase() === 'n/a' ||
+    rawApprover.toLowerCase() === 'none';
+
+  if (isApproverPlaceholder) {
+    rawApprover = defaultFieldSigs.approvedByName;
+    rawApproverDesig = defaultFieldSigs.approvedByTitle;
+  }
+
+  const hasVerifier = Boolean(rawVerifier && rawVerifier.trim().length > 0);
+  const hasApprover = Boolean(rawApprover && rawApprover.trim().length > 0);
 
   doc.setFont(cambriaFont, 'normal');
   doc.setFontSize(8);
   doc.setTextColor(71, 85, 105);
 
-  const defaultApproverName = report.approvedBy || userSig.approvedByName || (
-    fullImoName.includes('MINDORO ORIENTAL') 
-      ? 'Engr. Gerardo R. Perez, EdD' 
-      : (fullImoName.includes('OCCIDENTAL') 
-        ? 'Engr. Raymundo L. Calisin' 
-        : 'Engr. Armando L. Flores')
-  );
-  const defaultApproverDesig = userSig.approvedByTitle || 'Division Manager A';
-
-  if (hasVerifier) {
-    // 3-Column Signatures: Prepared By | Verified By | Approved By
+  if (hasVerifier && hasApprover) {
+    // 3-Column Signatures: Prepared By | Reviewed By | Approved By
     const sigColWidth = contentWidth / 3;
 
     // Prepared By
@@ -605,11 +621,11 @@ export async function generateReportPdf(report: FieldReport): Promise<jsPDF> {
     doc.setTextColor(100, 116, 139);
     doc.text(resolvedReporterDesig, margin, currentY + 15);
 
-    // Verified By
+    // Reviewed / Verified By
     doc.setFont(cambriaFont, 'normal');
     doc.setFontSize(8);
     doc.setTextColor(71, 85, 105);
-    doc.text('Verified by:', margin + sigColWidth, currentY);
+    doc.text('Reviewed by:', margin + sigColWidth, currentY);
     doc.setFont(cambriaFont, 'bold');
     doc.setFontSize(8.5);
     doc.setTextColor(15, 23, 42);
@@ -627,13 +643,41 @@ export async function generateReportPdf(report: FieldReport): Promise<jsPDF> {
     doc.setFont(cambriaFont, 'bold');
     doc.setFontSize(8.5);
     doc.setTextColor(15, 23, 42);
-    doc.text(defaultApproverName, margin + sigColWidth * 2, currentY + 11);
+    doc.text(rawApprover, margin + sigColWidth * 2, currentY + 11);
     doc.setFont(cambriaFont, 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(100, 116, 139);
-    doc.text(defaultApproverDesig, margin + sigColWidth * 2, currentY + 15);
-  } else {
-    // 2-Column Signatures: Prepared By | Approved By (Verified By omitted)
+    doc.text(rawApproverDesig, margin + sigColWidth * 2, currentY + 15);
+  } else if (hasVerifier && !hasApprover) {
+    // 2-Column Signatures: Prepared By | Reviewed By (Approved By omitted e.g. Pula, Bansud, Bongabong)
+    const reviewerX = margin + contentWidth * 0.60;
+
+    // Prepared By
+    doc.text('Prepared by:', margin, currentY);
+    doc.setFont(cambriaFont, 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(15, 23, 42);
+    doc.text(resolvedReporterName, margin, currentY + 11);
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(100, 116, 139);
+    doc.text(resolvedReporterDesig, margin, currentY + 15);
+
+    // Reviewed By
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(71, 85, 105);
+    doc.text('Reviewed by:', reviewerX, currentY);
+    doc.setFont(cambriaFont, 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(15, 23, 42);
+    doc.text(rawVerifier, reviewerX, currentY + 11);
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(100, 116, 139);
+    doc.text(rawVerifierDesig, reviewerX, currentY + 15);
+  } else if (!hasVerifier && hasApprover) {
+    // 2-Column Signatures: Prepared By | Approved By
     const approverX = margin + contentWidth * 0.60;
 
     // Prepared By
@@ -655,11 +699,22 @@ export async function generateReportPdf(report: FieldReport): Promise<jsPDF> {
     doc.setFont(cambriaFont, 'bold');
     doc.setFontSize(8.5);
     doc.setTextColor(15, 23, 42);
-    doc.text(defaultApproverName, approverX, currentY + 11);
+    doc.text(rawApprover, approverX, currentY + 11);
     doc.setFont(cambriaFont, 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(100, 116, 139);
-    doc.text(defaultApproverDesig, approverX, currentY + 15);
+    doc.text(rawApproverDesig, approverX, currentY + 15);
+  } else {
+    // 1-Column Signature: Prepared By only
+    doc.text('Prepared by:', margin, currentY);
+    doc.setFont(cambriaFont, 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(15, 23, 42);
+    doc.text(resolvedReporterName, margin, currentY + 11);
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(100, 116, 139);
+    doc.text(resolvedReporterDesig, margin, currentY + 15);
   }
 
   // 6. Footer: Relocated Report ID (bottom left, no label), Document No. (Calibri, italic, not bold), Editable Footnote, and Page # of ##
@@ -1304,44 +1359,85 @@ export async function generateWmrPdf(
     finalY = 16;
   }
 
-  const sigColWidth = contentWidth / 3;
+  const hasReviewer = Boolean(signatories.reviewedByName && signatories.reviewedByName.trim().length > 0);
 
-  doc.setFont(cambriaFont, 'normal');
-  doc.setFontSize(7);
-  doc.setTextColor(0, 0, 0);
+  if (hasReviewer) {
+    const sigColWidth = contentWidth / 3;
 
-  // Column 1: Prepared by
-  doc.text('Prepared by:', margin, finalY);
-  doc.setFont(cambriaFont, 'bold');
-  doc.setFontSize(7.5);
-  doc.text(signatories.preparedByName || 'ROME MINA RIVERA', margin, finalY + 8);
-  doc.setFont(cambriaFont, 'normal');
-  doc.setFontSize(6.5);
-  doc.text(signatories.preparedByTitle || 'Engineer A', margin, finalY + 11.5);
-  doc.text('MLRN -', margin, finalY + 15);
-  doc.text('LMM -', margin, finalY + 18);
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(0, 0, 0);
 
-  // Column 2: Reviewed by
-  doc.setFont(cambriaFont, 'normal');
-  doc.setFontSize(7);
-  doc.text('Reviewed by:', margin + sigColWidth, finalY);
-  doc.setFont(cambriaFont, 'bold');
-  doc.setFontSize(7.5);
-  doc.text(signatories.reviewedByName || 'AVE JANE V. ALVARADO', margin + sigColWidth, finalY + 8);
-  doc.setFont(cambriaFont, 'normal');
-  doc.setFontSize(6.5);
-  doc.text(signatories.reviewedByTitle || 'Supervising Engineer A', margin + sigColWidth, finalY + 11.5);
+    // Column 1: Prepared by
+    doc.text('Prepared by:', margin, finalY);
+    doc.setFont(cambriaFont, 'bold');
+    doc.setFontSize(7.5);
+    doc.text(signatories.preparedByName || '', margin, finalY + 8);
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(6.5);
+    doc.text(signatories.preparedByTitle || '', margin, finalY + 11.5);
+    if (signatories.initialsNote) {
+      const initLines = signatories.initialsNote.split('\n');
+      initLines.forEach((line, idx) => {
+        doc.text(line, margin, finalY + 15 + idx * 3.5);
+      });
+    }
 
-  // Column 3: Noted by
-  doc.setFont(cambriaFont, 'normal');
-  doc.setFontSize(7);
-  doc.text('Noted by:', margin + sigColWidth * 2, finalY);
-  doc.setFont(cambriaFont, 'bold');
-  doc.setFontSize(7.5);
-  doc.text(signatories.notedByName || 'EDGARD LAURENZ M. GERONIMO', margin + sigColWidth * 2, finalY + 8);
-  doc.setFont(cambriaFont, 'normal');
-  doc.setFontSize(6.5);
-  doc.text(signatories.notedByTitle || 'Principal Engineer C', margin + sigColWidth * 2, finalY + 11.5);
+    // Column 2: Reviewed by
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(7);
+    doc.text('Reviewed by:', margin + sigColWidth, finalY);
+    doc.setFont(cambriaFont, 'bold');
+    doc.setFontSize(7.5);
+    doc.text(signatories.reviewedByName || '', margin + sigColWidth, finalY + 8);
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(6.5);
+    doc.text(signatories.reviewedByTitle || '', margin + sigColWidth, finalY + 11.5);
+
+    // Column 3: Noted by
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(7);
+    doc.text('Noted by:', margin + sigColWidth * 2, finalY);
+    doc.setFont(cambriaFont, 'bold');
+    doc.setFontSize(7.5);
+    doc.text(signatories.notedByName || '', margin + sigColWidth * 2, finalY + 8);
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(6.5);
+    doc.text(signatories.notedByTitle || '', margin + sigColWidth * 2, finalY + 11.5);
+  } else {
+    // 2-Column layout: Prepared by (left) and Noted by (right) e.g. for Pula RIS, Bansud RIS, Bongabong
+    const approverX = margin + contentWidth * 0.60;
+
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(0, 0, 0);
+
+    // Column 1: Prepared by
+    doc.text('Prepared by:', margin, finalY);
+    doc.setFont(cambriaFont, 'bold');
+    doc.setFontSize(7.5);
+    doc.text(signatories.preparedByName || '', margin, finalY + 8);
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(6.5);
+    doc.text(signatories.preparedByTitle || '', margin, finalY + 11.5);
+    if (signatories.initialsNote) {
+      const initLines = signatories.initialsNote.split('\n');
+      initLines.forEach((line, idx) => {
+        doc.text(line, margin, finalY + 15 + idx * 3.5);
+      });
+    }
+
+    // Column 2: Noted by
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(7);
+    doc.text('Noted by:', approverX, finalY);
+    doc.setFont(cambriaFont, 'bold');
+    doc.setFontSize(7.5);
+    doc.text(signatories.notedByName || '', approverX, finalY + 8);
+    doc.setFont(cambriaFont, 'normal');
+    doc.setFontSize(6.5);
+    doc.text(signatories.notedByTitle || '', approverX, finalY + 11.5);
+  }
 
   // Footer Drawing: Adds ISO Logo.png on bottom right (75% scale), and Calibri text on all pages (no background, no dividing border)
   const totalPages = doc.getNumberOfPages();

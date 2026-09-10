@@ -282,7 +282,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.wmr.preparedByName}
                           onChange={(e) => updateSignatory('wmr', 'preparedByName', e.target.value)}
-                          placeholder="e.g. ROME MINA RIVERA"
+                          placeholder="e.g. Aljohn L. Soco / May Hyacinthe Anne N. Pechon"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -292,7 +292,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.wmr.preparedByTitle}
                           onChange={(e) => updateSignatory('wmr', 'preparedByTitle', e.target.value)}
-                          placeholder="e.g. Senior Engineer A"
+                          placeholder="e.g. Foreman A / Engineer A / Senior Engineer A"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -309,7 +309,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.wmr.reviewedByName}
                           onChange={(e) => updateSignatory('wmr', 'reviewedByName', e.target.value)}
-                          placeholder="e.g. AVE JANE V. ALVARADO"
+                          placeholder="e.g. Daniel Angelo M. Malabanan / Emelito V. Urriquia"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -319,7 +319,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.wmr.reviewedByTitle}
                           onChange={(e) => updateSignatory('wmr', 'reviewedByTitle', e.target.value)}
-                          placeholder="e.g. Supervising Engineer A"
+                          placeholder="e.g. Principal Engineer A / Senior Engineer A"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -336,7 +336,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.wmr.notedByName}
                           onChange={(e) => updateSignatory('wmr', 'notedByName', e.target.value)}
-                          placeholder="e.g. LOWELL L. LOZANO"
+                          placeholder="e.g. Maria Victoria O. Malenab / Mary Grace B. Cartagena"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -346,7 +346,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.wmr.notedByTitle}
                           onChange={(e) => updateSignatory('wmr', 'notedByTitle', e.target.value)}
-                          placeholder="e.g. Division Manager A"
+                          placeholder="e.g. Division Manager A / Principal Engineer C"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -420,7 +420,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.photoDoc.preparedByName}
                           onChange={(e) => updateSignatory('photoDoc', 'preparedByName', e.target.value)}
-                          placeholder="e.g. ROME MINA RIVERA"
+                          placeholder="e.g. Aljohn L. Soco / May Hyacinthe Anne N. Pechon"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -430,7 +430,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.photoDoc.preparedByTitle}
                           onChange={(e) => updateSignatory('photoDoc', 'preparedByTitle', e.target.value)}
-                          placeholder="e.g. Senior Engineer A"
+                          placeholder="e.g. Foreman A / Engineer A / Senior Engineer A"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -447,7 +447,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.photoDoc.reviewedByName}
                           onChange={(e) => updateSignatory('photoDoc', 'reviewedByName', e.target.value)}
-                          placeholder="e.g. AVE JANE V. ALVARADO"
+                          placeholder="e.g. Daniel Angelo M. Malabanan / Emelito V. Urriquia"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -457,7 +457,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.photoDoc.reviewedByTitle}
                           onChange={(e) => updateSignatory('photoDoc', 'reviewedByTitle', e.target.value)}
-                          placeholder="e.g. Supervising Engineer A"
+                          placeholder="e.g. Principal Engineer A / Senior Engineer A"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -474,7 +474,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.photoDoc.notedByName}
                           onChange={(e) => updateSignatory('photoDoc', 'notedByName', e.target.value)}
-                          placeholder="e.g. LOWELL L. LOZANO"
+                          placeholder="e.g. Maria Victoria O. Malenab / Mary Grace B. Cartagena"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -484,7 +484,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.photoDoc.notedByTitle}
                           onChange={(e) => updateSignatory('photoDoc', 'notedByTitle', e.target.value)}
-                          placeholder="e.g. Division Manager A"
+                          placeholder="e.g. Division Manager A / Principal Engineer C"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -551,7 +551,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.inspectionReport.preparedByName}
                           onChange={(e) => updateSignatory('inspectionReport', 'preparedByName', e.target.value)}
-                          placeholder="e.g. Juan Dela Cruz"
+                          placeholder="e.g. Field Submitter Name"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -561,7 +561,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.inspectionReport.preparedByTitle}
                           onChange={(e) => updateSignatory('inspectionReport', 'preparedByTitle', e.target.value)}
-                          placeholder="e.g. Water Resource Officer"
+                          placeholder="e.g. Water Resource Officer / Field Personnel"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -578,7 +578,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.inspectionReport.verifiedByName}
                           onChange={(e) => updateSignatory('inspectionReport', 'verifiedByName', e.target.value)}
-                          placeholder="e.g. AVE JANE V. ALVARADO"
+                          placeholder="e.g. Aljohn L. Soco / Michelle F. Abila / Ave Jane V. Alvarado"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -588,7 +588,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.inspectionReport.verifiedByTitle}
                           onChange={(e) => updateSignatory('inspectionReport', 'verifiedByTitle', e.target.value)}
-                          placeholder="e.g. Supervising Engineer A"
+                          placeholder="e.g. Foreman A / Engineer A / Senior Engineer A"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -605,7 +605,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.inspectionReport.approvedByName}
                           onChange={(e) => updateSignatory('inspectionReport', 'approvedByName', e.target.value)}
-                          placeholder="e.g. LOWELL L. LOZANO"
+                          placeholder="e.g. Daniel Angelo M. Malabanan / Emelito V. Urriquia"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>
@@ -615,7 +615,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
                           type="text"
                           value={signatories.inspectionReport.approvedByTitle}
                           onChange={(e) => updateSignatory('inspectionReport', 'approvedByTitle', e.target.value)}
-                          placeholder="e.g. Division Manager A"
+                          placeholder="e.g. Principal Engineer A / Division Manager A"
                           className="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 text-white text-xs p-2 rounded-lg focus:outline-none"
                         />
                       </div>

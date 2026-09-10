@@ -60,9 +60,7 @@ import {
   TIER_CONFIG
 } from '../utils/approvalHierarchyEngine';
 import { PhotoManager } from './PhotoManager';
-import { CaptionContext } from '../utils/captionGenerator';
-import { getUserSignatories } from '../utils/signatoriesConfig';
-import { composeTechnicalRemarks } from '../utils/technicalRemarksComposer';
+import { getUserSignatories, getDefaultFieldReportSignatories } from '../utils/signatoriesConfig';
 
 
 
@@ -1319,10 +1317,16 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
       }
     }
 
+      const defaultFieldSigs = getDefaultFieldReportSignatories(
+        reportImoOffice,
+        reportNisBinding,
+        currentUser?.name,
+        currentUser?.designation
+      );
       const userSig = getUserSignatories(currentUser?.id, currentUser);
-      const resolvedReporterDesignation = editingReport?.reporterDesignation || currentUser?.designation || userSig.inspectionReport.preparedByTitle || 'Water Resource Officer';
-      const resolvedVerifierName = editingReport?.verifierName || userSig.inspectionReport.verifiedByName || 'AVE JANE V. ALVARADO';
-      const resolvedVerifierDesignation = editingReport?.verifierDesignation || userSig.inspectionReport.verifiedByTitle || 'Supervising Engineer A';
+      const resolvedReporterDesignation = editingReport?.reporterDesignation || currentUser?.designation || userSig.inspectionReport.preparedByTitle || defaultFieldSigs.preparedByTitle || 'Water Resource Officer';
+      const resolvedVerifierName = editingReport?.verifierName || defaultFieldSigs.reviewedByName || userSig.inspectionReport.verifiedByName;
+      const resolvedVerifierDesignation = editingReport?.verifierDesignation || defaultFieldSigs.reviewedByTitle || userSig.inspectionReport.verifiedByTitle;
 
       const newReport: FieldReport = {
         id: editingReport ? editingReport.id : generateWmrReportId(reportNisBinding, reportImoOffice),
