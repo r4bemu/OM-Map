@@ -342,6 +342,25 @@ function saveLayersToFile(layersList: any[]) {
   }
 }
 
+function isDeveloperTestReport(r: any): boolean {
+  if (!r) return true;
+  const id = String(r.id || '').toLowerCase();
+  return id.startsWith('mock-') ||
+         id === 'report-1' ||
+         r.isMock === true ||
+         id.startsWith('rep-maint-test-') ||
+         id.startsWith('rep-maint-live-') ||
+         id.startsWith('rep-maint-verify-') ||
+         id.startsWith('rep-clean-drive-') ||
+         id.startsWith('rep-2pt-dist-') ||
+         id.startsWith('rep-pimo-verify-') ||
+         id.startsWith('rep-maint-test-pal-') ||
+         id.startsWith('rep-auto-route-') ||
+         id.startsWith('rep-maint-desilt-') ||
+         id.startsWith('rep-maint-dredge-') ||
+         id.startsWith('rep-maint-paint-');
+}
+
 function loadSavedReports() {
   try {
     ensureDataDir();
@@ -349,7 +368,7 @@ function loadSavedReports() {
       const content = fs.readFileSync(REPORTS_FILE, 'utf-8');
       const parsed = JSON.parse(content);
       if (Array.isArray(parsed)) {
-        return deduplicateById(parsed.filter((r: any) => !r.id?.startsWith('mock-') && r.id !== 'report-1' && !r.isMock));
+        return deduplicateById(parsed.filter((r: any) => !isDeveloperTestReport(r)));
       }
     }
   } catch (err) {

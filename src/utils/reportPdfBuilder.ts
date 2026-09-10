@@ -415,7 +415,9 @@ export async function generateReportPdf(report: FieldReport): Promise<jsPDF> {
         // Embed Image fitted into 4:3 frame without stretching or compression
         const resolvedPhotoUrl = p.dataUrl || p.sourceDataUrl || p.url || (p.driveFileId ? `/api/drive/photo/${p.driveFileId}` : '') || (p.id ? `/api/drive/photo/${p.id}` : '');
         const imgObj = await getBase64ImageFromUrl(resolvedPhotoUrl);
-        if (imgObj && imgObj.dataUrl) {
+        const isValidImage = Boolean(imgObj && imgObj.dataUrl && (imgObj.width || 0) > 20 && (imgObj.height || 0) > 20);
+        
+        if (isValidImage && imgObj) {
           try {
             const containerW = photoCardWidth - 0.6;
             const containerH = photoCardHeight - 0.6;
@@ -438,7 +440,12 @@ export async function generateReportPdf(report: FieldReport): Promise<jsPDF> {
           doc.setFont(cambriaFont, 'italic');
           doc.setFontSize(7.5);
           doc.setTextColor(148, 163, 184);
-          doc.text('[Image file preview not accessible]', x + photoCardWidth / 2, y + photoCardHeight / 2, { align: 'center' });
+          const fallbackText = (!resolvedPhotoUrl || resolvedPhotoUrl === '') 
+            ? '[Inspection Photo Pending Sync / Offline]'
+            : (imgObj && (imgObj.width <= 20 || imgObj.height <= 20))
+            ? '[Photo Placeholder - No Binary Uploaded]'
+            : '[Image File Preview Not Accessible]';
+          doc.text(fallbackText, x + photoCardWidth / 2, y + photoCardHeight / 2, { align: 'center' });
         }
 
         // Stage Badge on Top Left of Photo ("BEFORE" / "DURING" / "AFTER")

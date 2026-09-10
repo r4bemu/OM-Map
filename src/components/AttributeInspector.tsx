@@ -405,10 +405,23 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                       return (
                         <div key={p.id || i} className="relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 min-h-[144px] flex items-center justify-center">
                           <img 
-                            src={resolvedSrc} 
+                            src={resolvedSrc || undefined} 
                             alt="Inspection site" 
                             className="w-full h-36 object-cover" 
                             loading="lazy"
+                            onLoad={(e) => {
+                              const target = e.currentTarget;
+                              if (target.naturalWidth <= 10 || target.naturalHeight <= 10) {
+                                target.style.display = 'none';
+                                const parent = target.parentElement;
+                                if (parent && !parent.querySelector('.img-fallback')) {
+                                  const fallback = document.createElement('div');
+                                  fallback.className = 'img-fallback w-full h-36 flex flex-col items-center justify-center text-slate-500 text-xs p-3 text-center bg-slate-900/90';
+                                  fallback.innerHTML = '<span class="text-lg mb-1">📷</span><span>Photo placeholder (No image binary uploaded)</span>';
+                                  parent.prepend(fallback);
+                                }
+                              }
+                            }}
                             onError={(e) => {
                               const target = e.currentTarget;
                               // Try fallback to driveFileId if initial url failed
@@ -421,7 +434,10 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                               if (parent && !parent.querySelector('.img-fallback')) {
                                 const fallback = document.createElement('div');
                                 fallback.className = 'img-fallback w-full h-36 flex flex-col items-center justify-center text-slate-500 text-xs p-3 text-center bg-slate-900/90';
-                                fallback.innerHTML = '<span class="text-lg mb-1">📷</span><span>Inspection photo preview not accessible offline</span>';
+                                const msg = (!resolvedSrc || resolvedSrc === '')
+                                  ? 'Inspection photo pending cloud sync'
+                                  : 'Inspection photo preview not accessible offline';
+                                fallback.innerHTML = `<span class="text-lg mb-1">📷</span><span>${msg}</span>`;
                                 parent.prepend(fallback);
                               }
                             }}

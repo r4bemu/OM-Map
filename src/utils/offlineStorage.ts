@@ -39,8 +39,13 @@ export function getOfflineReports(): FieldReport[] {
   }
   try {
     const raw = localStorage.getItem(OFFLINE_REPORTS_KEY);
-    inMemoryReportsCache = raw ? JSON.parse(raw) : [];
-    return inMemoryReportsCache || [];
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (Array.isArray(parsed)) {
+      inMemoryReportsCache = parsed;
+      return parsed;
+    }
+    inMemoryReportsCache = [];
+    return [];
   } catch (err) {
     console.warn('Failed to read offline reports from localStorage', err);
     inMemoryReportsCache = [];
@@ -52,16 +57,21 @@ function createLightweightReports(reports: FieldReport[]): FieldReport[] {
   return (reports || []).map(r => {
     if (r.photos && Array.isArray(r.photos) && r.photos.length > 0) {
       const lightweightPhotos = r.photos.map(p => {
-        if (p && typeof p.url === 'string' && p.url.length > 300) {
-          // Truncate long base64 strings in url for localStorage, full images persist in IndexedDB
-          return {
-            ...p,
-            url: p.url.substring(0, 100) + '...[stored_in_idb]'
-          };
-        }
-        return p;
+        if (!p) return p;
+        // Keep server URLs and thumbnails intact; omit large base64 from localStorage only (IndexedDB retains full binary)
+        const isLongBase64 = typeof p.url === 'string' && p.url.startsWith('data:image/') && p.url.length > 500;
+        return {
+          ...p,
+          url: isLongBase64 ? '' : p.url,
+          dataUrl: undefined,
+          sourceDataUrl: undefined
+        };
       });
-      return { ...r, photos: lightweightPhotos };
+      return { 
+        ...r, 
+        photos: lightweightPhotos,
+        photoUrl: (typeof r.photoUrl === 'string' && r.photoUrl.startsWith('data:image/') && r.photoUrl.length > 500) ? undefined : r.photoUrl
+      };
     }
     return r;
   });
@@ -69,10 +79,33 @@ function createLightweightReports(reports: FieldReport[]): FieldReport[] {
 
 export function saveOfflineReports(reports: FieldReport[]): void {
   const safeReports = Array.isArray(reports) ? reports : [];
-  inMemoryReportsCache = safeReports;
+  
+  // Maintain full-fidelity objects with all base64 photos in memory
+  if (inMemoryReportsCache && inMemoryReportsCache.length > 0) {
+    // Preserve any existing full base64 images if incoming report has empty URLs
+    const memoryMap = new Map<string, FieldReport>();
+    inMemoryReportsCache.forEach(mr => memoryMap.set(mr.id, mr));
+    
+    inMemoryReportsCache = safeReports.map(r => {
+      const existing = memoryMap.get(r.id);
+      if (existing && existing.photos && r.photos) {
+        const mergedPhotos = r.photos.map((p, pIdx) => {
+          const ep = existing.photos?.[pIdx] || existing.photos?.find(x => x.id === p.id);
+          if ((!p.url || p.url === '') && ep && ep.url && ep.url.startsWith('data:image/')) {
+            return { ...p, url: ep.url, dataUrl: ep.dataUrl || ep.url, sourceDataUrl: ep.sourceDataUrl };
+          }
+          return p;
+        });
+        return { ...r, photos: mergedPhotos };
+      }
+      return r;
+    });
+  } else {
+    inMemoryReportsCache = safeReports;
+  }
 
-  // 1. Always save lightweight version (photos truncated) to localStorage for instant synchronous startup
-  const lightweight = createLightweightReports(safeReports);
+  // 1. Always save lightweight version to localStorage (prevent quota overflow)
+  const lightweight = createLightweightReports(inMemoryReportsCache || safeReports);
   try {
     localStorage.setItem(OFFLINE_REPORTS_KEY, JSON.stringify(lightweight));
   } catch (err) {
@@ -81,18 +114,15 @@ export function saveOfflineReports(reports: FieldReport[]): void {
       localStorage.removeItem(CACHED_LAYERS_KEY);
       localStorage.setItem(OFFLINE_REPORTS_KEY, JSON.stringify(lightweight));
     } catch (fallbackErr) {
-      // If still full, store unsynced reports only
       try {
-        const unsyncedOnly = safeReports.filter(r => !r.synced);
+        const unsyncedOnly = (inMemoryReportsCache || safeReports).filter(r => !r.synced);
         localStorage.setItem(OFFLINE_REPORTS_KEY, JSON.stringify(createLightweightReports(unsyncedOnly)));
-      } catch (e) {
-        // Data is safely held in inMemoryReportsCache and IndexedDB
-      }
+      } catch (e) {}
     }
   }
 
-  // 2. Persist full fidelity reports with all high-res photos to IndexedDB
-  saveCachedReportsDB(safeReports).catch(err => {
+  // 2. Persist full fidelity reports with all high-res photos to IndexedDB (500MB+ capacity)
+  saveCachedReportsDB(inMemoryReportsCache || safeReports).catch(err => {
     console.warn('IndexedDB async save reports notice:', err);
   });
 }
@@ -227,20 +257,52 @@ export async function saveCachedReportsDB(reports: FieldReport[]): Promise<void>
   try {
     const db = await openDB();
     if (!db.objectStoreNames.contains(STORE_REPORTS)) return;
+
+    // Read existing stored records to preserve base64 images if incoming report has empty URLs
+    const existingRecords = await new Promise<FieldReport[]>((resolve) => {
+      try {
+        const readTx = db.transaction(STORE_REPORTS, 'readonly');
+        const readStore = readTx.objectStore(STORE_REPORTS);
+        const req = readStore.getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => resolve([]);
+      } catch (_) {
+        resolve([]);
+      }
+    });
+
+    const existingMap = new Map<string, FieldReport>();
+    existingRecords.forEach(er => existingMap.set(er.id, er));
+
+    const mergedReports = safeReports.map(r => {
+      const existing = existingMap.get(r.id);
+      if (existing && existing.photos && r.photos) {
+        const mergedPhotos = r.photos.map((p, pIdx) => {
+          const ep = existing.photos?.[pIdx] || existing.photos?.find(x => x.id === p.id);
+          if ((!p.url || p.url === '') && ep && ep.url && ep.url.startsWith('data:image/')) {
+            return { ...p, url: ep.url, dataUrl: ep.dataUrl || ep.url, sourceDataUrl: ep.sourceDataUrl };
+          }
+          return p;
+        });
+        return { ...r, photos: mergedPhotos };
+      }
+      return r;
+    });
+
     const tx = db.transaction(STORE_REPORTS, 'readwrite');
     const store = tx.objectStore(STORE_REPORTS);
 
     await new Promise<void>((resolve, reject) => {
       const clearReq = store.clear();
       clearReq.onsuccess = () => {
-        if (!safeReports || safeReports.length === 0) return resolve();
+        if (!mergedReports || mergedReports.length === 0) return resolve();
         let addedCount = 0;
         let hasError = false;
-        safeReports.forEach(r => {
+        mergedReports.forEach(r => {
           const addReq = store.put(r);
           addReq.onsuccess = () => {
             addedCount++;
-            if (addedCount === safeReports.length && !hasError) resolve();
+            if (addedCount === mergedReports.length && !hasError) resolve();
           };
           addReq.onerror = () => {
             hasError = true;

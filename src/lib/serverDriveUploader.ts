@@ -864,6 +864,25 @@ export function parseSummaryToReport(
   };
 }
 
+function isDevTestReport(r: any): boolean {
+  if (!r) return true;
+  const id = String(r.id || '').toLowerCase();
+  return id.startsWith('mock-') ||
+         id === 'report-1' ||
+         r.isMock === true ||
+         id.startsWith('rep-maint-test-') ||
+         id.startsWith('rep-maint-live-') ||
+         id.startsWith('rep-maint-verify-') ||
+         id.startsWith('rep-clean-drive-') ||
+         id.startsWith('rep-2pt-dist-') ||
+         id.startsWith('rep-pimo-verify-') ||
+         id.startsWith('rep-maint-test-pal-') ||
+         id.startsWith('rep-auto-route-') ||
+         id.startsWith('rep-maint-desilt-') ||
+         id.startsWith('rep-maint-dredge-') ||
+         id.startsWith('rep-maint-paint-');
+}
+
 // Helper to load reports from server filesystem
 function loadServerReportsInternal(): any[] {
   try {
@@ -872,7 +891,7 @@ function loadServerReportsInternal(): any[] {
       const content = fs.readFileSync(reportsFile, 'utf-8');
       const parsed = JSON.parse(content);
       if (Array.isArray(parsed)) {
-        return parsed.filter((r: any) => !r.id?.startsWith('mock-') && r.id !== 'report-1' && !r.isMock);
+        return parsed.filter((r: any) => !isDevTestReport(r));
       }
     }
   } catch (err) {
@@ -1021,14 +1040,33 @@ export async function fetchReportsFromAllDriveFolders(
         const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
         if (!res.ok) return;
         const data = await res.json();
+        const isDevTestFolder = (name: string) => {
+          const lower = name.toLowerCase();
+          return lower.includes('rep-maint-test') ||
+                 lower.includes('rep-maint-live') ||
+                 lower.includes('rep-maint-verify') ||
+                 lower.includes('rep-clean-drive') ||
+                 lower.includes('rep-2pt-dist') ||
+                 lower.includes('rep-pimo-verify') ||
+                 lower.includes('rep-auto-route') ||
+                 lower.includes('rep-maint-desilt') ||
+                 lower.includes('rep-maint-dredge') ||
+                 lower.includes('rep-maint-paint') ||
+                 lower.includes('mock-') ||
+                 lower.includes('test_photo') ||
+                 lower.includes('test-photo');
+        };
+
         const subfolders = (data.files || []).filter((f: any) => 
-          f.name.startsWith('wmr-') || 
-          f.name.startsWith('WMR-') || 
-          f.name.startsWith('rep-') || 
-          f.name.startsWith('Report_') || 
-          f.name.toLowerCase().includes('report') || 
-          /^\d{6,}_/.test(f.name) ||
-          f.name.includes('_')
+          !isDevTestFolder(f.name) && (
+            f.name.startsWith('wmr-') || 
+            f.name.startsWith('WMR-') || 
+            f.name.startsWith('rep-') || 
+            f.name.startsWith('Report_') || 
+            f.name.toLowerCase().includes('report') || 
+            /^\d{6,}_/.test(f.name) ||
+            f.name.includes('_')
+          )
         );
 
         await Promise.all(subfolders.map(async (sub: any) => {

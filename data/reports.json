@@ -748,33 +748,6 @@
     "desiltingVolumeM3": 0
   },
   {
-    "id": "rep-maint-desilt-1786802167125",
-    "title": "Canal Desilting Segment Accomplishment",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Palawan IMO",
-    "nisBinding": "Malatgao RIS",
-    "status": "Completed",
-    "approvalStatus": "Pending_PreApproval",
-    "createdAt": "2026-08-15T13:56:07.174Z",
-    "lat": 9.332,
-    "lng": 118.421,
-    "secondLat": 9.345,
-    "secondLng": 118.432,
-    "locationName": "Malatgao Main Canal Sta 0+000 to Sta 0+500",
-    "canalSegment": "Malatgao Main Canal",
-    "segmentDistanceMeters": 500,
-    "segmentDistanceFormatted": "500.0 m (0.50 km)",
-    "maintenanceActivity": "Desilting / Clearing of Canal (Mechanical)",
-    "reporterName": "Field Engr Palawan",
-    "reporterRole": "Field Personnel",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Pending (N/A)",
-    "remarks": "Mechanical desilting accomplished.",
-    "synced": true,
-    "photos": []
-  },
-  {
     "id": "rep-1786850060251",
     "title": "Desilting / Clearing of Canal (Mechanical) - MAIN CANAL THRESHER CROSSING (16+844)",
     "reportType": "maintenance",
@@ -809,76 +782,6 @@
       }
     ],
     "photoUrl": "/api/drive/photo/1V3w316GCeAafSjP4MqeBLJ6OEYa4B48J"
-  },
-  {
-    "id": "rep-clean-drive-1786789233023",
-    "title": "Occidental Mindoro Dam Intake Inspection",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Occidental Mindoro IMO",
-    "nisBinding": "Mamburao RIS",
-    "status": "Completed",
-    "approvalStatus": "Pending_PreApproval",
-    "createdAt": "2026-08-15T10:20:36.373Z",
-    "lat": 13.2201,
-    "lng": 120.612,
-    "locationName": "Mamburao River Dam Intake",
-    "maintenanceActivity": "Brass dam / dredging at water source",
-    "reporterName": "Engr Occ Mindoro",
-    "reporterRole": "O&M Engineer",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Pending (N/A)",
-    "remarks": "Dam intake dredged and desilted.",
-    "synced": true,
-    "photos": [
-      {
-        "id": "15-2p2eCc7FhZ6TlKAvsLIIfO5NDJtjXh",
-        "url": "/api/drive/photo/15-2p2eCc7FhZ6TlKAvsLIIfO5NDJtjXh",
-        "driveFileId": "15-2p2eCc7FhZ6TlKAvsLIIfO5NDJtjXh",
-        "thumbnailUrl": "https://lh3.googleusercontent.com/drive-storage/AJQWtBMrzR7HB4bN8fqGW3txUit2ghsk3bN3it-VAqSmUOIVvem1jRLz4j5lv-CW2JK_af3vcYj9G6c9gY2_kFEv1TgY2kd1zUx6HHyB3xRanQ1HfgFwig=s220",
-        "stage": "During",
-        "caption": "During Activity Documentation",
-        "capturedAt": "2026-08-15T10:20:36.373Z",
-        "locationName": "Mamburao River Dam Intake",
-        "lat": 13.2201,
-        "lng": 120.612
-      }
-    ],
-    "photoUrl": "/api/drive/photo/15-2p2eCc7FhZ6TlKAvsLIIfO5NDJtjXh"
-  },
-  {
-    "id": "rep-maint-test-occ-1786779405624",
-    "title": "Mamburao Canal Gate Maintenance",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Occidental Mindoro IMO",
-    "nisBinding": "Mamburao RIS",
-    "locationName": "Mamburao Main Canal Turnout 2",
-    "canalSegment": "MC-Turnout-2",
-    "lat": 13.22,
-    "lng": 120.6,
-    "status": "Completed",
-    "remarks": "Gate clearing and gear lubrication completed",
-    "reporterName": "Field Officer Occ Mindoro 01",
-    "reporterRole": "Field Personnel",
-    "createdAt": "2026-08-15T07:36:45.624Z",
-    "synced": true,
-    "photos": [
-      {
-        "id": "photo-1",
-        "url": "/api/drive/photo/1LUlICaaGi3WSU1QxT_ay9SeRhoAUlS-O",
-        "stage": "Before",
-        "caption": "Before Gate Lubrication",
-        "driveFileId": "1LUlICaaGi3WSU1QxT_ay9SeRhoAUlS-O"
-      },
-      {
-        "id": "photo-2",
-        "url": "/api/drive/photo/1UhvVMPUEPTULUTxKcGgrqGABS4XV_0Xg",
-        "stage": "After",
-        "caption": "After Gate Clearing & Painting",
-        "driveFileId": "1UhvVMPUEPTULUTxKcGgrqGABS4XV_0Xg"
-      }
-    ]
   },
   {
     "id": "rep-1787023788978",
@@ -1093,74 +996,6 @@
     "photoUrl": "/api/drive/photo/1VZ-lTap6dNr_0UCSfQeJpgFQmaw-dT0c"
   },
   {
-    "id": "rep-maint-dredge-1786802167125",
-    "title": "Water Source Dredging / Brass Dam",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Occidental Mindoro IMO",
-    "nisBinding": "Mamburao RIS",
-    "status": "Completed",
-    "approvalStatus": "Pending_PreApproval",
-    "createdAt": "2026-08-15T13:56:09.989Z",
-    "lat": 13.2201,
-    "lng": 120.612,
-    "secondLat": 13.225,
-    "secondLng": 120.615,
-    "locationName": "Mamburao River Dam Intake",
-    "canalSegment": "Mamburao Main Intake",
-    "segmentDistanceMeters": 200,
-    "segmentDistanceFormatted": "200.0 m",
-    "maintenanceActivity": "Brass dam / dredging at water source",
-    "reporterName": "Field Engr Occ Mindoro",
-    "reporterRole": "Field Personnel",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Pending (N/A)",
-    "remarks": "Sand pile earth volume dredged.",
-    "synced": true,
-    "photos": []
-  },
-  {
-    "id": "rep-maint-verify-1786779608111",
-    "title": "Baco Siphon Desilting & Photo Test",
-    "reportType": "maintenance",
-    "lat": 13.355,
-    "lng": 121.168,
-    "canalSegment": "MC-Siphon-01",
-    "parcelId": "",
-    "completionPercent": 0,
-    "desiltingVolumeM3": 0,
-    "status": "In Progress",
-    "remarks": "Testing photo upload in designated MOMARO IMO Drive folder",
-    "reporterName": "Field Officer MOMARO 01",
-    "reporterRole": "Field Personnel",
-    "approvalStatus": "Pending_PreApproval",
-    "preApprovedBy": null,
-    "createdAt": "2026-08-15T07:40:08.111Z",
-    "synced": true,
-    "photoUrl": "",
-    "hazardSeverity": null,
-    "categoryMode": "maintenance",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "nisBinding": "Baco-Bucayao RIS",
-    "locationName": "Baco Siphon Sta. 3+000",
-    "photos": [
-      {
-        "id": "photo-1",
-        "url": "/api/drive/photo/1YRECFscm1aNRkukure1gtJAV3Cl1x_fu",
-        "stage": "Before",
-        "caption": "Before Desilting - Silt Blockage",
-        "driveFileId": "1YRECFscm1aNRkukure1gtJAV3Cl1x_fu"
-      },
-      {
-        "id": "photo-2",
-        "url": "/api/drive/photo/1SFF-Tre2MBdBgcjjt5WFiIX8F0hPRVQC",
-        "stage": "During",
-        "caption": "During Excavation Operations",
-        "driveFileId": "1SFF-Tre2MBdBgcjjt5WFiIX8F0hPRVQC"
-      }
-    ]
-  },
-  {
     "id": "rep-1786782300549",
     "title": "Gate Lubrication - LATERAL C-SOUTH (0+183 to 0+472)",
     "reportType": "maintenance",
@@ -1243,27 +1078,6 @@
         "driveFileId": "1YfGY-h6NZJWaXrDCTFRJ-AJir4YiZe83"
       }
     ]
-  },
-  {
-    "id": "rep-maint-test-photo-1786779304082",
-    "title": "Baco Main Canal Desilting Inspection",
-    "reportType": "maintenance",
-    "lat": 13.355,
-    "lng": 121.168,
-    "canalSegment": "MC-01",
-    "parcelId": "",
-    "completionPercent": 0,
-    "desiltingVolumeM3": 0,
-    "status": "In Progress",
-    "remarks": "Heavy silt accumulation restricting water flow velocity by ~40% near turnout 3.",
-    "reporterName": "Field Officer MOMARO 01",
-    "reporterRole": "Field Personnel",
-    "approvalStatus": "Pending_PreApproval",
-    "preApprovedBy": null,
-    "createdAt": "2026-08-15T07:35:04.082Z",
-    "synced": true,
-    "photoUrl": "",
-    "hazardSeverity": null
   },
   {
     "id": "rep-workflow-test-1786772944810",
@@ -1391,48 +1205,6 @@
       }
     ],
     "photoUrl": "/api/drive/photo/1PnEqvyXz9vOVibfg82aofwEMfjUY_pze"
-  },
-  {
-    "id": "rep-2pt-dist-1786791272524",
-    "title": "Canal Desilting Segment Accomplishment",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Palawan IMO",
-    "nisBinding": "Malatgao RIS",
-    "status": "Completed",
-    "approvalStatus": "Pending_PreApproval",
-    "createdAt": "2026-08-15T10:54:32.573Z",
-    "lat": 9.332,
-    "lng": 118.421,
-    "secondLat": 9.345,
-    "secondLng": 118.432,
-    "locationName": "Malatgao Main Canal Sta 0+100 to Sta 1+550",
-    "canalSegment": "Malatgao Main Canal",
-    "segmentDistanceMeters": 1.45,
-    "segmentDistanceFormatted": "1.45 km (1,450 m)",
-    "maintenanceActivity": "Desilting / Clearing of Canal (Mechanical)",
-    "reporterName": "Field Engr Test",
-    "reporterRole": "Field Personnel",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Pending (N/A)",
-    "remarks": "Completed 1.45 km mechanical desilting accomplishment.",
-    "synced": true,
-    "photos": [
-      {
-        "id": "1e8RiSk6b-lGw9tDOPxmzvjW1SdqcY1W2",
-        "url": "/api/drive/photo/1e8RiSk6b-lGw9tDOPxmzvjW1SdqcY1W2",
-        "driveFileId": "1e8RiSk6b-lGw9tDOPxmzvjW1SdqcY1W2",
-        "thumbnailUrl": "https://lh3.googleusercontent.com/drive-storage/AJQWtBMH20Ou_VAx9txv5nPshseSkpzvOVPqk0GxcAOfD8mJS_Xtc540cV63NWp7W5VSsYr6xbkuiXkiKvlcp-qEgKwCGQhBmDV7KHE__gVmKwHPCon3_Q=s220",
-        "stage": "After",
-        "caption": "After Activity Documentation",
-        "capturedAt": "2026-08-15T10:54:32.573Z",
-        "locationName": "Malatgao Main Canal Sta 0+100 to Sta 1+550",
-        "canalSegment": "Malatgao Main Canal",
-        "lat": 9.332,
-        "lng": 118.421
-      }
-    ],
-    "photoUrl": "/api/drive/photo/1e8RiSk6b-lGw9tDOPxmzvjW1SdqcY1W2"
   },
   {
     "id": "rep-1787040188324",
@@ -1580,119 +1352,6 @@
       }
     ],
     "photoUrl": "/api/drive/photo/1nyPFcPzftlPLb8HXnNX06fZ8KFNOULvA"
-  },
-  {
-    "id": "rep-pimo-verify-1786784428909",
-    "title": "Palawan Malatgao Siphon Gate Servicing",
-    "reportType": "maintenance",
-    "lat": 9.3245,
-    "lng": 118.4211,
-    "canalSegment": "",
-    "parcelId": "",
-    "completionPercent": 0,
-    "desiltingVolumeM3": 0,
-    "status": "Completed",
-    "remarks": "Gate servicing completed and lubricated in Malatgao RIS.",
-    "reporterName": "Engr. Palawan O&M",
-    "reporterRole": "O&M Engineer",
-    "approvalStatus": "Pending_PreApproval",
-    "preApprovedBy": null,
-    "createdAt": "2026-08-15T09:00:28.968Z",
-    "synced": true,
-    "hazardSeverity": null,
-    "categoryMode": "maintenance",
-    "imoOffice": "Palawan IMO",
-    "nisBinding": "Malatgao RIS",
-    "locationName": "Malatgao Main Canal Sta 1+200",
-    "maintenanceActivity": "Gate Lubrication",
-    "photos": [
-      {
-        "id": "p1",
-        "stage": "During",
-        "caption": "During Siphon Inspection",
-        "capturedAt": "2026-08-15T09:00:28.909Z",
-        "fileName": "Photo_1_During.jpg",
-        "url": "/api/drive/photo/1YFg0gsd1Z055Tr-jwz8NOrSHH8eDNRK1",
-        "driveFileId": "1YFg0gsd1Z055Tr-jwz8NOrSHH8eDNRK1"
-      }
-    ]
-  },
-  {
-    "id": "rep-maint-live-1786779250183",
-    "title": "Live Maintenance Photo Upload Test",
-    "reportType": "maintenance",
-    "lat": 13.35,
-    "lng": 121.17,
-    "canalSegment": "MC-01",
-    "parcelId": "",
-    "completionPercent": 0,
-    "desiltingVolumeM3": 0,
-    "status": "In Progress",
-    "remarks": "Field desilting photo documentation test in designated MOMARO IMO Drive folder",
-    "reporterName": "Field Officer MOMARO 01",
-    "reporterRole": "Field Personnel",
-    "approvalStatus": "Pending_PreApproval",
-    "preApprovedBy": null,
-    "createdAt": "2026-08-15T07:34:10.183Z",
-    "synced": true,
-    "photoUrl": "",
-    "hazardSeverity": null
-  },
-  {
-    "id": "rep-maint-paint-1786802167125",
-    "title": "Painting of Steel Turnout Gates",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Palawan IMO",
-    "nisBinding": "Malatgao RIS",
-    "status": "Completed",
-    "approvalStatus": "Pending_PreApproval",
-    "createdAt": "2026-08-15T13:56:12.507Z",
-    "lat": 9.335,
-    "lng": 118.428,
-    "locationName": "Turnout Gate No. 3",
-    "maintenanceActivity": "Painting",
-    "reporterName": "Painter Team",
-    "reporterRole": "Field Personnel",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Pending (N/A)",
-    "remarks": "Coating applied.",
-    "synced": true,
-    "photos": []
-  },
-  {
-    "id": "rep-maint-test-pal-1786779457734",
-    "title": "Malatgao RIS Main Canal Dredging",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Palawan IMO",
-    "nisBinding": "Malatgao RIS",
-    "locationName": "Malatgao Main Canal Sta. 0+800",
-    "canalSegment": "MC-01",
-    "lat": 9.3,
-    "lng": 118.25,
-    "status": "In Progress",
-    "remarks": "Heavy silt and debris dredging along Malatgao headworks",
-    "reporterName": "Field Officer Palawan 01",
-    "reporterRole": "Field Personnel",
-    "createdAt": "2026-08-15T07:37:37.734Z",
-    "synced": true,
-    "photos": [
-      {
-        "id": "photo-1",
-        "url": "/api/drive/photo/1AS4MFgLJQ9kazQDvVtY6bVdvcafMw64W",
-        "stage": "Before",
-        "caption": "Before Dredging Operations",
-        "driveFileId": "1AS4MFgLJQ9kazQDvVtY6bVdvcafMw64W"
-      },
-      {
-        "id": "photo-2",
-        "url": "/api/drive/photo/1kQKgW97h-07N5fANZcF5A9-vfD68EL1-",
-        "stage": "During",
-        "caption": "During Heavy Equipment Dredging",
-        "driveFileId": "1kQKgW97h-07N5fANZcF5A9-vfD68EL1-"
-      }
-    ]
   },
   {
     "id": "rep-1786781921981",
@@ -1979,76 +1638,6 @@
         "fileName": "Photo_4_After.jpg",
         "url": "/api/drive/photo/15A4XWu5uxNQVwNlJgisFAX73rOweVoKc",
         "driveFileId": "15A4XWu5uxNQVwNlJgisFAX73rOweVoKc"
-      }
-    ]
-  },
-  {
-    "id": "rep-maint-test-photo-1786779382605",
-    "title": "Baco Main Canal Desilting Inspection",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "nisBinding": "Baco-Bucayao RIS",
-    "locationName": "Baco Main Canal Sta. 2+100",
-    "canalSegment": "MC-01",
-    "lat": 13.355,
-    "lng": 121.168,
-    "status": "In Progress",
-    "remarks": "Heavy silt accumulation test",
-    "reporterName": "Field Officer MOMARO 01",
-    "reporterRole": "Field Personnel",
-    "createdAt": "2026-08-15T07:36:22.605Z",
-    "synced": true,
-    "photos": [
-      {
-        "id": "photo-1",
-        "url": "/api/drive/photo/1rN8yqzQZmZHWqSBSy_rf5O2JXI-yr6Sr",
-        "stage": "Before",
-        "caption": "Before Desilting - Heavy Silt",
-        "driveFileId": "1rN8yqzQZmZHWqSBSy_rf5O2JXI-yr6Sr"
-      },
-      {
-        "id": "photo-2",
-        "url": "/api/drive/photo/1gsGuD_rIkiD8uVFCVdymsE_RSSsuq6z8",
-        "stage": "During",
-        "caption": "During Excavation Operations",
-        "driveFileId": "1gsGuD_rIkiD8uVFCVdymsE_RSSsuq6z8"
-      }
-    ]
-  },
-  {
-    "id": "rep-auto-route-1786789198985",
-    "title": "Canal Clearing and Desilting - Sta 3+000",
-    "reportType": "maintenance",
-    "lat": 9.3301,
-    "lng": 118.425,
-    "canalSegment": "",
-    "parcelId": "",
-    "completionPercent": 0,
-    "desiltingVolumeM3": 0,
-    "status": "In Progress",
-    "remarks": "Manual clearing operations underway.",
-    "reporterName": "Field Engr Palawan",
-    "reporterRole": "Field Personnel",
-    "approvalStatus": "Pending_PreApproval",
-    "preApprovedBy": null,
-    "createdAt": "2026-08-15T10:19:59.036Z",
-    "synced": true,
-    "hazardSeverity": null,
-    "categoryMode": "maintenance",
-    "imoOffice": "Palawan IMO",
-    "nisBinding": "Malatgao RIS",
-    "locationName": "Malatgao Main Canal Lateral B",
-    "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
-    "photos": [
-      {
-        "id": "p1",
-        "stage": "During",
-        "caption": "During Clearing",
-        "capturedAt": "2026-08-15T10:19:58.985Z",
-        "fileName": "Photo_1_During.jpg",
-        "url": "/api/drive/photo/1nWTCTnS0H0TdL80_lkpg81deZrRVMpjv",
-        "driveFileId": "1nWTCTnS0H0TdL80_lkpg81deZrRVMpjv"
       }
     ]
   },
