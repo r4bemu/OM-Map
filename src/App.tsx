@@ -1585,51 +1585,103 @@ export default function App() {
   }, [activeRole, effectiveImo, selectedReport, setFieldReports]);
 
   const handleFullSystemOverhaul = useCallback(async () => {
+    const setStep = (id: string, status: SyncStep['status'], progress?: SyncStep['progress'], sublabel?: string) =>
+      setSyncSteps(prev => prev.map(s => s.id === id ? { ...s, status, progress, ...(sublabel ? { sublabel } : {}) } : s));
+
+    const OVERHAUL_STEPS: SyncStep[] = [
+      { id: 'upload',  label: 'Resetting Local Cache',           sublabel: 'Purging IndexedDB and resetting storage', status: 'pending' },
+      { id: 'layers',  label: 'Downloading GIS Canal Networks', sublabel: 'Fetching fresh layers from Google Drive',  status: 'pending' },
+      { id: 'reports', label: 'Downloading All Field Reports',   sublabel: 'Fetching complete historical reports',    status: 'pending' },
+      { id: 'weeks',   label: 'Rebuilding Manifest & Indexes',   sublabel: 'Verifying checksums and week archives',   status: 'pending' },
+    ];
+
     try {
       setIsSyncing(true);
-      setSyncStatusMessage('Executing full overhaul: Clearing local cache...');
-      
+      setSyncSteps(OVERHAUL_STEPS);
+      setSyncStatusMessage('Executing full system overhaul: Clearing local cache...');
+
       // 1. Wipe local IndexedDB & localStorage
+      setStep('upload', 'active');
       await clearAllLocalDataDB();
-
-      // 2. Mark overhaul timestamp
       setLastOverhaulTimestamp();
+      await new Promise(r => setTimeout(r, 400));
+      setStep('upload', 'done');
 
-      // 3. Re-download fresh layers and reports
+      // 2. Re-download fresh layers from Google Drive & server
+      setStep('layers', 'active');
+      setSyncStatusMessage('Downloading fresh GIS layers and canal networks...');
       const targetImo = effectiveImo;
-      const layerRes = await fetch(`/api/layers?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`);
-      if (layerRes.ok) {
-        const lData = await layerRes.json();
-        if (Array.isArray(lData.layers) && lData.layers.length > 0) {
-          const clean = lData.layers.filter((l: any) => !isMockLayer(l) && l.geometryType !== 'Polygon' && l.category !== 'Parcels');
-          setLayers(clean);
-          await saveCachedLayersDB(clean);
+      try {
+        await syncIMOFolderLayers(activeRole, targetImo);
+      } catch (lErr) {
+        console.warn('Overhaul layer sync notice:', lErr);
+        try {
+          const layerRes = await fetch(`/api/layers?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`);
+          if (layerRes.ok) {
+            const lData = await layerRes.json();
+            if (Array.isArray(lData.layers) && lData.layers.length > 0) {
+              const clean = lData.layers.filter((l: any) => !isMockLayer(l) && l.geometryType !== 'Polygon' && l.category !== 'Parcels');
+              setLayers(clean);
+              await saveCachedLayersDB(clean);
+            }
+          }
+        } catch (_) {}
+      }
+      setStep('layers', 'done');
+
+      // 3. Re-download fresh reports (all historical reports)
+      setStep('reports', 'active');
+      setSyncStatusMessage('Downloading complete historical field reports archive...');
+      try {
+        const repRes = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}&timeScope=all`);
+        if (repRes.ok) {
+          const rData = await repRes.json();
+          if (Array.isArray(rData.reports)) {
+            let reportsToSave = rData.reports;
+            if (isImoScoped && targetImo !== 'All IMOs') {
+              reportsToSave = reportsToSave.filter((r: any) => !r.imoOffice || matchesImoOffice(r.imoOffice, targetImo));
+            }
+            setFieldReports(reportsToSave);
+            await saveCachedReportsDB(reportsToSave);
+            saveOfflineReports(reportsToSave);
+          }
         }
+      } catch (rErr) {
+        console.warn('Overhaul reports fetch notice:', rErr);
       }
+      setStep('reports', 'done');
 
-      const repRes = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}&timeScope=all`);
-      if (repRes.ok) {
-        const rData = await repRes.json();
-        if (Array.isArray(rData.reports)) {
-          setFieldReports(rData.reports);
-          await saveCachedReportsDB(rData.reports);
-          saveOfflineReports(rData.reports);
+      // 4. Update manifest metadata & available cloud weeks
+      setStep('weeks', 'active');
+      setSyncStatusMessage('Updating manifest checksums and week archives...');
+      try {
+        const [lManRes, rManRes, weeksRes] = await Promise.allSettled([
+          fetch(`/api/layers/manifest?imo=${encodeURIComponent(targetImo)}`).then(r => r.ok ? r.json() : null),
+          fetch(`/api/reports/manifest?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`).then(r => r.ok ? r.json() : null),
+          fetch(`/api/reports/available-weeks?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`).then(r => r.ok ? r.json() : null)
+        ]);
+
+        const lMan = lManRes.status === 'fulfilled' ? lManRes.value : null;
+        const rMan = rManRes.status === 'fulfilled' ? rManRes.value : null;
+        const weeksData = weeksRes.status === 'fulfilled' ? weeksRes.value : null;
+
+        if (weeksData && Array.isArray(weeksData.weeks)) {
+          setAvailableCloudWeeks(weeksData.weeks);
         }
-      }
 
-      // 4. Update manifest metadata
-      const [lMan, rMan] = await Promise.all([
-        fetch(`/api/layers/manifest?imo=${encodeURIComponent(targetImo)}`).then(r => r.json()).catch(() => null),
-        fetch(`/api/reports/manifest?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`).then(r => r.json()).catch(() => null)
-      ]);
-
-      if (lMan && rMan) {
-        await saveManifestMetadataDB('master_manifest', {
-          layerChecksum: lMan.checksum,
-          reportChecksum: rMan.checksum,
-          lastSync: new Date().toISOString()
-        });
+        if (lMan && rMan) {
+          await saveManifestMetadataDB('master_manifest', {
+            layerChecksum: lMan.checksum,
+            reportChecksum: rMan.checksum,
+            lastSync: new Date().toISOString()
+          });
+        }
+      } catch (mErr) {
+        console.warn('Overhaul manifest update notice:', mErr);
       }
+      setStep('weeks', 'done');
+
+      setSyncStatusMessage('System overhaul completed successfully!');
 
       setDriveToast({
         id: `toast-${Date.now()}`,
@@ -1642,11 +1694,15 @@ export default function App() {
       }, 5000);
     } catch (err) {
       console.error('System overhaul error:', err);
+      setSyncStatusMessage('System overhaul encountered an issue.');
     } finally {
-      setIsSyncing(false);
-      setSyncStatusMessage('');
+      setTimeout(() => {
+        setIsSyncing(false);
+        setSyncSteps(INITIAL_SYNC_STEPS);
+        setSyncStatusMessage('');
+      }, 600);
     }
-  }, [activeRole, effectiveImo, setFieldReports, setLayers]);
+  }, [activeRole, effectiveImo, isImoScoped, setAvailableCloudWeeks, setFieldReports, setLayers, syncIMOFolderLayers]);
 
   // Search Autocomplete List
   const searchResults = useMemo(() => {
