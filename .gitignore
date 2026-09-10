@@ -17,6 +17,8 @@ coverage/
 !.env.example
 *.pem
 *.key
+service_account*.json
+*service_account*.json
 
 # Local Data Cache & Sensitive Tokens
 data/drive_cache/

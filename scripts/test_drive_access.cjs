@@ -1,4 +1,6 @@
 const fs = require('fs');
+const crypto = require('crypto');
+const path = require('path');
 
 if (typeof process.loadEnvFile === 'function') {
   try { process.loadEnvFile(); } catch (e) {}
@@ -9,36 +11,79 @@ const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
 const tokenFromEnv = process.env.GOOGLE_DRIVE_ACCESS_TOKEN;
 
+async function getServiceAccountToken() {
+  const keyPath = path.join(__dirname, '../service_account.json');
+  if (!fs.existsSync(keyPath)) return null;
+
+  try {
+    const key = JSON.parse(fs.readFileSync(keyPath, 'utf-8'));
+    const now = Math.floor(Date.now() / 1000);
+    const header = { alg: 'RS256', typ: 'JWT' };
+    const payload = {
+      iss: key.client_email,
+      scope: 'https://www.googleapis.com/auth/drive',
+      aud: 'https://oauth2.googleapis.com/token',
+      exp: now + 3600,
+      iat: now
+    };
+    const base64Url = (str) => Buffer.from(str).toString('base64url');
+    const signInput = base64Url(JSON.stringify(header)) + '.' + base64Url(JSON.stringify(payload));
+    const signer = crypto.createSign('RSA-SHA256');
+    signer.update(signInput);
+    const signature = signer.sign(key.private_key, 'base64url');
+    const assertion = signInput + '.' + signature;
+
+    const res = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        assertion
+      })
+    });
+    const data = await res.json();
+    return data.access_token || null;
+  } catch (err) {
+    console.error('Service Account token error:', err.message);
+    return null;
+  }
+}
+
 async function testAccess() {
-  console.log('Testing Google Drive Folder Access in Restricted Mode...\n');
-  console.log('Client ID:', clientId ? clientId.substring(0, 15) + '...' : 'Missing');
-  console.log('Refresh Token:', refreshToken ? refreshToken.substring(0, 10) + '...' : 'Missing');
+  console.log('Testing Google Drive Folder Access...\n');
 
-  let accessToken = tokenFromEnv;
+  let accessToken = await getServiceAccountToken();
+  if (accessToken) {
+    console.log('🌟 [Service Account] Successfully generated Access Token using service_account.json RSA key!');
+  } else {
+    console.log('Client ID:', clientId ? clientId.substring(0, 15) + '...' : 'Missing');
+    console.log('Refresh Token:', refreshToken ? refreshToken.substring(0, 10) + '...' : 'Missing');
+    accessToken = tokenFromEnv;
 
-  // 1. Try refreshing access token
-  if (clientId && clientSecret && refreshToken) {
-    try {
-      console.log('\n--- Step 1: Refreshing OAuth Access Token ---');
-      const res = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_id: clientId,
-          client_secret: clientSecret,
-          refresh_token: refreshToken,
-          grant_type: 'refresh_token'
-        })
-      });
-      const tokenData = await res.json();
-      if (tokenData.access_token) {
-        accessToken = tokenData.access_token;
-        console.log('✅ Successfully refreshed Access Token via OAuth 2.0!');
-      } else {
-        console.log('⚠️ Token refresh response:', JSON.stringify(tokenData));
+    // 1. Try refreshing access token
+    if (clientId && clientSecret && refreshToken) {
+      try {
+        console.log('\n--- Step 1: Refreshing OAuth Access Token ---');
+        const res = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            client_id: clientId,
+            client_secret: clientSecret,
+            refresh_token: refreshToken,
+            grant_type: 'refresh_token'
+          })
+        });
+        const tokenData = await res.json();
+        if (tokenData.access_token) {
+          accessToken = tokenData.access_token;
+          console.log('✅ Successfully refreshed Access Token via OAuth 2.0!');
+        } else {
+          console.log('⚠️ Token refresh response:', JSON.stringify(tokenData));
+        }
+      } catch (err) {
+        console.error('❌ Token refresh error:', err.message);
       }
-    } catch (err) {
-      console.error('❌ Token refresh error:', err.message);
     }
   }
 

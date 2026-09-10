@@ -66,9 +66,10 @@ try {
   console.warn('Failed to load persistent_drive_token.json:', e);
 }
 
-export function saveServerDriveToken(token: string, expiresInSec: number = 3500) {
+export function saveServerDriveToken(token: string, expiresInSeconds: number = 3600): void {
   inMemoryToken = token;
-  tokenExpiresAt = Date.now() + expiresInSec * 1000 - 60000; // Refresh 1 min early
+  tokenExpiresAt = Date.now() + (expiresInSeconds * 1000) - 60000; // Expire 1 min early for safety
+
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -87,6 +88,67 @@ export function getServerDriveToken(): string | null {
   return inMemoryToken || process.env.GOOGLE_DRIVE_ACCESS_TOKEN || null;
 }
 
+async function getServiceAccountToken(): Promise<string | null> {
+  const possiblePaths = [
+    path.join(process.cwd(), 'service_account.json'),
+    path.join(DATA_DIR, 'service_account.json')
+  ];
+  let keyContent = process.env.GOOGLE_SERVICE_ACCOUNT_KEY || '';
+  if (!keyContent) {
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        try {
+          keyContent = fs.readFileSync(p, 'utf-8');
+          break;
+        } catch (_) {}
+      }
+    }
+  }
+  if (!keyContent) return null;
+
+  try {
+    const key = JSON.parse(keyContent);
+    if (!key.client_email || !key.private_key) return null;
+
+    const now = Math.floor(Date.now() / 1000);
+    const header = { alg: 'RS256', typ: 'JWT' };
+    const payload = {
+      iss: key.client_email,
+      scope: 'https://www.googleapis.com/auth/drive',
+      aud: 'https://oauth2.googleapis.com/token',
+      exp: now + 3600,
+      iat: now
+    };
+    const base64Url = (str: string) => Buffer.from(str).toString('base64url');
+    const signInput = base64Url(JSON.stringify(header)) + '.' + base64Url(JSON.stringify(payload));
+    const signer = crypto.createSign('RSA-SHA256');
+    signer.update(signInput);
+    const signature = signer.sign(key.private_key, 'base64url');
+    const assertion = signInput + '.' + signature;
+
+    const res = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        assertion
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.access_token) {
+        saveServerDriveToken(data.access_token, data.expires_in || 3500);
+        return data.access_token;
+      }
+    } else {
+      console.warn('Service Account token refresh response:', await res.text());
+    }
+  } catch (err: any) {
+    console.warn('Service Account token generation failed:', err.message);
+  }
+  return null;
+}
+
 export async function getOrRefreshServerDriveToken(providedToken?: string): Promise<string | null> {
   if (providedToken) return providedToken;
 
@@ -95,6 +157,13 @@ export async function getOrRefreshServerDriveToken(providedToken?: string): Prom
     return inMemoryToken;
   }
 
+  // 1. Try Service Account Key (Permanent, Machine-to-Machine)
+  const saToken = await getServiceAccountToken();
+  if (saToken) {
+    return saToken;
+  }
+
+  // 2. Fallback to OAuth 2.0 refresh token
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;

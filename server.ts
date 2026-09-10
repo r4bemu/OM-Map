@@ -1512,11 +1512,8 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
   const buffer = await downloadDriveBinaryBuffer(accessToken || '', fileId);
   if (buffer && buffer.length > 0) {
     try {
-      safeWriteJsonSync(cachePath + '.tmp', buffer);
-      fs.renameSync(cachePath + '.tmp', cachePath);
-    } catch (e) {
-      try { fs.writeFileSync(cachePath, buffer); } catch (wErr) {}
-    }
+      fs.writeFileSync(cachePath, buffer);
+    } catch (e) {}
   }
   return buffer;
 }
@@ -1528,33 +1525,13 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
       const clientToken = req.headers['x-google-drive-token'] as string | undefined;
       const accessToken = await getOrRefreshServerDriveToken(clientToken);
 
-      const buffer = await getOrFetchDriveFileBuffer(fileId, accessToken);
+      const buffer = await getOrFetchDriveFileBuffer(fileId, accessToken || undefined);
       res.setHeader('Content-Type', 'application/octet-stream');
       res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
       res.send(buffer);
     } catch (err: any) {
       console.error(`Error streaming Drive file ${req.params.fileId}:`, err);
       res.status(500).json({ error: err.message || 'Failed to download file from Drive' });
-    }
-  });
-
-  // Stream Google Drive Inspection Photos by File ID with server disk caching
-  app.get('/api/drive/photo/:fileId', async (req, res) => {
-    try {
-      const { fileId } = req.params;
-      const clientToken = req.headers['x-google-drive-token'] as string | undefined;
-      const accessToken = await getOrRefreshServerDriveToken(clientToken);
-
-      const buffer = await getOrFetchDriveFileBuffer(fileId, accessToken);
-      if (!buffer || buffer.length === 0) {
-        return res.status(404).send('Photo not found on Drive');
-      }
-      res.setHeader('Content-Type', 'image/jpeg');
-      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
-      res.send(buffer);
-    } catch (err: any) {
-      console.error(`Error streaming Drive photo ${req.params.fileId}:`, err);
-      res.status(500).json({ error: err.message || 'Failed to download photo from Drive' });
     }
   });
 
