@@ -23,6 +23,7 @@ import {
   canUserAdvanceTier, 
   canUserEditReport 
 } from '../utils/approvalHierarchyEngine';
+import { resolvePhotoAttachmentUrl, handleImageFallback } from '../utils/photoUtils';
 
 interface ReportReviewCardProps {
   report: FieldReport;
@@ -383,10 +384,11 @@ export const ReportReviewCard: React.FC<ReportReviewCardProps> = ({
                   title={photo.caption || `Click to view photo ${idx + 1}`}
                 >
                   <img
-                    src={photo.url || photo.dataUrl || photo.sourceDataUrl}
+                    src={resolvePhotoAttachmentUrl(photo)}
                     alt={photo.caption || `Photo ${idx + 1}`}
                     className="w-full h-full object-cover"
                     loading="lazy"
+                    onError={(e) => handleImageFallback(e, photo, photo.caption || `Photo ${idx + 1}`)}
                   />
                   {photo.stage && (
                     <span className={`absolute bottom-0 inset-x-0 text-[8px] font-bold text-center py-0.5 uppercase tracking-wider backdrop-blur-sm ${
@@ -410,9 +412,10 @@ export const ReportReviewCard: React.FC<ReportReviewCardProps> = ({
               {/* Image Screen */}
               <div className="relative min-h-[220px] max-h-[460px] flex items-center justify-center bg-black/90 p-1">
                 <img
-                  src={allPhotos[selectedPhotoIndex].url || allPhotos[selectedPhotoIndex].dataUrl || allPhotos[selectedPhotoIndex].sourceDataUrl}
+                  src={resolvePhotoAttachmentUrl(allPhotos[selectedPhotoIndex])}
                   alt={allPhotos[selectedPhotoIndex].caption || 'Enlarged photo evidence'}
                   className="max-h-[440px] w-auto max-w-full object-contain rounded-lg select-none"
+                  onError={(e) => handleImageFallback(e, allPhotos[selectedPhotoIndex], allPhotos[selectedPhotoIndex].caption || 'Enlarged photo')}
                 />
 
                 {/* Left Carousel Arrow */}

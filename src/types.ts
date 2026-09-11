@@ -175,6 +175,7 @@ export interface PhotoAttachment {
   featureName?: string;
   driveFileId?: string;
   driveUrl?: string;
+  thumbnailUrl?: string;
   sizeBytes?: number; // In bytes (e.g. 250,000 = ~244 KB)
   framingConfig?: PhotoFramingConfig;
 }

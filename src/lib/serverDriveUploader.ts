@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { generateWmrReportId } from '../utils/reportIdGenerator.js';
 import {
   loadLocalManifest,
@@ -1082,8 +1083,8 @@ export async function fetchReportsFromAllDriveFolders(
               .filter((f: any) => f.mimeType?.startsWith('image/') || /\.(jpe?g|png|webp|heic)$/i.test(f.name))
               .sort((a: any, b: any) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 
-            // Pre-cache all discovered images to disk asynchronously if missing
-            imageFiles.forEach(async (img: any) => {
+            // Pre-cache all discovered images to disk if missing
+            await Promise.all(imageFiles.map(async (img: any) => {
               const cacheDest = path.join(DRIVE_CACHE_DIR, 'photo_' + img.id + '.bin');
               if (!fs.existsSync(cacheDest) || fs.statSync(cacheDest).size === 0) {
                 try {
@@ -1093,7 +1094,7 @@ export async function fetchReportsFromAllDriveFolders(
                   }
                 } catch (_) {}
               }
-            });
+            }));
 
             const dataJson = files.find((f: any) => f.name.startsWith('Data_') && f.name.endsWith('.json'));
             if (dataJson) {

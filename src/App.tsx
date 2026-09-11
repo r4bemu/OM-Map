@@ -1627,11 +1627,25 @@ export default function App() {
       }
       setStep('layers', 'done');
 
-      // 3. Re-download fresh reports (all historical reports)
+      // 3. Re-download fresh reports (all historical reports & pre-cached photos)
       setStep('reports', 'active');
-      setSyncStatusMessage('Downloading complete historical field reports archive...');
+      setSyncStatusMessage('Synchronizing Google Drive reports and downloading complete archive...');
       try {
-        const repRes = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}&timeScope=all`);
+        const driveToken = getAccessToken();
+        const headers: Record<string, string> = {};
+        if (driveToken) headers['x-google-drive-token'] = driveToken;
+
+        // Force server to sync reports and pre-cache photos from Google Drive first
+        try {
+          await fetch(`/api/drive/sync-reports?imo=${encodeURIComponent(targetImo)}`, {
+            method: 'POST',
+            headers
+          });
+        } catch (syncErr) {
+          console.warn('Overhaul Drive sync-reports notice:', syncErr);
+        }
+
+        const repRes = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}&timeScope=all`, { headers });
         if (repRes.ok) {
           const rData = await repRes.json();
           if (Array.isArray(rData.reports)) {

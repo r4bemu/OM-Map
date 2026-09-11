@@ -14,10 +14,10 @@ import {
   FileDown,
   Loader2
 } from 'lucide-react';
-import { FieldReport, PhotoAttachment, AuthUser, UserRole } from '../types';
 import { downloadPhotoDocsPdf } from '../utils/reportPdfBuilder';
 import { getAvailableWeeksFromReports, isReportInWeek, FridayWeekInfo } from '../utils/weekUtils';
 import { formatReportId } from '../utils/reportIdGenerator';
+import { resolvePhotoAttachmentUrl, handleImageFallback } from '../utils/photoUtils';
 
 interface Form691PhotoDocumentationProps {
   reports: FieldReport[];
@@ -363,20 +363,10 @@ export const Form691PhotoDocumentation: React.FC<Form691PhotoDocumentationProps>
                     return (
                       <div key={photo.id || pIdx} className="relative border-2 border-black rounded-lg overflow-hidden bg-slate-100 aspect-[4/3] w-full shadow-sm flex items-center justify-center">
                         <img 
-                          src={photo.url} 
+                          src={resolvePhotoAttachmentUrl(photo)} 
                           alt="Maintenance Site Photo" 
                           className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            target.style.display = 'none';
-                            const parent = target.parentElement;
-                            if (parent && !parent.querySelector('.img-doc-fallback')) {
-                              const fallback = document.createElement('div');
-                              fallback.className = 'img-doc-fallback w-full h-full flex flex-col items-center justify-center text-slate-400 text-[11px] p-4 text-center bg-slate-100 font-sans';
-                              fallback.innerHTML = '<span class="text-xl mb-1">📷</span><span class="font-semibold text-slate-600">[Photo Attachment Offline / Pending Cloud Sync]</span>';
-                              parent.prepend(fallback);
-                            }
-                          }}
+                          onError={(e) => handleImageFallback(e, photo, '[Photo Attachment Offline / Pending Cloud Sync]')}
                         />
 
                         {/* Stage Badge on Top Left Corner of Photo (Wrapped on top of photo) */}

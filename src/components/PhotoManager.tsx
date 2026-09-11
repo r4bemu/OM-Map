@@ -25,6 +25,7 @@ import {
 } from '../utils/imageCompressor';
 import { CaptionContext } from '../utils/captionGenerator';
 import { getSavedConfigurations } from '../utils/appConfigurations';
+import { resolvePhotoAttachmentUrl, handleImageFallback } from '../utils/photoUtils';
 
 /**
  * Auto-expanding textarea that dynamically grows with the caption text
@@ -401,9 +402,10 @@ export const PhotoManager: React.FC<PhotoManagerProps> = ({
                   title="Click to adjust 4:3 framing and caption"
                 >
                   <img
-                    src={photo.url || photo.dataUrl}
+                    src={resolvePhotoAttachmentUrl(photo)}
                     alt={photo.caption || 'Site inspection photo'}
                     className="w-full h-full object-contain pointer-events-none"
+                    onError={(e) => handleImageFallback(e, photo, photo.caption || 'Site inspection photo')}
                   />
                   <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover/plate:opacity-100 flex items-center justify-center transition-opacity gap-2">
                     <span className="px-3 py-1.5 bg-[#15803d] text-white text-xs font-bold rounded-lg shadow-lg flex items-center gap-1.5">

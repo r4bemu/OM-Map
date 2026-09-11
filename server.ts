@@ -851,7 +851,9 @@ export async function createApp() {
       if (fs.existsSync(DRIVE_CACHE_DIR)) {
         const files = fs.readdirSync(DRIVE_CACHE_DIR);
         for (const file of files) {
-          try { fs.unlinkSync(path.join(DRIVE_CACHE_DIR, file)); } catch (e) {}
+          if (!file.startsWith('photo_')) {
+            try { fs.unlinkSync(path.join(DRIVE_CACHE_DIR, file)); } catch (e) {}
+          }
         }
       }
       res.json({ success: true, message: 'Server layers catalog and Drive disk cache reset to defaults' });
@@ -1752,12 +1754,18 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
   app.get('/api/drive/photo/:fileId', async (req, res) => {
     try {
       const { fileId } = req.params;
+      const cleanId = (fileId || '').replace(/^photo_/, '').trim();
       ensureDataDir();
 
       // 1. FAST PATH: Check if already present in local disk cache (NO token or network needed!)
       const possibleDiskPaths = [
+        path.join(DRIVE_CACHE_DIR, `photo_${cleanId}.bin`),
+        path.join(DRIVE_CACHE_DIR, `${cleanId}.bin`),
         path.join(DRIVE_CACHE_DIR, `photo_${fileId}.bin`),
         path.join(DRIVE_CACHE_DIR, `${fileId}.bin`),
+        path.join(PHOTOS_DIR, `${cleanId}.jpg`),
+        path.join(PHOTOS_DIR, `${cleanId}.png`),
+        path.join(PHOTOS_DIR, `${cleanId}.bin`),
         path.join(PHOTOS_DIR, `${fileId}.jpg`),
         path.join(PHOTOS_DIR, `${fileId}.png`),
         path.join(PHOTOS_DIR, `${fileId}.bin`)
@@ -1784,9 +1792,9 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
       for (const r of localReports) {
         if (Array.isArray(r.photos)) {
           for (const p of r.photos) {
-            if ((p.driveFileId === fileId || p.id === fileId || p.url?.includes(fileId)) && p.url?.startsWith('data:image/')) {
-              saveBase64PhotoToDisk(fileId, p.url, fileId);
-              const cached = path.join(DRIVE_CACHE_DIR, `photo_${fileId}.bin`);
+            if ((p.driveFileId === cleanId || p.driveFileId === fileId || p.id === cleanId || p.id === fileId || p.url?.includes(cleanId)) && p.url?.startsWith('data:image/')) {
+              saveBase64PhotoToDisk(cleanId, p.url, cleanId);
+              const cached = path.join(DRIVE_CACHE_DIR, `photo_${cleanId}.bin`);
               if (fs.existsSync(cached)) {
                 const buf = fs.readFileSync(cached);
                 const mimeType = getImageMimeType(buf);
@@ -1798,9 +1806,9 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
             }
           }
         }
-        if (r.photoUrl?.startsWith('data:image/') && (r.id === fileId || r.photoUrl.includes(fileId))) {
-          saveBase64PhotoToDisk(fileId, r.photoUrl, fileId);
-          const cached = path.join(DRIVE_CACHE_DIR, `photo_${fileId}.bin`);
+        if (r.photoUrl?.startsWith('data:image/') && (r.id === cleanId || r.id === fileId || r.photoUrl.includes(cleanId))) {
+          saveBase64PhotoToDisk(cleanId, r.photoUrl, cleanId);
+          const cached = path.join(DRIVE_CACHE_DIR, `photo_${cleanId}.bin`);
           if (fs.existsSync(cached)) {
             const buf = fs.readFileSync(cached);
             const mimeType = getImageMimeType(buf);
@@ -1816,11 +1824,11 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
       const clientToken = req.headers['x-google-drive-token'] as string | undefined;
       const token = await getOrRefreshServerDriveToken(clientToken);
 
-      if (token) {
+      if (token && cleanId) {
         try {
-          const buffer = await downloadDriveBinaryBuffer(token, fileId);
+          const buffer = await downloadDriveBinaryBuffer(token, cleanId);
           if (buffer && buffer.length > 0) {
-            const cachedPhotoPath = path.join(DRIVE_CACHE_DIR, `photo_${fileId}.bin`);
+            const cachedPhotoPath = path.join(DRIVE_CACHE_DIR, `photo_${cleanId}.bin`);
             try {
               fs.writeFileSync(cachedPhotoPath, buffer);
             } catch (_) {}
@@ -1831,7 +1839,7 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
             return res.send(buffer);
           }
         } catch (dlErr) {
-          console.warn(`Drive download failed for ${fileId}:`, dlErr);
+          console.warn(`Drive download failed for ${cleanId}:`, dlErr);
         }
       }
 

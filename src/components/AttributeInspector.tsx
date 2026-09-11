@@ -23,6 +23,7 @@ import {
 import { FieldReport, UserRole, ApprovalStatus, AuthUser } from '../types';
 import { downloadReportPdf } from '../utils/reportPdfBuilder';
 import { isSyntheticFeatureId } from '../utils/gisLocationUtils';
+import { resolvePhotoAttachmentUrl, handleImageFallback } from '../utils/photoUtils';
 
 interface AttributeInspectorProps {
   authenticatedUser?: AuthUser | null;
@@ -401,12 +402,12 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                 <div className="grid grid-cols-1 gap-2">
                   {selectedReport.photos && selectedReport.photos.length > 0 ? (
                     selectedReport.photos.map((p, i) => {
-                      const resolvedSrc = p.dataUrl || (p as any).sourceDataUrl || p.url || (p.driveFileId ? `/api/drive/photo/${p.driveFileId}` : '') || (p.id ? `/api/drive/photo/${p.id}` : '') || p.thumbnailUrl;
+                      const resolvedSrc = resolvePhotoAttachmentUrl(p);
                       return (
                         <div key={p.id || i} className="relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 min-h-[144px] flex items-center justify-center">
                           <img 
                             src={resolvedSrc || undefined} 
-                            alt="Inspection site" 
+                            alt={p.caption || "Inspection site"} 
                             className="w-full h-36 object-cover" 
                             loading="lazy"
                             onLoad={(e) => {
@@ -422,25 +423,7 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                                 }
                               }
                             }}
-                            onError={(e) => {
-                              const target = e.currentTarget;
-                              // Try fallback to driveFileId if initial url failed
-                              if (p.driveFileId && target.src && !target.src.includes(p.driveFileId)) {
-                                target.src = `/api/drive/photo/${p.driveFileId}`;
-                                return;
-                              }
-                              target.style.display = 'none';
-                              const parent = target.parentElement;
-                              if (parent && !parent.querySelector('.img-fallback')) {
-                                const fallback = document.createElement('div');
-                                fallback.className = 'img-fallback w-full h-36 flex flex-col items-center justify-center text-slate-500 text-xs p-3 text-center bg-slate-900/90';
-                                const msg = (!resolvedSrc || resolvedSrc === '')
-                                  ? 'Inspection photo pending cloud sync'
-                                  : 'Inspection photo preview not accessible offline';
-                                fallback.innerHTML = `<span class="text-lg mb-1">📷</span><span>${msg}</span>`;
-                                parent.prepend(fallback);
-                              }
-                            }}
+                            onError={(e) => handleImageFallback(e, p, 'Inspection photo preview not accessible')}
                           />
                           <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold shadow-md ${
