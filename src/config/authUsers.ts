@@ -1414,7 +1414,7 @@ export async function rejectAccessRequestApi(
   return { success: false, error: 'Request not found' };
 }
 
-export async function revokeAccessRequestApi(id: string): Promise<{ success: boolean; request?: AccessRequest }> {
+export async function revokeAccessRequestApi(id: string): Promise<{ success: boolean; request?: AccessRequest; error?: string }> {
   try {
     const res = await fetch(`/api/access-requests/${id}/revoke`, { method: 'POST' });
     if (res.ok) {

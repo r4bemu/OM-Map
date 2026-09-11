@@ -163,7 +163,7 @@ export default function App() {
     try {
       const cached = getCachedLayers();
       if (Array.isArray(cached) && cached.length > 0) {
-        return cached.filter(l => !isMockLayer(l) && l.geometryType !== 'Polygon' && (l as any).category !== 'Parcels');
+        return cached.filter(l => !isMockLayer(l) && (l as any).geometryType !== 'Polygon' && (l as any).category !== 'Parcels');
       }
     } catch (_) {}
     return [];

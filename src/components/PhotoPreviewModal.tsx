@@ -25,6 +25,7 @@ import {
   formatBytes
 } from '../utils/imageCompressor';
 import { CaptionContext } from '../utils/captionGenerator';
+import { resolvePhotoAttachmentUrl } from '../utils/photoUtils';
 
 interface PhotoPreviewModalProps {
   isOpen: boolean;
@@ -45,7 +46,7 @@ export const PhotoPreviewModal: React.FC<PhotoPreviewModalProps> = ({
 }) => {
   if (!isOpen || !photo) return null;
 
-  const rawMasterSource = photo.sourceDataUrl || photo.dataUrl || photo.url;
+  const rawMasterSource = resolvePhotoAttachmentUrl(photo);
 
   // Local Framing State initialized from photo.framingConfig or calculated default
   const [framing, setFraming] = useState<PhotoFramingConfig>(() => {

@@ -347,18 +347,7 @@ function isDeveloperTestReport(r: any): boolean {
   const id = String(r.id || '').toLowerCase();
   return id.startsWith('mock-') ||
          id === 'report-1' ||
-         r.isMock === true ||
-         id.startsWith('rep-maint-test-') ||
-         id.startsWith('rep-maint-live-') ||
-         id.startsWith('rep-maint-verify-') ||
-         id.startsWith('rep-clean-drive-') ||
-         id.startsWith('rep-2pt-dist-') ||
-         id.startsWith('rep-pimo-verify-') ||
-         id.startsWith('rep-maint-test-pal-') ||
-         id.startsWith('rep-auto-route-') ||
-         id.startsWith('rep-maint-desilt-') ||
-         id.startsWith('rep-maint-dredge-') ||
-         id.startsWith('rep-maint-paint-');
+         r.isMock === true;
 }
 
 function loadSavedReports() {

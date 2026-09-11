@@ -61,6 +61,8 @@ import {
 } from '../utils/approvalHierarchyEngine';
 import { PhotoManager } from './PhotoManager';
 import { getUserSignatories, getDefaultFieldReportSignatories } from '../utils/signatoriesConfig';
+import { CaptionContext } from '../utils/captionGenerator';
+import { composeTechnicalRemarks } from '../utils/technicalRemarksComposer';
 
 
 
@@ -153,7 +155,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
       currentRole === 'Developer' ||
       currentRole === 'RO Admin' ||
       currentRole === 'RO Evaluator' ||
-      (currentRole === 'IMO Admin' && editingReport.approvalStatus !== 'Approved' && editingReport.currentTier !== 'Approved_RO_Admin')
+      (currentRole === 'IMO Admin' && editingReport.approvalStatus !== 'Approved' && editingReport.currentTier !== 'Approved_RO_Evaluator')
     )
   );
 

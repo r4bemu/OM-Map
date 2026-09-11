@@ -870,24 +870,15 @@ function isDevTestReport(r: any): boolean {
   const id = String(r.id || '').toLowerCase();
   return id.startsWith('mock-') ||
          id === 'report-1' ||
-         r.isMock === true ||
-         id.startsWith('rep-maint-test-') ||
-         id.startsWith('rep-maint-live-') ||
-         id.startsWith('rep-maint-verify-') ||
-         id.startsWith('rep-clean-drive-') ||
-         id.startsWith('rep-2pt-dist-') ||
-         id.startsWith('rep-pimo-verify-') ||
-         id.startsWith('rep-maint-test-pal-') ||
-         id.startsWith('rep-auto-route-') ||
-         id.startsWith('rep-maint-desilt-') ||
-         id.startsWith('rep-maint-dredge-') ||
-         id.startsWith('rep-maint-paint-');
+         r.isMock === true;
 }
 
 // Helper to load reports from server filesystem
 function loadServerReportsInternal(): any[] {
   try {
-    const reportsFile = path.join(DATA_DIR, 'reports.json');
+    const p1 = path.join(DATA_DIR, 'persistent_reports.json');
+    const p2 = path.join(DATA_DIR, 'reports.json');
+    const reportsFile = fs.existsSync(p1) ? p1 : p2;
     if (fs.existsSync(reportsFile)) {
       const content = fs.readFileSync(reportsFile, 'utf-8');
       const parsed = JSON.parse(content);
@@ -904,16 +895,18 @@ function loadServerReportsInternal(): any[] {
 // Helper to save reports to server filesystem
 function saveServerReportsInternal(reportsList: any[]): void {
   try {
-    const reportsFile = path.join(DATA_DIR, 'reports.json');
     const map = new Map<string, any>();
     for (const r of reportsList) {
-      if (r && r.id) map.set(r.id, r);
+      if (r && r.id && !isDevTestReport(r)) map.set(r.id, r);
     }
     const cleanList = Array.from(map.values());
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
-    fs.writeFileSync(reportsFile, JSON.stringify(cleanList, null, 2), 'utf-8');
+    const p1 = path.join(DATA_DIR, 'persistent_reports.json');
+    const p2 = path.join(DATA_DIR, 'reports.json');
+    fs.writeFileSync(p1, JSON.stringify(cleanList, null, 2), 'utf-8');
+    fs.writeFileSync(p2, JSON.stringify(cleanList, null, 2), 'utf-8');
   } catch (err) {
     console.error('Failed to save persistent reports to file:', err);
   }
@@ -1043,19 +1036,9 @@ export async function fetchReportsFromAllDriveFolders(
         const data = await res.json();
         const isDevTestFolder = (name: string) => {
           const lower = name.toLowerCase();
-          return lower.includes('rep-maint-test') ||
-                 lower.includes('rep-maint-live') ||
-                 lower.includes('rep-maint-verify') ||
-                 lower.includes('rep-clean-drive') ||
-                 lower.includes('rep-2pt-dist') ||
-                 lower.includes('rep-pimo-verify') ||
-                 lower.includes('rep-auto-route') ||
-                 lower.includes('rep-maint-desilt') ||
-                 lower.includes('rep-maint-dredge') ||
-                 lower.includes('rep-maint-paint') ||
-                 lower.includes('mock-') ||
-                 lower.includes('test_photo') ||
-                 lower.includes('test-photo');
+          return lower.startsWith('mock-') ||
+                 lower === 'mock' ||
+                 lower === '__test__';
         };
 
         const subfolders = (data.files || []).filter((f: any) => 

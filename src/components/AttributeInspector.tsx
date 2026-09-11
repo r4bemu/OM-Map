@@ -445,20 +445,10 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                   ) : (
                     <div className="relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 min-h-[144px] flex items-center justify-center">
                       <img
-                        src={selectedReport.photoUrl}
+                        src={resolvePhotoAttachmentUrl({ url: selectedReport.photoUrl, id: selectedReport.id })}
                         alt="Inspection site"
                         className="w-full h-36 object-cover rounded-xl border border-slate-700 shadow-md"
-                        onError={(e) => {
-                          const target = e.currentTarget;
-                          target.style.display = 'none';
-                          const parent = target.parentElement;
-                          if (parent && !parent.querySelector('.img-fallback')) {
-                            const fallback = document.createElement('div');
-                            fallback.className = 'img-fallback w-full h-36 flex flex-col items-center justify-center text-slate-500 text-xs p-3 text-center bg-slate-900/90';
-                            fallback.innerHTML = '<span class="text-lg mb-1">📷</span><span>Cover photo not accessible offline</span>';
-                            parent.prepend(fallback);
-                          }
-                        }}
+                        onError={(e) => handleImageFallback(e, { url: selectedReport.photoUrl, id: selectedReport.id }, 'Cover photo preview not accessible')}
                       />
                     </div>
                   )}

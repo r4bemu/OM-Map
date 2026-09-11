@@ -68,6 +68,7 @@ export interface AuthUser {
   email?: string;
   googleId?: string;
   provider?: 'google' | 'local';
+  isAdmitted?: boolean;
   createdAt?: string;
 }
 

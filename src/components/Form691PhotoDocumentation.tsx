@@ -18,6 +18,7 @@ import { downloadPhotoDocsPdf } from '../utils/reportPdfBuilder';
 import { getAvailableWeeksFromReports, isReportInWeek, FridayWeekInfo } from '../utils/weekUtils';
 import { formatReportId } from '../utils/reportIdGenerator';
 import { resolvePhotoAttachmentUrl, handleImageFallback } from '../utils/photoUtils';
+import { FieldReport, AuthUser, UserRole, PhotoAttachment } from '../types';
 
 interface Form691PhotoDocumentationProps {
   reports: FieldReport[];
