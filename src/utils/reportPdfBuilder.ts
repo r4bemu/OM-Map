@@ -10,34 +10,36 @@ import { getUserSignatories, getDefaultFieldReportSignatories, getDefaultWmrSign
 import { formatReportId } from './reportIdGenerator';
 import { resolvePhotoAttachmentUrl } from './photoUtils';
 
-// Helper to safely load an image URL into a base64 Data URL with natural dimension detection and fallback support
-async function getBase64ImageFromUrl(url: string, fallbackUrl?: string): Promise<{ dataUrl: string; width: number; height: number } | null> {
-  if (!url && !fallbackUrl) return null;
-  const targetUrl = url || fallbackUrl || '';
+// Helper to safely load an image URL into a base64 Data URL with natural dimension detection and multi-candidate fallback support
+async function getBase64ImageFromUrl(...candidateUrls: (string | undefined)[]): Promise<{ dataUrl: string; width: number; height: number } | null> {
+  const validUrls = candidateUrls.filter((u): u is string => typeof u === 'string' && u.trim().length > 0);
+  if (validUrls.length === 0) return null;
 
-  // Direct Data URL handling
-  if (targetUrl.startsWith('data:image')) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        resolve({
-          dataUrl: targetUrl,
-          width: img.naturalWidth || 600,
-          height: img.naturalHeight || 450
-        });
-      };
-      img.onerror = () => {
-        resolve({
-          dataUrl: targetUrl,
-          width: 600,
-          height: 450
-        });
-      };
-      img.src = targetUrl;
-    });
+  // 1. Direct Data URL handling (first found data URL)
+  for (const targetUrl of validUrls) {
+    if (targetUrl.startsWith('data:image')) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          resolve({
+            dataUrl: targetUrl,
+            width: img.naturalWidth || 600,
+            height: img.naturalHeight || 450
+          });
+        };
+        img.onerror = () => {
+          resolve({
+            dataUrl: targetUrl,
+            width: 600,
+            height: 450
+          });
+        };
+        img.src = targetUrl;
+      });
+    }
   }
 
-  // Helper to attempt fetch conversion
+  // 2. Fetch conversion across all candidate URLs
   const attemptFetch = async (u: string) => {
     try {
       const res = await fetch(u, { mode: 'cors' });
@@ -68,17 +70,12 @@ async function getBase64ImageFromUrl(url: string, fallbackUrl?: string): Promise
     return null;
   };
 
-  // 1. Try primary URL via fetch
-  const primaryResult = await attemptFetch(targetUrl);
-  if (primaryResult) return primaryResult;
-
-  // 2. Try fallback URL via fetch if different
-  if (fallbackUrl && fallbackUrl !== targetUrl) {
-    const fallbackResult = await attemptFetch(fallbackUrl);
-    if (fallbackResult) return fallbackResult;
+  for (const u of validUrls) {
+    const res = await attemptFetch(u);
+    if (res) return res;
   }
 
-  // 3. Fallback: HTML Canvas Image Loader
+  // 3. Fallback: HTML Canvas Image Loader across candidate URLs
   const attemptCanvas = (u: string) => new Promise<{ dataUrl: string; width: number; height: number } | null>((resolve) => {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
@@ -107,11 +104,9 @@ async function getBase64ImageFromUrl(url: string, fallbackUrl?: string): Promise
     img.src = u;
   });
 
-  const canvasResult = await attemptCanvas(targetUrl);
-  if (canvasResult) return canvasResult;
-
-  if (fallbackUrl && fallbackUrl !== targetUrl) {
-    return await attemptCanvas(fallbackUrl);
+  for (const u of validUrls) {
+    const canvasRes = await attemptCanvas(u);
+    if (canvasRes) return canvasRes;
   }
 
   return null;
@@ -431,9 +426,20 @@ export async function generateReportPdf(report: FieldReport): Promise<jsPDF> {
         doc.rect(x + 0.3, y + 0.3, photoCardWidth - 0.6, photoCardHeight - 0.6, 'F');
 
         // Embed Image fitted into 4:3 frame without stretching or compression
+        const rawId = p.driveFileId || (p.id && typeof p.id === 'string' && p.id.length >= 20 && !p.id.startsWith('photo-') ? p.id : undefined);
+        const cleanId = rawId ? String(rawId).replace(/^photo_/, '').trim() : undefined;
         const resolvedPhotoUrl = resolvePhotoAttachmentUrl(p);
-        const fallbackPhotoUrl = p.thumbnailUrl || (p.driveFileId ? `/api/drive/photo/${p.driveFileId}` : (p.id ? `/api/drive/photo/${p.id}` : undefined));
-        const imgObj = await getBase64ImageFromUrl(resolvedPhotoUrl, fallbackPhotoUrl);
+        const imgObj = await getBase64ImageFromUrl(
+          p.dataUrl,
+          p.sourceDataUrl,
+          resolvedPhotoUrl,
+          cleanId ? `https://drive.google.com/thumbnail?id=${cleanId}&sz=w1200` : undefined,
+          cleanId ? `https://lh3.googleusercontent.com/d/${cleanId}` : undefined,
+          cleanId ? `/api/drive/photo/${cleanId}` : undefined,
+          cleanId ? `https://drive.google.com/uc?export=view&id=${cleanId}` : undefined,
+          p.thumbnailUrl,
+          p.url
+        );
         const isValidImage = Boolean(imgObj && imgObj.dataUrl && (imgObj.width || 0) > 20 && (imgObj.height || 0) > 20);
         
         if (isValidImage && imgObj) {
@@ -1785,38 +1791,47 @@ export async function generatePhotoDocsPdf(
       doc.rect(photoX + 0.3, photoY + 0.3, photoW - 0.6, photoH - 0.6, 'F');
 
       // Image embed — 4:3 aspect ratio fit
+      const rawWeeklyId = (photo as any).driveFileId || (photo.id && typeof photo.id === 'string' && photo.id.length >= 20 && !photo.id.startsWith('photo-') ? photo.id : undefined);
+      const cleanWeeklyId = rawWeeklyId ? String(rawWeeklyId).replace(/^photo_/, '').trim() : undefined;
       const resolvedWeeklyPhotoUrl = resolvePhotoAttachmentUrl(photo);
-      const fallbackWeeklyPhotoUrl = (photo as any).thumbnailUrl || ((photo as any).driveFileId ? `/api/drive/photo/${(photo as any).driveFileId}` : (photo.id ? `/api/drive/photo/${photo.id}` : undefined));
-      if (resolvedWeeklyPhotoUrl || fallbackWeeklyPhotoUrl) {
-        try {
-          const containerW = photoW - 0.6;
-          const containerH = photoH - 0.6;
-          const imgObj = await getBase64ImageFromUrl(resolvedWeeklyPhotoUrl, fallbackWeeklyPhotoUrl);
-          if (imgObj && imgObj.dataUrl) {
-            const natW = imgObj.width || 4;
-            const natH = imgObj.height || 3;
-            const scale = Math.min(containerW / natW, containerH / natH);
-            const drawW = natW * scale;
-            const drawH = natH * scale;
-            const drawX = photoX + 0.3 + (containerW - drawW) / 2;
-            const drawY = photoY + 0.3 + (containerH - drawH) / 2;
-            try {
-              doc.addImage(imgObj.dataUrl, 'JPEG', drawX, drawY, drawW, drawH);
-            } catch (e) {
-              doc.addImage(imgObj.dataUrl, 'PNG', drawX, drawY, drawW, drawH);
-            }
-          } else {
-            doc.setFont('helvetica', 'italic');
-            doc.setFontSize(8);
-            doc.setTextColor(148, 163, 184);
-            doc.text('[Inspection Photo Preview]', photoX + photoW / 2, photoY + photoH / 2, { align: 'center' });
+      try {
+        const containerW = photoW - 0.6;
+        const containerH = photoH - 0.6;
+        const imgObj = await getBase64ImageFromUrl(
+          (photo as any).dataUrl,
+          (photo as any).sourceDataUrl,
+          resolvedWeeklyPhotoUrl,
+          cleanWeeklyId ? `https://drive.google.com/thumbnail?id=${cleanWeeklyId}&sz=w1200` : undefined,
+          cleanWeeklyId ? `https://lh3.googleusercontent.com/d/${cleanWeeklyId}` : undefined,
+          cleanWeeklyId ? `/api/drive/photo/${cleanWeeklyId}` : undefined,
+          cleanWeeklyId ? `https://drive.google.com/uc?export=view&id=${cleanWeeklyId}` : undefined,
+          (photo as any).thumbnailUrl,
+          (photo as any).url
+        );
+        if (imgObj && imgObj.dataUrl) {
+          const natW = imgObj.width || 4;
+          const natH = imgObj.height || 3;
+          const scale = Math.min(containerW / natW, containerH / natH);
+          const drawW = natW * scale;
+          const drawH = natH * scale;
+          const drawX = photoX + 0.3 + (containerW - drawW) / 2;
+          const drawY = photoY + 0.3 + (containerH - drawH) / 2;
+          try {
+            doc.addImage(imgObj.dataUrl, 'JPEG', drawX, drawY, drawW, drawH);
+          } catch (e) {
+            doc.addImage(imgObj.dataUrl, 'PNG', drawX, drawY, drawW, drawH);
           }
-        } catch (pngErr) {
+        } else {
           doc.setFont('helvetica', 'italic');
           doc.setFontSize(8);
           doc.setTextColor(148, 163, 184);
           doc.text('[Inspection Photo Preview]', photoX + photoW / 2, photoY + photoH / 2, { align: 'center' });
         }
+      } catch (pngErr) {
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.text('[Inspection Photo Preview]', photoX + photoW / 2, photoY + photoH / 2, { align: 'center' });
       }
 
       // Stage Badge on Top Left of Photo ("BEFORE" / "DURING" / "AFTER")

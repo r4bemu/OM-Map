@@ -250,7 +250,29 @@ export async function getOrCreateFolderOnDrive(
   }
 
   const folderData = await createRes.json();
+  // Grant public read permission to folder
+  makeDriveFilePublic(accessToken, folderData.id).catch(() => {});
   return folderData.id;
+}
+
+// Automatically grant public read permissions to any Drive asset for seamless cross-client CDN streaming
+export async function makeDriveFilePublic(accessToken: string, fileId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions?supportsAllDrives=true`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        role: 'reader',
+        type: 'anyone'
+      })
+    });
+    return res.ok;
+  } catch (err) {
+    return false;
+  }
 }
 
 // Upload text file into a specific Drive folder
@@ -294,7 +316,11 @@ export async function uploadTextFileToFolder(
     throw new Error(`Drive text upload failed: ${errText}`);
   }
 
-  return await res.json();
+  const data = await res.json();
+  if (data?.id) {
+    makeDriveFilePublic(accessToken, data.id).catch(() => {});
+  }
+  return data;
 }
 
 // Upload binary buffer (e.g., photo) into a specific Drive folder
@@ -347,7 +373,11 @@ export async function uploadBinaryToFolder(
     throw new Error(`Drive binary upload failed: ${errText}`);
   }
 
-  return await res.json();
+  const data = await res.json();
+  if (data?.id) {
+    makeDriveFilePublic(accessToken, data.id).catch(() => {});
+  }
+  return data;
 }
 
 // Upload a complete field report directly into the designated Google Drive IMO folder

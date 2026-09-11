@@ -1,12 +1,14 @@
-﻿import { PhotoAttachment } from '../types';
+import { PhotoAttachment } from '../types';
 
 /**
  * Robust, unified resolver for photo attachment URLs across all app components.
  * Prioritizes:
  * 1. Data URLs (lossless/framed base64 in memory/IndexedDB)
- * 2. Explicit server proxy URL or web URL (if non-empty)
- * 3. Google Drive proxy URL via driveFileId or long ID
- * 4. Google Drive thumbnail URL
+ * 2. External Web URLs (http/https not pointing to obsolete local proxy)
+ * 3. High-Quality Direct Google Drive Image CDN (https://drive.google.com/thumbnail?id=...&sz=w1200)
+ * 4. Google Drive LH3 CDN (https://lh3.googleusercontent.com/d/...)
+ * 5. Backend Server Proxy (/api/drive/photo/...)
+ * 6. Google Drive thumbnail URL
  */
 export function resolvePhotoAttachmentUrl(photo?: PhotoAttachment | any): string {
   if (!photo) return '';
@@ -17,24 +19,31 @@ export function resolvePhotoAttachmentUrl(photo?: PhotoAttachment | any): string
     return dataUrl.trim();
   }
 
-  // 2. Existing valid URL (if not empty or whitespace)
+  // 2. Existing valid data URL in photo.url
+  if (typeof photo.url === 'string' && photo.url.startsWith('data:image/')) {
+    return photo.url.trim();
+  }
+
+  // 3. Extract clean Google Drive File ID
+  const rawId = photo.driveFileId || (photo.id && typeof photo.id === 'string' && photo.id.length >= 20 && !photo.id.startsWith('photo-') && !photo.id.startsWith('p-') ? photo.id : undefined);
+  const cleanId = rawId ? String(rawId).replace(/^photo_/, '').trim() : undefined;
+
+  if (cleanId) {
+    // Prefer direct Google Drive thumbnail CDN with high resolution (works across static hosting, offline caches, & local dev)
+    return `https://drive.google.com/thumbnail?id=${cleanId}&sz=w1200`;
+  }
+
+  // 4. Existing valid external URL (e.g. web/unsplash)
+  if (typeof photo.url === 'string' && photo.url.trim().length > 0 && !photo.url.startsWith('/api/drive/photo/')) {
+    return photo.url.trim();
+  }
+
+  // 5. Existing server proxy URL if present
   if (typeof photo.url === 'string' && photo.url.trim().length > 0) {
     return photo.url.trim();
   }
 
-  // 3. Google Drive file ID proxy
-  if (photo.driveFileId && typeof photo.driveFileId === 'string' && photo.driveFileId.trim().length > 0) {
-    const cleanId = photo.driveFileId.replace(/^photo_/, '').trim();
-    return `/api/drive/photo/${cleanId}`;
-  }
-
-  // 4. Drive ID fallback if id looks like a Drive ID (not local mock/photo- prefix)
-  if (photo.id && typeof photo.id === 'string' && photo.id.length >= 20 && !photo.id.startsWith('photo-') && !photo.id.startsWith('p-')) {
-    const cleanId = photo.id.replace(/^photo_/, '').trim();
-    return `/api/drive/photo/${cleanId}`;
-  }
-
-  // 5. Thumbnail URL
+  // 6. Thumbnail URL
   if (photo.thumbnailUrl && typeof photo.thumbnailUrl === 'string' && photo.thumbnailUrl.trim().length > 0) {
     return photo.thumbnailUrl.trim();
   }
@@ -43,7 +52,8 @@ export function resolvePhotoAttachmentUrl(photo?: PhotoAttachment | any): string
 }
 
 /**
- * Handle image loading errors by attempting successive fallbacks (Drive file proxy -> Thumbnail -> Fallback UI)
+ * Handle image loading errors by attempting successive multi-tier fallbacks:
+ * Direct CDN -> LH3 CDN -> Local Server Proxy -> Export View -> Thumbnail -> Styled Fallback UI
  */
 export function handleImageFallback(
   e: any,
@@ -51,21 +61,41 @@ export function handleImageFallback(
   fallbackMessage: string = 'Photo Attachment'
 ) {
   const target = e.currentTarget;
-  const driveFileId = photo?.driveFileId || (photo?.id && photo.id.length >= 20 && !photo.id.startsWith('photo-') ? photo.id : undefined);
+  if (!target) return;
 
-  // Fallback 1: Try Drive photo API endpoint if not already tried
-  if (driveFileId) {
-    const driveUrl = `/api/drive/photo/${driveFileId.replace(/^photo_/, '')}`;
-    if (!target.src.includes(driveUrl)) {
-      target.src = driveUrl;
+  const rawId = photo?.driveFileId || (photo?.id && typeof photo.id === 'string' && photo.id.length >= 20 && !photo.id.startsWith('photo-') ? photo.id : undefined);
+  const cleanId = rawId ? String(rawId).replace(/^photo_/, '').trim() : undefined;
+
+  if (cleanId) {
+    const currentSrc = target.src || '';
+    const tier1 = `https://drive.google.com/thumbnail?id=${cleanId}&sz=w1200`;
+    const tier2 = `https://lh3.googleusercontent.com/d/${cleanId}`;
+    const tier3 = `/api/drive/photo/${cleanId}`;
+    const tier4 = `https://drive.google.com/uc?export=view&id=${cleanId}`;
+
+    // Step 1: If thumbnail CDN failed, try LH3 full-res CDN
+    if (currentSrc.includes('thumbnail?id=') || currentSrc.includes('drive.google.com/thumbnail')) {
+      target.src = tier2;
       return;
     }
-  }
 
-  // Fallback 2: Try thumbnailUrl if not already tried
-  if (photo?.thumbnailUrl && target.src !== photo.thumbnailUrl) {
-    target.src = photo.thumbnailUrl;
-    return;
+    // Step 2: If LH3 failed, try server proxy
+    if (currentSrc.includes('lh3.googleusercontent.com/d/')) {
+      target.src = tier3;
+      return;
+    }
+
+    // Step 3: If server proxy failed, try export view
+    if (currentSrc.includes('/api/drive/photo/')) {
+      target.src = tier4;
+      return;
+    }
+
+    // Step 4: If export view failed, try initial thumbnail link if available
+    if (photo?.thumbnailUrl && currentSrc !== photo.thumbnailUrl) {
+      target.src = photo.thumbnailUrl;
+      return;
+    }
   }
 
   // Final fallback: Hide broken img and inject styled fallback container

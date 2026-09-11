@@ -60,9 +60,10 @@ function createLightweightReports(reports: FieldReport[]): FieldReport[] {
         if (!p) return p;
         // Keep server URLs and thumbnails intact; omit large base64 from localStorage only (IndexedDB retains full binary)
         const isLongBase64 = typeof p.url === 'string' && p.url.startsWith('data:image/') && p.url.length > 500;
-        const fallbackUrl = p.driveFileId 
-          ? `/api/drive/photo/${p.driveFileId}` 
-          : (p.id && (p.id.length >= 20 || !p.id.startsWith('photo-')) ? `/api/drive/photo/${p.id}` : (p.thumbnailUrl || ''));
+        const cleanDriveId = p.driveFileId || (p.id && (p.id.length >= 20 || !p.id.startsWith('photo-')) ? p.id : undefined);
+        const fallbackUrl = cleanDriveId 
+          ? `https://drive.google.com/thumbnail?id=${cleanDriveId.replace(/^photo_/, '')}&sz=w1200` 
+          : (p.thumbnailUrl || (p.driveFileId ? `/api/drive/photo/${p.driveFileId}` : ''));
         return {
           ...p,
           url: isLongBase64 ? fallbackUrl : (p.url || fallbackUrl),
@@ -70,9 +71,10 @@ function createLightweightReports(reports: FieldReport[]): FieldReport[] {
           sourceDataUrl: undefined
         };
       });
-      const fallbackPhotoUrl = r.photos[0]?.driveFileId 
-        ? `/api/drive/photo/${r.photos[0]?.driveFileId}` 
-        : (r.photos[0]?.id && (r.photos[0]?.id.length >= 20 || !r.photos[0]?.id.startsWith('photo-')) ? `/api/drive/photo/${r.photos[0]?.id}` : undefined);
+      const firstDriveId = r.photos[0]?.driveFileId || (r.photos[0]?.id && (r.photos[0]?.id.length >= 20 || !r.photos[0]?.id.startsWith('photo-')) ? r.photos[0]?.id : undefined);
+      const fallbackPhotoUrl = firstDriveId 
+        ? `https://drive.google.com/thumbnail?id=${firstDriveId.replace(/^photo_/, '')}&sz=w1200` 
+        : (r.photos[0]?.thumbnailUrl || undefined);
       return { 
         ...r, 
         photos: lightweightPhotos,

@@ -207,6 +207,25 @@ export const uploadFileToFolder = async (
 };
 
 // Upload binary data (e.g. decoded photo image) into a specific Google Drive folder
+export const makeDriveItemPublic = async (accessToken: string, fileId: string): Promise<boolean> => {
+  try {
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions?supportsAllDrives=true`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        role: 'reader',
+        type: 'anyone'
+      })
+    });
+    return res.ok;
+  } catch (_) {
+    return false;
+  }
+};
+
 export const uploadBinaryToFolder = async (
   accessToken: string,
   folderId: string,
@@ -237,7 +256,7 @@ export const uploadBinaryToFolder = async (
     type: `multipart/related; boundary=${boundary}`
   });
 
-  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -251,7 +270,11 @@ export const uploadBinaryToFolder = async (
     throw new Error(`Failed to upload image binary to Google Drive: ${err}`);
   }
 
-  return await res.json();
+  const data = await res.json();
+  if (data?.id) {
+    makeDriveItemPublic(accessToken, data.id).catch(() => {});
+  }
+  return data;
 };
 
 // Upload GeoJSON layer / file to Google Drive
