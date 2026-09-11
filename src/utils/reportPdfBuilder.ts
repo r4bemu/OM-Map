@@ -8,66 +8,78 @@ import { FOOTER_BACKGROUND_BASE64, FOOTER_ISO_LOGO_BASE64 } from './footerAssets
 import { registerWmrCustomFonts } from './reportFontLoader';
 import { getUserSignatories, getDefaultFieldReportSignatories, getDefaultWmrSignatories } from './signatoriesConfig';
 import { formatReportId } from './reportIdGenerator';
+import { resolvePhotoAttachmentUrl } from './photoUtils';
 
-// Helper to safely load an image URL into a base64 Data URL
-// Helper to safely load an image URL into a base64 Data URL with natural dimension detection
-async function getBase64ImageFromUrl(url: string): Promise<{ dataUrl: string; width: number; height: number } | null> {
-  if (!url) return null;
-  
+// Helper to safely load an image URL into a base64 Data URL with natural dimension detection and fallback support
+async function getBase64ImageFromUrl(url: string, fallbackUrl?: string): Promise<{ dataUrl: string; width: number; height: number } | null> {
+  if (!url && !fallbackUrl) return null;
+  const targetUrl = url || fallbackUrl || '';
+
   // Direct Data URL handling
-  if (url.startsWith('data:image')) {
+  if (targetUrl.startsWith('data:image')) {
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
         resolve({
-          dataUrl: url,
+          dataUrl: targetUrl,
           width: img.naturalWidth || 600,
           height: img.naturalHeight || 450
         });
       };
       img.onerror = () => {
         resolve({
-          dataUrl: url,
+          dataUrl: targetUrl,
           width: 600,
           height: 450
         });
       };
-      img.src = url;
+      img.src = targetUrl;
     });
   }
 
-  // 1. First attempt: fetch directly as blob and convert to DataURL
-  try {
-    const res = await fetch(url, { mode: 'cors' });
-    if (res.ok) {
-      const blob = await res.blob();
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-      if (dataUrl && dataUrl.startsWith('data:image')) {
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.onload = () => {
-            resolve({
-              dataUrl,
-              width: img.naturalWidth || 600,
-              height: img.naturalHeight || 450
-            });
-          };
-          img.onerror = () => resolve({ dataUrl, width: 600, height: 450 });
-          img.src = dataUrl;
+  // Helper to attempt fetch conversion
+  const attemptFetch = async (u: string) => {
+    try {
+      const res = await fetch(u, { mode: 'cors' });
+      if (res.ok) {
+        const blob = await res.blob();
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
         });
+        if (dataUrl && dataUrl.startsWith('data:image')) {
+          return new Promise<{ dataUrl: string; width: number; height: number }>((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              resolve({
+                dataUrl,
+                width: img.naturalWidth || 600,
+                height: img.naturalHeight || 450
+              });
+            };
+            img.onerror = () => resolve({ dataUrl, width: 600, height: 450 });
+            img.src = dataUrl;
+          });
+        }
       }
-    }
-  } catch (fetchErr) {
-    // Fall back to Canvas draw method
+    } catch (_) {}
+    return null;
+  };
+
+  // 1. Try primary URL via fetch
+  const primaryResult = await attemptFetch(targetUrl);
+  if (primaryResult) return primaryResult;
+
+  // 2. Try fallback URL via fetch if different
+  if (fallbackUrl && fallbackUrl !== targetUrl) {
+    const fallbackResult = await attemptFetch(fallbackUrl);
+    if (fallbackResult) return fallbackResult;
   }
 
-  // 2. Second attempt: HTML Canvas Image Loader
-  return new Promise((resolve) => {
+  // 3. Fallback: HTML Canvas Image Loader
+  const attemptCanvas = (u: string) => new Promise<{ dataUrl: string; width: number; height: number } | null>((resolve) => {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
     img.onload = () => {
@@ -88,15 +100,21 @@ async function getBase64ImageFromUrl(url: string): Promise<{ dataUrl: string; wi
           resolve(null);
         }
       } catch (err) {
-        console.warn('Canvas conversion failed for image:', url, err);
         resolve(null);
       }
     };
-    img.onerror = () => {
-      resolve(null);
-    };
-    img.src = url;
+    img.onerror = () => resolve(null);
+    img.src = u;
   });
+
+  const canvasResult = await attemptCanvas(targetUrl);
+  if (canvasResult) return canvasResult;
+
+  if (fallbackUrl && fallbackUrl !== targetUrl) {
+    return await attemptCanvas(fallbackUrl);
+  }
+
+  return null;
 }
 
 /**
@@ -413,8 +431,9 @@ export async function generateReportPdf(report: FieldReport): Promise<jsPDF> {
         doc.rect(x + 0.3, y + 0.3, photoCardWidth - 0.6, photoCardHeight - 0.6, 'F');
 
         // Embed Image fitted into 4:3 frame without stretching or compression
-        const resolvedPhotoUrl = p.dataUrl || p.sourceDataUrl || p.url || (p.driveFileId ? `/api/drive/photo/${p.driveFileId}` : '') || (p.id ? `/api/drive/photo/${p.id}` : '');
-        const imgObj = await getBase64ImageFromUrl(resolvedPhotoUrl);
+        const resolvedPhotoUrl = resolvePhotoAttachmentUrl(p);
+        const fallbackPhotoUrl = p.thumbnailUrl || (p.driveFileId ? `/api/drive/photo/${p.driveFileId}` : (p.id ? `/api/drive/photo/${p.id}` : undefined));
+        const imgObj = await getBase64ImageFromUrl(resolvedPhotoUrl, fallbackPhotoUrl);
         const isValidImage = Boolean(imgObj && imgObj.dataUrl && (imgObj.width || 0) > 20 && (imgObj.height || 0) > 20);
         
         if (isValidImage && imgObj) {
@@ -1766,12 +1785,13 @@ export async function generatePhotoDocsPdf(
       doc.rect(photoX + 0.3, photoY + 0.3, photoW - 0.6, photoH - 0.6, 'F');
 
       // Image embed — 4:3 aspect ratio fit
-      const resolvedWeeklyPhotoUrl = (photo as any).dataUrl || (photo as any).sourceDataUrl || photo.url || ((photo as any).driveFileId ? `/api/drive/photo/${(photo as any).driveFileId}` : '') || (photo.id ? `/api/drive/photo/${photo.id}` : '');
-      if (resolvedWeeklyPhotoUrl) {
+      const resolvedWeeklyPhotoUrl = resolvePhotoAttachmentUrl(photo);
+      const fallbackWeeklyPhotoUrl = (photo as any).thumbnailUrl || ((photo as any).driveFileId ? `/api/drive/photo/${(photo as any).driveFileId}` : (photo.id ? `/api/drive/photo/${photo.id}` : undefined));
+      if (resolvedWeeklyPhotoUrl || fallbackWeeklyPhotoUrl) {
         try {
           const containerW = photoW - 0.6;
           const containerH = photoH - 0.6;
-          const imgObj = await getBase64ImageFromUrl(resolvedWeeklyPhotoUrl);
+          const imgObj = await getBase64ImageFromUrl(resolvedWeeklyPhotoUrl, fallbackWeeklyPhotoUrl);
           if (imgObj && imgObj.dataUrl) {
             const natW = imgObj.width || 4;
             const natH = imgObj.height || 3;
