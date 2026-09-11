@@ -58,7 +58,7 @@ function createLightweightReports(reports: FieldReport[]): FieldReport[] {
     if (r.photos && Array.isArray(r.photos) && r.photos.length > 0) {
       const lightweightPhotos = r.photos.map(p => {
         if (!p) return p;
-        // Keep server URLs and thumbnails intact; omit large base64 from localStorage only (IndexedDB retains full binary)
+        // Keep server URLs and thumbnails intact; for synced reports, replace large base64 with Drive CDN URL
         const isLongBase64 = typeof p.url === 'string' && p.url.startsWith('data:image/') && p.url.length > 500;
         const cleanDriveId = p.driveFileId || (p.id && (p.id.length >= 20 || !p.id.startsWith('photo-')) ? p.id : undefined);
         const fallbackUrl = cleanDriveId 
@@ -66,7 +66,7 @@ function createLightweightReports(reports: FieldReport[]): FieldReport[] {
           : (p.thumbnailUrl || (p.driveFileId ? `/api/drive/photo/${p.driveFileId}` : ''));
         return {
           ...p,
-          url: isLongBase64 ? fallbackUrl : (p.url || fallbackUrl),
+          url: fallbackUrl ? fallbackUrl : p.url,
           dataUrl: undefined,
           sourceDataUrl: undefined
         };
@@ -78,7 +78,7 @@ function createLightweightReports(reports: FieldReport[]): FieldReport[] {
       return { 
         ...r, 
         photos: lightweightPhotos,
-        photoUrl: (typeof r.photoUrl === 'string' && r.photoUrl.startsWith('data:image/') && r.photoUrl.length > 500) ? fallbackPhotoUrl : (r.photoUrl || fallbackPhotoUrl)
+        photoUrl: fallbackPhotoUrl ? fallbackPhotoUrl : r.photoUrl
       };
     }
     return r;
@@ -526,7 +526,7 @@ export async function saveCachedLayersDB(layers: GISLayer[]): Promise<void> {
   }
 }
 
-export async function syncOfflineQueueToServer(): Promise<{ syncedCount: number; errors: any[] }> {
+export async function syncOfflineQueueToServer(driveToken?: string | null): Promise<{ syncedCount: number; errors: any[] }> {
   // Try IndexedDB first for complete photo records, fallback to in-memory/localStorage
   let allReports = await getCachedReportsDB();
   if (!allReports || allReports.length === 0) {
@@ -538,6 +538,10 @@ export async function syncOfflineQueueToServer(): Promise<{ syncedCount: number;
     return { syncedCount: 0, errors: [] };
   }
 
+  let syncedCount = 0;
+  const errors: any[] = [];
+
+  // 1. Try server batch upload first
   try {
     const res = await fetch('/api/reports/batch', {
       method: 'POST',
@@ -545,19 +549,43 @@ export async function syncOfflineQueueToServer(): Promise<{ syncedCount: number;
       body: JSON.stringify({ reports: unsynced })
     });
 
-    if (!res.ok) {
-      throw new Error(`Server returned status ${res.status}`);
+    if (res.ok) {
+      const syncedIds = unsynced.map(r => r.id);
+      markReportsSynced(syncedIds);
+      return { syncedCount: syncedIds.length, errors: [] };
     }
-
-    const data = await res.json();
-    const syncedIds = unsynced.map(r => r.id);
-    markReportsSynced(syncedIds);
-
-    return { syncedCount: syncedIds.length, errors: [] };
   } catch (err) {
-    console.warn('Network or server unreachable for offline sync', err);
-    return { syncedCount: 0, errors: [err] };
+    console.warn('Backend server batch sync unreachable, attempting direct Drive upload:', err);
   }
+
+  // 2. Fallback: Direct Google Drive Upload for each unsynced report if driveToken is present
+  if (driveToken) {
+    try {
+      const { uploadMaintenanceReportToDrive } = await import('../lib/googleDriveService');
+      const successfullySyncedIds: string[] = [];
+
+      for (const rep of unsynced) {
+        try {
+          const driveRes = await uploadMaintenanceReportToDrive(driveToken, rep);
+          if (driveRes && driveRes.folderId) {
+            successfullySyncedIds.push(rep.id);
+            syncedCount++;
+          }
+        } catch (dErr) {
+          console.warn(`Direct Drive upload failed for report ${rep.id}:`, dErr);
+          errors.push(dErr);
+        }
+      }
+
+      if (successfullySyncedIds.length > 0) {
+        markReportsSynced(successfullySyncedIds);
+      }
+    } catch (importErr) {
+      console.warn('Could not import googleDriveService for offline queue sync:', importErr);
+    }
+  }
+
+  return { syncedCount, errors };
 }
 
 export async function clearAllLayersDB(): Promise<void> {

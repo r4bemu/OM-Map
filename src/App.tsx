@@ -31,6 +31,7 @@ import {
   saveManifestMetadataDB,
   deleteCachedReportDB,
   clearAllLocalDataDB,
+  clearAllLayersDB,
   setLastOverhaulTimestamp
 } from './utils/offlineStorage';
 import { getIsoWeekInfo, getAvailableWeeksFromReports, isReportInWeek } from './utils/weekUtils';
@@ -1154,7 +1155,8 @@ export default function App() {
       const track1 = (async () => {
         setStep('upload', 'active');
         try {
-          await syncOfflineQueueToServer();
+          const driveToken = getAccessToken();
+          await syncOfflineQueueToServer(driveToken);
         } catch (e) {
           console.warn('Track 1 (Upload) notice:', e);
         } finally {
@@ -1472,15 +1474,16 @@ export default function App() {
       }, 5500);
     }
 
-    // 4. Submit report via backend API
+    // 4. Submit report via backend API with Client-Side Direct Google Drive Fallback
     if (!isOffline) {
-      try {
-        const driveToken = getAccessToken();
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-        if (driveToken) {
-          headers['x-google-drive-token'] = driveToken;
-        }
+      let serverSynced = false;
+      const driveToken = getAccessToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (driveToken) {
+        headers['x-google-drive-token'] = driveToken;
+      }
 
+      try {
         const res = await fetch('/api/reports', {
           method: 'POST',
           headers,
@@ -1488,36 +1491,64 @@ export default function App() {
         });
 
         if (res.ok) {
+          serverSynced = true;
           markReportsSynced([newReport.id]);
           const data = await res.json();
-          if (data.driveSync?.success) {
-            console.log(`✅ Report auto-uploaded to Google Drive! Folder ID: ${data.driveSync.reportFolderId}, Photos: ${data.driveSync.photoCount}`);
+          if (data.report) {
+            setFieldReports(prev => prev.map(r => r.id === newReport.id ? { ...newReport, ...data.report, synced: true } : r));
           }
-          // Success toast notification
           setDriveToast({
             id: `toast-${Date.now()}`,
             type: 'success',
             title: 'Saved to Google Drive',
-            message: 'Report successfully submitted and archived to Google Drive for future reference.',
+            message: 'Report successfully submitted and archived to Google Drive.',
             reportTitle: newReport.title
           });
           setTimeout(() => {
             setDriveToast(current => current?.type === 'success' ? null : current);
           }, 5000);
-        } else {
-          setDriveToast({
-            id: `toast-${Date.now()}`,
-            type: 'warning',
-            title: 'Saved Locally on Device',
-            message: 'Report stored in local memory and will auto-upload to Google Drive upon reconnecting.',
-            reportTitle: newReport.title
-          });
-          setTimeout(() => {
-            setDriveToast(current => current?.type === 'warning' ? null : current);
-          }, 5500);
         }
-      } catch (err) {
-        console.warn('Report submission server sync warning', err);
+      } catch (serverErr) {
+        console.warn('Backend server unreachable, falling back to direct client Drive sync:', serverErr);
+      }
+
+      // If backend was unreachable or failed (e.g. static GitHub Pages hosting):
+      if (!serverSynced) {
+        if (driveToken) {
+          try {
+            setDriveToast({
+              id: `toast-${Date.now()}`,
+              type: 'submitting',
+              title: 'Uploading to Google Drive...',
+              message: 'Connecting directly to Google Drive designated IMO folder...',
+              reportTitle: newReport.title
+            });
+
+            const driveResult = await uploadMaintenanceReportToDrive(driveToken, newReport);
+            if (driveResult && driveResult.folderId) {
+              const updatedReport = driveResult.updatedReport || { ...newReport, synced: true };
+              markReportsSynced([newReport.id]);
+              setFieldReports(prev => prev.map(r => r.id === newReport.id ? { ...updatedReport, synced: true } : r));
+              addOfflineReport({ ...updatedReport, synced: true });
+
+              setDriveToast({
+                id: `toast-${Date.now()}`,
+                type: 'success',
+                title: 'Saved to Google Drive',
+                message: `Report and ${driveResult.photoCount} inspection photos uploaded directly to Google Drive.`,
+                reportTitle: newReport.title
+              });
+              setTimeout(() => {
+                setDriveToast(current => current?.type === 'success' ? null : current);
+              }, 5000);
+              return;
+            }
+          } catch (directDriveErr) {
+            console.warn('Direct Google Drive upload error:', directDriveErr);
+          }
+        }
+
+        // Saved locally in offline queue if both server and direct drive upload are unavailable
         setDriveToast({
           id: `toast-${Date.now()}`,
           type: 'warning',
@@ -1587,7 +1618,7 @@ export default function App() {
       setSyncSteps(prev => prev.map(s => s.id === id ? { ...s, status, progress, ...(sublabel ? { sublabel } : {}) } : s));
 
     const OVERHAUL_STEPS: SyncStep[] = [
-      { id: 'upload',  label: 'Resetting Local Cache',           sublabel: 'Purging IndexedDB and resetting storage', status: 'pending' },
+      { id: 'upload',  label: 'Preserving & Resetting Cache',    sublabel: 'Safeguarding unsynced reports and purging cache', status: 'pending' },
       { id: 'layers',  label: 'Downloading GIS Canal Networks', sublabel: 'Fetching fresh layers from Google Drive',  status: 'pending' },
       { id: 'reports', label: 'Downloading All Field Reports',   sublabel: 'Fetching complete historical reports',    status: 'pending' },
       { id: 'weeks',   label: 'Rebuilding Manifest & Indexes',   sublabel: 'Verifying checksums and week archives',   status: 'pending' },
@@ -1596,11 +1627,58 @@ export default function App() {
     try {
       setIsSyncing(true);
       setSyncSteps(OVERHAUL_STEPS);
-      setSyncStatusMessage('Executing full system overhaul: Clearing local cache...');
+      setSyncStatusMessage('Executing full system overhaul: Safeguarding local data...');
 
-      // 1. Wipe local IndexedDB & localStorage
+      // 0. Safeguard: Capture all unsynced or local-only reports before clearing
       setStep('upload', 'active');
-      await clearAllLocalDataDB();
+      const localCachedReports = await getCachedReportsDB();
+      const offlineReports = getOfflineReports();
+      const allCurrentLocal = [...(fieldReports || []), ...(localCachedReports || []), ...(offlineReports || [])];
+      
+      const unsyncedReportsMap = new Map<string, FieldReport>();
+      allCurrentLocal.forEach(r => {
+        if (r && r.id && !r.id.startsWith('mock-') && !(r as any).isMock) {
+          if (!r.synced) {
+            unsyncedReportsMap.set(r.id, r);
+          }
+        }
+      });
+      const unsyncedReports = Array.from(unsyncedReportsMap.values());
+      if (unsyncedReports.length > 0) {
+        console.log(`🛡️ System Overhaul Safeguard: Preserving ${unsyncedReports.length} unsynced local reports.`);
+      }
+
+      // If online and drive token or server available, try uploading unsynced reports first
+      const driveToken = getAccessToken();
+      if (unsyncedReports.length > 0 && !isOfflineRef.current) {
+        for (const unRep of unsyncedReports) {
+          try {
+            if (driveToken) {
+              const res = await uploadMaintenanceReportToDrive(driveToken, unRep);
+              if (res && res.folderId) {
+                unRep.synced = true;
+                if (res.updatedReport) {
+                  Object.assign(unRep, res.updatedReport);
+                }
+              }
+            } else {
+              const res = await fetch('/api/reports', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(unRep)
+              });
+              if (res.ok) {
+                unRep.synced = true;
+              }
+            }
+          } catch (flushErr) {
+            console.warn('Could not auto-flush unsynced report during overhaul:', flushErr);
+          }
+        }
+      }
+
+      // 1. Wipe local layer & manifest caches (safe purge)
+      await clearAllLayersDB();
       setLastOverhaulTimestamp();
       await new Promise(r => setTimeout(r, 400));
       setStep('upload', 'done');
@@ -1630,8 +1708,8 @@ export default function App() {
       // 3. Re-download fresh reports (all historical reports & pre-cached photos)
       setStep('reports', 'active');
       setSyncStatusMessage('Synchronizing Google Drive reports and downloading complete archive...');
+      let downloadedReports: FieldReport[] = [];
       try {
-        const driveToken = getAccessToken();
         const headers: Record<string, string> = {};
         if (driveToken) headers['x-google-drive-token'] = driveToken;
 
@@ -1649,18 +1727,34 @@ export default function App() {
         if (repRes.ok) {
           const rData = await repRes.json();
           if (Array.isArray(rData.reports)) {
-            let reportsToSave = rData.reports;
-            if (isImoScoped && targetImo !== 'All IMOs') {
-              reportsToSave = reportsToSave.filter((r: any) => !r.imoOffice || matchesImoOffice(r.imoOffice, targetImo));
-            }
-            setFieldReports(reportsToSave);
-            await saveCachedReportsDB(reportsToSave);
-            saveOfflineReports(reportsToSave);
+            downloadedReports = rData.reports;
           }
         }
       } catch (rErr) {
         console.warn('Overhaul reports fetch notice:', rErr);
       }
+
+      // If remote reports fetch returned empty (or 404 on static hosting), fall back to persistent json if available
+      if (downloadedReports.length === 0) {
+        try {
+          const staticRes = await fetch('data/persistent_reports.json');
+          if (staticRes.ok) {
+            const staticData = await staticRes.json();
+            if (Array.isArray(staticData)) {
+              downloadedReports = staticData;
+            }
+          }
+        } catch (_) {}
+      }
+
+      // MERGE downloaded reports with all preserved unsynced/local reports
+      let finalReports = deduplicateItems([...unsyncedReports, ...downloadedReports]);
+      if (isImoScoped && targetImo !== 'All IMOs') {
+        finalReports = finalReports.filter((r: any) => !r.imoOffice || matchesImoOffice(r.imoOffice, targetImo));
+      }
+      setFieldReports(finalReports);
+      await saveCachedReportsDB(finalReports);
+      saveOfflineReports(finalReports);
       setStep('reports', 'done');
 
       // 4. Update manifest metadata & available cloud weeks
@@ -1714,7 +1808,7 @@ export default function App() {
         setSyncStatusMessage('');
       }, 600);
     }
-  }, [activeRole, effectiveImo, isImoScoped, setAvailableCloudWeeks, setFieldReports, setLayers, syncIMOFolderLayers]);
+  }, [activeRole, effectiveImo, fieldReports, isImoScoped, setAvailableCloudWeeks, setFieldReports, setLayers, syncIMOFolderLayers]);
 
   // Search Autocomplete List
   const searchResults = useMemo(() => {

@@ -589,8 +589,8 @@ Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)
         const fileId = uploadedDriveFile.id;
         photo.id = fileId;
         photo.driveFileId = fileId;
-        photo.url = '/api/drive/photo/' + fileId;
-        photo.thumbnailUrl = uploadedDriveFile.thumbnailLink || photo.thumbnailUrl;
+        photo.url = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1200';
+        photo.thumbnailUrl = uploadedDriveFile.thumbnailLink || ('https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1200');
 
         // Pre-cache on disk immediately
         if (rawImageBuffer && rawImageBuffer.length > 0) {

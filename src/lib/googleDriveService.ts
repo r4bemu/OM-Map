@@ -24,8 +24,29 @@ provider.addScope('https://www.googleapis.com/auth/drive.metadata.readonly');
 provider.addScope('https://www.googleapis.com/auth/forms.body');
 provider.addScope('https://www.googleapis.com/auth/forms.responses.readonly');
 
+const DRIVE_TOKEN_KEY = 'nia_client_drive_token';
+
 let isSigningIn = false;
-let cachedAccessToken: string | null = null;
+let cachedAccessToken: string | null = (() => {
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(DRIVE_TOKEN_KEY) : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.token && parsed.expiresAt && Date.now() < parsed.expiresAt) {
+        return parsed.token;
+      }
+    }
+  } catch (_) {}
+  return null;
+})();
+
+export const saveClientDriveToken = (token: string, expiresInSeconds: number = 3600) => {
+  cachedAccessToken = token;
+  try {
+    const expiresAt = Date.now() + (expiresInSeconds * 1000) - 60000;
+    localStorage.setItem(DRIVE_TOKEN_KEY, JSON.stringify({ token, expiresAt }));
+  } catch (_) {}
+};
 
 export const initAuth = (
   onAuthSuccess?: (user: User, token: string) => void,
@@ -33,14 +54,15 @@ export const initAuth = (
 ) => {
   return onAuthStateChanged(auth, async (user: User | null) => {
     if (user) {
-      if (cachedAccessToken) {
-        if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken);
+      const token = getAccessToken();
+      if (token) {
+        if (onAuthSuccess) onAuthSuccess(user, token);
       } else if (!isSigningIn) {
-        // Token lost from memory (page refresh), user needs to click sign in to get fresh token with scopes
         if (onAuthFailure) onAuthFailure();
       }
     } else {
       cachedAccessToken = null;
+      try { localStorage.removeItem(DRIVE_TOKEN_KEY); } catch (_) {}
       if (onAuthFailure) onAuthFailure();
     }
   });
@@ -55,8 +77,8 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
       throw new Error('Failed to obtain access token with Google Drive permissions');
     }
 
-    cachedAccessToken = credential.accessToken;
-    return { user: result.user, accessToken: cachedAccessToken };
+    saveClientDriveToken(credential.accessToken, 3600);
+    return { user: result.user, accessToken: credential.accessToken };
   } catch (error: any) {
     console.error('Google Sign-In Error:', error);
     throw error;
@@ -66,12 +88,26 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
 };
 
 export const getAccessToken = (): string | null => {
-  return cachedAccessToken;
+  if (cachedAccessToken) return cachedAccessToken;
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(DRIVE_TOKEN_KEY) : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.token && parsed.expiresAt && Date.now() < parsed.expiresAt) {
+        cachedAccessToken = parsed.token;
+        return parsed.token;
+      } else {
+        localStorage.removeItem(DRIVE_TOKEN_KEY);
+      }
+    }
+  } catch (_) {}
+  return null;
 };
 
 export const logoutGoogle = async () => {
   await signOut(auth);
   cachedAccessToken = null;
+  try { localStorage.removeItem(DRIVE_TOKEN_KEY); } catch (_) {}
 };
 
 export interface DriveFileItem {
@@ -306,15 +342,14 @@ export const getDesignatedFolderForImo = (imoOffice?: string): string => {
   return '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb';
 };
 
-// Upload complete Maintenance / Field Report (text, variables, GPS, and photos) to Google Drive folder
 export const uploadMaintenanceReportToDrive = async (
   accessToken: string,
   report: FieldReport,
   parentFolderName?: string
-): Promise<{ folderId: string; summaryFile: DriveFileItem; photoCount: number }> => {
+): Promise<{ folderId: string; summaryFile: DriveFileItem; photoCount: number; updatedReport: FieldReport }> => {
   // Strict Safety Guard: Never upload mock field reports to Google Drive
   if (report?.id?.startsWith('mock-') || (report as any)?.isMock || String(report?.id).includes('mock')) {
-    return { folderId: '', summaryFile: { id: '', name: 'mock_bypassed' } as any, photoCount: 0 };
+    return { folderId: '', summaryFile: { id: '', name: 'mock_bypassed' } as any, photoCount: 0, updatedReport: report };
   }
 
   // 1. Determine designated IMO folder
@@ -326,78 +361,18 @@ export const uploadMaintenanceReportToDrive = async (
   const reportFolderName = `${reportId}_${safeTitle}`;
   const reportFolderId = await getOrCreateFolder(accessToken, reportFolderName, parentFolderId);
 
-  // 3. Format Human-Readable Text Summary Document
-  const textSummary = `
-===================================================================
-GEOPULSE GIS O&M SYSTEM - FIELD MAINTENANCE & STATUS REPORT
-===================================================================
-Report ID:         ${report.id}
-Report Title:      ${report.title}
-Report Category:   ${report.categoryMode || report.reportType}
-Status:            ${report.status}
-Created At:        ${new Date(report.createdAt).toLocaleString()} (${report.createdAt})
-
--------------------------------------------------------------------
-1. LOCATION & SPATIAL DATA
--------------------------------------------------------------------
-Location Name:     ${report.locationName || 'N/A'}
-Canal Segment:     ${report.canalSegment || 'N/A'}
-Parcel ID:         ${report.parcelId || 'N/A'}
-Latitude (GPS):    ${report.lat ?? 'N/A'}
-Longitude (GPS):   ${report.lng ?? 'N/A'}
-${report.secondLat !== undefined ? `Second Latitude:   ${report.secondLat}\n` : ''}${report.secondLng !== undefined ? `Second Longitude:  ${report.secondLng}\n` : ''}
--------------------------------------------------------------------
-2. FIELD PARTICULARS & MAINTENANCE METRICS
--------------------------------------------------------------------
-Maintenance Activity:  ${report.maintenanceActivity || 'N/A'}
-Desilting Volume:      ${report.desiltingVolumeM3 ? `${report.desiltingVolumeM3} m³` : 'N/A'}
-Completion Rate:       ${report.completionPercent !== undefined ? `${report.completionPercent}%` : 'N/A'}
-
--------------------------------------------------------------------
-3. HYDROLOGICAL & OPERATIONAL VARIABLES
--------------------------------------------------------------------
-Operational State:     ${report.operationalState || 'N/A'}
-Water Level Gauge:     ${report.waterLevelMeters !== undefined ? `${report.waterLevelMeters} meters` : 'N/A'}
-Discharge Flow Rate:   ${report.dischargeFlowM3s !== undefined ? `${report.dischargeFlowM3s} m³/s` : 'N/A'}
-Gate Opening:          ${report.gateOpeningCm !== undefined ? `${report.gateOpeningCm} cm` : 'N/A'}
-Water Quality:         ${report.waterQuality || 'N/A'}
-Service Area:          ${report.beneficiaryServiceArea || 'N/A'}
-Operational Incident:  ${report.operationalIncident || 'N/A'}
-
--------------------------------------------------------------------
-4. INSPECTOR & STAFF METRICS
--------------------------------------------------------------------
-Reporter Name:     ${report.reporterName}
-Reporter Role:     ${report.reporterRole}
-Sync Status:       ${report.synced ? 'Synced to Server' : 'Local Queue'}
-
--------------------------------------------------------------------
-5. REMARKS & FIELD NOTES
--------------------------------------------------------------------
-${report.remarks || 'No additional remarks.'}
-
--------------------------------------------------------------------
-6. ATTACHED INSPECTION PHOTOS
--------------------------------------------------------------------
-Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)}
-(Individual photo files are stored directly inside this Google Drive folder)
-===================================================================
-`.trim();
-
-  // 4. Upload Text Summary file
-  const summaryFileName = `Summary_${report.id}.txt`;
-  const summaryFile = await uploadFileToFolder(accessToken, reportFolderId, summaryFileName, textSummary, 'text/plain');
-
-  // 5. Upload Full JSON Raw Data file
-  const jsonFileName = `Data_${report.id}.json`;
-  await uploadFileToFolder(accessToken, reportFolderId, jsonFileName, JSON.stringify(report, null, 2), 'application/json');
-
-  // 6. Upload Photo Files into reportFolderId
+  // 3. Upload Photo Files into reportFolderId FIRST to capture Google Drive File IDs
   let photoCount = 0;
-  const photosList = report.photos || (report.photoUrl ? [{ id: 'p1', url: report.photoUrl, stage: 'During' as const }] : []);
+  const photosList = Array.isArray(report.photos) && report.photos.length > 0 
+    ? report.photos 
+    : (report.photoUrl ? [{ id: 'p1', url: report.photoUrl, stage: 'During' as const }] : []);
+
+  const updatedPhotos: any[] = [];
 
   for (let i = 0; i < photosList.length; i++) {
-    const photo = photosList[i];
+    const photo = { ...photosList[i] };
+    const stageName = (photo.stage || 'Photo').replace(/[^a-zA-Z0-9]/g, '');
+
     if (photo.url && photo.url.startsWith('data:image/')) {
       try {
         const matches = photo.url.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
@@ -411,10 +386,15 @@ Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)
           }
           const byteArray = new Uint8Array(byteNumbers);
           const ext = mimeType.split('/')[1] || 'png';
-          const stageName = (photo.stage || 'Photo').replace(/[^a-zA-Z0-9]/g, '');
           const photoFileName = `Photo_${i + 1}_${stageName}.${ext}`;
 
-          await uploadBinaryToFolder(accessToken, reportFolderId, photoFileName, byteArray, mimeType);
+          const uploadedItem = await uploadBinaryToFolder(accessToken, reportFolderId, photoFileName, byteArray, mimeType);
+          if (uploadedItem?.id) {
+            photo.id = uploadedItem.id;
+            photo.driveFileId = uploadedItem.id;
+            photo.url = `https://drive.google.com/thumbnail?id=${uploadedItem.id}&sz=w1200`;
+            photo.thumbnailUrl = `https://drive.google.com/thumbnail?id=${uploadedItem.id}&sz=w1200`;
+          }
           photoCount++;
         }
       } catch (e) {
@@ -426,9 +406,83 @@ Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)
       await uploadFileToFolder(accessToken, reportFolderId, refFileName, linkContent, 'text/plain');
       photoCount++;
     }
+    updatedPhotos.push(photo);
   }
 
-  return { folderId: reportFolderId, summaryFile, photoCount };
+  const updatedReport: FieldReport = {
+    ...report,
+    photos: updatedPhotos,
+    photoUrl: updatedPhotos[0]?.url || report.photoUrl,
+    synced: true
+  };
+
+  // 4. Format Human-Readable Text Summary Document
+  const textSummary = `
+===================================================================
+GEOPULSE GIS O&M SYSTEM - FIELD MAINTENANCE & STATUS REPORT
+===================================================================
+Report ID:         ${updatedReport.id}
+Report Title:      ${updatedReport.title}
+Report Category:   ${updatedReport.categoryMode || updatedReport.reportType}
+Status:            ${updatedReport.status}
+Created At:        ${new Date(updatedReport.createdAt).toLocaleString()} (${updatedReport.createdAt})
+
+-------------------------------------------------------------------
+1. LOCATION & SPATIAL DATA
+-------------------------------------------------------------------
+Location Name:     ${updatedReport.locationName || 'N/A'}
+Canal Segment:     ${updatedReport.canalSegment || 'N/A'}
+Parcel ID:         ${updatedReport.parcelId || 'N/A'}
+Latitude (GPS):    ${updatedReport.lat ?? 'N/A'}
+Longitude (GPS):   ${updatedReport.lng ?? 'N/A'}
+${updatedReport.secondLat !== undefined ? `Second Latitude:   ${updatedReport.secondLat}\n` : ''}${updatedReport.secondLng !== undefined ? `Second Longitude:  ${updatedReport.secondLng}\n` : ''}
+-------------------------------------------------------------------
+2. FIELD PARTICULARS & MAINTENANCE METRICS
+-------------------------------------------------------------------
+Maintenance Activity:  ${updatedReport.maintenanceActivity || 'N/A'}
+Desilting Volume:      ${updatedReport.desiltingVolumeM3 ? `${updatedReport.desiltingVolumeM3} m³` : 'N/A'}
+Completion Rate:       ${updatedReport.completionPercent !== undefined ? `${updatedReport.completionPercent}%` : 'N/A'}
+
+-------------------------------------------------------------------
+3. HYDROLOGICAL & OPERATIONAL VARIABLES
+-------------------------------------------------------------------
+Operational State:     ${updatedReport.operationalState || 'N/A'}
+Water Level Gauge:     ${updatedReport.waterLevelMeters !== undefined ? `${updatedReport.waterLevelMeters} meters` : 'N/A'}
+Discharge Flow Rate:   ${updatedReport.dischargeFlowM3s !== undefined ? `${updatedReport.dischargeFlowM3s} m³/s` : 'N/A'}
+Gate Opening:          ${updatedReport.gateOpeningCm !== undefined ? `${updatedReport.gateOpeningCm} cm` : 'N/A'}
+Water Quality:         ${updatedReport.waterQuality || 'N/A'}
+Service Area:          ${updatedReport.beneficiaryServiceArea || 'N/A'}
+Operational Incident:  ${updatedReport.operationalIncident || 'N/A'}
+
+-------------------------------------------------------------------
+4. INSPECTOR & STAFF METRICS
+-------------------------------------------------------------------
+Reporter Name:     ${updatedReport.reporterName}
+Reporter Role:     ${updatedReport.reporterRole}
+Sync Status:       Synced to Google Drive
+
+-------------------------------------------------------------------
+5. REMARKS & FIELD NOTES
+-------------------------------------------------------------------
+${updatedReport.remarks || 'No additional remarks.'}
+
+-------------------------------------------------------------------
+6. ATTACHED INSPECTION PHOTOS
+-------------------------------------------------------------------
+Total Photos: ${updatedReport.photos ? updatedReport.photos.length : (updatedReport.photoUrl ? 1 : 0)}
+(Individual photo files are stored directly inside this Google Drive folder)
+===================================================================
+`.trim();
+
+  // 5. Upload Text Summary file
+  const summaryFileName = `Summary_${updatedReport.id}.txt`;
+  const summaryFile = await uploadFileToFolder(accessToken, reportFolderId, summaryFileName, textSummary, 'text/plain');
+
+  // 6. Upload Full JSON Raw Data file (with populated Drive URLs and IDs)
+  const jsonFileName = `Data_${updatedReport.id}.json`;
+  await uploadFileToFolder(accessToken, reportFolderId, jsonFileName, JSON.stringify(updatedReport, null, 2), 'application/json');
+
+  return { folderId: reportFolderId, summaryFile, photoCount, updatedReport };
 };
 
 // Delete file from Google Drive (Requires user confirmation before calling)
