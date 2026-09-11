@@ -36,7 +36,7 @@ import {
 } from './utils/offlineStorage';
 import { getIsoWeekInfo, getAvailableWeeksFromReports, isReportInWeek } from './utils/weekUtils';
 import { parseGISFile } from './utils/kmzParser';
-import { getAccessToken, uploadMaintenanceReportToDrive } from './lib/googleDriveService';
+import { getAccessToken, uploadMaintenanceReportToDrive, googleSignIn } from './lib/googleDriveService';
 import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers, fetchAccessRequestsApi, canUserManageRequests, isImoScopedRole, matchesImoOffice } from './config/authUsers';
 import { MOCK_FIELD_REPORTS_2026 } from './data/mockFieldReports2026';
 import { 
@@ -570,6 +570,8 @@ export default function App() {
     title: string;
     message: string;
     reportTitle?: string;
+    actionLabel?: string;
+    onAction?: () => void;
   } | null>(null);
 
   const isFilterActive = useMemo(() => {
@@ -1553,12 +1555,45 @@ export default function App() {
           id: `toast-${Date.now()}`,
           type: 'warning',
           title: 'Saved Locally on Device',
-          message: 'Report stored in local memory and will auto-upload to Google Drive upon reconnecting.',
-          reportTitle: newReport.title
+          message: 'Report is queued in offline memory. Connect Google Drive to upload to the designated IMO folder.',
+          reportTitle: newReport.title,
+          actionLabel: 'Connect Google Drive & Upload',
+          onAction: async () => {
+            try {
+              const authRes = await googleSignIn();
+              if (authRes?.accessToken) {
+                setDriveToast({
+                  id: `toast-${Date.now()}`,
+                  type: 'submitting',
+                  title: 'Uploading to Google Drive...',
+                  message: 'Uploading report and inspection photos to Google Drive...',
+                  reportTitle: newReport.title
+                });
+                const driveResult = await uploadMaintenanceReportToDrive(authRes.accessToken, newReport);
+                if (driveResult?.folderId) {
+                  const updatedReport = driveResult.updatedReport || { ...newReport, synced: true };
+                  markReportsSynced([newReport.id]);
+                  setFieldReports(prev => prev.map(r => r.id === newReport.id ? { ...updatedReport, synced: true } : r));
+                  addOfflineReport({ ...updatedReport, synced: true });
+
+                  setDriveToast({
+                    id: `toast-${Date.now()}`,
+                    type: 'success',
+                    title: 'Saved to Google Drive',
+                    message: `Report and ${driveResult.photoCount} inspection photos uploaded directly to Google Drive.`,
+                    reportTitle: newReport.title
+                  });
+                  setTimeout(() => setDriveToast(null), 5000);
+                }
+              }
+            } catch (authErr) {
+              console.warn('Direct Google Drive auth/upload cancelled or failed:', authErr);
+            }
+          }
         });
         setTimeout(() => {
           setDriveToast(current => current?.type === 'warning' ? null : current);
-        }, 5500);
+        }, 8000);
       }
     }
   };
@@ -2497,6 +2532,18 @@ export default function App() {
                 <p className="text-[10.5px] text-slate-300 mt-1 leading-snug">
                   {driveToast.message}
                 </p>
+                {driveToast.onAction && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (driveToast.onAction) driveToast.onAction();
+                    }}
+                    className="mt-2 w-full py-1.5 px-3 bg-[#166534] hover:bg-[#15803d] text-white text-[11px] font-bold rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md active:scale-95"
+                  >
+                    <Cloud className="w-3.5 h-3.5" />
+                    <span>{driveToast.actionLabel || 'Connect Google Drive & Upload'}</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>

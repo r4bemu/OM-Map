@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Cloud, 
@@ -10,10 +10,13 @@ import {
   AlertTriangle,
   RotateCcw,
   ShieldAlert,
-  Calendar
+  Calendar,
+  CloudUpload,
+  ExternalLink
 } from 'lucide-react';
 import { AvailableCloudWeek, UserRole } from '../types';
 import { isOverhaulAllowedToday } from '../utils/offlineStorage';
+import { getAccessToken, googleSignIn, logoutGoogle } from '../lib/googleDriveService';
 
 interface SyncDataModalProps {
   onClose: () => void;
@@ -48,6 +51,37 @@ export const SyncDataModal: React.FC<SyncDataModalProps> = ({
 }) => {
   const [isOverhaulModalOpen, setIsOverhaulModalOpen] = useState<boolean>(false);
   const [isExecutingOverhaul, setIsExecutingOverhaul] = useState<boolean>(false);
+  const [driveToken, setDriveToken] = useState<string | null>(() => getAccessToken());
+  const [isSigningInDrive, setIsSigningInDrive] = useState(false);
+  const [driveSyncMessage, setDriveSyncMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setDriveToken(getAccessToken());
+  }, []);
+
+  const handleConnectDrive = async () => {
+    try {
+      setIsSigningInDrive(true);
+      setDriveSyncMessage('Connecting to Google Drive...');
+      const res = await googleSignIn();
+      if (res?.accessToken) {
+        setDriveToken(res.accessToken);
+        setDriveSyncMessage('Google Drive connected! Syncing reports...');
+        onSyncNow();
+      }
+    } catch (err: any) {
+      console.warn('Google Sign-In failed:', err);
+      setDriveSyncMessage(err.message || 'Google Sign-In was cancelled or failed.');
+    } finally {
+      setIsSigningInDrive(false);
+      setTimeout(() => setDriveSyncMessage(null), 4000);
+    }
+  };
+
+  const handleDisconnectDrive = async () => {
+    await logoutGoogle();
+    setDriveToken(null);
+  };
 
   const overhaulStatus = isOverhaulAllowedToday(currentRole);
 
@@ -96,6 +130,96 @@ export const SyncDataModal: React.FC<SyncDataModalProps> = ({
 
         {/* Body Content - Responsive Scrollable Area */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
+          {/* Google Drive Direct Cloud Sync Status Card */}
+          <div className={`p-2.5 rounded-xl border text-xs flex flex-col gap-2 ${
+            driveToken
+              ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
+              : 'bg-slate-800/80 border-slate-700/80 text-slate-300'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`p-1.5 rounded-lg ${driveToken ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-400'}`}>
+                  <Cloud className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-[11px] text-slate-100 flex items-center gap-1.5">
+                    <span>Google Drive Cloud Sync</span>
+                    {driveToken ? (
+                      <span className="text-[9px] px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded font-semibold">
+                        Connected
+                      </span>
+                    ) : (
+                      <span className="text-[9px] px-1.5 py-0.2 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded font-semibold">
+                        Offline / Unlinked
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[9.5px] text-slate-400">
+                    {driveToken 
+                      ? 'Uploads directly into designated IMO Google Drive folders.'
+                      : 'Connect Google account to upload reports & photos to Google Drive.'}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                {driveToken ? (
+                  <button
+                    type="button"
+                    onClick={handleDisconnectDrive}
+                    className="text-[10px] text-slate-400 hover:text-slate-200 underline cursor-pointer"
+                  >
+                    Disconnect
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleConnectDrive}
+                    disabled={isSigningInDrive}
+                    className="px-2.5 py-1.5 bg-[#166534] hover:bg-[#15803d] text-white text-[10px] font-bold rounded-lg flex items-center gap-1 transition cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
+                  >
+                    {isSigningInDrive ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Cloud className="w-3 h-3" />
+                    )}
+                    <span>Connect Drive</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {driveSyncMessage && (
+              <div className="text-[10px] text-emerald-400 bg-emerald-950/60 p-1.5 rounded border border-emerald-500/20">
+                {driveSyncMessage}
+              </div>
+            )}
+
+            {unsyncedCount > 0 && (
+              <div className="pt-1.5 flex items-center justify-between border-t border-slate-700/50">
+                <span className="text-[10px] text-amber-400 font-medium flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  <span>{unsyncedCount} report(s) queued locally</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!driveToken) {
+                      handleConnectDrive();
+                    } else {
+                      onSyncNow();
+                    }
+                  }}
+                  disabled={isSyncing || isSigningInDrive}
+                  className="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white text-[10px] font-bold rounded flex items-center gap-1 transition cursor-pointer active:scale-95"
+                >
+                  <CloudUpload className={`w-3 h-3 ${isSyncing ? 'animate-spin' : ''}`} />
+                  <span>Upload {unsyncedCount} Report{unsyncedCount === 1 ? '' : 's'} to Drive</span>
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Live Sync Status Banner */}
           <div className={`p-2.5 rounded-xl border text-xs flex items-center gap-2.5 ${
             isSyncing 
