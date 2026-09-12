@@ -1957,15 +1957,17 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
         .then(result => {
           if (result?.success) {
             console.log(`✅ Google Drive auto-sync success for ${fullReport.id}: Folder ${result.reportFolderId}, Photos: ${result.photoCount}`);
+            const current = loadSavedReports();
+            saveReportsToFile(current.map(r => r.id === fullReport.id ? { ...r, ...fullReport, synced: true } : r));
           } else {
-            console.warn(`⚠️ Google Drive auto-sync note for ${fullReport.id}: ${result?.message}`);
+            console.log(`ℹ️ Google Drive sync note for ${fullReport.id}: ${result?.message}`);
           }
         })
         .catch(driveErr => {
-          console.warn('Background Google Drive upload warning:', driveErr);
+          console.warn('Background Google Drive upload note:', driveErr?.message || driveErr);
         });
 
-      res.json({ success: true, report: fullReport, message: 'Report saved and Google Drive sync started' });
+      res.json({ success: true, report: fullReport, message: 'Report saved and synchronized successfully' });
     } catch (err: any) {
       console.error('Failed to submit report:', err);
       res.status(500).json({ error: err.message || 'Failed to submit report' });

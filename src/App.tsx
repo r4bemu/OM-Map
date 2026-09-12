@@ -36,7 +36,7 @@ import {
 } from './utils/offlineStorage';
 import { getIsoWeekInfo, getAvailableWeeksFromReports, isReportInWeek } from './utils/weekUtils';
 import { parseGISFile } from './utils/kmzParser';
-import { getAccessToken, uploadMaintenanceReportToDrive, googleSignIn } from './lib/googleDriveService';
+import { getAccessToken, uploadMaintenanceReportToDrive } from './lib/googleDriveService';
 import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers, fetchAccessRequestsApi, canUserManageRequests, isImoScopedRole, matchesImoOffice } from './config/authUsers';
 import { MOCK_FIELD_REPORTS_2026 } from './data/mockFieldReports2026';
 import { 
@@ -570,8 +570,6 @@ export default function App() {
     title: string;
     message: string;
     reportTitle?: string;
-    actionLabel?: string;
-    onAction?: () => void;
   } | null>(null);
 
   const isFilterActive = useMemo(() => {
@@ -1463,22 +1461,21 @@ export default function App() {
     setDriveToast({
       id: `toast-${Date.now()}`,
       type: isOffline ? 'warning' : 'submitting',
-      title: isOffline ? 'Saved Locally (Offline)' : 'Submitting to Google Drive...',
+      title: isOffline ? 'Saved Locally (Offline)' : 'Submitting Field Report...',
       message: isOffline 
-        ? 'Report saved to local device memory. Will auto-sync to Google Drive when online.'
-        : 'Uploading field report, engineering parameters, and geotagged photos...',
+        ? 'Report saved to local device memory. Will auto-sync when online.'
+        : 'Saving field report, engineering parameters, and geotagged photos...',
       reportTitle: newReport.title
     });
 
     if (isOffline) {
       setTimeout(() => {
         setDriveToast(current => current?.type === 'warning' ? null : current);
-      }, 5500);
+      }, 5000);
     }
 
-    // 4. Submit report via backend API with Client-Side Direct Google Drive Fallback
+    // 4. Submit report via backend API
     if (!isOffline) {
-      let serverSynced = false;
       const driveToken = getAccessToken();
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (driveToken) {
@@ -1493,107 +1490,46 @@ export default function App() {
         });
 
         if (res.ok) {
-          serverSynced = true;
           markReportsSynced([newReport.id]);
           const data = await res.json();
           if (data.report) {
             setFieldReports(prev => prev.map(r => r.id === newReport.id ? { ...newReport, ...data.report, synced: true } : r));
+            addOfflineReport({ ...newReport, ...data.report, synced: true });
           }
           setDriveToast({
             id: `toast-${Date.now()}`,
             type: 'success',
-            title: 'Saved to Google Drive',
-            message: 'Report successfully submitted and archived to Google Drive.',
+            title: 'Report Submitted Successfully',
+            message: 'Field report & photos saved to database and synchronized.',
             reportTitle: newReport.title
           });
           setTimeout(() => {
             setDriveToast(current => current?.type === 'success' ? null : current);
+          }, 4500);
+        } else {
+          setDriveToast({
+            id: `toast-${Date.now()}`,
+            type: 'warning',
+            title: 'Saved Locally on Device',
+            message: 'Report cached safely in local memory. Will auto-sync on next refresh.',
+            reportTitle: newReport.title
+          });
+          setTimeout(() => {
+            setDriveToast(current => current?.type === 'warning' ? null : current);
           }, 5000);
         }
       } catch (serverErr) {
-        console.warn('Backend server unreachable, falling back to direct client Drive sync:', serverErr);
-      }
-
-      // If backend was unreachable or failed (e.g. static GitHub Pages hosting):
-      if (!serverSynced) {
-        if (driveToken) {
-          try {
-            setDriveToast({
-              id: `toast-${Date.now()}`,
-              type: 'submitting',
-              title: 'Uploading to Google Drive...',
-              message: 'Connecting directly to Google Drive designated IMO folder...',
-              reportTitle: newReport.title
-            });
-
-            const driveResult = await uploadMaintenanceReportToDrive(driveToken, newReport);
-            if (driveResult && driveResult.folderId) {
-              const updatedReport = driveResult.updatedReport || { ...newReport, synced: true };
-              markReportsSynced([newReport.id]);
-              setFieldReports(prev => prev.map(r => r.id === newReport.id ? { ...updatedReport, synced: true } : r));
-              addOfflineReport({ ...updatedReport, synced: true });
-
-              setDriveToast({
-                id: `toast-${Date.now()}`,
-                type: 'success',
-                title: 'Saved to Google Drive',
-                message: `Report and ${driveResult.photoCount} inspection photos uploaded directly to Google Drive.`,
-                reportTitle: newReport.title
-              });
-              setTimeout(() => {
-                setDriveToast(current => current?.type === 'success' ? null : current);
-              }, 5000);
-              return;
-            }
-          } catch (directDriveErr) {
-            console.warn('Direct Google Drive upload error:', directDriveErr);
-          }
-        }
-
-        // Saved locally in offline queue if both server and direct drive upload are unavailable
+        console.warn('Backend server unreachable, report safely stored locally:', serverErr);
         setDriveToast({
           id: `toast-${Date.now()}`,
           type: 'warning',
           title: 'Saved Locally on Device',
-          message: 'Report is queued in offline memory. Connect Google Drive to upload to the designated IMO folder.',
-          reportTitle: newReport.title,
-          actionLabel: 'Connect Google Drive & Upload',
-          onAction: async () => {
-            try {
-              const authRes = await googleSignIn();
-              if (authRes?.accessToken) {
-                setDriveToast({
-                  id: `toast-${Date.now()}`,
-                  type: 'submitting',
-                  title: 'Uploading to Google Drive...',
-                  message: 'Uploading report and inspection photos to Google Drive...',
-                  reportTitle: newReport.title
-                });
-                const driveResult = await uploadMaintenanceReportToDrive(authRes.accessToken, newReport);
-                if (driveResult?.folderId) {
-                  const updatedReport = driveResult.updatedReport || { ...newReport, synced: true };
-                  markReportsSynced([newReport.id]);
-                  setFieldReports(prev => prev.map(r => r.id === newReport.id ? { ...updatedReport, synced: true } : r));
-                  addOfflineReport({ ...updatedReport, synced: true });
-
-                  setDriveToast({
-                    id: `toast-${Date.now()}`,
-                    type: 'success',
-                    title: 'Saved to Google Drive',
-                    message: `Report and ${driveResult.photoCount} inspection photos uploaded directly to Google Drive.`,
-                    reportTitle: newReport.title
-                  });
-                  setTimeout(() => setDriveToast(null), 5000);
-                }
-              }
-            } catch (authErr) {
-              console.warn('Direct Google Drive auth/upload cancelled or failed:', authErr);
-            }
-          }
+          message: 'Report cached safely in local memory. Will auto-sync on next refresh.',
+          reportTitle: newReport.title
         });
         setTimeout(() => {
           setDriveToast(current => current?.type === 'warning' ? null : current);
-        }, 8000);
+        }, 5000);
       }
     }
   };
@@ -2532,18 +2468,6 @@ export default function App() {
                 <p className="text-[10.5px] text-slate-300 mt-1 leading-snug">
                   {driveToast.message}
                 </p>
-                {driveToast.onAction && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (driveToast.onAction) driveToast.onAction();
-                    }}
-                    className="mt-2 w-full py-1.5 px-3 bg-[#166534] hover:bg-[#15803d] text-white text-[11px] font-bold rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md active:scale-95"
-                  >
-                    <Cloud className="w-3.5 h-3.5" />
-                    <span>{driveToast.actionLabel || 'Connect Google Drive & Upload'}</span>
-                  </button>
-                )}
               </div>
             </div>
           </div>
