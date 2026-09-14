@@ -671,7 +671,7 @@ Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)
       reportFolderId: '',
       photoCount: 0,
       message: isQuotaError
-        ? 'Service Account storage quota exceeded on personal Google Drive. Please connect your Google account in the Sync menu to upload.'
+        ? 'Google Drive storage quota exceeded or service account quota restricted. Report safely stored in local database.'
         : 'Failed to upload to Google Drive: ' + (err.message || err)
     };
   }
