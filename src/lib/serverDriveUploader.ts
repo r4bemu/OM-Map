@@ -380,6 +380,106 @@ export async function uploadBinaryToFolder(
   return data;
 }
 
+// Upload report and photos via Google Apps Script Web App Relay (Permanent, zero OAuth expiry)
+export async function uploadReportViaAppsScript(
+  appsScriptUrl: string,
+  report: any
+): Promise<{ success: boolean; reportFolderId: string; photoCount: number; message: string }> {
+  try {
+    const imoOffice = report.imoOffice || 'Mindoro Oriental-Marinduque-Romblon IMO';
+    const targetFolderId = getDesignatedFolderForImo(imoOffice);
+
+    const payload = {
+      report,
+      targetFolderId,
+      imoOffice
+    };
+
+    const res = await fetch(appsScriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      redirect: 'follow'
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      return {
+        success: false,
+        reportFolderId: '',
+        photoCount: 0,
+        message: `Apps Script upload failed: HTTP ${res.status} - ${errText}`
+      };
+    }
+
+    const data: any = await res.json();
+    if (data && data.success && data.reportFolderId) {
+      if (data.updatedReport) {
+        if (Array.isArray(data.updatedReport.photos)) {
+          report.photos = data.updatedReport.photos;
+        }
+        if (data.updatedReport.photoUrl) {
+          report.photoUrl = data.updatedReport.photoUrl;
+        }
+      }
+      report.driveFolderId = data.reportFolderId;
+      report.synced = true;
+
+      // Update local manifest for instant startup
+      try {
+        const localManifest = loadLocalManifest() || {
+          version: 1,
+          lastUpdated: new Date().toISOString(),
+          hash: '',
+          totalReports: 0,
+          reportsIndex: {}
+        };
+        localManifest.reportsIndex[report.id] = {
+          id: report.id,
+          folderId: data.reportFolderId,
+          folderName: 'wmr-' + report.id,
+          imoOffice: String(report.imoOffice || imoOffice),
+          nisBinding: report.nisBinding,
+          modifiedTime: new Date().toISOString(),
+          photoCount: data.photoCount || 0,
+          title: report.title,
+          status: report.status
+        };
+        localManifest.totalReports = Object.keys(localManifest.reportsIndex).length;
+        localManifest.version = (localManifest.version || 0) + 1;
+        localManifest.lastUpdated = new Date().toISOString();
+        localManifest.hash = computeManifestHash(localManifest.reportsIndex);
+        saveLocalManifest(localManifest);
+      } catch (mErr) {
+        console.warn('Local manifest update notice:', mErr);
+      }
+
+      console.log(`[Apps Script Relay] Successfully synced report ${report.id} to Google Drive folder: ${data.reportFolderId}`);
+      return {
+        success: true,
+        reportFolderId: data.reportFolderId,
+        photoCount: data.photoCount || 0,
+        message: data.message || `Report and photos successfully backed up to Google Drive via Apps Script relay.`
+      };
+    } else {
+      return {
+        success: false,
+        reportFolderId: '',
+        photoCount: 0,
+        message: data?.error || data?.message || 'Apps Script returned unverified status'
+      };
+    }
+  } catch (err: any) {
+    console.error('Error during Apps Script relay upload:', err);
+    return {
+      success: false,
+      reportFolderId: '',
+      photoCount: 0,
+      message: `Failed to upload via Apps Script relay: ${err.message || err}`
+    };
+  }
+}
+
 // Upload a complete field report directly into the designated Google Drive IMO folder
 export async function uploadReportToTargetDriveFolder(
   report: any,
@@ -393,6 +493,13 @@ export async function uploadReportToTargetDriveFolder(
       photoCount: 0,
       message: 'Mock field report strictly bypassed from Google Drive upload.'
     };
+  }
+
+  // Priority 1: Google Apps Script Web App Relay (Permanent, zero OAuth expiry)
+  const appsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
+  if (appsScriptUrl && appsScriptUrl.trim()) {
+    console.log(`🚀 Routing report ${report.id} via permanent Google Apps Script relay`);
+    return await uploadReportViaAppsScript(appsScriptUrl.trim(), report);
   }
 
   const accessToken = await getOrRefreshServerDriveToken(providedToken);

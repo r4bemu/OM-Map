@@ -1452,13 +1452,21 @@ export async function createApp() {
 
   // Check Google Drive Backend Upload Status
   app.get('/api/drive/status', async (req, res) => {
+    const appsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
     const token = await getOrRefreshServerDriveToken();
     const folderId = getTargetFolderId();
     const hasRefreshToken = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN);
     res.json({
-      active: !!token,
+      active: !!appsScriptUrl || !!token,
+      hasAppsScript: !!appsScriptUrl,
       hasRefreshToken,
-      mode: hasRefreshToken ? 'Long-Term Auto Refresh Token (Active)' : token ? 'Session Access Token' : 'Inactive',
+      mode: appsScriptUrl 
+        ? 'Permanent Google Apps Script Relay (Active)' 
+        : hasRefreshToken 
+        ? 'Long-Term Auto Refresh Token (Active)' 
+        : token 
+        ? 'Session Access Token' 
+        : 'Inactive',
       targetFolderId: folderId,
       driveFolderUrl: `https://drive.google.com/drive/folders/${folderId}`
     });
