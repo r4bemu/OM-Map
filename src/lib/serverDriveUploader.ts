@@ -659,12 +659,20 @@ Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)
       message: 'Report and ' + photoCount + ' photo(s) successfully backed up to designated Google Drive folder for ' + imoOffice + '.'
     };
   } catch (err: any) {
-    console.error('❌ Error uploading report to Google Drive:', err);
+    const rawMsg = String(err?.message || err || '');
+    const isQuotaError = rawMsg.includes('storageQuotaExceeded') || rawMsg.includes('quota');
+    if (isQuotaError) {
+      console.warn('⚠️ Google Drive storageQuotaExceeded error detected: Service accounts do not have quota on personal @gmail.com folders. User OAuth connection required.');
+    } else {
+      console.error('❌ Error uploading report to Google Drive:', err);
+    }
     return {
       success: false,
       reportFolderId: '',
       photoCount: 0,
-      message: 'Failed to upload to Google Drive: ' + (err.message || err)
+      message: isQuotaError
+        ? 'Service Account storage quota exceeded on personal Google Drive. Please connect your Google account in the Sync menu to upload.'
+        : 'Failed to upload to Google Drive: ' + (err.message || err)
     };
   }
 }

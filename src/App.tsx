@@ -36,7 +36,7 @@ import {
 } from './utils/offlineStorage';
 import { getIsoWeekInfo, getAvailableWeeksFromReports, isReportInWeek } from './utils/weekUtils';
 import { parseGISFile } from './utils/kmzParser';
-import { getAccessToken, uploadMaintenanceReportToDrive } from './lib/googleDriveService';
+import { getAccessToken, googleSignIn, uploadMaintenanceReportToDrive } from './lib/googleDriveService';
 import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers, fetchAccessRequestsApi, canUserManageRequests, isImoScopedRole, matchesImoOffice } from './config/authUsers';
 import { MOCK_FIELD_REPORTS_2026 } from './data/mockFieldReports2026';
 import { 
@@ -570,6 +570,8 @@ export default function App() {
     title: string;
     message: string;
     reportTitle?: string;
+    actionLabel?: string;
+    onAction?: () => void;
   } | null>(null);
 
   const isFilterActive = useMemo(() => {
@@ -1384,6 +1386,112 @@ export default function App() {
     }
   };
 
+  // Google Drive Explicit Authorization & Batch Flush Handlers
+  const handleConnectDrive = useCallback(async () => {
+    try {
+      const res = await googleSignIn();
+      if (res?.accessToken) {
+        setDriveToast({
+          id: `toast-${Date.now()}`,
+          type: 'success',
+          title: 'Google Drive Connected',
+          message: `Linked as ${res.user?.email || 'Authorized User'}. Syncing queued reports...`
+        });
+        await handleSyncUnsyncedReports(res.accessToken);
+      }
+    } catch (err: any) {
+      if (err.type === 'popup_closed' || err.code === 'auth/popup-closed-by-user') {
+        return;
+      }
+      console.warn('Google Drive Sign-In failed:', err);
+      setDriveToast({
+        id: `toast-${Date.now()}`,
+        type: 'warning',
+        title: 'Google Drive Link Failed',
+        message: err?.message || 'Could not connect Google Drive account.'
+      });
+    }
+  }, []);
+
+  const handleSyncUnsyncedReports = useCallback(async (tokenOverride?: string) => {
+    const activeToken = tokenOverride || getAccessToken();
+    if (!activeToken) {
+      setDriveToast({
+        id: `toast-${Date.now()}`,
+        type: 'warning',
+        title: 'Google Drive Not Connected',
+        message: 'Please connect your Google Drive account first to sync reports.',
+        actionLabel: 'Connect Google Drive',
+        onAction: handleConnectDrive
+      });
+      return;
+    }
+
+    const localCachedReports = await getCachedReportsDB();
+    const offlineReports = getOfflineReports();
+    const allReports = [...(fieldReports || []), ...(localCachedReports || []), ...(offlineReports || [])];
+    
+    const unsyncedMap = new Map<string, FieldReport>();
+    allReports.forEach(r => {
+      if (r && r.id && !r.synced && !r.id.startsWith('mock-') && !(r as any).isMock) {
+        unsyncedMap.set(r.id, r);
+      }
+    });
+    const unsynced = Array.from(unsyncedMap.values());
+    if (unsynced.length === 0) return;
+
+    setDriveToast({
+      id: `toast-${Date.now()}`,
+      type: 'submitting',
+      title: 'Syncing to Google Drive...',
+      message: `Uploading ${unsynced.length} queued report(s) to designated IMO folders...`
+    });
+
+    let uploadedCount = 0;
+    for (const rep of unsynced) {
+      try {
+        const driveRes = await uploadMaintenanceReportToDrive(activeToken, rep);
+        if (driveRes && driveRes.folderId) {
+          const syncedRep: FieldReport = {
+            ...rep,
+            ...driveRes.updatedReport,
+            driveFolderId: driveRes.folderId,
+            synced: true
+          };
+          markReportsSynced([rep.id]);
+          addOfflineReport(syncedRep);
+          setFieldReports(prev => prev.map(r => r.id === rep.id ? syncedRep : r));
+
+          // Also update backend server
+          fetch('/api/reports', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-google-drive-token': activeToken
+            },
+            body: JSON.stringify(syncedRep)
+          }).catch(e => console.warn('Could not sync report to backend:', e));
+
+          uploadedCount++;
+        }
+      } catch (uploadErr) {
+        console.warn(`Failed to upload queued report ${rep.id} to Drive:`, uploadErr);
+      }
+    }
+
+    if (uploadedCount > 0) {
+      setDriveToast({
+        id: `toast-${Date.now()}`,
+        type: 'success',
+        title: 'Google Drive Sync Completed',
+        message: `Successfully uploaded and verified ${uploadedCount} report(s) on Google Drive.`
+      });
+      setTimeout(() => {
+        setDriveToast(current => current?.type === 'success' ? null : current);
+      }, 5000);
+    }
+  }, [fieldReports, handleConnectDrive]);
+
   // Field Report Actions
   const handleSubmitReport = async (newReport: FieldReport) => {
     // 1. Instantly update client reports state (handles both new submissions and edits)
@@ -1454,17 +1562,17 @@ export default function App() {
       });
     }
 
-    // 3. Save report locally in offline storage
+    // 3. Save report locally in offline storage (Zero-Data-Loss Safety Guarantee)
     addOfflineReport(newReport);
 
     // Initial Submitting notification
     setDriveToast({
       id: `toast-${Date.now()}`,
       type: isOffline ? 'warning' : 'submitting',
-      title: isOffline ? 'Saved Locally (Offline)' : 'Submitting Field Report...',
+      title: isOffline ? 'Saved Locally (Offline)' : 'Submitting to Google Drive...',
       message: isOffline 
         ? 'Report saved to local device memory. Will auto-sync when online.'
-        : 'Saving field report, engineering parameters, and geotagged photos...',
+        : 'Uploading inspection photos, summary, and parameters directly to Google Drive...',
       reportTitle: newReport.title
     });
 
@@ -1472,65 +1580,113 @@ export default function App() {
       setTimeout(() => {
         setDriveToast(current => current?.type === 'warning' ? null : current);
       }, 5000);
+      return;
     }
 
-    // 4. Submit report via backend API
-    if (!isOffline) {
-      const driveToken = getAccessToken();
+    // 4. "Google Drive First" Submission Pipeline
+    let finalReportToPersist = { ...newReport };
+    let driveUploadSuccessful = false;
+    let driveErrorMessage: string | null = null;
+
+    const driveToken = getAccessToken();
+
+    // Priority 1: Direct Google Drive Upload (Creates folder, uploads photos, and writes JSON/TXT in Drive)
+    if (driveToken) {
+      try {
+        const driveResult = await uploadMaintenanceReportToDrive(driveToken, newReport);
+        if (driveResult && driveResult.folderId) {
+          driveUploadSuccessful = true;
+          finalReportToPersist = {
+            ...finalReportToPersist,
+            ...driveResult.updatedReport,
+            driveFolderId: driveResult.folderId,
+            synced: true
+          };
+          console.log(`✅ Google Drive First upload success: Folder ${driveResult.folderId}, Photos: ${driveResult.photoCount}`);
+        }
+      } catch (driveErr: any) {
+        console.warn('Google Drive direct upload failed:', driveErr);
+        driveErrorMessage = driveErr?.message || 'Google Drive upload failed';
+      }
+    }
+
+    // Priority 2: Save to backend server database (/api/reports)
+    try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (driveToken) {
         headers['x-google-drive-token'] = driveToken;
       }
 
-      try {
-        const res = await fetch('/api/reports', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(newReport)
-        });
+      const res = await fetch('/api/reports', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(finalReportToPersist)
+      });
 
-        if (res.ok) {
-          markReportsSynced([newReport.id]);
-          const data = await res.json();
-          if (data.report) {
-            setFieldReports(prev => prev.map(r => r.id === newReport.id ? { ...newReport, ...data.report, synced: true } : r));
-            addOfflineReport({ ...newReport, ...data.report, synced: true });
-          }
+      if (res.ok) {
+        const data = await res.json();
+        const serverReport = data.report || finalReportToPersist;
+        
+        // If server successfully uploaded to Drive or client direct upload succeeded
+        if (driveUploadSuccessful || data.synced) {
+          serverReport.synced = true;
+          markReportsSynced([serverReport.id]);
+        }
+
+        setFieldReports(prev => prev.map(r => r.id === serverReport.id ? serverReport : r));
+        addOfflineReport(serverReport);
+
+        if (driveUploadSuccessful || data.synced) {
           setDriveToast({
             id: `toast-${Date.now()}`,
             type: 'success',
-            title: 'Report Submitted Successfully',
-            message: 'Field report & photos saved to database and synchronized.',
-            reportTitle: newReport.title
+            title: 'Report Persisted to Google Drive',
+            message: 'Field report, engineering parameters & photos are safely archived in Google Drive.',
+            reportTitle: serverReport.title
           });
           setTimeout(() => {
             setDriveToast(current => current?.type === 'success' ? null : current);
           }, 4500);
         } else {
+          // Saved on server/local, but NOT yet in Google Drive
           setDriveToast({
             id: `toast-${Date.now()}`,
             type: 'warning',
-            title: 'Saved Locally on Device',
-            message: 'Report cached safely in local memory. Will auto-sync on next refresh.',
-            reportTitle: newReport.title
+            title: 'Saved Locally - Drive Not Synced',
+            message: driveToken 
+              ? (driveErrorMessage || data.message || 'Google Drive storage quota or permission issue. Report saved in local database.')
+              : 'Connect your Google Drive account to archive photos and reports in official cloud folders.',
+            reportTitle: serverReport.title,
+            actionLabel: 'Connect Google Drive & Upload',
+            onAction: handleConnectDrive
           });
-          setTimeout(() => {
-            setDriveToast(current => current?.type === 'warning' ? null : current);
-          }, 5000);
         }
-      } catch (serverErr) {
-        console.warn('Backend server unreachable, report safely stored locally:', serverErr);
+      } else {
+        // Server error response
         setDriveToast({
           id: `toast-${Date.now()}`,
           type: 'warning',
           title: 'Saved Locally on Device',
           message: 'Report cached safely in local memory. Will auto-sync on next refresh.',
-          reportTitle: newReport.title
+          reportTitle: finalReportToPersist.title,
+          actionLabel: driveToken ? undefined : 'Connect Google Drive & Upload',
+          onAction: driveToken ? undefined : handleConnectDrive
         });
-        setTimeout(() => {
-          setDriveToast(current => current?.type === 'warning' ? null : current);
-        }, 5000);
       }
+    } catch (serverErr) {
+      console.warn('Backend server unreachable, report safely stored locally:', serverErr);
+      setDriveToast({
+        id: `toast-${Date.now()}`,
+        type: 'warning',
+        title: 'Saved Locally on Device',
+        message: 'Report cached safely in local memory. Will auto-sync on next refresh.',
+        reportTitle: finalReportToPersist.title,
+        actionLabel: driveToken ? undefined : 'Connect Google Drive & Upload',
+        onAction: driveToken ? undefined : handleConnectDrive
+      });
+      setTimeout(() => {
+        setDriveToast(current => current?.type === 'warning' ? null : current);
+      }, 5000);
     }
   };
 
@@ -1538,22 +1694,36 @@ export default function App() {
     setFieldReports(prev => deduplicateItems([...newReports, ...prev]));
 
     if (!isOffline) {
+      const driveToken = getAccessToken();
       for (const rep of newReports) {
+        let repToSave = { ...rep };
+        if (driveToken && !rep.synced) {
+          try {
+            const driveRes = await uploadMaintenanceReportToDrive(driveToken, rep);
+            if (driveRes && driveRes.folderId) {
+              repToSave = {
+                ...repToSave,
+                ...driveRes.updatedReport,
+                driveFolderId: driveRes.folderId,
+                synced: true
+              };
+              markReportsSynced([rep.id]);
+            }
+          } catch (dErr) {
+            console.warn('Batch Drive upload notice for', rep.id, dErr);
+          }
+        }
+
         try {
+          const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+          if (driveToken) headers['x-google-drive-token'] = driveToken;
           await fetch('/api/reports', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(rep)
+            headers,
+            body: JSON.stringify(repToSave)
           });
         } catch (err) {
           console.warn('Server report sync failed', rep.id, err);
-        }
-
-        const driveToken = getAccessToken();
-        if (driveToken) {
-          uploadMaintenanceReportToDrive(driveToken, rep).catch(err => {
-            console.warn('Drive background upload error:', err);
-          });
         }
       }
     }
@@ -2468,6 +2638,20 @@ export default function App() {
                 <p className="text-[10.5px] text-slate-300 mt-1 leading-snug">
                   {driveToast.message}
                 </p>
+                {driveToast.actionLabel && driveToast.onAction && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const act = driveToast.onAction;
+                      setDriveToast(null);
+                      if (act) act();
+                    }}
+                    className="mt-2.5 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-[10.5px] font-bold flex items-center gap-1.5 transition cursor-pointer shadow-sm active:scale-95"
+                  >
+                    <Cloud className="w-3.5 h-3.5" />
+                    <span>{driveToast.actionLabel}</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>

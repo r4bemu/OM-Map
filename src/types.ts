@@ -270,6 +270,7 @@ export interface FieldReport {
   revisionHistory?: { revisionNumber: number; modifiedAt: string; modifiedBy?: string; reason?: string }[];
   createdAt: string;
   synced: boolean;
+  driveFolderId?: string;
   
   // Multi-Tier Institutional Approval Chain & Revision Tracking
   currentTier?: ApprovalTier;

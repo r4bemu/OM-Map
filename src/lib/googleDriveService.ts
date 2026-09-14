@@ -46,6 +46,15 @@ export const saveClientDriveToken = (token: string, expiresInSeconds: number = 3
     const expiresAt = Date.now() + (expiresInSeconds * 1000) - 60000;
     localStorage.setItem(DRIVE_TOKEN_KEY, JSON.stringify({ token, expiresAt }));
   } catch (_) {}
+
+  // Automatically propagate token to backend server to enable server-side background Drive operations
+  if (typeof fetch !== 'undefined' && token) {
+    fetch('/api/drive/sync-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accessToken: token })
+    }).catch(e => console.warn('Could not forward client Drive token to backend server:', e));
+  }
 };
 
 export const initAuth = (
@@ -411,6 +420,7 @@ export const uploadMaintenanceReportToDrive = async (
 
   const updatedReport: FieldReport = {
     ...report,
+    driveFolderId: reportFolderId,
     photos: updatedPhotos,
     photoUrl: updatedPhotos[0]?.url || report.photoUrl,
     synced: true

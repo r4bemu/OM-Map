@@ -1950,24 +1950,44 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
       }
 
       const currentReports = loadSavedReports();
-      saveReportsToFile([fullReport, ...currentReports.filter((r: any) => r.id !== fullReport.id)]);
 
-      // Background upload report, variables & photos directly to target Google Drive folder
-      uploadReportToTargetDriveFolder(fullReport, clientToken)
-        .then(result => {
-          if (result?.success) {
-            console.log(`✅ Google Drive auto-sync success for ${fullReport.id}: Folder ${result.reportFolderId}, Photos: ${result.photoCount}`);
-            const current = loadSavedReports();
-            saveReportsToFile(current.map(r => r.id === fullReport.id ? { ...r, ...fullReport, synced: true } : r));
-          } else {
-            console.log(`ℹ️ Google Drive sync note for ${fullReport.id}: ${result?.message}`);
-          }
-        })
-        .catch(driveErr => {
-          console.warn('Background Google Drive upload note:', driveErr?.message || driveErr);
+      // If already synced via client-side Google Drive First upload
+      if (fullReport.synced && (fullReport.driveFolderId || fullReport.folderId)) {
+        saveReportsToFile([fullReport, ...currentReports.filter((r: any) => r.id !== fullReport.id)]);
+        return res.json({ 
+          success: true, 
+          synced: true, 
+          report: fullReport, 
+          message: 'Report and photos already synchronized with Google Drive' 
         });
+      }
 
-      res.json({ success: true, report: fullReport, message: 'Report saved and synchronized successfully' });
+      // If clientToken or server token is available, attempt immediate Drive upload
+      let driveSyncResult: any = null;
+      try {
+        driveSyncResult = await uploadReportToTargetDriveFolder(fullReport, clientToken);
+      } catch (driveErr: any) {
+        driveSyncResult = { success: false, message: driveErr?.message || 'Drive sync error' };
+      }
+
+      const isSynced = Boolean(driveSyncResult?.success);
+      const updatedToSave = {
+        ...fullReport,
+        synced: isSynced,
+        driveFolderId: driveSyncResult?.reportFolderId || fullReport.driveFolderId
+      };
+
+      saveReportsToFile([updatedToSave, ...currentReports.filter((r: any) => r.id !== updatedToSave.id)]);
+
+      res.json({ 
+        success: true, 
+        synced: isSynced, 
+        report: updatedToSave, 
+        driveFolderId: driveSyncResult?.reportFolderId,
+        message: isSynced 
+          ? 'Report saved and synchronized with Google Drive successfully' 
+          : (driveSyncResult?.message || 'Report saved to local database (pending Google Drive sync)') 
+      });
     } catch (err: any) {
       console.error('Failed to submit report:', err);
       res.status(500).json({ error: err.message || 'Failed to submit report' });
