@@ -32,7 +32,9 @@ import {
   deleteCachedReportDB,
   clearAllLocalDataDB,
   clearAllLayersDB,
-  setLastOverhaulTimestamp
+  setLastOverhaulTimestamp,
+  preloadCachedPhotosIntoMemory,
+  cacheReportPhotosClient
 } from './utils/offlineStorage';
 import { getIsoWeekInfo, getAvailableWeeksFromReports, isReportInWeek } from './utils/weekUtils';
 import { parseGISFile } from './utils/kmzParser';
@@ -781,6 +783,9 @@ export default function App() {
       }
 
       try {
+        // Preload any cached photos from IndexedDB into memory for instant offline rendering
+        preloadCachedPhotosIntoMemory().catch(() => {});
+
         const rawCachedReports = await getCachedReportsDB();
         const initialReports = (rawCachedReports && rawCachedReports.length > 0) ? rawCachedReports : getOfflineReports();
         if (initialReports && initialReports.length > 0) {
@@ -791,6 +796,13 @@ export default function App() {
           localReports = cleanReports;
           if (!isCancelled) {
             setFieldReports(cleanReports);
+          }
+
+          // If online, schedule background caching of inspection photos into IndexedDB
+          if (!isOfflineRef.current && cleanReports.length > 0) {
+            setTimeout(() => {
+              cacheReportPhotosClient(cleanReports).catch(() => {});
+            }, 1500);
           }
         }
       } catch (e) {
@@ -921,6 +933,8 @@ export default function App() {
             return combined;
           });
           markWeekDownloaded(weekKey);
+          // Pre-cache photos of the downloaded week into IndexedDB
+          cacheReportPhotosClient(data.reports).catch(() => {});
         }
       }
       await fetchAvailableCloudWeeks(activeRole, effectiveImo);
@@ -951,6 +965,8 @@ export default function App() {
           if (availableCloudWeeks.length > 0) {
             markWeeksDownloaded(availableCloudWeeks.map(w => w.key));
           }
+          // Pre-cache all photos into IndexedDB
+          cacheReportPhotosClient(data.reports).catch(() => {});
         }
       }
       await fetchAvailableCloudWeeks(activeRole, effectiveImo);
@@ -1744,6 +1760,8 @@ export default function App() {
             method: 'POST',
             headers
           });
+          // Also trigger server disk photo pre-caching in parallel
+          fetch('/api/drive/pre-cache-photos', { method: 'POST' }).catch(() => {});
         } catch (syncErr) {
           console.warn('Overhaul Drive sync-reports notice:', syncErr);
         }
@@ -1780,6 +1798,17 @@ export default function App() {
       setFieldReports(finalReports);
       await saveCachedReportsDB(finalReports);
       saveOfflineReports(finalReports);
+
+      // Pre-cache inspection photos into IndexedDB for 100% reliable zero-network offline access
+      setSyncStatusMessage('Pre-caching inspection photos into offline IndexedDB...');
+      try {
+        await cacheReportPhotosClient(finalReports, (done, total) => {
+          const pct = total > 0 ? Math.round((done / total) * 100) : 100;
+          setStep('reports', 'active', pct, `Caching photos (${done}/${total})`);
+        });
+      } catch (photoErr) {
+        console.warn('Client photo pre-caching notice:', photoErr);
+      }
       setStep('reports', 'done');
 
       // 4. Update manifest metadata & available cloud weeks

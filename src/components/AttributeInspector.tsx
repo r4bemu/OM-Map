@@ -23,7 +23,7 @@ import {
 import { FieldReport, UserRole, ApprovalStatus, AuthUser } from '../types';
 import { downloadReportPdf } from '../utils/reportPdfBuilder';
 import { isSyntheticFeatureId } from '../utils/gisLocationUtils';
-import { resolvePhotoAttachmentUrl, handleImageFallback } from '../utils/photoUtils';
+import { resolvePhotoAttachmentUrl, handleImageFallback, captureAndCacheImageElement } from '../utils/photoUtils';
 
 interface AttributeInspectorProps {
   authenticatedUser?: AuthUser | null;
@@ -421,6 +421,8 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                                   fallback.innerHTML = '<span class="text-lg mb-1">📷</span><span>Photo placeholder (No image binary uploaded)</span>';
                                   parent.prepend(fallback);
                                 }
+                              } else {
+                                captureAndCacheImageElement(target, p);
                               }
                             }}
                             onError={(e) => handleImageFallback(e, p, 'Inspection photo preview not accessible')}
@@ -429,7 +431,7 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold shadow-md ${
                               p.stage === 'Before' 
                                 ? 'bg-amber-500 text-slate-950 font-black' 
-                                : p.stage === 'During'
+                                : p.stage === 'During' 
                                 ? 'bg-cyan-500 text-slate-950 font-black'
                                 : 'bg-emerald-500 text-slate-950 font-black'
                             }`}>
@@ -448,6 +450,12 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                         src={resolvePhotoAttachmentUrl({ url: selectedReport.photoUrl, id: selectedReport.id })}
                         alt="Inspection site"
                         className="w-full h-36 object-cover rounded-xl border border-slate-700 shadow-md"
+                        onLoad={(e) => {
+                          const target = e.currentTarget;
+                          if (target.naturalWidth > 10 && target.naturalHeight > 10) {
+                            captureAndCacheImageElement(target, { url: selectedReport.photoUrl, id: selectedReport.id });
+                          }
+                        }}
                         onError={(e) => handleImageFallback(e, { url: selectedReport.photoUrl, id: selectedReport.id }, 'Cover photo preview not accessible')}
                       />
                     </div>

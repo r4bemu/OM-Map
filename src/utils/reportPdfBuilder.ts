@@ -9,6 +9,7 @@ import { registerWmrCustomFonts } from './reportFontLoader';
 import { getUserSignatories, getDefaultFieldReportSignatories, getDefaultWmrSignatories } from './signatoriesConfig';
 import { formatReportId } from './reportIdGenerator';
 import { resolvePhotoAttachmentUrl } from './photoUtils';
+import { getCachedPhotoSync, getCachedPhotoDB } from './offlineStorage';
 
 // Helper to safely load an image URL into a base64 Data URL with natural dimension detection and multi-candidate fallback support
 async function getBase64ImageFromUrl(...candidateUrls: (string | undefined)[]): Promise<{ dataUrl: string; width: number; height: number } | null> {
@@ -36,6 +37,25 @@ async function getBase64ImageFromUrl(...candidateUrls: (string | undefined)[]): 
         };
         img.src = targetUrl;
       });
+    }
+  }
+
+  // 1b. Check IndexedDB cached photos
+  for (const targetUrl of validUrls) {
+    const match = targetUrl.match(/id=([a-zA-Z0-9_-]{20,})/) || targetUrl.match(/\/photo\/([a-zA-Z0-9_-]{20,})/);
+    const key = match ? match[1] : (targetUrl.length >= 20 && !targetUrl.includes('/') ? targetUrl : undefined);
+    if (key) {
+      try {
+        const cached = getCachedPhotoSync(key) || await getCachedPhotoDB(key);
+        if (cached && cached.startsWith('data:image')) {
+          return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve({ dataUrl: cached, width: img.naturalWidth || 600, height: img.naturalHeight || 450 });
+            img.onerror = () => resolve({ dataUrl: cached, width: 600, height: 450 });
+            img.src = cached;
+          });
+        }
+      } catch (_) {}
     }
   }
 

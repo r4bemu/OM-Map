@@ -145,6 +145,29 @@ export function saveOfflineReports(reports: FieldReport[]): void {
   saveCachedReportsDB(inMemoryReportsCache || safeReports).catch(err => {
     console.warn('IndexedDB async save reports notice:', err);
   });
+
+  // 3. Auto-cache any embedded base64 photos into STORE_PHOTOS
+  try {
+    const list = inMemoryReportsCache || safeReports;
+    list.forEach(r => {
+      if (Array.isArray(r.photos)) {
+        r.photos.forEach(p => {
+          if (!p) return;
+          const rawId = p.driveFileId || (p.id && p.id.length >= 20 && !p.id.startsWith('photo-') ? p.id : undefined);
+          const cleanId = rawId ? normalizePhotoKey(rawId) : (p.id ? normalizePhotoKey(p.id) : undefined);
+          const dataUrl = (typeof p.url === 'string' && p.url.startsWith('data:image/')) 
+            ? p.url 
+            : (typeof p.dataUrl === 'string' && p.dataUrl.startsWith('data:image/') ? p.dataUrl : undefined);
+          if (cleanId && dataUrl) {
+            saveCachedPhotoDB(cleanId, dataUrl).catch(() => {});
+          }
+        });
+      }
+      if (r.photoUrl && typeof r.photoUrl === 'string' && r.photoUrl.startsWith('data:image/')) {
+        saveCachedPhotoDB(`${r.id}_cover`, r.photoUrl).catch(() => {});
+      }
+    });
+  } catch (_) {}
 }
 
 export function addOfflineReport(report: FieldReport): FieldReport[] {
@@ -225,11 +248,234 @@ export function saveCachedLayers(layers: GISLayer[]): void {
 
 // IndexedDB for large GIS Layer vector datasets (500MB+), Field Reports, and Manifest Metadata
 const DB_NAME = 'GeoPulseGISDB_v4';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE_LAYERS = 'gis_layers';
 const STORE_REPORTS = 'offline_reports';
 const STORE_METADATA = 'manifest_metadata';
+const STORE_PHOTOS = 'offline_photos';
 const LAST_OVERHAUL_KEY = 'nia_last_system_overhaul_timestamp';
+
+const inMemoryPhotoCache = new Map<string, string>();
+
+export function normalizePhotoKey(key: string): string {
+  if (!key) return '';
+  return String(key).replace(/^photo_/, '').trim();
+}
+
+export function getCachedPhotoSync(photoKey: string): string | null {
+  if (!photoKey) return null;
+  const clean = normalizePhotoKey(photoKey);
+  return inMemoryPhotoCache.get(clean) || inMemoryPhotoCache.get(photoKey) || null;
+}
+
+export async function getCachedPhotoDB(photoKey: string): Promise<string | null> {
+  if (!photoKey) return null;
+  const clean = normalizePhotoKey(photoKey);
+  if (inMemoryPhotoCache.has(clean)) {
+    return inMemoryPhotoCache.get(clean)!;
+  }
+  if (inMemoryPhotoCache.has(photoKey)) {
+    return inMemoryPhotoCache.get(photoKey)!;
+  }
+
+  try {
+    const db = await openDB();
+    if (!db.objectStoreNames.contains(STORE_PHOTOS)) return null;
+    const tx = db.transaction(STORE_PHOTOS, 'readonly');
+    const store = tx.objectStore(STORE_PHOTOS);
+    return new Promise((resolve) => {
+      const req = store.get(clean);
+      req.onsuccess = () => {
+        if (req.result && req.result.dataUrl) {
+          inMemoryPhotoCache.set(clean, req.result.dataUrl);
+          resolve(req.result.dataUrl);
+        } else if (photoKey !== clean) {
+          const req2 = store.get(photoKey);
+          req2.onsuccess = () => {
+            if (req2.result && req2.result.dataUrl) {
+              inMemoryPhotoCache.set(clean, req2.result.dataUrl);
+              resolve(req2.result.dataUrl);
+            } else {
+              resolve(null);
+            }
+          };
+          req2.onerror = () => resolve(null);
+        } else {
+          resolve(null);
+        }
+      };
+      req.onerror = () => resolve(null);
+    });
+  } catch (err) {
+    return null;
+  }
+}
+
+export async function saveCachedPhotoDB(photoKey: string, dataUrl: string): Promise<void> {
+  if (!photoKey || !dataUrl) return;
+  const clean = normalizePhotoKey(photoKey);
+  inMemoryPhotoCache.set(clean, dataUrl);
+  if (photoKey !== clean) inMemoryPhotoCache.set(photoKey, dataUrl);
+
+  try {
+    const db = await openDB();
+    if (!db.objectStoreNames.contains(STORE_PHOTOS)) return;
+    const tx = db.transaction(STORE_PHOTOS, 'readwrite');
+    const store = tx.objectStore(STORE_PHOTOS);
+    await new Promise<void>((resolve, reject) => {
+      const req = store.put({
+        id: clean,
+        dataUrl,
+        updatedAt: new Date().toISOString()
+      });
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.warn(`Failed to save photo ${clean} to IndexedDB:`, err);
+  }
+}
+
+export async function getAllCachedPhotoKeysDB(): Promise<string[]> {
+  try {
+    const db = await openDB();
+    if (!db.objectStoreNames.contains(STORE_PHOTOS)) return [];
+    const tx = db.transaction(STORE_PHOTOS, 'readonly');
+    const store = tx.objectStore(STORE_PHOTOS);
+    return new Promise((resolve) => {
+      const req = store.getAllKeys();
+      req.onsuccess = () => {
+        const keys = (req.result || []).map(k => String(k));
+        resolve(keys);
+      };
+      req.onerror = () => resolve([]);
+    });
+  } catch (err) {
+    return [];
+  }
+}
+
+export async function preloadCachedPhotosIntoMemory(limit: number = 300): Promise<void> {
+  try {
+    const db = await openDB();
+    if (!db.objectStoreNames.contains(STORE_PHOTOS)) return;
+    const tx = db.transaction(STORE_PHOTOS, 'readonly');
+    const store = tx.objectStore(STORE_PHOTOS);
+    await new Promise<void>((resolve) => {
+      const req = store.openCursor();
+      let count = 0;
+      req.onsuccess = (e: any) => {
+        const cursor = e.target.result;
+        if (cursor && count < limit) {
+          const val = cursor.value;
+          if (val && val.id && val.dataUrl) {
+            inMemoryPhotoCache.set(val.id, val.dataUrl);
+          }
+          count++;
+          cursor.continue();
+        } else {
+          resolve();
+        }
+      };
+      req.onerror = () => resolve();
+    });
+  } catch (err) {}
+}
+
+export async function cacheReportPhotosClient(
+  reports: FieldReport[],
+  onProgress?: (done: number, total: number) => void
+): Promise<number> {
+  if (!Array.isArray(reports) || reports.length === 0) return 0;
+
+  const candidates: { key: string; urls: string[]; reportId: string }[] = [];
+  const seenKeys = new Set<string>();
+
+  for (const rep of reports) {
+    if (!rep || !Array.isArray(rep.photos)) continue;
+    for (const p of rep.photos) {
+      if (!p) continue;
+      const rawId = p.driveFileId || (p.id && p.id.length >= 20 && !p.id.startsWith('photo-') ? p.id : undefined);
+      const cleanId = rawId ? normalizePhotoKey(rawId) : (p.id ? normalizePhotoKey(p.id) : undefined);
+      if (!cleanId) continue;
+      if (seenKeys.has(cleanId)) continue;
+      seenKeys.add(cleanId);
+
+      // If photo already has data:image base64, save to IndexedDB immediately
+      if (typeof p.url === 'string' && p.url.startsWith('data:image/')) {
+        await saveCachedPhotoDB(cleanId, p.url);
+        continue;
+      }
+      if (typeof p.dataUrl === 'string' && p.dataUrl.startsWith('data:image/')) {
+        await saveCachedPhotoDB(cleanId, p.dataUrl);
+        continue;
+      }
+
+      if (inMemoryPhotoCache.has(cleanId)) continue;
+
+      const urls: string[] = [
+        `/api/drive/photo/${cleanId}`,
+        `https://drive.google.com/thumbnail?id=${cleanId}&sz=w1200`,
+        `https://lh3.googleusercontent.com/d/${cleanId}`
+      ];
+      if (p.url && !p.url.startsWith('data:image/')) {
+        urls.unshift(p.url);
+      }
+      candidates.push({ key: cleanId, urls, reportId: rep.id });
+    }
+  }
+
+  if (candidates.length === 0) return 0;
+
+  const existingKeys = new Set(await getAllCachedPhotoKeysDB());
+  const toFetch = candidates.filter(c => !existingKeys.has(c.key));
+
+  if (toFetch.length === 0) return 0;
+
+  let completed = 0;
+  const total = toFetch.length;
+  onProgress?.(0, total);
+
+  const CONCURRENCY = 4;
+  let index = 0;
+
+  const worker = async () => {
+    while (index < toFetch.length) {
+      const current = toFetch[index++];
+      let cached = false;
+
+      for (const u of current.urls) {
+        try {
+          const res = await fetch(u, { mode: 'cors' });
+          if (res.ok) {
+            const blob = await res.blob();
+            if (blob.size > 500) {
+              const dataUrl = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+              });
+              if (dataUrl && dataUrl.startsWith('data:image/')) {
+                await saveCachedPhotoDB(current.key, dataUrl);
+                cached = true;
+                break;
+              }
+            }
+          }
+        } catch (_) {}
+      }
+
+      completed++;
+      onProgress?.(completed, total);
+    }
+  };
+
+  const workers = Array.from({ length: Math.min(CONCURRENCY, toFetch.length) }, () => worker());
+  await Promise.all(workers);
+
+  return completed;
+}
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -247,6 +493,9 @@ function openDB(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains(STORE_METADATA)) {
         db.createObjectStore(STORE_METADATA, { keyPath: 'key' });
+      }
+      if (!db.objectStoreNames.contains(STORE_PHOTOS)) {
+        db.createObjectStore(STORE_PHOTOS, { keyPath: 'id' });
       }
     };
     request.onsuccess = () => resolve(request.result);
@@ -317,6 +566,7 @@ export async function deleteCachedReportDB(reportId: string): Promise<void> {
 export async function clearAllLocalDataDB(): Promise<void> {
   try {
     inMemoryReportsCache = [];
+    inMemoryPhotoCache.clear();
     try {
       localStorage.removeItem(OFFLINE_REPORTS_KEY);
       localStorage.removeItem(DOWNLOADED_WEEKS_KEY);
@@ -325,7 +575,7 @@ export async function clearAllLocalDataDB(): Promise<void> {
     } catch (_) {}
 
     const db = await openDB();
-    const stores = [STORE_LAYERS, STORE_REPORTS, STORE_METADATA];
+    const stores = [STORE_LAYERS, STORE_REPORTS, STORE_METADATA, STORE_PHOTOS];
     for (const s of stores) {
       if (db.objectStoreNames.contains(s)) {
         try {

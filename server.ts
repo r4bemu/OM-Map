@@ -1832,7 +1832,7 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
             const mimeType = getImageMimeType(buffer);
             res.setHeader('Content-Type', mimeType);
             res.setHeader('Access-Control-Allow-Origin', '*');
-            res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
             return res.send(buffer);
           }
         } catch (dlErr) {
@@ -1840,10 +1840,122 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
         }
       }
 
+      // 4. QUATERNARY PATH: Direct Public Google Drive CDN fetch (Zero-OAuth resilient fallback)
+      if (cleanId) {
+        const cdnCandidates = [
+          `https://drive.google.com/thumbnail?id=${cleanId}&sz=w1200`,
+          `https://lh3.googleusercontent.com/d/${cleanId}`,
+          `https://drive.google.com/uc?export=view&id=${cleanId}`
+        ];
+
+        for (const cdnUrl of cdnCandidates) {
+          try {
+            const cdnRes = await fetch(cdnUrl, { redirect: 'follow' });
+            if (cdnRes.ok) {
+              const arrayBuf = await cdnRes.arrayBuffer();
+              if (arrayBuf && arrayBuf.byteLength > 500) {
+                const buffer = Buffer.from(arrayBuf);
+                const cachedPhotoPath = path.join(DRIVE_CACHE_DIR, `photo_${cleanId}.bin`);
+                try {
+                  fs.writeFileSync(cachedPhotoPath, buffer);
+                } catch (_) {}
+                const mimeType = getImageMimeType(buffer);
+                res.setHeader('Content-Type', mimeType);
+                res.setHeader('Access-Control-Allow-Origin', '*');
+                res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+                return res.send(buffer);
+              }
+            }
+          } catch (_) {}
+        }
+      }
+
       res.status(404).json({ error: 'Photo not found or inaccessible' });
     } catch (err: any) {
       console.warn(`Failed to stream Drive photo ${req.params.fileId}:`, err.message);
       res.status(404).json({ error: 'Photo not found or inaccessible' });
+    }
+  });
+
+  // Background Disk Pre-Caching Helper
+  async function downloadAndCachePhotoToDisk(cleanId: string): Promise<boolean> {
+    if (!cleanId) return false;
+    ensureDataDir();
+    const cachedPath = path.join(DRIVE_CACHE_DIR, `photo_${cleanId}.bin`);
+    if (fs.existsSync(cachedPath)) {
+      try {
+        if (fs.statSync(cachedPath).size > 500) return true;
+      } catch (_) {}
+    }
+
+    const cdnCandidates = [
+      `https://drive.google.com/thumbnail?id=${cleanId}&sz=w1200`,
+      `https://lh3.googleusercontent.com/d/${cleanId}`,
+      `https://drive.google.com/uc?export=view&id=${cleanId}`
+    ];
+
+    for (const cdnUrl of cdnCandidates) {
+      try {
+        const cdnRes = await fetch(cdnUrl, { redirect: 'follow' });
+        if (cdnRes.ok) {
+          const arrayBuf = await cdnRes.arrayBuffer();
+          if (arrayBuf && arrayBuf.byteLength > 500) {
+            fs.writeFileSync(cachedPath, Buffer.from(arrayBuf));
+            return true;
+          }
+        }
+      } catch (_) {}
+    }
+    return false;
+  }
+
+  async function preCacheAllReportPhotosToDisk(): Promise<{ cached: number; total: number }> {
+    try {
+      const reports = loadSavedReports();
+      const driveIds = new Set<string>();
+      reports.forEach((r: any) => {
+        if (Array.isArray(r.photos)) {
+          r.photos.forEach((p: any) => {
+            const rawId = p.driveFileId || (p.id && typeof p.id === 'string' && p.id.length >= 20 && !p.id.startsWith('photo-') && !p.id.startsWith('p-') ? p.id : undefined);
+            if (rawId) {
+              driveIds.add(String(rawId).replace(/^photo_/, '').trim());
+            }
+          });
+        }
+      });
+
+      const idList = Array.from(driveIds);
+      let cachedCount = 0;
+      const CONCURRENCY = 4;
+      let index = 0;
+
+      const worker = async () => {
+        while (index < idList.length) {
+          const id = idList[index++];
+          const ok = await downloadAndCachePhotoToDisk(id);
+          if (ok) cachedCount++;
+        }
+      };
+
+      const workers = Array.from({ length: Math.min(CONCURRENCY, idList.length) }, () => worker());
+      await Promise.all(workers);
+      console.log(`📸 Pre-cached ${cachedCount}/${idList.length} report photos to server disk.`);
+      return { cached: cachedCount, total: idList.length };
+    } catch (err: any) {
+      console.warn('Pre-cache report photos notice:', err.message);
+      return { cached: 0, total: 0 };
+    }
+  }
+
+  (globalThis as any).preCacheAllReportPhotosToDisk = preCacheAllReportPhotosToDisk;
+
+  // Pre-cache endpoint for explicit synchronization
+  app.post('/api/drive/pre-cache-photos', async (_req, res) => {
+    try {
+      const result = await preCacheAllReportPhotosToDisk();
+      res.json({ success: true, ...result });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
     }
   });
 
@@ -1856,6 +1968,7 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
       const localBackup = loadSavedReports();
       const merged = deduplicateById([...localBackup, ...driveReports]);
       saveReportsToFile(merged);
+      preCacheAllReportPhotosToDisk().catch(() => {});
       res.json({ success: true, count: merged.length, reports: merged });
     } catch (err: any) {
       res.status(500).json({ error: err.message || 'Drive report sync failed' });
@@ -2153,6 +2266,14 @@ if (isMainModule) {
     const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server listening on http://0.0.0.0:${PORT}`);
+      // Background non-blocking pre-cache of all report photos to server disk cache
+      setTimeout(() => {
+        if (typeof (globalThis as any).preCacheAllReportPhotosToDisk === 'function') {
+          (globalThis as any).preCacheAllReportPhotosToDisk().catch((e: any) => {
+            console.warn('Startup photo pre-cache notice:', e.message);
+          });
+        }
+      }, 3000);
     });
   }).catch(err => {
     console.error('Server startup failed:', err);

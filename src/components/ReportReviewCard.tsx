@@ -23,7 +23,7 @@ import {
   canUserAdvanceTier, 
   canUserEditReport 
 } from '../utils/approvalHierarchyEngine';
-import { resolvePhotoAttachmentUrl, handleImageFallback } from '../utils/photoUtils';
+import { resolvePhotoAttachmentUrl, handleImageFallback, captureAndCacheImageElement } from '../utils/photoUtils';
 
 interface ReportReviewCardProps {
   report: FieldReport;
@@ -388,6 +388,12 @@ export const ReportReviewCard: React.FC<ReportReviewCardProps> = ({
                     alt={photo.caption || `Photo ${idx + 1}`}
                     className="w-full h-full object-cover"
                     loading="lazy"
+                    onLoad={(e) => {
+                      const target = e.currentTarget;
+                      if (target.naturalWidth > 10 && target.naturalHeight > 10) {
+                        captureAndCacheImageElement(target, photo);
+                      }
+                    }}
                     onError={(e) => handleImageFallback(e, photo, photo.caption || `Photo ${idx + 1}`)}
                   />
                   {photo.stage && (
@@ -415,6 +421,12 @@ export const ReportReviewCard: React.FC<ReportReviewCardProps> = ({
                   src={resolvePhotoAttachmentUrl(allPhotos[selectedPhotoIndex])}
                   alt={allPhotos[selectedPhotoIndex].caption || 'Enlarged photo evidence'}
                   className="max-h-[440px] w-auto max-w-full object-contain rounded-lg select-none"
+                  onLoad={(e) => {
+                    const target = e.currentTarget;
+                    if (target.naturalWidth > 10 && target.naturalHeight > 10) {
+                      captureAndCacheImageElement(target, allPhotos[selectedPhotoIndex]);
+                    }
+                  }}
                   onError={(e) => handleImageFallback(e, allPhotos[selectedPhotoIndex], allPhotos[selectedPhotoIndex].caption || 'Enlarged photo')}
                 />
 
