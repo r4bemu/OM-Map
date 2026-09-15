@@ -41,8 +41,20 @@ export function getOfflineReports(): FieldReport[] {
     const raw = localStorage.getItem(OFFLINE_REPORTS_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
     if (Array.isArray(parsed)) {
-      inMemoryReportsCache = parsed;
-      return parsed;
+      // Deduplicate by ID: if any entry for report.id is synced, keep the synced copy
+      const map = new Map<string, FieldReport>();
+      for (const r of parsed) {
+        if (!r || !r.id) continue;
+        const existing = map.get(r.id);
+        if (!existing) {
+          map.set(r.id, r);
+        } else if (r.synced && !existing.synced) {
+          map.set(r.id, r);
+        }
+      }
+      const clean = Array.from(map.values());
+      inMemoryReportsCache = clean;
+      return clean;
     }
     inMemoryReportsCache = [];
     return [];
@@ -137,7 +149,9 @@ export function saveOfflineReports(reports: FieldReport[]): void {
 
 export function addOfflineReport(report: FieldReport): FieldReport[] {
   const current = getOfflineReports();
-  const updated = [report, ...current];
+  // Filter out any existing report with the same ID to avoid stale unsynced duplicates
+  const filtered = current.filter(r => r.id !== report.id);
+  const updated = [report, ...filtered];
   saveOfflineReports(updated);
   return updated;
 }
@@ -540,6 +554,7 @@ export async function syncOfflineQueueToServer(driveToken?: string | null): Prom
 
   let syncedCount = 0;
   const errors: any[] = [];
+  const successfullySyncedIds: string[] = [];
 
   // 1. Try server batch upload first
   try {
@@ -550,39 +565,45 @@ export async function syncOfflineQueueToServer(driveToken?: string | null): Prom
     });
 
     if (res.ok) {
-      const syncedIds = unsynced.map(r => r.id);
-      markReportsSynced(syncedIds);
-      return { syncedCount: syncedIds.length, errors: [] };
+      const data = await res.json();
+      if (data && Array.isArray(data.syncedIds)) {
+        successfullySyncedIds.push(...data.syncedIds);
+        syncedCount += data.syncedIds.length;
+      } else {
+        const syncedIds = unsynced.map(r => r.id);
+        successfullySyncedIds.push(...syncedIds);
+        syncedCount += syncedIds.length;
+      }
     }
   } catch (err) {
-    console.warn('Backend server batch sync unreachable, attempting direct Drive upload:', err);
+    console.warn('Backend server batch sync unreachable, attempting direct Apps Script relay:', err);
   }
 
-  // 2. Fallback: Direct Google Drive Upload for each unsynced report if driveToken is present
-  if (driveToken) {
+  // 2. Fallback: Direct Permanent Google Apps Script Relay Upload for remaining unsynced reports
+  const remainingUnsynced = unsynced.filter(r => !successfullySyncedIds.includes(r.id));
+  if (remainingUnsynced.length > 0) {
     try {
-      const { uploadMaintenanceReportToDrive } = await import('../lib/googleDriveService');
-      const successfullySyncedIds: string[] = [];
-
-      for (const rep of unsynced) {
+      const { uploadReportViaAppsScriptClient } = await import('../lib/googleDriveService');
+      for (const rep of remainingUnsynced) {
         try {
-          const driveRes = await uploadMaintenanceReportToDrive(driveToken, rep);
-          if (driveRes && driveRes.folderId) {
+          const directRes = await uploadReportViaAppsScriptClient(rep);
+          if (directRes && directRes.success) {
             successfullySyncedIds.push(rep.id);
             syncedCount++;
           }
         } catch (dErr) {
-          console.warn(`Direct Drive upload failed for report ${rep.id}:`, dErr);
+          console.warn(`Direct Apps Script upload failed for report ${rep.id}:`, dErr);
           errors.push(dErr);
         }
       }
-
-      if (successfullySyncedIds.length > 0) {
-        markReportsSynced(successfullySyncedIds);
-      }
     } catch (importErr) {
       console.warn('Could not import googleDriveService for offline queue sync:', importErr);
+      errors.push(importErr);
     }
+  }
+
+  if (successfullySyncedIds.length > 0) {
+    markReportsSynced(successfullySyncedIds);
   }
 
   return { syncedCount, errors };

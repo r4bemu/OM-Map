@@ -351,14 +351,100 @@ export const getDesignatedFolderForImo = (imoOffice?: string): string => {
   return '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb';
 };
 
+export const getAppsScriptUrl = (): string => {
+  const metaEnv = typeof import.meta !== 'undefined' && (import.meta as any).env ? (import.meta as any).env : {};
+  return (
+    metaEnv.VITE_GOOGLE_APPS_SCRIPT_URL ||
+    (typeof process !== 'undefined' && (process as any).env?.GOOGLE_APPS_SCRIPT_URL) ||
+    'https://script.google.com/macros/s/AKfycbzJxZNSBbuY7WA1n7ad2A5zQuEKHp1z3aQg8MTU0Z67sT890jrQYq79aWuTwoMwAjyGaQ/exec'
+  );
+};
+
+// Permanent Google Apps Script Relay client uploader (Zero OAuth token required)
+export const uploadReportViaAppsScriptClient = async (
+  report: FieldReport
+): Promise<{
+  success: boolean;
+  reportFolderId: string;
+  photoCount: number;
+  updatedReport: FieldReport;
+  folderUrl?: string;
+  message: string;
+}> => {
+  // Strict Safety Guard: Never upload mock field reports to Google Drive
+  if (report?.id?.startsWith('mock-') || (report as any)?.isMock || String(report?.id).includes('mock')) {
+    return {
+      success: true,
+      reportFolderId: '',
+      photoCount: 0,
+      updatedReport: report,
+      message: 'Mock field report strictly bypassed from Google Drive upload.'
+    };
+  }
+
+  const appsScriptUrl = getAppsScriptUrl();
+  const imoOffice = report.imoOffice || 'Mindoro Oriental-Marinduque-Romblon IMO';
+  const targetFolderId = getDesignatedFolderForImo(imoOffice);
+
+  const payload = {
+    report,
+    targetFolderId,
+    imoOffice
+  };
+
+  const res = await fetch(appsScriptUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload),
+    redirect: 'follow'
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Apps Script upload failed: HTTP ${res.status} - ${errText}`);
+  }
+
+  const data: any = await res.json();
+  if (!data || !data.success) {
+    throw new Error(data?.error || data?.message || 'Apps Script returned unsuccessful status');
+  }
+
+  const updatedReport: FieldReport = {
+    ...report,
+    ...(data.updatedReport || {}),
+    driveFolderId: data.reportFolderId,
+    synced: true
+  };
+
+  return {
+    success: true,
+    reportFolderId: data.reportFolderId,
+    photoCount: data.photoCount || 0,
+    updatedReport,
+    folderUrl: data.folderUrl,
+    message: data.message || 'Report and photos successfully backed up to Google Drive via Apps Script relay.'
+  };
+};
+
 export const uploadMaintenanceReportToDrive = async (
-  accessToken: string,
+  accessToken: string | null | undefined,
   report: FieldReport,
   parentFolderName?: string
 ): Promise<{ folderId: string; summaryFile: DriveFileItem; photoCount: number; updatedReport: FieldReport }> => {
   // Strict Safety Guard: Never upload mock field reports to Google Drive
   if (report?.id?.startsWith('mock-') || (report as any)?.isMock || String(report?.id).includes('mock')) {
     return { folderId: '', summaryFile: { id: '', name: 'mock_bypassed' } as any, photoCount: 0, updatedReport: report };
+  }
+
+  // If no OAuth accessToken provided, automatically route via permanent Google Apps Script Relay
+  if (!accessToken || !accessToken.trim()) {
+    const relayRes = await uploadReportViaAppsScriptClient(report);
+    return {
+      folderId: relayRes.reportFolderId,
+      summaryFile: { id: relayRes.reportFolderId, name: `Summary_${report.id}.txt` } as any,
+      photoCount: relayRes.photoCount,
+      updatedReport: relayRes.updatedReport
+    };
   }
 
   // 1. Determine designated IMO folder

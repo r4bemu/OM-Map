@@ -36,9 +36,9 @@ import {
 } from './utils/offlineStorage';
 import { getIsoWeekInfo, getAvailableWeeksFromReports, isReportInWeek } from './utils/weekUtils';
 import { parseGISFile } from './utils/kmzParser';
-import { getAccessToken, uploadMaintenanceReportToDrive } from './lib/googleDriveService';
+import { getAccessToken, uploadMaintenanceReportToDrive, uploadReportViaAppsScriptClient } from './lib/googleDriveService';
 import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers, fetchAccessRequestsApi, canUserManageRequests, isImoScopedRole, matchesImoOffice } from './config/authUsers';
-import { MOCK_FIELD_REPORTS_2026 } from './data/mockFieldReports2026';
+
 import { 
   MAINTENANCE_ACTIVITY_CONFIG, 
   OPERATIONAL_STATE_CONFIG, 
@@ -1155,8 +1155,14 @@ export default function App() {
       const track1 = (async () => {
         setStep('upload', 'active');
         try {
-          const driveToken = getAccessToken();
-          await syncOfflineQueueToServer(driveToken);
+          const syncRes = await syncOfflineQueueToServer();
+          if (syncRes.syncedCount > 0) {
+            const freshOffline = getOfflineReports();
+            setFieldReports(prev => {
+              const offlineMap = new Map(freshOffline.map(r => [r.id, r]));
+              return prev.map(r => offlineMap.get(r.id) || r);
+            });
+          }
         } catch (e) {
           console.warn('Track 1 (Upload) notice:', e);
         } finally {
@@ -1475,103 +1481,87 @@ export default function App() {
       return;
     }
 
-    // 4. "Google Drive First" Submission Pipeline
+    // 4. Submission & Google Drive Persistence Pipeline
     let finalReportToPersist = { ...newReport };
     let driveUploadSuccessful = false;
-    let driveErrorMessage: string | null = null;
+    let serverSuccess = false;
 
-    const driveToken = getAccessToken();
-
-    // Priority 1: Direct Google Drive Upload (Creates folder, uploads photos, and writes JSON/TXT in Drive)
-    if (driveToken) {
-      try {
-        const driveResult = await uploadMaintenanceReportToDrive(driveToken, newReport);
-        if (driveResult && driveResult.folderId) {
-          driveUploadSuccessful = true;
-          finalReportToPersist = {
-            ...finalReportToPersist,
-            ...driveResult.updatedReport,
-            driveFolderId: driveResult.folderId,
-            synced: true
-          };
-          console.log(`✅ Google Drive First upload success: Folder ${driveResult.folderId}, Photos: ${driveResult.photoCount}`);
-        }
-      } catch (driveErr: any) {
-        console.warn('Google Drive direct upload failed:', driveErr);
-        driveErrorMessage = driveErr?.message || 'Google Drive upload failed';
-      }
-    }
-
-    // Priority 2: Save to backend server database (/api/reports)
+    // First attempt: Save via Backend Server (/api/reports)
     try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (driveToken) {
-        headers['x-google-drive-token'] = driveToken;
-      }
-
       const res = await fetch('/api/reports', {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(finalReportToPersist)
       });
 
       if (res.ok) {
         const data = await res.json();
         const serverReport = data.report || finalReportToPersist;
+        serverSuccess = true;
         
-        // If server successfully uploaded to Drive or client direct upload succeeded
-        if (driveUploadSuccessful || data.synced) {
+        if (data.synced) {
+          driveUploadSuccessful = true;
           serverReport.synced = true;
-          markReportsSynced([serverReport.id]);
+          finalReportToPersist = serverReport;
         }
-
-        setFieldReports(prev => prev.map(r => r.id === serverReport.id ? serverReport : r));
-        addOfflineReport(serverReport);
-
-        if (driveUploadSuccessful || data.synced) {
-          setDriveToast({
-            id: `toast-${Date.now()}`,
-            type: 'success',
-            title: 'Report Persisted to Google Drive',
-            message: 'Field report, engineering parameters & photos are safely archived in Google Drive.',
-            reportTitle: serverReport.title
-          });
-          setTimeout(() => {
-            setDriveToast(current => current?.type === 'success' ? null : current);
-          }, 4500);
-        } else {
-          // Saved on server/local, but pending Google Drive sync
-          setDriveToast({
-            id: `toast-${Date.now()}`,
-            type: 'success',
-            title: 'Report Submitted & Saved',
-            message: 'Field report & photos saved to database.',
-            reportTitle: serverReport.title
-          });
-          setTimeout(() => {
-            setDriveToast(current => current?.type === 'success' ? null : current);
-          }, 4500);
-        }
-      } else {
-        // Server error response
-        setDriveToast({
-          id: `toast-${Date.now()}`,
-          type: 'warning',
-          title: 'Saved Locally on Device',
-          message: 'Report cached safely in local memory. Will auto-sync on next refresh.',
-          reportTitle: finalReportToPersist.title
-        });
-        setTimeout(() => {
-          setDriveToast(current => current?.type === 'warning' ? null : current);
-        }, 5000);
       }
     } catch (serverErr) {
-      console.warn('Backend server unreachable, report safely stored locally:', serverErr);
+      console.warn('Backend server unreachable, attempting direct Apps Script relay upload:', serverErr);
+    }
+
+    // Direct Google Apps Script Relay Fallback (Zero-Token permanent upload)
+    if (!driveUploadSuccessful) {
+      try {
+        const directResult = await uploadReportViaAppsScriptClient(finalReportToPersist);
+        if (directResult && directResult.success) {
+          driveUploadSuccessful = true;
+          finalReportToPersist = {
+            ...finalReportToPersist,
+            ...(directResult.updatedReport || {}),
+            driveFolderId: directResult.reportFolderId,
+            synced: true
+          };
+
+          // If server was reachable but pending drive sync, update it with synced report
+          if (serverSuccess) {
+            fetch('/api/reports', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(finalReportToPersist)
+            }).catch(() => {});
+          }
+        }
+      } catch (directErr) {
+        console.warn('Direct Apps Script Drive upload failed:', directErr);
+      }
+    }
+
+    // Update local state and offline store
+    if (driveUploadSuccessful) {
+      finalReportToPersist.synced = true;
+      markReportsSynced([finalReportToPersist.id]);
+    }
+
+    setFieldReports(prev => prev.map(r => r.id === finalReportToPersist.id ? finalReportToPersist : r));
+    addOfflineReport(finalReportToPersist);
+
+    if (driveUploadSuccessful) {
+      setDriveToast({
+        id: `toast-${Date.now()}`,
+        type: 'success',
+        title: 'Report Persisted to Google Drive',
+        message: 'Field report, engineering parameters & photos are safely archived in Google Drive.',
+        reportTitle: finalReportToPersist.title
+      });
+      setTimeout(() => {
+        setDriveToast(current => current?.type === 'success' ? null : current);
+      }, 4500);
+    } else {
       setDriveToast({
         id: `toast-${Date.now()}`,
         type: 'warning',
         title: 'Saved Locally on Device',
-        message: 'Report cached safely in local memory. Will auto-sync on next refresh.',
+        message: 'Report cached safely in local memory. Will auto-sync when online.',
         reportTitle: finalReportToPersist.title
       });
       setTimeout(() => {
@@ -1584,32 +1574,29 @@ export default function App() {
     setFieldReports(prev => deduplicateItems([...newReports, ...prev]));
 
     if (!isOffline) {
-      const driveToken = getAccessToken();
       for (const rep of newReports) {
         let repToSave = { ...rep };
-        if (driveToken && !rep.synced) {
+        if (!rep.synced) {
           try {
-            const driveRes = await uploadMaintenanceReportToDrive(driveToken, rep);
-            if (driveRes && driveRes.folderId) {
+            const driveRes = await uploadReportViaAppsScriptClient(rep);
+            if (driveRes && driveRes.success) {
               repToSave = {
                 ...repToSave,
-                ...driveRes.updatedReport,
-                driveFolderId: driveRes.folderId,
+                ...(driveRes.updatedReport || {}),
+                driveFolderId: driveRes.reportFolderId,
                 synced: true
               };
               markReportsSynced([rep.id]);
             }
           } catch (dErr) {
-            console.warn('Batch Drive upload notice for', rep.id, dErr);
+            console.warn('Direct Apps Script upload notice for', rep.id, dErr);
           }
         }
 
         try {
-          const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-          if (driveToken) headers['x-google-drive-token'] = driveToken;
           await fetch('/api/reports', {
             method: 'POST',
-            headers,
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(repToSave)
           });
         } catch (err) {
@@ -1679,27 +1666,33 @@ export default function App() {
         console.log(`🛡️ System Overhaul Safeguard: Preserving ${unsyncedReports.length} unsynced local reports.`);
       }
 
-      // If online and drive token or server available, try uploading unsynced reports first
-      const driveToken = getAccessToken();
+      // If online, try uploading unsynced reports first via server or Apps Script relay
       if (unsyncedReports.length > 0 && !isOfflineRef.current) {
         for (const unRep of unsyncedReports) {
           try {
-            if (driveToken) {
-              const res = await uploadMaintenanceReportToDrive(driveToken, unRep);
-              if (res && res.folderId) {
-                unRep.synced = true;
-                if (res.updatedReport) {
-                  Object.assign(unRep, res.updatedReport);
-                }
-              }
-            } else {
+            let uploaded = false;
+            try {
               const res = await fetch('/api/reports', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(unRep)
               });
               if (res.ok) {
+                const data = await res.json();
+                if (data.synced) {
+                  unRep.synced = true;
+                  uploaded = true;
+                }
+              }
+            } catch (_) {}
+
+            if (!uploaded) {
+              const res = await uploadReportViaAppsScriptClient(unRep);
+              if (res && res.success) {
                 unRep.synced = true;
+                if (res.updatedReport) {
+                  Object.assign(unRep, res.updatedReport);
+                }
               }
             }
           } catch (flushErr) {
@@ -1741,6 +1734,7 @@ export default function App() {
       setSyncStatusMessage('Synchronizing Google Drive reports and downloading complete archive...');
       let downloadedReports: FieldReport[] = [];
       try {
+        const driveToken = getAccessToken();
         const headers: Record<string, string> = {};
         if (driveToken) headers['x-google-drive-token'] = driveToken;
 

@@ -441,7 +441,7 @@ function saveUsersToFile(usersList: any[]) {
 
 export async function createApp() {
   const app = express();
-  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
   // Gzip / Brotli compression for lightning-fast responses & preventing large payload limits
   app.use(compression());
@@ -2027,20 +2027,38 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
       const currentReports = loadSavedReports();
       const mergedMap = new Map();
       currentReports.forEach((r: any) => mergedMap.set(r.id, r));
-      incoming.forEach((r: any) => mergedMap.set(r.id, r));
+
+      const syncedIds: string[] = [];
+      const updatedIncoming: any[] = [];
+
+      for (const rep of incoming) {
+        let updatedRep = { ...rep };
+        if (!updatedRep.synced || !updatedRep.driveFolderId) {
+          try {
+            const driveRes = await uploadReportToTargetDriveFolder(updatedRep, clientToken);
+            if (driveRes && driveRes.success) {
+              updatedRep.synced = true;
+              updatedRep.driveFolderId = driveRes.reportFolderId || updatedRep.driveFolderId;
+              syncedIds.push(updatedRep.id);
+            }
+          } catch (dErr) {
+            console.warn(`Drive batch upload error for ${rep.id}:`, dErr);
+          }
+        } else {
+          syncedIds.push(updatedRep.id);
+        }
+        mergedMap.set(updatedRep.id, updatedRep);
+        updatedIncoming.push(updatedRep);
+      }
+
       const updatedReports = Array.from(mergedMap.values());
       saveReportsToFile(updatedReports);
 
-      // Trigger Drive uploads in background for incoming batch
-      incoming.forEach((rep: any) => {
-        uploadReportToTargetDriveFolder(rep, clientToken).catch(err => {
-          console.warn(`Background Drive batch upload error for ${rep.id}:`, err);
-        });
-      });
-
       res.json({
         success: true,
-        syncedCount: incoming.length,
+        syncedCount: syncedIds.length,
+        syncedIds,
+        reports: updatedIncoming,
         totalReports: updatedReports.length
       });
     } catch (err: any) {
@@ -2132,7 +2150,7 @@ const isMainModule = process.argv[1] && (
 
 if (isMainModule) {
   createApp().then(app => {
-    const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
+    const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server listening on http://0.0.0.0:${PORT}`);
     });
