@@ -60,6 +60,9 @@ function doPost(e) {
     }
 
     var payload = JSON.parse(e.postData.contents);
+    if (payload.action === 'getReports' || payload.action === 'listReports') {
+      return handleGetReports(payload.imo || payload.imoOffice);
+    }
     var report = payload.report || payload;
     var imoOffice = report.imoOffice || payload.imoOffice || 'Mindoro Oriental-Marinduque-Romblon IMO';
     var targetFolderId = payload.targetFolderId || report.driveFolderId;
@@ -191,11 +194,227 @@ function doPost(e) {
 }
 
 function doGet(e) {
+  var action = (e && e.parameter && e.parameter.action) || 'ping';
+  if (action === 'getReports' || action === 'listReports') {
+    return handleGetReports(e.parameter.imo);
+  }
   return createJsonResponse({
     status: 'online',
     service: 'NIA Region IV-B O&M GIS Drive Relay',
     timestamp: new Date().toISOString()
   });
+}
+
+function handleGetReports(requestedImo) {
+  try {
+    var results = [];
+    var foldersToScan = [];
+
+    if (requestedImo && requestedImo !== 'All IMOs' && requestedImo !== 'Regional Office IV-B') {
+      var folder = getDesignatedFolder(requestedImo);
+      if (folder) {
+        foldersToScan.push({ imo: requestedImo, folder: folder });
+      }
+    } else {
+      var keys = ['MOMARO', 'Occidental Mindoro', 'Palawan'];
+      for (var k = 0; k < keys.length; k++) {
+        try {
+          var fId = IMO_FOLDERS[keys[k]];
+          var fol = DriveApp.getFolderById(fId);
+          if (fol) {
+            foldersToScan.push({ imo: keys[k], folder: fol });
+          }
+        } catch (_) {}
+      }
+    }
+
+    for (var i = 0; i < foldersToScan.length; i++) {
+      var item = foldersToScan[i];
+      scanFolderForReports(item.folder, item.imo, results, 0);
+    }
+
+    // Deduplicate by report ID
+    var reportMap = {};
+    for (var r = 0; r < results.length; r++) {
+      var rep = results[r];
+      if (rep && rep.id) {
+        if (!reportMap[rep.id]) {
+          reportMap[rep.id] = rep;
+        } else {
+          var existingTime = new Date(reportMap[rep.id].createdAt || 0).getTime();
+          var newTime = new Date(rep.createdAt || 0).getTime();
+          if (newTime >= existingTime) {
+            reportMap[rep.id] = rep;
+          }
+        }
+      }
+    }
+
+    var finalReports = [];
+    for (var id in reportMap) {
+      finalReports.push(reportMap[id]);
+    }
+
+    return createJsonResponse({
+      success: true,
+      count: finalReports.length,
+      reports: finalReports
+    });
+  } catch (err) {
+    Logger.log('handleGetReports error: ' + err);
+    return createJsonResponse({
+      success: false,
+      error: err.toString(),
+      reports: []
+    });
+  }
+}
+
+function scanFolderForReports(parentFolder, imoName, results, depth) {
+  if (depth > 2) return;
+
+  var subfolders = parentFolder.getFolders();
+  while (subfolders.hasNext()) {
+    var sub = subfolders.next();
+    var folderName = sub.getName();
+    var lower = folderName.toLowerCase();
+
+    // Skip trash/dev/mock
+    if (lower.indexOf('mock-') === 0 || lower === 'mock' || lower === '__test__') continue;
+
+    var files = sub.getFiles();
+    var jsonFile = null;
+    var summaryFile = null;
+    var imageFiles = [];
+
+    while (files.hasNext()) {
+      var file = files.next();
+      var fName = file.getName();
+      var mime = file.getMimeType();
+      if (fName.indexOf('Data_') === 0 && fName.indexOf('.json') !== -1) {
+        jsonFile = file;
+      } else if (fName.indexOf('Summary_') === 0 && fName.indexOf('.txt') !== -1) {
+        summaryFile = file;
+      } else if (mime.indexOf('image/') === 0 || /\.(jpe?g|png|webp|heic)$/i.test(fName)) {
+        imageFiles.push({
+          id: file.getId(),
+          name: fName,
+          url: 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w1200',
+          thumbnailUrl: 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w600'
+        });
+      }
+    }
+
+    if (jsonFile) {
+      try {
+        var content = jsonFile.getBlob().getDataAsString();
+        var report = JSON.parse(content);
+        if (report && report.id) {
+          if (imageFiles.length > 0) {
+            report.photos = imageFiles.map(function(img, idx) {
+              var stage = 'During';
+              var lName = img.name.toLowerCase();
+              if (lName.indexOf('before') !== -1) stage = 'Before';
+              else if (lName.indexOf('after') !== -1) stage = 'After';
+              return {
+                id: img.id,
+                driveFileId: img.id,
+                url: img.url,
+                thumbnailUrl: img.thumbnailUrl,
+                stage: stage,
+                caption: stage + ' Activity Documentation #' + (idx + 1),
+                lat: report.lat,
+                lng: report.lng
+              };
+            });
+            report.photoUrl = report.photos[0] ? report.photos[0].url : report.photoUrl;
+          }
+          report.driveFolderId = sub.getId();
+          report.synced = true;
+          report.imoOffice = report.imoOffice || imoName;
+          results.push(report);
+          continue;
+        }
+      } catch (err) {
+        Logger.log('Error parsing ' + jsonFile.getName() + ': ' + err);
+      }
+    }
+
+    if (summaryFile) {
+      try {
+        var sumText = summaryFile.getBlob().getDataAsString();
+        var sReport = parseSummaryToReportGas(sumText, folderName, imageFiles, imoName, sub.getId());
+        if (sReport && sReport.id) {
+          results.push(sReport);
+          continue;
+        }
+      } catch (sumErr) {
+        Logger.log('Error parsing ' + summaryFile.getName() + ': ' + sumErr);
+      }
+    }
+
+    // Recurse into subfolders (e.g. week folders or category folders)
+    scanFolderForReports(sub, imoName, results, depth + 1);
+  }
+}
+
+function parseSummaryToReportGas(text, folderName, imageFiles, imoName, folderId) {
+  var lines = text.split('\n');
+  function getVal(prefix) {
+    for (var i = 0; i < lines.length; i++) {
+      var l = lines[i];
+      if (l.toLowerCase().indexOf(prefix.toLowerCase()) === 0) {
+        var parts = l.split(':');
+        if (parts.length >= 2) {
+          var val = parts.slice(1).join(':').trim();
+          return (val === 'N/A' || val === 'Pending') ? undefined : val;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  var extractedId = folderName.indexOf('Report_') === 0
+    ? folderName.replace(/^Report_/, '').split('_')[0]
+    : folderName.split('_')[0];
+  var id = getVal('Report ID:') || extractedId || ('rep-' + new Date().getTime());
+  var title = getVal('Report Title:') || folderName;
+
+  var photos = imageFiles.map(function(img, idx) {
+    var stage = 'During';
+    var lName = img.name.toLowerCase();
+    if (lName.indexOf('before') !== -1) stage = 'Before';
+    else if (lName.indexOf('after') !== -1) stage = 'After';
+    return {
+      id: img.id,
+      driveFileId: img.id,
+      url: img.url,
+      thumbnailUrl: img.thumbnailUrl,
+      stage: stage,
+      caption: stage + ' Activity Documentation #' + (idx + 1)
+    };
+  });
+
+  return {
+    id: id,
+    title: title,
+    categoryMode: (getVal('Report Category:') || '').toLowerCase().indexOf('oper') !== -1 ? 'operational' : 'maintenance',
+    imoOffice: getVal('IMO Office:') || imoName,
+    nisBinding: getVal('NIS Binding:'),
+    status: getVal('Status:') || 'Completed',
+    approvalStatus: getVal('Approval Status:') || 'Pending_PreApproval',
+    createdAt: getVal('Created At:') || new Date().toISOString(),
+    locationName: getVal('Location Name:'),
+    canalSegment: getVal('Canal Segment:'),
+    parcelId: getVal('Parcel ID:'),
+    lat: parseFloat(getVal('Latitude (GPS):') || '0') || undefined,
+    lng: parseFloat(getVal('Longitude (GPS):') || '0') || undefined,
+    maintenanceActivity: getVal('Maintenance Activity:'),
+    photos: photos,
+    photoUrl: photos[0] ? photos[0].url : undefined,
+    driveFolderId: folderId,
+    synced: true
+  };
 }
 
 function createJsonResponse(obj) {

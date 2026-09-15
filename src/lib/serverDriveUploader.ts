@@ -1090,6 +1090,31 @@ export async function fetchReportsFromAllDriveFolders(
     return filterByImo(driveReportsCache);
   }
 
+  // Priority 1: Google Apps Script Web App Relay (Permanent, zero OAuth expiry)
+  const appsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
+  if (appsScriptUrl && appsScriptUrl.trim()) {
+    try {
+      console.log('🌐 Fetching reports from Google Drive via Apps Script relay...');
+      const imoParam = (targetImo && targetImo !== 'All IMOs' && targetImo !== 'Regional Office IV-B') 
+        ? `&imo=${encodeURIComponent(targetImo)}` 
+        : '';
+      const fetchUrl = `${appsScriptUrl.trim()}?action=getReports${imoParam}`;
+      const res = await fetch(fetchUrl);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && Array.isArray(data.reports)) {
+          console.log(`✅ Retrieved ${data.reports.length} report(s) directly from Google Drive!`);
+          driveReportsCache = data.reports;
+          driveReportsCacheTime = Date.now();
+          saveServerReportsInternal(data.reports);
+          return filterByImo(data.reports);
+        }
+      }
+    } catch (relayErr) {
+      console.warn('Apps Script getReports fetch warning:', relayErr);
+    }
+  }
+
   const token = await getOrRefreshServerDriveToken(providedToken);
   if (!token) {
     console.warn('⚠️ No Google Drive token available to fetch reports.');
