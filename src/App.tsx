@@ -783,8 +783,8 @@ export default function App() {
       }
 
       try {
-        // Preload any cached photos from IndexedDB into memory for instant offline rendering
-        preloadCachedPhotosIntoMemory().catch(() => {});
+        // Preload all cached photos from IndexedDB into memory for instant offline rendering
+        await preloadCachedPhotosIntoMemory();
 
         const rawCachedReports = await getCachedReportsDB();
         const initialReports = (rawCachedReports && rawCachedReports.length > 0) ? rawCachedReports : getOfflineReports();

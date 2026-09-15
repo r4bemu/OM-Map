@@ -102,7 +102,7 @@ export function saveOfflineReports(reports: FieldReport[]): void {
   
   // Maintain full-fidelity objects with all base64 photos in memory
   if (inMemoryReportsCache && inMemoryReportsCache.length > 0) {
-    // Preserve any existing full base64 images if incoming report has empty URLs
+    // Preserve any existing full base64 images if incoming report has non-base64 or empty URLs
     const memoryMap = new Map<string, FieldReport>();
     inMemoryReportsCache.forEach(mr => memoryMap.set(mr.id, mr));
     
@@ -111,8 +111,19 @@ export function saveOfflineReports(reports: FieldReport[]): void {
       if (existing && existing.photos && r.photos) {
         const mergedPhotos = r.photos.map((p, pIdx) => {
           const ep = existing.photos?.[pIdx] || existing.photos?.find(x => x.id === p.id);
-          if ((!p.url || p.url === '') && ep && ep.url && ep.url.startsWith('data:image/')) {
-            return { ...p, url: ep.url, dataUrl: ep.dataUrl || ep.url, sourceDataUrl: ep.sourceDataUrl };
+          const pHasB64 = (typeof p.url === 'string' && p.url.startsWith('data:image/')) || (typeof p.dataUrl === 'string' && p.dataUrl.startsWith('data:image/'));
+          const epHasB64 = (typeof ep?.url === 'string' && ep.url.startsWith('data:image/')) || (typeof ep?.dataUrl === 'string' && ep.dataUrl.startsWith('data:image/'));
+          const rawId = p.driveFileId || (p.id && p.id.length >= 20 && !p.id.startsWith('photo-') ? p.id : undefined);
+          const cleanId = rawId ? normalizePhotoKey(rawId) : (p.id ? normalizePhotoKey(p.id) : undefined);
+          const syncB64 = cleanId ? getCachedPhotoSync(cleanId) : (p.id ? getCachedPhotoSync(p.id) : null);
+
+          if (!pHasB64) {
+            if (epHasB64) {
+              const b64 = (ep!.url?.startsWith('data:image/') ? ep!.url : ep!.dataUrl)!;
+              return { ...p, url: b64, dataUrl: b64, sourceDataUrl: ep?.sourceDataUrl || p.sourceDataUrl };
+            } else if (syncB64) {
+              return { ...p, url: syncB64, dataUrl: syncB64, sourceDataUrl: p.sourceDataUrl };
+            }
           }
           return p;
         });
@@ -155,11 +166,15 @@ export function saveOfflineReports(reports: FieldReport[]): void {
           if (!p) return;
           const rawId = p.driveFileId || (p.id && p.id.length >= 20 && !p.id.startsWith('photo-') ? p.id : undefined);
           const cleanId = rawId ? normalizePhotoKey(rawId) : (p.id ? normalizePhotoKey(p.id) : undefined);
+          const photoId = p.id ? normalizePhotoKey(p.id) : undefined;
           const dataUrl = (typeof p.url === 'string' && p.url.startsWith('data:image/')) 
             ? p.url 
             : (typeof p.dataUrl === 'string' && p.dataUrl.startsWith('data:image/') ? p.dataUrl : undefined);
           if (cleanId && dataUrl) {
             saveCachedPhotoDB(cleanId, dataUrl).catch(() => {});
+          }
+          if (photoId && photoId !== cleanId && dataUrl) {
+            saveCachedPhotoDB(photoId, dataUrl).catch(() => {});
           }
         });
       }
@@ -355,7 +370,7 @@ export async function getAllCachedPhotoKeysDB(): Promise<string[]> {
   }
 }
 
-export async function preloadCachedPhotosIntoMemory(limit: number = 300): Promise<void> {
+export async function preloadCachedPhotosIntoMemory(limit: number = 1000): Promise<void> {
   try {
     const db = await openDB();
     if (!db.objectStoreNames.contains(STORE_PHOTOS)) return;
@@ -370,6 +385,10 @@ export async function preloadCachedPhotosIntoMemory(limit: number = 300): Promis
           const val = cursor.value;
           if (val && val.id && val.dataUrl) {
             inMemoryPhotoCache.set(val.id, val.dataUrl);
+            const clean = normalizePhotoKey(val.id);
+            if (clean !== val.id) {
+              inMemoryPhotoCache.set(clean, val.dataUrl);
+            }
           }
           count++;
           cursor.continue();
@@ -652,8 +671,27 @@ export async function getCachedReportsDB(): Promise<FieldReport[] | null> {
     return new Promise((resolve) => {
       const req = store.getAll();
       req.onsuccess = () => {
-        const reports = req.result as FieldReport[];
-        if (reports && reports.length > 0) {
+        const rawReports = req.result as FieldReport[];
+        if (rawReports && rawReports.length > 0) {
+          // Hydrate with any synchronous in-memory cached photos
+          const reports = rawReports.map(r => {
+            if (Array.isArray(r.photos) && r.photos.length > 0) {
+              const hydratedPhotos = r.photos.map(p => {
+                if (!p) return p;
+                const pHasB64 = (typeof p.url === 'string' && p.url.startsWith('data:image/')) || (typeof p.dataUrl === 'string' && p.dataUrl.startsWith('data:image/'));
+                if (pHasB64) return p;
+                const rawId = p.driveFileId || (p.id && p.id.length >= 20 && !p.id.startsWith('photo-') ? p.id : undefined);
+                const cleanId = rawId ? normalizePhotoKey(rawId) : (p.id ? normalizePhotoKey(p.id) : undefined);
+                const syncB64 = cleanId ? getCachedPhotoSync(cleanId) : (p.id ? getCachedPhotoSync(p.id) : null);
+                if (syncB64) {
+                  return { ...p, url: syncB64, dataUrl: syncB64 };
+                }
+                return p;
+              });
+              return { ...r, photos: hydratedPhotos };
+            }
+            return r;
+          });
           inMemoryReportsCache = reports;
           resolve(reports);
         } else {
@@ -674,7 +712,7 @@ export async function saveCachedReportsDB(reports: FieldReport[]): Promise<void>
     const db = await openDB();
     if (!db.objectStoreNames.contains(STORE_REPORTS)) return;
 
-    // Read existing stored records to preserve base64 images if incoming report has empty URLs
+    // Read existing stored records to preserve base64 images if incoming report has non-base64 or empty URLs
     const existingRecords = await new Promise<FieldReport[]>((resolve) => {
       try {
         const readTx = db.transaction(STORE_REPORTS, 'readonly');
@@ -695,14 +733,48 @@ export async function saveCachedReportsDB(reports: FieldReport[]): Promise<void>
       if (existing && existing.photos && r.photos) {
         const mergedPhotos = r.photos.map((p, pIdx) => {
           const ep = existing.photos?.[pIdx] || existing.photos?.find(x => x.id === p.id);
-          if ((!p.url || p.url === '') && ep && ep.url && ep.url.startsWith('data:image/')) {
-            return { ...p, url: ep.url, dataUrl: ep.dataUrl || ep.url, sourceDataUrl: ep.sourceDataUrl };
+          const pHasB64 = (typeof p.url === 'string' && p.url.startsWith('data:image/')) || (typeof p.dataUrl === 'string' && p.dataUrl.startsWith('data:image/'));
+          const epHasB64 = (typeof ep?.url === 'string' && ep.url.startsWith('data:image/')) || (typeof ep?.dataUrl === 'string' && ep.dataUrl.startsWith('data:image/'));
+          const rawId = p.driveFileId || (p.id && p.id.length >= 20 && !p.id.startsWith('photo-') ? p.id : undefined);
+          const cleanId = rawId ? normalizePhotoKey(rawId) : (p.id ? normalizePhotoKey(p.id) : undefined);
+          const syncB64 = cleanId ? getCachedPhotoSync(cleanId) : (p.id ? getCachedPhotoSync(p.id) : null);
+
+          if (!pHasB64) {
+            if (epHasB64) {
+              const b64 = (ep!.url?.startsWith('data:image/') ? ep!.url : ep!.dataUrl)!;
+              return { ...p, url: b64, dataUrl: b64, sourceDataUrl: ep?.sourceDataUrl || p.sourceDataUrl };
+            } else if (syncB64) {
+              return { ...p, url: syncB64, dataUrl: syncB64, sourceDataUrl: p.sourceDataUrl };
+            }
           }
           return p;
         });
         return { ...r, photos: mergedPhotos };
       }
       return r;
+    });
+
+    inMemoryReportsCache = mergedReports;
+
+    // Auto-cache any base64 photos into STORE_PHOTOS
+    mergedReports.forEach(r => {
+      if (Array.isArray(r.photos)) {
+        r.photos.forEach(p => {
+          if (!p) return;
+          const rawId = p.driveFileId || (p.id && p.id.length >= 20 && !p.id.startsWith('photo-') ? p.id : undefined);
+          const cleanId = rawId ? normalizePhotoKey(rawId) : (p.id ? normalizePhotoKey(p.id) : undefined);
+          const photoId = p.id ? normalizePhotoKey(p.id) : undefined;
+          const dataUrl = (typeof p.url === 'string' && p.url.startsWith('data:image/')) 
+            ? p.url 
+            : (typeof p.dataUrl === 'string' && p.dataUrl.startsWith('data:image/') ? p.dataUrl : undefined);
+          if (cleanId && dataUrl) {
+            saveCachedPhotoDB(cleanId, dataUrl).catch(() => {});
+          }
+          if (photoId && photoId !== cleanId && dataUrl) {
+            saveCachedPhotoDB(photoId, dataUrl).catch(() => {});
+          }
+        });
+      }
     });
 
     const tx = db.transaction(STORE_REPORTS, 'readwrite');

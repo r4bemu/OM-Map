@@ -90,15 +90,41 @@ export function handleImageFallback(
   const photoId = photo?.id ? normalizePhotoKey(photo.id) : undefined;
   const lookupKey = cleanId || photoId;
 
-  // Step 0: Check IndexedDB asynchronously before falling back to network URLs
+  // Step 0: Immediate synchronous in-memory cache check
+  const syncCached = (cleanId ? getCachedPhotoSync(cleanId) : null) || (photoId ? getCachedPhotoSync(photoId) : null);
+  if (syncCached && target.src !== syncCached) {
+    target.src = syncCached;
+    target.style.display = '';
+    const existingFallback = target.parentElement?.querySelector('.img-doc-fallback, .img-fallback');
+    if (existingFallback) existingFallback.remove();
+    return;
+  }
+
+  // Step 0b: Check IndexedDB asynchronously
   if (lookupKey) {
     getCachedPhotoDB(lookupKey).then(cached => {
       if (cached && target) {
         target.src = cached;
         target.style.display = '';
-        return;
+        const existingFallback = target.parentElement?.querySelector('.img-doc-fallback, .img-fallback');
+        if (existingFallback) existingFallback.remove();
       }
     }).catch(() => {});
+  }
+
+  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+
+  // If offline, do NOT attempt remote CDN requests that will throw unhandled network errors
+  if (isOffline) {
+    target.style.display = 'none';
+    const parent = target.parentElement;
+    if (parent && !parent.querySelector('.img-doc-fallback, .img-fallback')) {
+      const fallback = document.createElement('div');
+      fallback.className = 'img-fallback w-full h-full min-h-[100px] flex flex-col items-center justify-center text-slate-400 text-xs p-3 text-center bg-slate-900/90 rounded-lg select-none';
+      fallback.innerHTML = `<span class="text-xl mb-1 opacity-60">📷</span><span class="text-[11px] font-medium text-slate-400">${fallbackMessage}</span>`;
+      parent.prepend(fallback);
+    }
+    return;
   }
 
   if (cleanId) {
@@ -108,7 +134,7 @@ export function handleImageFallback(
     const tierLh3 = `https://lh3.googleusercontent.com/d/${cleanId}`;
     const tierExport = `https://drive.google.com/uc?export=view&id=${cleanId}`;
 
-    // Step 1: If direct CDN failed (common when offline), try local server proxy
+    // Step 1: If direct CDN failed, try local server proxy
     if (currentSrc.includes('thumbnail?id=') || currentSrc.includes('drive.google.com/thumbnail')) {
       target.src = tierProxy;
       return;
