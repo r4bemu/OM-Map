@@ -1037,12 +1037,41 @@ function loadServerReportsInternal(): any[] {
   return [];
 }
 
+// Helper to sanitize report revisions and prevent multi-megabyte base64 duplication in snapshots
+export function sanitizeReportForStorage(rep: any): any {
+  if (!rep) return rep;
+  const clone = { ...rep };
+  if (Array.isArray(clone.revisions)) {
+    clone.revisions = clone.revisions.map((rev: any) => {
+      if (!rev || !rev.snapshot) return rev;
+      const snap = { ...rev.snapshot };
+      if (snap.photoUrl && typeof snap.photoUrl === 'string' && snap.photoUrl.startsWith('data:image/')) {
+        snap.photoUrl = clone.photoUrl || '';
+      }
+      if (Array.isArray(snap.photos)) {
+        snap.photos = snap.photos.map((p: any, idx: number) => {
+          const pClone = { ...p };
+          if (pClone.url && typeof pClone.url === 'string' && pClone.url.startsWith('data:image/')) {
+            pClone.url = clone.photos && clone.photos[idx] ? clone.photos[idx].url : '';
+          }
+          delete pClone.dataUrl;
+          delete pClone.sourceDataUrl;
+          return pClone;
+        });
+      }
+      delete snap.revisions;
+      return { ...rev, snapshot: snap };
+    });
+  }
+  return clone;
+}
+
 // Helper to save reports to server filesystem
 function saveServerReportsInternal(reportsList: any[]): void {
   try {
     const map = new Map<string, any>();
     for (const r of reportsList) {
-      if (r && r.id && !isDevTestReport(r)) map.set(r.id, r);
+      if (r && r.id && !isDevTestReport(r)) map.set(r.id, sanitizeReportForStorage(r));
     }
     const cleanList = Array.from(map.values());
     if (!fs.existsSync(DATA_DIR)) {

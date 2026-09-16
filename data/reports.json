@@ -1,5 +1,841 @@
 [
   {
+    "id": "WMR-260915-11181146-bbris",
+    "title": "Farm Ditch / Lateral Restoration - MAIN CANAL (0+020 to 1+742)",
+    "reportType": "maintenance",
+    "categoryMode": "maintenance",
+    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+    "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+    "lat": 13.233801972329898,
+    "lng": 121.13526339101938,
+    "secondLat": 13.245827289600651,
+    "secondLng": 121.13011304430567,
+    "locationName": "MAIN CANAL (0+020 to 1+742)",
+    "pathCoords": [
+      [
+        13.233801972329898,
+        121.13526339101938
+      ],
+      [
+        13.233824562398615,
+        121.13563386814643
+      ],
+      [
+        13.234052,
+        121.13562
+      ],
+      [
+        13.234589,
+        121.135792
+      ],
+      [
+        13.234925,
+        121.136016
+      ],
+      [
+        13.235592,
+        121.136338
+      ],
+      [
+        13.236652,
+        121.136577
+      ],
+      [
+        13.236985,
+        121.136563
+      ],
+      [
+        13.237829,
+        121.136325
+      ],
+      [
+        13.238019,
+        121.136244
+      ],
+      [
+        13.238284,
+        121.135461
+      ],
+      [
+        13.238795,
+        121.134026
+      ],
+      [
+        13.239511,
+        121.132158
+      ],
+      [
+        13.239636,
+        121.131904
+      ],
+      [
+        13.240423,
+        121.131561
+      ],
+      [
+        13.241142,
+        121.131275
+      ],
+      [
+        13.242563,
+        121.130713
+      ],
+      [
+        13.244899,
+        121.129794
+      ],
+      [
+        13.245364,
+        121.129603
+      ],
+      [
+        13.245735871813539,
+        121.12954332865637
+      ],
+      [
+        13.245827289600651,
+        121.13011304430567
+      ]
+    ],
+    "referenceContext": "Geometric 0+000 from Vertex 0",
+    "canalSegment": "MAIN CANAL (0+020 to 1+742)",
+    "segmentDistanceMeters": 1824,
+    "segmentDistanceFormatted": "1.82 km (1,824 m)",
+    "maintenanceActivity": "Farm Ditch / Lateral Restoration",
+    "performedBy": "IMO",
+    "performedByList": [
+      "IMO"
+    ],
+    "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO",
+    "status": "Completed",
+    "currentTier": "Pending_IMO_Reviewer",
+    "submittedByUserId": "usr-dev-01",
+    "submittedByUsername": "dev_master",
+    "submittedByRole": "Developer",
+    "approvalStatus": "Approved",
+    "approvedBy": "Lead Systems Architect (Developer)",
+    "approvedAt": "2026-09-15T03:18:11.464Z",
+    "remarks": "Farm ditch and lateral canal rehabilitation works along 1 (covering a 1.82 km (1824.0 m) stretch) were conducted by NIA Personnel. Maintenance operations remain actively in progress along the 1.82 km (1824.0 m) stretch, with continuous field monitoring to achieve targeted physical accomplishment.",
+    "reporterName": "Lead Systems Architect (Developer)",
+    "reporterRole": "Developer",
+    "reporterDesignation": "Master Systems Administrator - Regional Wide",
+    "verifierName": "Aljohn L. Soco",
+    "verifierDesignation": "Foreman A",
+    "revisionNumber": 0,
+    "revisionHistory": [],
+    "createdAt": "2026-09-15T03:18:11.464Z",
+    "synced": true,
+    "photos": [
+      {
+        "id": "1SsxJNl6jRKJqv31vIXFgYfCxuMP8qnO2",
+        "driveFileId": "1SsxJNl6jRKJqv31vIXFgYfCxuMP8qnO2",
+        "url": "https://drive.google.com/thumbnail?id=1SsxJNl6jRKJqv31vIXFgYfCxuMP8qnO2&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1SsxJNl6jRKJqv31vIXFgYfCxuMP8qnO2&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #1",
+        "lat": 13.233801972329898,
+        "lng": 121.13526339101938
+      },
+      {
+        "id": "1wmpH2fWKIxvxwxn-Y9RRN9Ve7G6j8ra8",
+        "driveFileId": "1wmpH2fWKIxvxwxn-Y9RRN9Ve7G6j8ra8",
+        "url": "https://drive.google.com/thumbnail?id=1wmpH2fWKIxvxwxn-Y9RRN9Ve7G6j8ra8&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1wmpH2fWKIxvxwxn-Y9RRN9Ve7G6j8ra8&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #2",
+        "lat": 13.233801972329898,
+        "lng": 121.13526339101938
+      },
+      {
+        "id": "1jRskkzO5bmH3pBNDVNEsLlEjV3uTF31F",
+        "driveFileId": "1jRskkzO5bmH3pBNDVNEsLlEjV3uTF31F",
+        "url": "https://drive.google.com/thumbnail?id=1jRskkzO5bmH3pBNDVNEsLlEjV3uTF31F&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1jRskkzO5bmH3pBNDVNEsLlEjV3uTF31F&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #3",
+        "lat": 13.233801972329898,
+        "lng": 121.13526339101938
+      },
+      {
+        "id": "1jrOz3NVlEE6vihUjJfHqTZXAZICnMOxg",
+        "driveFileId": "1jrOz3NVlEE6vihUjJfHqTZXAZICnMOxg",
+        "url": "https://drive.google.com/thumbnail?id=1jrOz3NVlEE6vihUjJfHqTZXAZICnMOxg&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1jrOz3NVlEE6vihUjJfHqTZXAZICnMOxg&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #4",
+        "lat": 13.233801972329898,
+        "lng": 121.13526339101938
+      },
+      {
+        "id": "1Ar2ocoAzlX6JCf0S-KCQt2N_TO0C8wvZ",
+        "driveFileId": "1Ar2ocoAzlX6JCf0S-KCQt2N_TO0C8wvZ",
+        "url": "https://drive.google.com/thumbnail?id=1Ar2ocoAzlX6JCf0S-KCQt2N_TO0C8wvZ&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1Ar2ocoAzlX6JCf0S-KCQt2N_TO0C8wvZ&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #5",
+        "lat": 13.233801972329898,
+        "lng": 121.13526339101938
+      },
+      {
+        "id": "1NpPNJQkWRMJZ6E6ZQrLIILxBccfz3LXh",
+        "driveFileId": "1NpPNJQkWRMJZ6E6ZQrLIILxBccfz3LXh",
+        "url": "https://drive.google.com/thumbnail?id=1NpPNJQkWRMJZ6E6ZQrLIILxBccfz3LXh&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1NpPNJQkWRMJZ6E6ZQrLIILxBccfz3LXh&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #6",
+        "lat": 13.233801972329898,
+        "lng": 121.13526339101938
+      }
+    ],
+    "photoUrl": "https://drive.google.com/thumbnail?id=1SsxJNl6jRKJqv31vIXFgYfCxuMP8qnO2&sz=w1200",
+    "completionPercent": 100,
+    "desiltingVolumeM3": 0,
+    "revisions": [
+      {
+        "revisionNumber": 1,
+        "createdAt": "2026-09-15T03:18:11.464Z",
+        "createdBy": "Lead Systems Architect (Developer)",
+        "createdById": "usr-dev-01",
+        "createdRole": "Developer",
+        "changeSummary": "Initial field submission",
+        "snapshot": {
+          "id": "WMR-260915-11181146-bbris",
+          "title": "Farm Ditch / Lateral Restoration - MAIN CANAL (0+020 to 1+742)",
+          "reportType": "maintenance",
+          "categoryMode": "maintenance",
+          "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+          "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+          "lat": 13.233801972329898,
+          "lng": 121.13526339101938,
+          "secondLat": 13.245827289600651,
+          "secondLng": 121.13011304430567,
+          "locationName": "MAIN CANAL (0+020 to 1+742)",
+          "pathCoords": [
+            [
+              13.233801972329898,
+              121.13526339101938
+            ],
+            [
+              13.233824562398615,
+              121.13563386814643
+            ],
+            [
+              13.234052,
+              121.13562
+            ],
+            [
+              13.234589,
+              121.135792
+            ],
+            [
+              13.234925,
+              121.136016
+            ],
+            [
+              13.235592,
+              121.136338
+            ],
+            [
+              13.236652,
+              121.136577
+            ],
+            [
+              13.236985,
+              121.136563
+            ],
+            [
+              13.237829,
+              121.136325
+            ],
+            [
+              13.238019,
+              121.136244
+            ],
+            [
+              13.238284,
+              121.135461
+            ],
+            [
+              13.238795,
+              121.134026
+            ],
+            [
+              13.239511,
+              121.132158
+            ],
+            [
+              13.239636,
+              121.131904
+            ],
+            [
+              13.240423,
+              121.131561
+            ],
+            [
+              13.241142,
+              121.131275
+            ],
+            [
+              13.242563,
+              121.130713
+            ],
+            [
+              13.244899,
+              121.129794
+            ],
+            [
+              13.245364,
+              121.129603
+            ],
+            [
+              13.245735871813539,
+              121.12954332865637
+            ],
+            [
+              13.245827289600651,
+              121.13011304430567
+            ]
+          ],
+          "referenceContext": "Geometric 0+000 from Vertex 0",
+          "canalSegment": "MAIN CANAL (0+020 to 1+742)",
+          "segmentDistanceMeters": 1824,
+          "segmentDistanceFormatted": "1.82 km (1,824 m)",
+          "maintenanceActivity": "Farm Ditch / Lateral Restoration",
+          "performedBy": "IMO",
+          "performedByList": [
+            "IMO"
+          ],
+          "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO",
+          "status": "Completed",
+          "currentTier": "Pending_IMO_Preparer",
+          "submittedByUserId": "usr-dev-01",
+          "submittedByUsername": "dev_master",
+          "submittedByRole": "Developer",
+          "approvalStatus": "Approved",
+          "approvedBy": "Lead Systems Architect (Developer)",
+          "approvedAt": "2026-09-15T03:18:11.464Z",
+          "remarks": "Farm ditch and lateral canal rehabilitation works along 1 (covering a 1.82 km (1824.0 m) stretch) were conducted by NIA Personnel. Maintenance operations remain actively in progress along the 1.82 km (1824.0 m) stretch, with continuous field monitoring to achieve targeted physical accomplishment.",
+          "reporterName": "Lead Systems Architect (Developer)",
+          "reporterRole": "Developer",
+          "reporterDesignation": "Master Systems Administrator - Regional Wide",
+          "verifierName": "Aljohn L. Soco",
+          "verifierDesignation": "Foreman A",
+          "revisionNumber": 0,
+          "revisionHistory": [],
+          "createdAt": "2026-09-15T03:18:11.464Z",
+          "synced": true,
+          "photos": [
+            {
+              "id": "photo-1789442225608-m31f5m",
+              "url": "https://drive.google.com/thumbnail?id=1SsxJNl6jRKJqv31vIXFgYfCxuMP8qnO2&sz=w1200",
+              "stage": "Before",
+              "caption": "Before #1",
+              "capturedAt": "2026-09-09T01:35:05.766Z",
+              "sizeBytes": 254627,
+              "framingConfig": {
+                "mode": "fit-width",
+                "zoom": 1,
+                "panStep": 0,
+                "offsetXPercent": 0,
+                "offsetYPercent": 0,
+                "naturalWidth": 1536,
+                "naturalHeight": 2048,
+                "naturalAspectRatio": 0.75
+              },
+              "locationName": "MAIN CANAL (0+020 to 1+742)",
+              "canalSegment": "MAIN CANAL (0+020 to 1+742)",
+              "featureName": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+              "stageLabel": "Before #1",
+              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+              "lat": 13.233801972329898,
+              "lng": 121.13526339101938
+            },
+            {
+              "id": "photo-1789442225701-c9uimz",
+              "url": "https://drive.google.com/thumbnail?id=1wmpH2fWKIxvxwxn-Y9RRN9Ve7G6j8ra8&sz=w1200",
+              "stage": "During",
+              "caption": "During #1",
+              "capturedAt": "2026-09-09T01:35:01.324Z",
+              "sizeBytes": 261899,
+              "framingConfig": {
+                "mode": "fit-width",
+                "zoom": 1,
+                "panStep": 0,
+                "offsetXPercent": 0,
+                "offsetYPercent": 0,
+                "naturalWidth": 1536,
+                "naturalHeight": 2048,
+                "naturalAspectRatio": 0.75
+              },
+              "locationName": "MAIN CANAL (0+020 to 1+742)",
+              "canalSegment": "MAIN CANAL (0+020 to 1+742)",
+              "featureName": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+              "stageLabel": "During #1",
+              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+              "lat": 13.233801972329898,
+              "lng": 121.13526339101938
+            },
+            {
+              "id": "photo-1789442225777-oy8gq5",
+              "url": "https://drive.google.com/thumbnail?id=1jRskkzO5bmH3pBNDVNEsLlEjV3uTF31F&sz=w1200",
+              "stage": "During",
+              "caption": "During #2",
+              "capturedAt": "2026-09-09T01:34:57.295Z",
+              "sizeBytes": 250051,
+              "framingConfig": {
+                "mode": "fit-width",
+                "zoom": 1,
+                "panStep": 0,
+                "offsetXPercent": 0,
+                "offsetYPercent": 0,
+                "naturalWidth": 1536,
+                "naturalHeight": 2048,
+                "naturalAspectRatio": 0.75
+              },
+              "locationName": "MAIN CANAL (0+020 to 1+742)",
+              "canalSegment": "MAIN CANAL (0+020 to 1+742)",
+              "featureName": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+              "stageLabel": "During #2",
+              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+              "lat": 13.233801972329898,
+              "lng": 121.13526339101938
+            }
+          ],
+          "photoUrl": "https://drive.google.com/thumbnail?id=1SsxJNl6jRKJqv31vIXFgYfCxuMP8qnO2&sz=w1200",
+          "completionPercent": 100,
+          "desiltingVolumeM3": 0
+        }
+      }
+    ],
+    "activeRevisionNumber": 1,
+    "tierHistory": [
+      {
+        "id": "th-1789448550714",
+        "tier": "Pending_IMO_Reviewer",
+        "action": "forwarded",
+        "actorName": "Lead Systems Architect (Developer)",
+        "actorId": "usr-dev-01",
+        "actorRole": "Developer",
+        "timestamp": "2026-09-15T05:02:30.714Z",
+        "comments": "Approved by Developer"
+      },
+      {
+        "id": "th-1789448553337",
+        "tier": "Pending_IMO_Reviewer",
+        "action": "forwarded",
+        "actorName": "Lead Systems Architect (Developer)",
+        "actorId": "usr-dev-01",
+        "actorRole": "Developer",
+        "timestamp": "2026-09-15T05:02:33.337Z",
+        "comments": "Approved by Developer"
+      },
+      {
+        "id": "th-1789448555173",
+        "tier": "Pending_IMO_Reviewer",
+        "action": "forwarded",
+        "actorName": "Lead Systems Architect (Developer)",
+        "actorId": "usr-dev-01",
+        "actorRole": "Developer",
+        "timestamp": "2026-09-15T05:02:35.173Z",
+        "comments": "Approved by Developer"
+      }
+    ],
+    "driveFolderId": "1iLYEctOG703EEWhvVZYpEcEocUzgN7KC"
+  },
+  {
+    "id": "WMR-260915-11592750-bbris",
+    "title": "Temporary Fix - BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+    "reportType": "maintenance",
+    "categoryMode": "maintenance",
+    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+    "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+    "lat": 13.288933,
+    "lng": 121.105811,
+    "locationName": "BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+    "pathCoords": [
+      [
+        13.288933,
+        121.105811
+      ]
+    ],
+    "referenceContext": "Structure Attribute: BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+    "canalSegment": "BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+    "maintenanceActivity": "Temporary Fix",
+    "performedBy": "IMO",
+    "performedByList": [
+      "IMO"
+    ],
+    "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO",
+    "status": "Completed",
+    "currentTier": "Pending_IMO_Preparer",
+    "submittedByUserId": "usr-dev-01",
+    "submittedByUsername": "dev_master",
+    "submittedByRole": "Developer",
+    "approvalStatus": "Approved",
+    "approvedBy": "Lead Systems Architect (Developer)",
+    "approvedAt": "2026-09-15T03:59:27.505Z",
+    "remarks": "Emergency remedial and temporary repair works along Bayog Lateral A2 End Of Canal/ Check Gate (3+004.3) at (13.28893°N, 121.10581°E) were conducted by NIA Personnel. Prior to intervention, initial site inspection revealed breached / eroded canal section, which significantly restricted design water conveyance. During operations, maintenance personnel carried out worker placing sacks at gate. Maintenance operations remain actively in progress, with field crews continuing on-site works toward target completion.",
+    "reporterName": "Lead Systems Architect (Developer)",
+    "reporterRole": "Developer",
+    "reporterDesignation": "Master Systems Administrator - Regional Wide",
+    "verifierName": "Aljohn L. Soco",
+    "verifierDesignation": "Foreman A",
+    "revisionNumber": 0,
+    "revisionHistory": [],
+    "createdAt": "2026-09-15T03:59:27.506Z",
+    "synced": true,
+    "photos": [
+      {
+        "id": "1YeCepeW-sd38gkndllEg9vS4DydZiF9n",
+        "driveFileId": "1YeCepeW-sd38gkndllEg9vS4DydZiF9n",
+        "url": "https://drive.google.com/thumbnail?id=1YeCepeW-sd38gkndllEg9vS4DydZiF9n&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1YeCepeW-sd38gkndllEg9vS4DydZiF9n&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #1",
+        "lat": 13.288933,
+        "lng": 121.105811
+      },
+      {
+        "id": "1BjbYi9SPsbrHqJDkiQ9Pma9PtEs1vJf5",
+        "driveFileId": "1BjbYi9SPsbrHqJDkiQ9Pma9PtEs1vJf5",
+        "url": "https://drive.google.com/thumbnail?id=1BjbYi9SPsbrHqJDkiQ9Pma9PtEs1vJf5&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1BjbYi9SPsbrHqJDkiQ9Pma9PtEs1vJf5&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #2",
+        "lat": 13.288933,
+        "lng": 121.105811
+      },
+      {
+        "id": "1kpLdS_qBK4i2_SV3FdtfuRaTBztmd5Yp",
+        "driveFileId": "1kpLdS_qBK4i2_SV3FdtfuRaTBztmd5Yp",
+        "url": "https://drive.google.com/thumbnail?id=1kpLdS_qBK4i2_SV3FdtfuRaTBztmd5Yp&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1kpLdS_qBK4i2_SV3FdtfuRaTBztmd5Yp&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #3",
+        "lat": 13.288933,
+        "lng": 121.105811
+      }
+    ],
+    "photoUrl": "https://drive.google.com/thumbnail?id=1YeCepeW-sd38gkndllEg9vS4DydZiF9n&sz=w1200",
+    "completionPercent": 100,
+    "desiltingVolumeM3": 0,
+    "revisions": [
+      {
+        "revisionNumber": 1,
+        "createdAt": "2026-09-15T03:59:27.506Z",
+        "createdBy": "Lead Systems Architect (Developer)",
+        "createdById": "usr-dev-01",
+        "createdRole": "Developer",
+        "changeSummary": "Initial field submission",
+        "snapshot": {
+          "id": "WMR-260915-11592750-bbris",
+          "title": "Temporary Fix - BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+          "reportType": "maintenance",
+          "categoryMode": "maintenance",
+          "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+          "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+          "lat": 13.288933,
+          "lng": 121.105811,
+          "locationName": "BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+          "pathCoords": [
+            [
+              13.288933,
+              121.105811
+            ]
+          ],
+          "referenceContext": "Structure Attribute: BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+          "canalSegment": "BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+          "maintenanceActivity": "Temporary Fix",
+          "performedBy": "IMO",
+          "performedByList": [
+            "IMO"
+          ],
+          "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO",
+          "status": "Completed",
+          "currentTier": "Pending_IMO_Preparer",
+          "submittedByUserId": "usr-dev-01",
+          "submittedByUsername": "dev_master",
+          "submittedByRole": "Developer",
+          "approvalStatus": "Approved",
+          "approvedBy": "Lead Systems Architect (Developer)",
+          "approvedAt": "2026-09-15T03:59:27.505Z",
+          "remarks": "Emergency remedial and temporary repair works along Bayog Lateral A2 End Of Canal/ Check Gate (3+004.3) at (13.28893°N, 121.10581°E) were conducted by NIA Personnel. Prior to intervention, initial site inspection revealed breached / eroded canal section, which significantly restricted design water conveyance. During operations, maintenance personnel carried out worker placing sacks at gate. Maintenance operations remain actively in progress, with field crews continuing on-site works toward target completion.",
+          "reporterName": "Lead Systems Architect (Developer)",
+          "reporterRole": "Developer",
+          "reporterDesignation": "Master Systems Administrator - Regional Wide",
+          "verifierName": "Aljohn L. Soco",
+          "verifierDesignation": "Foreman A",
+          "revisionNumber": 0,
+          "revisionHistory": [],
+          "createdAt": "2026-09-15T03:59:27.506Z",
+          "synced": true,
+          "photos": [
+            {
+              "id": "photo-1789444755328-cxc900",
+              "url": "https://drive.google.com/thumbnail?id=1YeCepeW-sd38gkndllEg9vS4DydZiF9n&sz=w1200",
+              "stage": "Before",
+              "caption": "Breached / eroded canal section",
+              "capturedAt": "2026-09-08T07:40:25.489Z",
+              "sizeBytes": 211879,
+              "framingConfig": {
+                "mode": "fit-height",
+                "zoom": 1,
+                "panStep": 0,
+                "offsetXPercent": 0,
+                "offsetYPercent": 0,
+                "naturalWidth": 2048,
+                "naturalHeight": 1536,
+                "naturalAspectRatio": 1.3333333333333333
+              },
+              "locationName": "BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+              "canalSegment": "BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+              "featureName": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+              "stageLabel": "Before #1",
+              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+              "lat": 13.288933,
+              "lng": 121.105811
+            },
+            {
+              "id": "photo-1789444755417-w6ymv2",
+              "url": "https://drive.google.com/thumbnail?id=1BjbYi9SPsbrHqJDkiQ9Pma9PtEs1vJf5&sz=w1200",
+              "stage": "During",
+              "caption": "Worker placing sacks at gate",
+              "capturedAt": "2026-09-08T07:40:20.890Z",
+              "sizeBytes": 232741,
+              "framingConfig": {
+                "mode": "fit-height",
+                "zoom": 1,
+                "panStep": 0,
+                "offsetXPercent": 0,
+                "offsetYPercent": 0,
+                "naturalWidth": 2048,
+                "naturalHeight": 1536,
+                "naturalAspectRatio": 1.3333333333333333
+              },
+              "locationName": "BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+              "canalSegment": "BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+              "featureName": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+              "stageLabel": "During #1",
+              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+              "lat": 13.288933,
+              "lng": 121.105811
+            },
+            {
+              "id": "photo-1789444755501-jcjm0k",
+              "url": "https://drive.google.com/thumbnail?id=1kpLdS_qBK4i2_SV3FdtfuRaTBztmd5Yp&sz=w1200",
+              "stage": "During",
+              "caption": "Workers placing sandbags",
+              "capturedAt": "2026-09-08T05:59:01.576Z",
+              "sizeBytes": 254882,
+              "framingConfig": {
+                "mode": "fit-width",
+                "zoom": 1,
+                "panStep": 0,
+                "offsetXPercent": 0,
+                "offsetYPercent": 0,
+                "naturalWidth": 1536,
+                "naturalHeight": 2048,
+                "naturalAspectRatio": 0.75
+              },
+              "locationName": "BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+              "canalSegment": "BAYOG LATERAL A2 END OF CANAL/ CHECK GATE (3+004.3)",
+              "featureName": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+              "stageLabel": "During #2",
+              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+              "lat": 13.288933,
+              "lng": 121.105811
+            }
+          ],
+          "photoUrl": "https://drive.google.com/thumbnail?id=1YeCepeW-sd38gkndllEg9vS4DydZiF9n&sz=w1200",
+          "completionPercent": 100,
+          "desiltingVolumeM3": 0
+        }
+      }
+    ],
+    "activeRevisionNumber": 1,
+    "driveFolderId": "11AfpZQhAcRIASzfvag9Ybf4_b23spPT-"
+  },
+  {
+    "id": "WMR-260830-00565464-bbris",
+    "title": "Desilting / Clearing of Canal (Manual) - MAIN CANAL END OF CANAL (23+628)",
+    "reportType": "maintenance",
+    "categoryMode": "maintenance",
+    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+    "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+    "lat": 13.410601,
+    "lng": 121.168908,
+    "locationName": "MAIN CANAL END OF CANAL (23+628)",
+    "pathCoords": [
+      [
+        13.410601,
+        121.168908
+      ]
+    ],
+    "canalSegment": "MAIN CANAL END OF CANAL (23+628)",
+    "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
+    "performedBy": "IMO, IA",
+    "performedByList": [
+      "IMO",
+      "IA"
+    ],
+    "performedByIA": "SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.",
+    "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO; by IA: SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.",
+    "status": "Completed",
+    "currentTier": "Pending_NIS_Preparer",
+    "submittedByUserId": "usr-dev-01",
+    "submittedByUsername": "dev_master",
+    "submittedByRole": "Developer",
+    "approvalStatus": "Approved",
+    "approvedBy": "Engr. Test Memory",
+    "approvedAt": "2026-08-29T16:56:54.645Z",
+    "remarks": "Manual canal desilting and vegetation clearing operations along Main Canal End Of Canal (Sta. 23+628) were undertaken by NIA Personnel in close coordination with SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.. Prior to intervention, initial site inspection revealed vegetation overgrowth and fine sand (banlik) deposit, which significantly restricted design water conveyance. During operations, maintenance personnel carried out excavator removing vegetation from canal and scooping and desilting canal bed, using rented equipment. With all target works completed and verified on-site, the canal section has been restored to optimal operating condition.",
+    "reporterName": "Engr. Test Memory",
+    "reporterRole": "Developer",
+    "reporterDesignation": "Master Systems Administrator - Regional Wide",
+    "verifierName": "AVE JANE V. ALVARADO",
+    "verifierDesignation": "Supervising Engineer A",
+    "revisionNumber": 0,
+    "revisionHistory": [],
+    "createdAt": "2026-08-29T16:56:54.646Z",
+    "synced": true,
+    "photos": [
+      {
+        "id": "1t015ePu8H8KXZluR9KfmsNXyqmf2RrbU",
+        "driveFileId": "1t015ePu8H8KXZluR9KfmsNXyqmf2RrbU",
+        "url": "https://drive.google.com/thumbnail?id=1t015ePu8H8KXZluR9KfmsNXyqmf2RrbU&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1t015ePu8H8KXZluR9KfmsNXyqmf2RrbU&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #1",
+        "lat": 13.410601,
+        "lng": 121.168908
+      },
+      {
+        "id": "1TUNjoXYPYncl3WZDJjpV1aFPBDTpd5_V",
+        "driveFileId": "1TUNjoXYPYncl3WZDJjpV1aFPBDTpd5_V",
+        "url": "https://drive.google.com/thumbnail?id=1TUNjoXYPYncl3WZDJjpV1aFPBDTpd5_V&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1TUNjoXYPYncl3WZDJjpV1aFPBDTpd5_V&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #2",
+        "lat": 13.410601,
+        "lng": 121.168908
+      }
+    ],
+    "photoUrl": "https://drive.google.com/thumbnail?id=1t015ePu8H8KXZluR9KfmsNXyqmf2RrbU&sz=w1200",
+    "completionPercent": 100,
+    "desiltingVolumeM3": 0,
+    "revisions": [
+      {
+        "revisionNumber": 1,
+        "createdAt": "2026-08-29T16:56:54.646Z",
+        "createdBy": "Engr. Test Memory",
+        "createdById": "usr-dev-01",
+        "createdRole": "Developer",
+        "changeSummary": "Initial field submission",
+        "snapshot": {
+          "id": "WMR-260830-00565464-bbris",
+          "title": "Desilting / Clearing of Canal (Manual) - MAIN CANAL END OF CANAL (23+628)",
+          "reportType": "maintenance",
+          "categoryMode": "maintenance",
+          "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+          "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+          "lat": 13.410601,
+          "lng": 121.168908,
+          "locationName": "MAIN CANAL END OF CANAL (23+628)",
+          "pathCoords": [
+            [
+              13.410601,
+              121.168908
+            ]
+          ],
+          "canalSegment": "MAIN CANAL END OF CANAL (23+628)",
+          "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
+          "performedBy": "IMO, IA",
+          "performedByList": [
+            "IMO",
+            "IA"
+          ],
+          "performedByIA": "SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.",
+          "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO; by IA: SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.",
+          "status": "Completed",
+          "currentTier": "Pending_NIS_Preparer",
+          "submittedByUserId": "usr-dev-01",
+          "submittedByUsername": "dev_master",
+          "submittedByRole": "Developer",
+          "approvalStatus": "Approved",
+          "approvedBy": "Engr. Test Memory",
+          "approvedAt": "2026-08-29T16:56:54.645Z",
+          "remarks": "Manual canal desilting and vegetation clearing operations along Main Canal End Of Canal (Sta. 23+628) were undertaken by NIA Personnel in close coordination with SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.. Prior to intervention, initial site inspection revealed vegetation overgrowth and fine sand (banlik) deposit, which significantly restricted design water conveyance. During operations, maintenance personnel carried out excavator removing vegetation from canal and scooping and desilting canal bed, using rented equipment. With all target works completed and verified on-site, the canal section has been restored to optimal operating condition.",
+          "reporterName": "Engr. Test Memory",
+          "reporterRole": "Developer",
+          "reporterDesignation": "Master Systems Administrator - Regional Wide",
+          "verifierName": "AVE JANE V. ALVARADO",
+          "verifierDesignation": "Supervising Engineer A",
+          "revisionNumber": 0,
+          "revisionHistory": [],
+          "createdAt": "2026-08-29T16:56:54.646Z",
+          "synced": true,
+          "photos": [
+            {
+              "id": "photo-1788022488278-lmoto4",
+              "url": "https://drive.google.com/thumbnail?id=1t015ePu8H8KXZluR9KfmsNXyqmf2RrbU&sz=w1200",
+              "stage": "Before",
+              "caption": "Canal bed showing vegetation overgrowth and fine sand (banlik) deposit.",
+              "capturedAt": "2026-08-17T13:02:55.161Z",
+              "sizeBytes": 279806,
+              "framingConfig": {
+                "mode": "fit-height",
+                "zoom": 1,
+                "panStep": 0,
+                "offsetXPercent": 0,
+                "offsetYPercent": 0,
+                "naturalWidth": 4624,
+                "naturalHeight": 2136,
+                "naturalAspectRatio": 2.1647940074906367
+              },
+              "canalSegment": "MAIN CANAL END OF CANAL (23+628)",
+              "featureName": "NIS",
+              "stageLabel": "Before #1",
+              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+              "locationName": "MAIN CANAL END OF CANAL (23+628)",
+              "lat": 13.410601,
+              "lng": 121.168908
+            },
+            {
+              "id": "photo-1788022491912-shkhhh",
+              "url": "https://drive.google.com/thumbnail?id=1TUNjoXYPYncl3WZDJjpV1aFPBDTpd5_V&sz=w1200",
+              "stage": "During",
+              "caption": "Excavator removing vegetation from canal and scooping and desilting canal bed, using rented equipment.",
+              "capturedAt": "2026-08-17T12:58:32.000Z",
+              "sizeBytes": 291423,
+              "framingConfig": {
+                "mode": "fit-height",
+                "zoom": 1,
+                "panStep": 0,
+                "offsetXPercent": 0,
+                "offsetYPercent": 0,
+                "naturalWidth": 3264,
+                "naturalHeight": 1504,
+                "naturalAspectRatio": 2.1702127659574466
+              },
+              "canalSegment": "MAIN CANAL END OF CANAL (23+628)",
+              "featureName": "NIS",
+              "stageLabel": "During #1",
+              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+              "locationName": "MAIN CANAL END OF CANAL (23+628)",
+              "lat": 13.410601,
+              "lng": 121.168908
+            }
+          ],
+          "photoUrl": "https://drive.google.com/thumbnail?id=1t015ePu8H8KXZluR9KfmsNXyqmf2RrbU&sz=w1200",
+          "completionPercent": 100,
+          "desiltingVolumeM3": 0
+        }
+      }
+    ],
+    "activeRevisionNumber": 1,
+    "driveFolderId": "1AWO3NlZu5YGHsTFz1flu93iQ0rMHVeE3"
+  },
+  {
     "id": "WMR-260828-11594980-bbris",
     "title": "Canal Repair / Construction - LATERAL A THRESHER CROSSING (9+634) to LATERAL A (10+290)",
     "reportType": "maintenance",
@@ -88,33 +924,27 @@
     "synced": true,
     "photos": [
       {
-        "id": "1PmP4RdlTSWgLQp99K7zzj4oO5B5dxXyl",
-        "url": "https://drive.google.com/thumbnail?id=1PmP4RdlTSWgLQp99K7zzj4oO5B5dxXyl&sz=w1200",
-        "driveFileId": "1PmP4RdlTSWgLQp99K7zzj4oO5B5dxXyl",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1PmP4RdlTSWgLQp99K7zzj4oO5B5dxXyl&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #1",
-        "capturedAt": "2026-08-28T03:59:49.800Z",
-        "locationName": "LATERAL A THRESHER CROSSING (9+634) to LATERAL A (10+290)",
-        "canalSegment": "LATERAL A THRESHER CROSSING (9+634) to LATERAL A (10+290)",
+        "id": "1S1ojs-92h8CDpt4_BPmP9cJ5FsiacDLk",
+        "driveFileId": "1S1ojs-92h8CDpt4_BPmP9cJ5FsiacDLk",
+        "url": "https://drive.google.com/thumbnail?id=1S1ojs-92h8CDpt4_BPmP9cJ5FsiacDLk&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1S1ojs-92h8CDpt4_BPmP9cJ5FsiacDLk&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #1",
         "lat": 13.358456,
         "lng": 121.125908
       },
       {
-        "id": "1S1ojs-92h8CDpt4_BPmP9cJ5FsiacDLk",
-        "url": "https://drive.google.com/thumbnail?id=1S1ojs-92h8CDpt4_BPmP9cJ5FsiacDLk&sz=w1200",
-        "driveFileId": "1S1ojs-92h8CDpt4_BPmP9cJ5FsiacDLk",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1S1ojs-92h8CDpt4_BPmP9cJ5FsiacDLk&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #2",
-        "capturedAt": "2026-08-28T03:59:49.800Z",
-        "locationName": "LATERAL A THRESHER CROSSING (9+634) to LATERAL A (10+290)",
-        "canalSegment": "LATERAL A THRESHER CROSSING (9+634) to LATERAL A (10+290)",
+        "id": "1PmP4RdlTSWgLQp99K7zzj4oO5B5dxXyl",
+        "driveFileId": "1PmP4RdlTSWgLQp99K7zzj4oO5B5dxXyl",
+        "url": "https://drive.google.com/thumbnail?id=1PmP4RdlTSWgLQp99K7zzj4oO5B5dxXyl&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1PmP4RdlTSWgLQp99K7zzj4oO5B5dxXyl&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #2",
         "lat": 13.358456,
         "lng": 121.125908
       }
     ],
-    "photoUrl": "https://drive.google.com/thumbnail?id=1PmP4RdlTSWgLQp99K7zzj4oO5B5dxXyl&sz=w1200",
+    "photoUrl": "https://drive.google.com/thumbnail?id=1S1ojs-92h8CDpt4_BPmP9cJ5FsiacDLk&sz=w1200",
     "completionPercent": 100,
     "desiltingVolumeM3": 0,
     "revisions": [
@@ -215,7 +1045,7 @@
           "photos": [
             {
               "id": "photo-1787889416379-3m4hjr",
-              "url": "",
+              "url": "https://drive.google.com/thumbnail?id=1S1ojs-92h8CDpt4_BPmP9cJ5FsiacDLk&sz=w1200",
               "stage": "Before",
               "caption": "Culvert cracked and damaged and collapsed box culvert cover, for repair under future POW.",
               "capturedAt": "2024-10-08T08:04:36.000Z",
@@ -240,7 +1070,7 @@
             },
             {
               "id": "photo-1787889416435-i3vzks",
-              "url": "",
+              "url": "https://drive.google.com/thumbnail?id=1PmP4RdlTSWgLQp99K7zzj4oO5B5dxXyl&sz=w1200",
               "stage": "During",
               "caption": "Concrete canal lining freshly cured concrete surface, to restore canal conveyance capacity.",
               "capturedAt": "2024-11-04T07:36:52.000Z",
@@ -264,198 +1094,14 @@
               "lng": 121.125908
             }
           ],
-          "photoUrl": "",
+          "photoUrl": "https://drive.google.com/thumbnail?id=1S1ojs-92h8CDpt4_BPmP9cJ5FsiacDLk&sz=w1200",
           "completionPercent": 100,
           "desiltingVolumeM3": 0
         }
       }
     ],
-    "activeRevisionNumber": 1
-  },
-  {
-    "id": "WMR-260830-00565464-bbris",
-    "title": "Desilting / Clearing of Canal (Manual) - MAIN CANAL END OF CANAL (23+628)",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
-    "lat": 13.410601,
-    "lng": 121.168908,
-    "locationName": "MAIN CANAL END OF CANAL (23+628)",
-    "pathCoords": [
-      [
-        13.410601,
-        121.168908
-      ]
-    ],
-    "canalSegment": "MAIN CANAL END OF CANAL (23+628)",
-    "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
-    "performedBy": "IMO, IA",
-    "performedByList": [
-      "IMO",
-      "IA"
-    ],
-    "performedByIA": "SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.",
-    "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO; by IA: SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.",
-    "status": "Completed",
-    "currentTier": "Pending_NIS_Preparer",
-    "submittedByUserId": "usr-dev-01",
-    "submittedByUsername": "dev_master",
-    "submittedByRole": "Developer",
-    "approvalStatus": "Approved",
-    "approvedBy": "Engr. Test Memory",
-    "approvedAt": "2026-08-29T16:56:54.645Z",
-    "remarks": "Manual canal desilting and vegetation clearing operations along Main Canal End Of Canal (Sta. 23+628) were undertaken by NIA Personnel in close coordination with SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.. Prior to intervention, initial site inspection revealed vegetation overgrowth and fine sand (banlik) deposit, which significantly restricted design water conveyance. During operations, maintenance personnel carried out excavator removing vegetation from canal and scooping and desilting canal bed, using rented equipment. With all target works completed and verified on-site, the canal section has been restored to optimal operating condition.",
-    "reporterName": "Engr. Test Memory",
-    "reporterRole": "Developer",
-    "reporterDesignation": "Master Systems Administrator - Regional Wide",
-    "verifierName": "AVE JANE V. ALVARADO",
-    "verifierDesignation": "Supervising Engineer A",
-    "revisionNumber": 0,
-    "revisionHistory": [],
-    "createdAt": "2026-08-29T16:56:54.646Z",
-    "synced": true,
-    "photos": [
-      {
-        "id": "1t015ePu8H8KXZluR9KfmsNXyqmf2RrbU",
-        "url": "https://drive.google.com/thumbnail?id=1t015ePu8H8KXZluR9KfmsNXyqmf2RrbU&sz=w1200",
-        "driveFileId": "1t015ePu8H8KXZluR9KfmsNXyqmf2RrbU",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1t015ePu8H8KXZluR9KfmsNXyqmf2RrbU&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #1",
-        "capturedAt": "2026-08-29T16:56:54.646Z",
-        "locationName": "MAIN CANAL END OF CANAL (23+628)",
-        "canalSegment": "MAIN CANAL END OF CANAL (23+628)",
-        "lat": 13.410601,
-        "lng": 121.168908
-      },
-      {
-        "id": "1TUNjoXYPYncl3WZDJjpV1aFPBDTpd5_V",
-        "url": "https://drive.google.com/thumbnail?id=1TUNjoXYPYncl3WZDJjpV1aFPBDTpd5_V&sz=w1200",
-        "driveFileId": "1TUNjoXYPYncl3WZDJjpV1aFPBDTpd5_V",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1TUNjoXYPYncl3WZDJjpV1aFPBDTpd5_V&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #2",
-        "capturedAt": "2026-08-29T16:56:54.646Z",
-        "locationName": "MAIN CANAL END OF CANAL (23+628)",
-        "canalSegment": "MAIN CANAL END OF CANAL (23+628)",
-        "lat": 13.410601,
-        "lng": 121.168908
-      }
-    ],
-    "photoUrl": "https://drive.google.com/thumbnail?id=1t015ePu8H8KXZluR9KfmsNXyqmf2RrbU&sz=w1200",
-    "completionPercent": 100,
-    "desiltingVolumeM3": 0,
-    "revisions": [
-      {
-        "revisionNumber": 1,
-        "createdAt": "2026-08-29T16:56:54.646Z",
-        "createdBy": "Engr. Test Memory",
-        "createdById": "usr-dev-01",
-        "createdRole": "Developer",
-        "changeSummary": "Initial field submission",
-        "snapshot": {
-          "id": "WMR-260830-00565464-bbris",
-          "title": "Desilting / Clearing of Canal (Manual) - MAIN CANAL END OF CANAL (23+628)",
-          "reportType": "maintenance",
-          "categoryMode": "maintenance",
-          "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-          "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
-          "lat": 13.410601,
-          "lng": 121.168908,
-          "locationName": "MAIN CANAL END OF CANAL (23+628)",
-          "pathCoords": [
-            [
-              13.410601,
-              121.168908
-            ]
-          ],
-          "canalSegment": "MAIN CANAL END OF CANAL (23+628)",
-          "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
-          "performedBy": "IMO, IA",
-          "performedByList": [
-            "IMO",
-            "IA"
-          ],
-          "performedByIA": "SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.",
-          "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO; by IA: SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.",
-          "status": "Completed",
-          "currentTier": "Pending_NIS_Preparer",
-          "submittedByUserId": "usr-dev-01",
-          "submittedByUsername": "dev_master",
-          "submittedByRole": "Developer",
-          "approvalStatus": "Approved",
-          "approvedBy": "Engr. Test Memory",
-          "approvedAt": "2026-08-29T16:56:54.645Z",
-          "remarks": "Manual canal desilting and vegetation clearing operations along Main Canal End Of Canal (Sta. 23+628) were undertaken by NIA Personnel in close coordination with SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.. Prior to intervention, initial site inspection revealed vegetation overgrowth and fine sand (banlik) deposit, which significantly restricted design water conveyance. During operations, maintenance personnel carried out excavator removing vegetation from canal and scooping and desilting canal bed, using rented equipment. With all target works completed and verified on-site, the canal section has been restored to optimal operating condition.",
-          "reporterName": "Engr. Test Memory",
-          "reporterRole": "Developer",
-          "reporterDesignation": "Master Systems Administrator - Regional Wide",
-          "verifierName": "AVE JANE V. ALVARADO",
-          "verifierDesignation": "Supervising Engineer A",
-          "revisionNumber": 0,
-          "revisionHistory": [],
-          "createdAt": "2026-08-29T16:56:54.646Z",
-          "synced": true,
-          "photos": [
-            {
-              "id": "photo-1788022488278-lmoto4",
-              "url": "",
-              "stage": "Before",
-              "caption": "Canal bed showing vegetation overgrowth and fine sand (banlik) deposit.",
-              "capturedAt": "2026-08-17T13:02:55.161Z",
-              "sizeBytes": 279806,
-              "framingConfig": {
-                "mode": "fit-height",
-                "zoom": 1,
-                "panStep": 0,
-                "offsetXPercent": 0,
-                "offsetYPercent": 0,
-                "naturalWidth": 4624,
-                "naturalHeight": 2136,
-                "naturalAspectRatio": 2.1647940074906367
-              },
-              "canalSegment": "MAIN CANAL END OF CANAL (23+628)",
-              "featureName": "NIS",
-              "stageLabel": "Before #1",
-              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-              "locationName": "MAIN CANAL END OF CANAL (23+628)",
-              "lat": 13.410601,
-              "lng": 121.168908
-            },
-            {
-              "id": "photo-1788022491912-shkhhh",
-              "url": "",
-              "stage": "During",
-              "caption": "Excavator removing vegetation from canal and scooping and desilting canal bed, using rented equipment.",
-              "capturedAt": "2026-08-17T12:58:32.000Z",
-              "sizeBytes": 291423,
-              "framingConfig": {
-                "mode": "fit-height",
-                "zoom": 1,
-                "panStep": 0,
-                "offsetXPercent": 0,
-                "offsetYPercent": 0,
-                "naturalWidth": 3264,
-                "naturalHeight": 1504,
-                "naturalAspectRatio": 2.1702127659574466
-              },
-              "canalSegment": "MAIN CANAL END OF CANAL (23+628)",
-              "featureName": "NIS",
-              "stageLabel": "During #1",
-              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-              "locationName": "MAIN CANAL END OF CANAL (23+628)",
-              "lat": 13.410601,
-              "lng": 121.168908
-            }
-          ],
-          "photoUrl": "",
-          "completionPercent": 100,
-          "desiltingVolumeM3": 0
-        }
-      }
-    ],
-    "activeRevisionNumber": 1
+    "activeRevisionNumber": 1,
+    "driveFolderId": "13rLGvC2DXde505edqr_GPxtKhH3kq3B4"
   },
   {
     "id": "wmr-260822-22053227-bbris",
@@ -532,870 +1178,597 @@
     "synced": true,
     "photos": [
       {
-        "id": "12z6D0moeTHbwpqrun7nRXVRr1UPLRg7g",
-        "url": "https://drive.google.com/thumbnail?id=12z6D0moeTHbwpqrun7nRXVRr1UPLRg7g&sz=w1200",
-        "driveFileId": "12z6D0moeTHbwpqrun7nRXVRr1UPLRg7g",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=12z6D0moeTHbwpqrun7nRXVRr1UPLRg7g&sz=w600",
+        "id": "1bZ_kWM2ui-iXGMO_7dQ28msy9o5KXGdL",
+        "driveFileId": "1bZ_kWM2ui-iXGMO_7dQ28msy9o5KXGdL",
+        "url": "https://drive.google.com/thumbnail?id=1bZ_kWM2ui-iXGMO_7dQ28msy9o5KXGdL&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1bZ_kWM2ui-iXGMO_7dQ28msy9o5KXGdL&sz=w600",
         "stage": "During",
         "caption": "During Activity Documentation #1",
-        "capturedAt": "2026-08-22T14:05:32.279Z",
-        "locationName": "SUB LATERAL C3 (0+327 to 6+843)",
-        "canalSegment": "SUB LATERAL C3 (0+327 to 6+843)",
-        "lat": 13.36118697216883,
-        "lng": 121.18724713464015
-      },
-      {
-        "id": "1pLeAc3EhOjb-4AAeeBs3l4gTVgIGgfuo",
-        "url": "https://drive.google.com/thumbnail?id=1pLeAc3EhOjb-4AAeeBs3l4gTVgIGgfuo&sz=w1200",
-        "driveFileId": "1pLeAc3EhOjb-4AAeeBs3l4gTVgIGgfuo",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1pLeAc3EhOjb-4AAeeBs3l4gTVgIGgfuo&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #2",
-        "capturedAt": "2026-08-22T14:05:32.279Z",
-        "locationName": "SUB LATERAL C3 (0+327 to 6+843)",
-        "canalSegment": "SUB LATERAL C3 (0+327 to 6+843)",
-        "lat": 13.36118697216883,
-        "lng": 121.18724713464015
-      },
-      {
-        "id": "12dHHfDZmDWbyvjQ2XNU1JFuYoB4L8J3b",
-        "url": "https://drive.google.com/thumbnail?id=12dHHfDZmDWbyvjQ2XNU1JFuYoB4L8J3b&sz=w1200",
-        "driveFileId": "12dHHfDZmDWbyvjQ2XNU1JFuYoB4L8J3b",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=12dHHfDZmDWbyvjQ2XNU1JFuYoB4L8J3b&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #3",
-        "capturedAt": "2026-08-22T14:05:32.279Z",
-        "locationName": "SUB LATERAL C3 (0+327 to 6+843)",
-        "canalSegment": "SUB LATERAL C3 (0+327 to 6+843)",
-        "lat": 13.36118697216883,
-        "lng": 121.18724713464015
-      },
-      {
-        "id": "1XglSR8yDm0qO9zytZfbznE1WbC0pC0FX",
-        "url": "https://drive.google.com/thumbnail?id=1XglSR8yDm0qO9zytZfbznE1WbC0pC0FX&sz=w1200",
-        "driveFileId": "1XglSR8yDm0qO9zytZfbznE1WbC0pC0FX",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1XglSR8yDm0qO9zytZfbznE1WbC0pC0FX&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #4",
-        "capturedAt": "2026-08-22T14:05:32.279Z",
-        "locationName": "SUB LATERAL C3 (0+327 to 6+843)",
-        "canalSegment": "SUB LATERAL C3 (0+327 to 6+843)",
-        "lat": 13.36118697216883,
-        "lng": 121.18724713464015
-      },
-      {
-        "id": "1-zCI30lm5jF_ihcCktG6t2RidgDQO0T0",
-        "url": "https://drive.google.com/thumbnail?id=1-zCI30lm5jF_ihcCktG6t2RidgDQO0T0&sz=w1200",
-        "driveFileId": "1-zCI30lm5jF_ihcCktG6t2RidgDQO0T0",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1-zCI30lm5jF_ihcCktG6t2RidgDQO0T0&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #5",
-        "capturedAt": "2026-08-22T14:05:32.279Z",
-        "locationName": "SUB LATERAL C3 (0+327 to 6+843)",
-        "canalSegment": "SUB LATERAL C3 (0+327 to 6+843)",
-        "lat": 13.36118697216883,
-        "lng": 121.18724713464015
-      },
-      {
-        "id": "1fPddpIaqgbQTrNJJ5I_c0BQyEFS3ZZiL",
-        "url": "https://drive.google.com/thumbnail?id=1fPddpIaqgbQTrNJJ5I_c0BQyEFS3ZZiL&sz=w1200",
-        "driveFileId": "1fPddpIaqgbQTrNJJ5I_c0BQyEFS3ZZiL",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1fPddpIaqgbQTrNJJ5I_c0BQyEFS3ZZiL&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #6",
-        "capturedAt": "2026-08-22T14:05:32.279Z",
-        "locationName": "SUB LATERAL C3 (0+327 to 6+843)",
-        "canalSegment": "SUB LATERAL C3 (0+327 to 6+843)",
-        "lat": 13.36118697216883,
-        "lng": 121.18724713464015
-      },
-      {
-        "id": "1qYHUAKFUYADwPxz9RHliAZ0dE10LtFRg",
-        "url": "https://drive.google.com/thumbnail?id=1qYHUAKFUYADwPxz9RHliAZ0dE10LtFRg&sz=w1200",
-        "driveFileId": "1qYHUAKFUYADwPxz9RHliAZ0dE10LtFRg",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1qYHUAKFUYADwPxz9RHliAZ0dE10LtFRg&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #7",
-        "capturedAt": "2026-08-22T14:05:32.279Z",
-        "locationName": "SUB LATERAL C3 (0+327 to 6+843)",
-        "canalSegment": "SUB LATERAL C3 (0+327 to 6+843)",
-        "lat": 13.36118697216883,
-        "lng": 121.18724713464015
-      },
-      {
-        "id": "1aRrL6Cs8hUYwQj8XGqky9umJRnMMU7AH",
-        "url": "https://drive.google.com/thumbnail?id=1aRrL6Cs8hUYwQj8XGqky9umJRnMMU7AH&sz=w1200",
-        "driveFileId": "1aRrL6Cs8hUYwQj8XGqky9umJRnMMU7AH",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1aRrL6Cs8hUYwQj8XGqky9umJRnMMU7AH&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #8",
-        "capturedAt": "2026-08-22T14:05:32.279Z",
-        "locationName": "SUB LATERAL C3 (0+327 to 6+843)",
-        "canalSegment": "SUB LATERAL C3 (0+327 to 6+843)",
-        "lat": 13.36118697216883,
-        "lng": 121.18724713464015
-      },
-      {
-        "id": "1XacjI7xkVucCeYecEQaQb76gB6TJy8hj",
-        "url": "https://drive.google.com/thumbnail?id=1XacjI7xkVucCeYecEQaQb76gB6TJy8hj&sz=w1200",
-        "driveFileId": "1XacjI7xkVucCeYecEQaQb76gB6TJy8hj",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1XacjI7xkVucCeYecEQaQb76gB6TJy8hj&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #9",
-        "capturedAt": "2026-08-22T14:05:32.279Z",
-        "locationName": "SUB LATERAL C3 (0+327 to 6+843)",
-        "canalSegment": "SUB LATERAL C3 (0+327 to 6+843)",
         "lat": 13.36118697216883,
         "lng": 121.18724713464015
       },
       {
         "id": "1JY3Z1IP8uLBbvUNZ4LzjM0yfIuVrzoRJ",
-        "url": "https://drive.google.com/thumbnail?id=1JY3Z1IP8uLBbvUNZ4LzjM0yfIuVrzoRJ&sz=w1200",
         "driveFileId": "1JY3Z1IP8uLBbvUNZ4LzjM0yfIuVrzoRJ",
+        "url": "https://drive.google.com/thumbnail?id=1JY3Z1IP8uLBbvUNZ4LzjM0yfIuVrzoRJ&sz=w1200",
         "thumbnailUrl": "https://drive.google.com/thumbnail?id=1JY3Z1IP8uLBbvUNZ4LzjM0yfIuVrzoRJ&sz=w600",
         "stage": "During",
-        "caption": "During Activity Documentation #10",
-        "capturedAt": "2026-08-22T14:05:32.279Z",
-        "locationName": "SUB LATERAL C3 (0+327 to 6+843)",
-        "canalSegment": "SUB LATERAL C3 (0+327 to 6+843)",
+        "caption": "During Activity Documentation #2",
         "lat": 13.36118697216883,
         "lng": 121.18724713464015
       },
       {
-        "id": "1bZ_kWM2ui-iXGMO_7dQ28msy9o5KXGdL",
-        "url": "https://drive.google.com/thumbnail?id=1bZ_kWM2ui-iXGMO_7dQ28msy9o5KXGdL&sz=w1200",
-        "driveFileId": "1bZ_kWM2ui-iXGMO_7dQ28msy9o5KXGdL",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1bZ_kWM2ui-iXGMO_7dQ28msy9o5KXGdL&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #11",
-        "capturedAt": "2026-08-22T14:05:32.279Z",
-        "locationName": "SUB LATERAL C3 (0+327 to 6+843)",
-        "canalSegment": "SUB LATERAL C3 (0+327 to 6+843)",
-        "lat": 13.36118697216883,
-        "lng": 121.18724713464015
-      }
-    ],
-    "photoUrl": "https://drive.google.com/thumbnail?id=12z6D0moeTHbwpqrun7nRXVRr1UPLRg7g&sz=w1200",
-    "completionPercent": 100,
-    "desiltingVolumeM3": 0
-  },
-  {
-    "id": "rep-1786850060251",
-    "title": "Desilting / Clearing of Canal (Mechanical) - MAIN CANAL THRESHER CROSSING (16+844)",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "status": "In Progress",
-    "approvalStatus": "Approved",
-    "createdAt": "2026-08-16T03:14:20.251Z",
-    "lat": 13.355792,
-    "lng": 121.165004,
-    "locationName": "MAIN CANAL THRESHER CROSSING (16+844)",
-    "completionPercent": 50,
-    "maintenanceActivity": "Desilting / Clearing of Canal (Mechanical)",
-    "reporterName": "Reporter's name",
-    "reporterRole": "Developer",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Reporter's name (2026-08-16T03:14:20.251Z)",
-    "remarks": "Maintenance activity performed efficiently along MAIN CANAL THRESHER CROSSING (16+844).",
-    "synced": true,
-    "photos": [
-      {
-        "id": "1V3w316GCeAafSjP4MqeBLJ6OEYa4B48J",
-        "url": "https://drive.google.com/thumbnail?id=1V3w316GCeAafSjP4MqeBLJ6OEYa4B48J&sz=w1200",
-        "driveFileId": "1V3w316GCeAafSjP4MqeBLJ6OEYa4B48J",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1V3w316GCeAafSjP4MqeBLJ6OEYa4B48J&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #1",
-        "capturedAt": "2026-08-16T03:14:20.251Z",
-        "locationName": "MAIN CANAL THRESHER CROSSING (16+844)",
-        "lat": 13.355792,
-        "lng": 121.165004
-      }
-    ],
-    "photoUrl": "https://drive.google.com/thumbnail?id=1V3w316GCeAafSjP4MqeBLJ6OEYa4B48J&sz=w1200"
-  },
-  {
-    "id": "rep-1787023788978",
-    "title": "Desilting / Clearing of Canal (Mechanical) - SUB LATERAL C3 (0+842 to 1+642)",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "nisBinding": "27",
-    "status": "Completed",
-    "approvalStatus": "Approved",
-    "createdAt": "2026-08-18T03:29:48.978Z",
-    "lat": 13.36376,
-    "lng": 121.18884,
-    "secondLat": 13.36398,
-    "secondLng": 121.19504,
-    "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-    "canalSegment": "27",
-    "segmentDistanceMeters": 800,
-    "segmentDistanceFormatted": "800 meters",
-    "completionPercent": 100,
-    "maintenanceActivity": "Desilting / Clearing of Canal (Mechanical)",
-    "reporterName": "Engr. Test Memory",
-    "reporterRole": "Developer",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Engr. Test Memory (2026-08-18T03:36:03.839Z)",
-    "remarks": "Canal clearing and desilting was completed along 800 meters to restore unobstructed conveyance.",
-    "synced": true,
-    "photos": [
-      {
-        "id": "18puITEN7j-GlJDVGiB3HAEttOzgmtSsj",
-        "url": "https://drive.google.com/thumbnail?id=18puITEN7j-GlJDVGiB3HAEttOzgmtSsj&sz=w1200",
-        "driveFileId": "18puITEN7j-GlJDVGiB3HAEttOzgmtSsj",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=18puITEN7j-GlJDVGiB3HAEttOzgmtSsj&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #1",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
-      },
-      {
-        "id": "1msBOo3QqbrMZ3EN8wwbcPloONzuc1BZr",
-        "url": "https://drive.google.com/thumbnail?id=1msBOo3QqbrMZ3EN8wwbcPloONzuc1BZr&sz=w1200",
-        "driveFileId": "1msBOo3QqbrMZ3EN8wwbcPloONzuc1BZr",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1msBOo3QqbrMZ3EN8wwbcPloONzuc1BZr&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #2",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
-      },
-      {
-        "id": "18b-Tf4Tw1zB22e3zaxkLbkUSU63vNpyX",
-        "url": "https://drive.google.com/thumbnail?id=18b-Tf4Tw1zB22e3zaxkLbkUSU63vNpyX&sz=w1200",
-        "driveFileId": "18b-Tf4Tw1zB22e3zaxkLbkUSU63vNpyX",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=18b-Tf4Tw1zB22e3zaxkLbkUSU63vNpyX&sz=w600",
+        "id": "1XacjI7xkVucCeYecEQaQb76gB6TJy8hj",
+        "driveFileId": "1XacjI7xkVucCeYecEQaQb76gB6TJy8hj",
+        "url": "https://drive.google.com/thumbnail?id=1XacjI7xkVucCeYecEQaQb76gB6TJy8hj&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1XacjI7xkVucCeYecEQaQb76gB6TJy8hj&sz=w600",
         "stage": "During",
         "caption": "During Activity Documentation #3",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
+        "lat": 13.36118697216883,
+        "lng": 121.18724713464015
       },
       {
-        "id": "1WnoZOGPjcehsvSgjYpkq9kCvA-OyC7d7",
-        "url": "https://drive.google.com/thumbnail?id=1WnoZOGPjcehsvSgjYpkq9kCvA-OyC7d7&sz=w1200",
-        "driveFileId": "1WnoZOGPjcehsvSgjYpkq9kCvA-OyC7d7",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1WnoZOGPjcehsvSgjYpkq9kCvA-OyC7d7&sz=w600",
+        "id": "1aRrL6Cs8hUYwQj8XGqky9umJRnMMU7AH",
+        "driveFileId": "1aRrL6Cs8hUYwQj8XGqky9umJRnMMU7AH",
+        "url": "https://drive.google.com/thumbnail?id=1aRrL6Cs8hUYwQj8XGqky9umJRnMMU7AH&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1aRrL6Cs8hUYwQj8XGqky9umJRnMMU7AH&sz=w600",
         "stage": "During",
         "caption": "During Activity Documentation #4",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
+        "lat": 13.36118697216883,
+        "lng": 121.18724713464015
       },
       {
-        "id": "1S16gbBi1W7WLlMQH0dP6GRryLillWBbV",
-        "url": "https://drive.google.com/thumbnail?id=1S16gbBi1W7WLlMQH0dP6GRryLillWBbV&sz=w1200",
-        "driveFileId": "1S16gbBi1W7WLlMQH0dP6GRryLillWBbV",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1S16gbBi1W7WLlMQH0dP6GRryLillWBbV&sz=w600",
+        "id": "1qYHUAKFUYADwPxz9RHliAZ0dE10LtFRg",
+        "driveFileId": "1qYHUAKFUYADwPxz9RHliAZ0dE10LtFRg",
+        "url": "https://drive.google.com/thumbnail?id=1qYHUAKFUYADwPxz9RHliAZ0dE10LtFRg&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1qYHUAKFUYADwPxz9RHliAZ0dE10LtFRg&sz=w600",
         "stage": "During",
         "caption": "During Activity Documentation #5",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
+        "lat": 13.36118697216883,
+        "lng": 121.18724713464015
       },
       {
-        "id": "1WfgmuGepJ4v5tPi0MnMU8XzggALYGCi6",
-        "url": "https://drive.google.com/thumbnail?id=1WfgmuGepJ4v5tPi0MnMU8XzggALYGCi6&sz=w1200",
-        "driveFileId": "1WfgmuGepJ4v5tPi0MnMU8XzggALYGCi6",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1WfgmuGepJ4v5tPi0MnMU8XzggALYGCi6&sz=w600",
+        "id": "1fPddpIaqgbQTrNJJ5I_c0BQyEFS3ZZiL",
+        "driveFileId": "1fPddpIaqgbQTrNJJ5I_c0BQyEFS3ZZiL",
+        "url": "https://drive.google.com/thumbnail?id=1fPddpIaqgbQTrNJJ5I_c0BQyEFS3ZZiL&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1fPddpIaqgbQTrNJJ5I_c0BQyEFS3ZZiL&sz=w600",
         "stage": "During",
         "caption": "During Activity Documentation #6",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
+        "lat": 13.36118697216883,
+        "lng": 121.18724713464015
       },
       {
-        "id": "1Oesa6uV-Xl4O-fOJXJy54qqCobihkKWg",
-        "url": "https://drive.google.com/thumbnail?id=1Oesa6uV-Xl4O-fOJXJy54qqCobihkKWg&sz=w1200",
-        "driveFileId": "1Oesa6uV-Xl4O-fOJXJy54qqCobihkKWg",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1Oesa6uV-Xl4O-fOJXJy54qqCobihkKWg&sz=w600",
+        "id": "1-zCI30lm5jF_ihcCktG6t2RidgDQO0T0",
+        "driveFileId": "1-zCI30lm5jF_ihcCktG6t2RidgDQO0T0",
+        "url": "https://drive.google.com/thumbnail?id=1-zCI30lm5jF_ihcCktG6t2RidgDQO0T0&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1-zCI30lm5jF_ihcCktG6t2RidgDQO0T0&sz=w600",
         "stage": "During",
         "caption": "During Activity Documentation #7",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
+        "lat": 13.36118697216883,
+        "lng": 121.18724713464015
       },
       {
-        "id": "1oZCcdzPFL7q419SPhdtaPCjAAFB9mSrG",
-        "url": "https://drive.google.com/thumbnail?id=1oZCcdzPFL7q419SPhdtaPCjAAFB9mSrG&sz=w1200",
-        "driveFileId": "1oZCcdzPFL7q419SPhdtaPCjAAFB9mSrG",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1oZCcdzPFL7q419SPhdtaPCjAAFB9mSrG&sz=w600",
+        "id": "1XglSR8yDm0qO9zytZfbznE1WbC0pC0FX",
+        "driveFileId": "1XglSR8yDm0qO9zytZfbznE1WbC0pC0FX",
+        "url": "https://drive.google.com/thumbnail?id=1XglSR8yDm0qO9zytZfbznE1WbC0pC0FX&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1XglSR8yDm0qO9zytZfbznE1WbC0pC0FX&sz=w600",
         "stage": "During",
         "caption": "During Activity Documentation #8",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
+        "lat": 13.36118697216883,
+        "lng": 121.18724713464015
       },
       {
-        "id": "1djIn7A89CSNhNq9Jpx0YnuM-1EMUpTdl",
-        "url": "https://drive.google.com/thumbnail?id=1djIn7A89CSNhNq9Jpx0YnuM-1EMUpTdl&sz=w1200",
-        "driveFileId": "1djIn7A89CSNhNq9Jpx0YnuM-1EMUpTdl",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1djIn7A89CSNhNq9Jpx0YnuM-1EMUpTdl&sz=w600",
+        "id": "12dHHfDZmDWbyvjQ2XNU1JFuYoB4L8J3b",
+        "driveFileId": "12dHHfDZmDWbyvjQ2XNU1JFuYoB4L8J3b",
+        "url": "https://drive.google.com/thumbnail?id=12dHHfDZmDWbyvjQ2XNU1JFuYoB4L8J3b&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=12dHHfDZmDWbyvjQ2XNU1JFuYoB4L8J3b&sz=w600",
         "stage": "During",
         "caption": "During Activity Documentation #9",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
+        "lat": 13.36118697216883,
+        "lng": 121.18724713464015
       },
       {
-        "id": "1TsHQvzOva-8XmNX-vGsmaKux7snbfWz2",
-        "url": "https://drive.google.com/thumbnail?id=1TsHQvzOva-8XmNX-vGsmaKux7snbfWz2&sz=w1200",
-        "driveFileId": "1TsHQvzOva-8XmNX-vGsmaKux7snbfWz2",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1TsHQvzOva-8XmNX-vGsmaKux7snbfWz2&sz=w600",
+        "id": "1pLeAc3EhOjb-4AAeeBs3l4gTVgIGgfuo",
+        "driveFileId": "1pLeAc3EhOjb-4AAeeBs3l4gTVgIGgfuo",
+        "url": "https://drive.google.com/thumbnail?id=1pLeAc3EhOjb-4AAeeBs3l4gTVgIGgfuo&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1pLeAc3EhOjb-4AAeeBs3l4gTVgIGgfuo&sz=w600",
         "stage": "During",
         "caption": "During Activity Documentation #10",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
+        "lat": 13.36118697216883,
+        "lng": 121.18724713464015
       },
       {
-        "id": "11B_fXMJWqUD2LqthCUqe5eGggqGPAxIS",
-        "url": "https://drive.google.com/thumbnail?id=11B_fXMJWqUD2LqthCUqe5eGggqGPAxIS&sz=w1200",
-        "driveFileId": "11B_fXMJWqUD2LqthCUqe5eGggqGPAxIS",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=11B_fXMJWqUD2LqthCUqe5eGggqGPAxIS&sz=w600",
+        "id": "12z6D0moeTHbwpqrun7nRXVRr1UPLRg7g",
+        "driveFileId": "12z6D0moeTHbwpqrun7nRXVRr1UPLRg7g",
+        "url": "https://drive.google.com/thumbnail?id=12z6D0moeTHbwpqrun7nRXVRr1UPLRg7g&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=12z6D0moeTHbwpqrun7nRXVRr1UPLRg7g&sz=w600",
         "stage": "During",
         "caption": "During Activity Documentation #11",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
-      },
-      {
-        "id": "1VZ-lTap6dNr_0UCSfQeJpgFQmaw-dT0c",
-        "url": "https://drive.google.com/thumbnail?id=1VZ-lTap6dNr_0UCSfQeJpgFQmaw-dT0c&sz=w1200",
-        "driveFileId": "1VZ-lTap6dNr_0UCSfQeJpgFQmaw-dT0c",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1VZ-lTap6dNr_0UCSfQeJpgFQmaw-dT0c&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #12",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
-      },
-      {
-        "id": "1ACu3JIC_gHlImeOp2tI6K77w6p0U-YxH",
-        "url": "https://drive.google.com/thumbnail?id=1ACu3JIC_gHlImeOp2tI6K77w6p0U-YxH&sz=w1200",
-        "driveFileId": "1ACu3JIC_gHlImeOp2tI6K77w6p0U-YxH",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1ACu3JIC_gHlImeOp2tI6K77w6p0U-YxH&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #13",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
-      },
-      {
-        "id": "1BqHE1rYINb1yL2QsqOwxwsGcgN297K24",
-        "url": "https://drive.google.com/thumbnail?id=1BqHE1rYINb1yL2QsqOwxwsGcgN297K24&sz=w1200",
-        "driveFileId": "1BqHE1rYINb1yL2QsqOwxwsGcgN297K24",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1BqHE1rYINb1yL2QsqOwxwsGcgN297K24&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #14",
-        "capturedAt": "2026-08-18T03:29:48.978Z",
-        "locationName": "SUB LATERAL C3 (0+842 to 1+642)",
-        "canalSegment": "27",
-        "lat": 13.36376,
-        "lng": 121.18884
+        "lat": 13.36118697216883,
+        "lng": 121.18724713464015
       }
     ],
-    "photoUrl": "/api/drive/photo/18puITEN7j-GlJDVGiB3HAEttOzgmtSsj"
+    "photoUrl": "https://drive.google.com/thumbnail?id=1bZ_kWM2ui-iXGMO_7dQ28msy9o5KXGdL&sz=w1200",
+    "completionPercent": 100,
+    "desiltingVolumeM3": 0,
+    "driveFolderId": "1zNJxcI29N1l0Dzk5ud7anUrXFooDGEvK"
   },
   {
-    "id": "rep-1786782300549",
-    "title": "Gate Lubrication - LATERAL C-SOUTH (0+183 to 0+472)",
+    "id": "rep-1787049927741",
+    "title": "Desilting / Clearing of Canal (Manual) - LATERAL C (7+501.8)",
     "reportType": "maintenance",
-    "lat": 9.327993,
-    "lng": 118.449295,
-    "canalSegment": "f-1786777131418-29",
-    "parcelId": "",
-    "completionPercent": 100,
-    "desiltingVolumeM3": 1200,
-    "status": "Completed",
-    "remarks": "Maintenance activity performed efficiently along LATERAL C-SOUTH (0+183 to 0+472).",
-    "reporterName": "Field Engr test 2",
-    "reporterRole": "O&M Engineer",
-    "approvalStatus": "PreApproved",
-    "preApprovedBy": "Field Engr test 2",
-    "createdAt": "2026-08-15T08:25:00.549Z",
-    "synced": true,
-    "photoUrl": "https://drive.google.com/thumbnail?id=1J2yhuWq8Q-3BbQsFy2ySdsSMzPStPbbz&sz=w1200",
-    "hazardSeverity": null,
     "categoryMode": "maintenance",
     "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "nisBinding": "f-1786777131418-29",
-    "secondLat": 9.325949,
-    "secondLng": 118.447669,
-    "locationName": "LATERAL C-SOUTH (0+183 to 0+472)",
+    "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+    "lat": 13.366262607704549,
+    "lng": 121.18306964635852,
+    "locationName": "LATERAL C (7+501.8)",
     "pathCoords": [
       [
-        9.327993,
-        118.449295
-      ],
-      [
-        9.327372,
-        118.448788
-      ],
-      [
-        9.325949,
-        118.447669
+        13.366262772144955,
+        121.18306683093944
       ]
     ],
-    "maintenanceActivity": "Gate Lubrication",
-    "preApprovedAt": "2026-08-15T08:25:00.549Z",
-    "photos": [
-      {
-        "id": "1J2yhuWq8Q-3BbQsFy2ySdsSMzPStPbbz",
-        "url": "https://drive.google.com/thumbnail?id=1J2yhuWq8Q-3BbQsFy2ySdsSMzPStPbbz&sz=w1200",
-        "driveFileId": "1J2yhuWq8Q-3BbQsFy2ySdsSMzPStPbbz",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1J2yhuWq8Q-3BbQsFy2ySdsSMzPStPbbz&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #1",
-        "capturedAt": "2026-08-15T08:25:00.549Z",
-        "locationName": "LATERAL C-SOUTH (0+183 to 0+472)",
-        "canalSegment": "f-1786777131418-29",
-        "lat": 9.327993,
-        "lng": 118.449295
-      },
-      {
-        "id": "11V7l_RDlPI3vtWJip-b526bId6UQAfcT",
-        "url": "https://drive.google.com/thumbnail?id=11V7l_RDlPI3vtWJip-b526bId6UQAfcT&sz=w1200",
-        "driveFileId": "11V7l_RDlPI3vtWJip-b526bId6UQAfcT",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=11V7l_RDlPI3vtWJip-b526bId6UQAfcT&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #2",
-        "capturedAt": "2026-08-15T08:25:00.549Z",
-        "locationName": "LATERAL C-SOUTH (0+183 to 0+472)",
-        "canalSegment": "f-1786777131418-29",
-        "lat": 9.327993,
-        "lng": 118.449295
-      },
-      {
-        "id": "1YfGY-h6NZJWaXrDCTFRJ-AJir4YiZe83",
-        "url": "https://drive.google.com/thumbnail?id=1YfGY-h6NZJWaXrDCTFRJ-AJir4YiZe83&sz=w1200",
-        "driveFileId": "1YfGY-h6NZJWaXrDCTFRJ-AJir4YiZe83",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1YfGY-h6NZJWaXrDCTFRJ-AJir4YiZe83&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #3",
-        "capturedAt": "2026-08-15T08:25:00.549Z",
-        "locationName": "LATERAL C-SOUTH (0+183 to 0+472)",
-        "canalSegment": "f-1786777131418-29",
-        "lat": 9.327993,
-        "lng": 118.449295
-      }
-    ]
-  },
-  {
-    "id": "rep-workflow-test-1786772944810",
-    "title": "Desilting / Clearing of Canal (Manual) - LATERAL F (0+332.7)",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "nisBinding": "f-1786778534394-26",
-    "status": "In Progress",
-    "approvalStatus": "Approved",
-    "createdAt": "2026-08-15T05:49:04.810Z",
-    "lat": 13.35,
-    "lng": 121.17,
-    "locationName": "LATERAL F (0+332.7)",
-    "canalSegment": "f-1786778534394-26",
-    "completionPercent": 50,
+    "canalSegment": "LATERAL C (7+501.8)",
     "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
-    "reporterName": "Field Officer MOMARO 01",
-    "reporterRole": "Field Personnel",
-    "preApprovedBy": "Engr. Arthur V. Ramos (2026-08-15T05:49:04.880Z)",
-    "approvedBy": "Engr. Gerardo P. Alcala (2026-08-15T05:49:04.886Z)",
-    "remarks": "Needs silt removal",
-    "synced": true,
-    "photos": [
-      {
-        "id": "1icflPS9EVySSvkBmzAbwHVePabPH8L8p",
-        "url": "https://drive.google.com/thumbnail?id=1icflPS9EVySSvkBmzAbwHVePabPH8L8p&sz=w1200",
-        "driveFileId": "1icflPS9EVySSvkBmzAbwHVePabPH8L8p",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1icflPS9EVySSvkBmzAbwHVePabPH8L8p&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #1",
-        "capturedAt": "2026-08-15T05:49:04.810Z",
-        "locationName": "LATERAL F (0+332.7)",
-        "canalSegment": "f-1786778534394-26",
-        "lat": 13.35,
-        "lng": 121.17
-      },
-      {
-        "id": "1YYmDU6MOM0qZYdSXRbrQA4I2VW1anx6W",
-        "url": "https://drive.google.com/thumbnail?id=1YYmDU6MOM0qZYdSXRbrQA4I2VW1anx6W&sz=w1200",
-        "driveFileId": "1YYmDU6MOM0qZYdSXRbrQA4I2VW1anx6W",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1YYmDU6MOM0qZYdSXRbrQA4I2VW1anx6W&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #2",
-        "capturedAt": "2026-08-15T05:49:04.810Z",
-        "locationName": "LATERAL F (0+332.7)",
-        "canalSegment": "f-1786778534394-26",
-        "lat": 13.35,
-        "lng": 121.17
-      }
+    "performedBy": "IMO, IA",
+    "performedByList": [
+      "IMO",
+      "IA"
     ],
-    "photoUrl": "https://drive.google.com/thumbnail?id=1icflPS9EVySSvkBmzAbwHVePabPH8L8p&sz=w1200"
-  },
-  {
-    "id": "rep-1787033957929",
-    "title": "Desilting / Clearing of Canal (Mechanical) - LATERAL C (7+513.8)",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "nisBinding": "23",
-    "status": "In Progress",
-    "approvalStatus": "Approved",
-    "createdAt": "2026-08-18T06:19:17.930Z",
-    "lat": 13.3661978,
-    "lng": 121.1860264,
-    "locationName": "LATERAL C (7+513.8)",
-    "canalSegment": "23",
-    "completionPercent": 50,
-    "maintenanceActivity": "Desilting / Clearing of Canal (Mechanical)",
-    "reporterName": "Maminta",
-    "reporterRole": "Developer",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Maminta (2026-08-18T06:19:17.929Z)",
-    "remarks": "Desilting and clearing operations is in progress along 23 by IMO.",
-    "synced": true,
-    "photos": [
-      {
-        "id": "1qU25uiffUVTiw7VVPyX0OmKMq5O51Ajm",
-        "url": "https://drive.google.com/thumbnail?id=1qU25uiffUVTiw7VVPyX0OmKMq5O51Ajm&sz=w1200",
-        "driveFileId": "1qU25uiffUVTiw7VVPyX0OmKMq5O51Ajm",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1qU25uiffUVTiw7VVPyX0OmKMq5O51Ajm&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #1",
-        "capturedAt": "2026-08-18T06:19:17.930Z",
-        "locationName": "LATERAL C (7+513.8)",
-        "canalSegment": "23",
-        "lat": 13.3661978,
-        "lng": 121.1860264
-      }
-    ],
-    "photoUrl": "https://drive.google.com/thumbnail?id=1qU25uiffUVTiw7VVPyX0OmKMq5O51Ajm&sz=w1200"
-  },
-  {
-    "id": "rep-1787032326518",
-    "title": "Painting - MAIN CANAL BULLCART 12 (13+980)",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+    "performedByIA": "SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.",
+    "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO; by IA: SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.",
     "status": "Completed",
     "approvalStatus": "Approved",
-    "createdAt": "2026-08-18T05:52:06.519Z",
-    "lat": 13.332434,
-    "lng": 121.164078,
-    "locationName": "MAIN CANAL BULLCART 12 (13+980)",
-    "completionPercent": 100,
-    "maintenanceActivity": "Painting",
+    "approvedBy": "Rei Maminta",
+    "approvedAt": "2026-08-18T10:45:27.741Z",
+    "remarks": "Desilting and clearing operations was completed along BACO-BUCAYAO RIVER IRRIGATION SYSTEM Main Canal by IMO.",
     "reporterName": "Rei Maminta",
     "reporterRole": "Developer",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Rei Maminta (2026-08-18T05:52:06.518Z)",
-    "remarks": "Protective painting works was completed along MAIN CANAL BULLCART 12 (13+980) by IMO, IA.",
+    "reporterDesignation": "Supervising Engineer A",
+    "verifierDesignation": "Supervising Engineer",
+    "revisionNumber": 0,
+    "revisionHistory": [],
+    "createdAt": "2026-08-18T10:45:27.741Z",
     "synced": true,
     "photos": [
       {
-        "id": "1PnEqvyXz9vOVibfg82aofwEMfjUY_pze",
-        "url": "https://drive.google.com/thumbnail?id=1PnEqvyXz9vOVibfg82aofwEMfjUY_pze&sz=w1200",
-        "driveFileId": "1PnEqvyXz9vOVibfg82aofwEMfjUY_pze",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1PnEqvyXz9vOVibfg82aofwEMfjUY_pze&sz=w600",
+        "id": "1ziOcXCFJ-Bt3ucCs8VL0gTv9SiBlTLf_",
+        "driveFileId": "1ziOcXCFJ-Bt3ucCs8VL0gTv9SiBlTLf_",
+        "url": "https://drive.google.com/thumbnail?id=1ziOcXCFJ-Bt3ucCs8VL0gTv9SiBlTLf_&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1ziOcXCFJ-Bt3ucCs8VL0gTv9SiBlTLf_&sz=w600",
+        "stage": "After",
+        "caption": "After Activity Documentation #1",
+        "lat": 13.366262607704549,
+        "lng": 121.18306964635852
+      },
+      {
+        "id": "1q2asOD2wCSyWfp1z8QDAqEuEVlmuQaxz",
+        "driveFileId": "1q2asOD2wCSyWfp1z8QDAqEuEVlmuQaxz",
+        "url": "https://drive.google.com/thumbnail?id=1q2asOD2wCSyWfp1z8QDAqEuEVlmuQaxz&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1q2asOD2wCSyWfp1z8QDAqEuEVlmuQaxz&sz=w600",
         "stage": "During",
-        "caption": "During Activity Documentation #1",
-        "capturedAt": "2026-08-18T05:52:06.519Z",
-        "locationName": "MAIN CANAL BULLCART 12 (13+980)",
-        "lat": 13.332434,
-        "lng": 121.164078
+        "caption": "During Activity Documentation #2",
+        "lat": 13.366262607704549,
+        "lng": 121.18306964635852
+      },
+      {
+        "id": "13UQaBK33_bYHW89SMbfrAM9IYsbpUv2a",
+        "driveFileId": "13UQaBK33_bYHW89SMbfrAM9IYsbpUv2a",
+        "url": "https://drive.google.com/thumbnail?id=13UQaBK33_bYHW89SMbfrAM9IYsbpUv2a&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=13UQaBK33_bYHW89SMbfrAM9IYsbpUv2a&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #3",
+        "lat": 13.366262607704549,
+        "lng": 121.18306964635852
+      },
+      {
+        "id": "1w9mE0N5a6rUChCMhjeZNcDUfIA5WSkar",
+        "driveFileId": "1w9mE0N5a6rUChCMhjeZNcDUfIA5WSkar",
+        "url": "https://drive.google.com/thumbnail?id=1w9mE0N5a6rUChCMhjeZNcDUfIA5WSkar&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1w9mE0N5a6rUChCMhjeZNcDUfIA5WSkar&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #4",
+        "lat": 13.366262607704549,
+        "lng": 121.18306964635852
+      },
+      {
+        "id": "1vQTSckHxhp5cGlSEWC9HD4L_xfoab1v4",
+        "driveFileId": "1vQTSckHxhp5cGlSEWC9HD4L_xfoab1v4",
+        "url": "https://drive.google.com/thumbnail?id=1vQTSckHxhp5cGlSEWC9HD4L_xfoab1v4&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1vQTSckHxhp5cGlSEWC9HD4L_xfoab1v4&sz=w600",
+        "stage": "After",
+        "caption": "After Activity Documentation #5",
+        "lat": 13.366262607704549,
+        "lng": 121.18306964635852
+      },
+      {
+        "id": "1Xz6TcIaroU2RaCpQlII17ZvZbVVxeyA6",
+        "driveFileId": "1Xz6TcIaroU2RaCpQlII17ZvZbVVxeyA6",
+        "url": "https://drive.google.com/thumbnail?id=1Xz6TcIaroU2RaCpQlII17ZvZbVVxeyA6&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1Xz6TcIaroU2RaCpQlII17ZvZbVVxeyA6&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #6",
+        "lat": 13.366262607704549,
+        "lng": 121.18306964635852
       }
     ],
-    "photoUrl": "https://drive.google.com/thumbnail?id=1PnEqvyXz9vOVibfg82aofwEMfjUY_pze&sz=w1200"
+    "photoUrl": "https://drive.google.com/thumbnail?id=1ziOcXCFJ-Bt3ucCs8VL0gTv9SiBlTLf_&sz=w1200",
+    "completionPercent": 100,
+    "desiltingVolumeM3": 0,
+    "driveFolderId": "1z4w1l7tiXzc--R9NBy7lkFJqckVBot5C"
   },
   {
     "id": "rep-1787040188324",
     "title": "Brass dam / dredging at water source - LATERAL C4 THRESHER CROSSING (0+505.6) to SUB LATERAL C4 (0+216.4)",
-    "reportType": "maintenance",
     "categoryMode": "maintenance",
     "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
     "nisBinding": "28",
     "status": "Completed",
     "approvalStatus": "Approved",
-    "createdAt": "2026-08-18T08:03:08.324Z",
-    "lat": 13.367921,
-    "lng": 121.179162,
-    "secondLat": 13.365821793728944,
-    "secondLng": 121.1817702217253,
+    "createdAt": "8/18/2026, 8:03:08 AM (2026-08-18T08:03:08.324Z)",
     "locationName": "LATERAL C4 THRESHER CROSSING (0+505.6) to SUB LATERAL C4 (0+216.4)",
     "canalSegment": "28",
-    "segmentDistanceMeters": 382,
-    "segmentDistanceFormatted": "382 meters",
-    "completionPercent": 100,
+    "lat": 13.367921,
+    "lng": 121.179162,
     "maintenanceActivity": "Brass dam / dredging at water source",
-    "reporterName": "123123123",
-    "reporterRole": "Developer",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "123123123 (2026-08-18T08:03:08.324Z)",
-    "remarks": "Control structure servicing and gate maintenance was completed at LATERAL C4 THRESHER CROSSING (0+505. 6) in coordination with Baco-Bucayao RIS-Lateral C Farmers and Irrigators Association, Inc.. Control structure servicing and gate maintenance is in progress at LATERAL C4 THRESHER CROSSING (0+505. 6) by field maintenance personnel.",
-    "synced": true,
     "photos": [
       {
-        "id": "19F0q3ImjCutCFERB_UqklA8_IGc1sDlr",
-        "url": "https://drive.google.com/thumbnail?id=19F0q3ImjCutCFERB_UqklA8_IGc1sDlr&sz=w1200",
-        "driveFileId": "19F0q3ImjCutCFERB_UqklA8_IGc1sDlr",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=19F0q3ImjCutCFERB_UqklA8_IGc1sDlr&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #1",
-        "capturedAt": "2026-08-18T08:03:08.324Z",
-        "locationName": "LATERAL C4 THRESHER CROSSING (0+505.6) to SUB LATERAL C4 (0+216.4)",
-        "canalSegment": "28",
-        "lat": 13.367921,
-        "lng": 121.179162
-      },
-      {
-        "id": "1YmoLyCH08ZUE2BiviT4HBkH_Rg_HETH_",
-        "url": "https://drive.google.com/thumbnail?id=1YmoLyCH08ZUE2BiviT4HBkH_Rg_HETH_&sz=w1200",
-        "driveFileId": "1YmoLyCH08ZUE2BiviT4HBkH_Rg_HETH_",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1YmoLyCH08ZUE2BiviT4HBkH_Rg_HETH_&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #2",
-        "capturedAt": "2026-08-18T08:03:08.324Z",
-        "locationName": "LATERAL C4 THRESHER CROSSING (0+505.6) to SUB LATERAL C4 (0+216.4)",
-        "canalSegment": "28",
-        "lat": 13.367921,
-        "lng": 121.179162
-      },
-      {
-        "id": "11-j2E9f6LmHqi6uw-DJvVbldeNnXeGPv",
-        "url": "https://drive.google.com/thumbnail?id=11-j2E9f6LmHqi6uw-DJvVbldeNnXeGPv&sz=w1200",
-        "driveFileId": "11-j2E9f6LmHqi6uw-DJvVbldeNnXeGPv",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=11-j2E9f6LmHqi6uw-DJvVbldeNnXeGPv&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #3",
-        "capturedAt": "2026-08-18T08:03:08.324Z",
-        "locationName": "LATERAL C4 THRESHER CROSSING (0+505.6) to SUB LATERAL C4 (0+216.4)",
-        "canalSegment": "28",
-        "lat": 13.367921,
-        "lng": 121.179162
+        "id": "1g0r0XSpggTT4jZ0mrv2sHIeKosyCI-Zu",
+        "driveFileId": "1g0r0XSpggTT4jZ0mrv2sHIeKosyCI-Zu",
+        "url": "https://drive.google.com/thumbnail?id=1g0r0XSpggTT4jZ0mrv2sHIeKosyCI-Zu&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1g0r0XSpggTT4jZ0mrv2sHIeKosyCI-Zu&sz=w600",
+        "stage": "After",
+        "caption": "After Activity Documentation #1"
       },
       {
         "id": "1RcA9LLHz-zn0xZ7wA5RBnMu-o5Rr6aqc",
-        "url": "https://drive.google.com/thumbnail?id=1RcA9LLHz-zn0xZ7wA5RBnMu-o5Rr6aqc&sz=w1200",
         "driveFileId": "1RcA9LLHz-zn0xZ7wA5RBnMu-o5Rr6aqc",
+        "url": "https://drive.google.com/thumbnail?id=1RcA9LLHz-zn0xZ7wA5RBnMu-o5Rr6aqc&sz=w1200",
         "thumbnailUrl": "https://drive.google.com/thumbnail?id=1RcA9LLHz-zn0xZ7wA5RBnMu-o5Rr6aqc&sz=w600",
         "stage": "After",
-        "caption": "After Activity Documentation #4",
-        "capturedAt": "2026-08-18T08:03:08.324Z",
-        "locationName": "LATERAL C4 THRESHER CROSSING (0+505.6) to SUB LATERAL C4 (0+216.4)",
-        "canalSegment": "28",
-        "lat": 13.367921,
-        "lng": 121.179162
+        "caption": "After Activity Documentation #2"
       },
       {
-        "id": "1g0r0XSpggTT4jZ0mrv2sHIeKosyCI-Zu",
-        "url": "https://drive.google.com/thumbnail?id=1g0r0XSpggTT4jZ0mrv2sHIeKosyCI-Zu&sz=w1200",
-        "driveFileId": "1g0r0XSpggTT4jZ0mrv2sHIeKosyCI-Zu",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1g0r0XSpggTT4jZ0mrv2sHIeKosyCI-Zu&sz=w600",
-        "stage": "After",
-        "caption": "After Activity Documentation #5",
-        "capturedAt": "2026-08-18T08:03:08.324Z",
-        "locationName": "LATERAL C4 THRESHER CROSSING (0+505.6) to SUB LATERAL C4 (0+216.4)",
-        "canalSegment": "28",
-        "lat": 13.367921,
-        "lng": 121.179162
+        "id": "11-j2E9f6LmHqi6uw-DJvVbldeNnXeGPv",
+        "driveFileId": "11-j2E9f6LmHqi6uw-DJvVbldeNnXeGPv",
+        "url": "https://drive.google.com/thumbnail?id=11-j2E9f6LmHqi6uw-DJvVbldeNnXeGPv&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=11-j2E9f6LmHqi6uw-DJvVbldeNnXeGPv&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #3"
+      },
+      {
+        "id": "1YmoLyCH08ZUE2BiviT4HBkH_Rg_HETH_",
+        "driveFileId": "1YmoLyCH08ZUE2BiviT4HBkH_Rg_HETH_",
+        "url": "https://drive.google.com/thumbnail?id=1YmoLyCH08ZUE2BiviT4HBkH_Rg_HETH_&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1YmoLyCH08ZUE2BiviT4HBkH_Rg_HETH_&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #4"
+      },
+      {
+        "id": "19F0q3ImjCutCFERB_UqklA8_IGc1sDlr",
+        "driveFileId": "19F0q3ImjCutCFERB_UqklA8_IGc1sDlr",
+        "url": "https://drive.google.com/thumbnail?id=19F0q3ImjCutCFERB_UqklA8_IGc1sDlr&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=19F0q3ImjCutCFERB_UqklA8_IGc1sDlr&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #5"
       }
     ],
-    "photoUrl": "https://drive.google.com/thumbnail?id=19F0q3ImjCutCFERB_UqklA8_IGc1sDlr&sz=w1200"
+    "photoUrl": "https://drive.google.com/thumbnail?id=1g0r0XSpggTT4jZ0mrv2sHIeKosyCI-Zu&sz=w1200",
+    "driveFolderId": "1kh8ThwlfKeByugkOglC_gRLGGl3OqWxC",
+    "synced": true
+  },
+  {
+    "id": "rep-1787037338803",
+    "title": "Desilting / Clearing of Canal (Manual) - CALAPAN DAM MAIN CANAL LEFT (1+933.3)",
+    "categoryMode": "maintenance",
+    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+    "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
+    "status": "Completed",
+    "approvalStatus": "Approved",
+    "createdAt": "8/18/2026, 7:15:38 AM (2026-08-18T07:15:38.803Z)",
+    "locationName": "CALAPAN DAM MAIN CANAL LEFT (1+933.3)",
+    "canalSegment": "CALAPAN DAM MAIN CANAL LEFT",
+    "lat": 13.4,
+    "lng": 121.19,
+    "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
+    "photos": [
+      {
+        "id": "1pmL7AdIKEcX_rXzV6o4tX5Fi425ddfgp",
+        "driveFileId": "1pmL7AdIKEcX_rXzV6o4tX5Fi425ddfgp",
+        "url": "https://drive.google.com/thumbnail?id=1pmL7AdIKEcX_rXzV6o4tX5Fi425ddfgp&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1pmL7AdIKEcX_rXzV6o4tX5Fi425ddfgp&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #1"
+      }
+    ],
+    "photoUrl": "https://drive.google.com/thumbnail?id=1pmL7AdIKEcX_rXzV6o4tX5Fi425ddfgp&sz=w1200",
+    "driveFolderId": "16VB2orI_QbaAqwt-wVJQhqehMmvgFFZB",
+    "synced": true
+  },
+  {
+    "id": "rep-1787033957929",
+    "title": "Desilting / Clearing of Canal (Mechanical) - LATERAL C (7+513.8)",
+    "categoryMode": "maintenance",
+    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+    "nisBinding": "23",
+    "status": "In Progress",
+    "approvalStatus": "Approved",
+    "createdAt": "8/18/2026, 6:19:17 AM (2026-08-18T06:19:17.930Z)",
+    "locationName": "LATERAL C (7+513.8)",
+    "canalSegment": "23",
+    "lat": 13.3661978,
+    "lng": 121.1860264,
+    "maintenanceActivity": "Desilting / Clearing of Canal (Mechanical)",
+    "photos": [
+      {
+        "id": "1qU25uiffUVTiw7VVPyX0OmKMq5O51Ajm",
+        "driveFileId": "1qU25uiffUVTiw7VVPyX0OmKMq5O51Ajm",
+        "url": "https://drive.google.com/thumbnail?id=1qU25uiffUVTiw7VVPyX0OmKMq5O51Ajm&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1qU25uiffUVTiw7VVPyX0OmKMq5O51Ajm&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #1"
+      }
+    ],
+    "photoUrl": "https://drive.google.com/thumbnail?id=1qU25uiffUVTiw7VVPyX0OmKMq5O51Ajm&sz=w1200",
+    "driveFolderId": "1YuX1f82Q3XLqC-qMMZygUjsMfzo5AhmA",
+    "synced": true
+  },
+  {
+    "id": "rep-1787032326518",
+    "title": "Painting - MAIN CANAL BULLCART 12 (13+980)",
+    "categoryMode": "maintenance",
+    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+    "status": "Completed",
+    "approvalStatus": "Approved",
+    "createdAt": "8/18/2026, 5:52:06 AM (2026-08-18T05:52:06.519Z)",
+    "locationName": "MAIN CANAL BULLCART 12 (13+980)",
+    "lat": 13.332434,
+    "lng": 121.164078,
+    "maintenanceActivity": "Painting",
+    "photos": [
+      {
+        "id": "1PnEqvyXz9vOVibfg82aofwEMfjUY_pze",
+        "driveFileId": "1PnEqvyXz9vOVibfg82aofwEMfjUY_pze",
+        "url": "https://drive.google.com/thumbnail?id=1PnEqvyXz9vOVibfg82aofwEMfjUY_pze&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1PnEqvyXz9vOVibfg82aofwEMfjUY_pze&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #1"
+      }
+    ],
+    "photoUrl": "https://drive.google.com/thumbnail?id=1PnEqvyXz9vOVibfg82aofwEMfjUY_pze&sz=w1200",
+    "driveFolderId": "1j_vZnOMW6XzRG9oSHplTXqZUghpAbsNF",
+    "synced": true
   },
   {
     "id": "rep-1787029152099",
     "title": "Desilting / Clearing of Canal (Manual) - LATERAL C (7+559)",
-    "reportType": "maintenance",
     "categoryMode": "maintenance",
     "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
     "nisBinding": "23",
     "status": "Suspended",
     "approvalStatus": "Approved",
-    "createdAt": "2026-08-18T04:59:12.099Z",
-    "lat": 13.366776214934921,
-    "lng": 121.1831036507695,
+    "createdAt": "8/18/2026, 4:59:12 AM (2026-08-18T04:59:12.099Z)",
     "locationName": "LATERAL C (7+559)",
     "canalSegment": "23",
-    "completionPercent": 50,
+    "lat": 13.366776214934921,
+    "lng": 121.1831036507695,
     "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
-    "reporterName": "Rei Maminta",
-    "reporterRole": "Developer",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Rei Maminta (2026-08-18T04:59:12.099Z)",
-    "remarks": "Desilting and clearing operations is in progress along 23 in coordination with MAIN AND LATERAL E CANAL IRRIGATORS ASSOCIATION INC.. Cleared vegetation. Operations utilized shovels and pans. Spoil material was carried by shovel and pan to safe canal bank setback. Conducted at inaccessible to heavy equipment due to narrow service road. Desilting and clearing operations is in progress along 23 by IMO, IA. Cleared vegetation. Operations utilized shovels and pans. Spoil material was carried by shovel and pan to safe canal bank setback. Conducted at inaccessible to heavy equipment due to narrow service road. Desilting and clearing operations is in progress along 23 by IMO, IA. Cleared vegetation. Spoil material was moved by wheelbarrow to a designated stockpile. Conducted at any canal structures where manual work is more practical. Desilting and clearing operations is in progress along 23 by IMO, IA. Desilting and clearing operations is in progress along 23 by IMO.",
-    "synced": true,
     "photos": [
-      {
-        "id": "1zQkzU2GSYgOdUvwi5WOBK9ZZlBZgm-O8",
-        "url": "https://drive.google.com/thumbnail?id=1zQkzU2GSYgOdUvwi5WOBK9ZZlBZgm-O8&sz=w1200",
-        "driveFileId": "1zQkzU2GSYgOdUvwi5WOBK9ZZlBZgm-O8",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1zQkzU2GSYgOdUvwi5WOBK9ZZlBZgm-O8&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #1",
-        "capturedAt": "2026-08-18T04:59:12.099Z",
-        "locationName": "LATERAL C (7+559)",
-        "canalSegment": "23",
-        "lat": 13.366776214934921,
-        "lng": 121.1831036507695
-      },
       {
         "id": "1nyPFcPzftlPLb8HXnNX06fZ8KFNOULvA",
-        "url": "https://drive.google.com/thumbnail?id=1nyPFcPzftlPLb8HXnNX06fZ8KFNOULvA&sz=w1200",
         "driveFileId": "1nyPFcPzftlPLb8HXnNX06fZ8KFNOULvA",
+        "url": "https://drive.google.com/thumbnail?id=1nyPFcPzftlPLb8HXnNX06fZ8KFNOULvA&sz=w1200",
         "thumbnailUrl": "https://drive.google.com/thumbnail?id=1nyPFcPzftlPLb8HXnNX06fZ8KFNOULvA&sz=w600",
         "stage": "During",
-        "caption": "During Activity Documentation #2",
-        "capturedAt": "2026-08-18T04:59:12.099Z",
-        "locationName": "LATERAL C (7+559)",
-        "canalSegment": "23",
-        "lat": 13.366776214934921,
-        "lng": 121.1831036507695
+        "caption": "During Activity Documentation #1"
+      },
+      {
+        "id": "1zQkzU2GSYgOdUvwi5WOBK9ZZlBZgm-O8",
+        "driveFileId": "1zQkzU2GSYgOdUvwi5WOBK9ZZlBZgm-O8",
+        "url": "https://drive.google.com/thumbnail?id=1zQkzU2GSYgOdUvwi5WOBK9ZZlBZgm-O8&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1zQkzU2GSYgOdUvwi5WOBK9ZZlBZgm-O8&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #2"
       }
     ],
-    "photoUrl": "https://drive.google.com/thumbnail?id=1zQkzU2GSYgOdUvwi5WOBK9ZZlBZgm-O8&sz=w1200"
+    "photoUrl": "https://drive.google.com/thumbnail?id=1nyPFcPzftlPLb8HXnNX06fZ8KFNOULvA&sz=w1200",
+    "driveFolderId": "1mNpu-l8WJd57iYWEKYCH0ZKulc5cw38L",
+    "synced": true
   },
   {
-    "id": "rep-1786781921981",
-    "title": "Desilting / Clearing of Canal (Manual) - TURN OUT #4-L (0+000) to STAFF GAUGE (0+000)",
-    "reportType": "maintenance",
-    "lat": 9.33191,
-    "lng": 118.433571,
-    "canalSegment": "",
-    "parcelId": "",
-    "completionPercent": 100,
-    "desiltingVolumeM3": 1200,
-    "status": "Completed",
-    "remarks": "Maintenance activity performed efficiently along TURN OUT #4-L (0+000) to STAFF GAUGE (0+000).",
-    "reporterName": "Sample report",
-    "reporterRole": "Developer",
-    "approvalStatus": "Approved",
-    "preApprovedBy": null,
-    "createdAt": "2026-08-15T08:18:41.981Z",
-    "synced": true,
-    "photoUrl": "https://drive.google.com/thumbnail?id=1TNKd4MMsac-zERpk4piQOzDNHT9aNYBz&sz=w1200",
-    "hazardSeverity": null,
+    "id": "rep-1787023788978",
+    "title": "Desilting / Clearing of Canal (Mechanical) - LATERAL C3 OUTLET ROAD CROSSING (0+842) to LATERAL C3 END OF CANAL (1+642)",
     "categoryMode": "maintenance",
     "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "secondLat": 9.3383,
-    "secondLng": 118.43866,
-    "locationName": "TURN OUT #4-L (0+000) to STAFF GAUGE (0+000)",
-    "pathCoords": [
-      [
-        9.33191,
-        118.433571
-      ],
-      [
-        9.331917200756223,
-        118.4335621816826
-      ],
-      [
-        9.332435,
-        118.433985
-      ],
-      [
-        9.332987,
-        118.434424
-      ],
-      [
-        9.333717,
-        118.43501
-      ],
-      [
-        9.335088,
-        118.436106
-      ],
-      [
-        9.336171,
-        118.436985
-      ],
-      [
-        9.336386,
-        118.437146
-      ],
-      [
-        9.337225,
-        118.437812
-      ],
-      [
-        9.3383,
-        118.43866
-      ]
-    ],
-    "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
-    "approvedBy": "Sample report",
-    "approvedAt": "2026-08-15T08:18:41.981Z",
+    "nisBinding": "Main System",
+    "status": "Completed",
+    "approvalStatus": "Approved",
+    "createdAt": "8/18/2026, 11:29:48 AM (2026-08-18T03:29:48.978Z)",
+    "locationName": "Canal Network (LATERAL C3 OUTLET ROAD CROSSING (0+842) to LATERAL C3 END OF CANAL (1+642))",
+    "canalSegment": "LATERAL C3",
+    "lat": 13.36376,
+    "lng": 121.18884,
+    "maintenanceActivity": "Desilting / Clearing of Canal (Mechanical)",
     "photos": [
       {
-        "id": "1TNKd4MMsac-zERpk4piQOzDNHT9aNYBz",
-        "url": "https://drive.google.com/thumbnail?id=1TNKd4MMsac-zERpk4piQOzDNHT9aNYBz&sz=w1200",
-        "driveFileId": "1TNKd4MMsac-zERpk4piQOzDNHT9aNYBz",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1TNKd4MMsac-zERpk4piQOzDNHT9aNYBz&sz=w600",
+        "id": "1VZ-lTap6dNr_0UCSfQeJpgFQmaw-dT0c",
+        "driveFileId": "1VZ-lTap6dNr_0UCSfQeJpgFQmaw-dT0c",
+        "url": "https://drive.google.com/thumbnail?id=1VZ-lTap6dNr_0UCSfQeJpgFQmaw-dT0c&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1VZ-lTap6dNr_0UCSfQeJpgFQmaw-dT0c&sz=w600",
         "stage": "During",
-        "caption": "During Activity Documentation #1",
-        "capturedAt": "2026-08-15T08:18:41.981Z",
-        "locationName": "TURN OUT #4-L (0+000) to STAFF GAUGE (0+000)",
-        "canalSegment": "",
-        "lat": 9.33191,
-        "lng": 118.433571
+        "caption": "During Activity Documentation #1"
       },
       {
-        "id": "1gJDkT7X_pJl4iTn-NT-GyjcU_xMoCES_",
-        "url": "https://drive.google.com/thumbnail?id=1gJDkT7X_pJl4iTn-NT-GyjcU_xMoCES_&sz=w1200",
-        "driveFileId": "1gJDkT7X_pJl4iTn-NT-GyjcU_xMoCES_",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1gJDkT7X_pJl4iTn-NT-GyjcU_xMoCES_&sz=w600",
+        "id": "1TsHQvzOva-8XmNX-vGsmaKux7snbfWz2",
+        "driveFileId": "1TsHQvzOva-8XmNX-vGsmaKux7snbfWz2",
+        "url": "https://drive.google.com/thumbnail?id=1TsHQvzOva-8XmNX-vGsmaKux7snbfWz2&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1TsHQvzOva-8XmNX-vGsmaKux7snbfWz2&sz=w600",
         "stage": "During",
-        "caption": "During Activity Documentation #2",
-        "capturedAt": "2026-08-15T08:18:41.981Z",
-        "locationName": "TURN OUT #4-L (0+000) to STAFF GAUGE (0+000)",
-        "canalSegment": "",
-        "lat": 9.33191,
-        "lng": 118.433571
+        "caption": "During Activity Documentation #2"
       },
       {
-        "id": "1GSY0u_S8BLIDewTfRJlvyu8PbBccbbQE",
-        "url": "https://drive.google.com/thumbnail?id=1GSY0u_S8BLIDewTfRJlvyu8PbBccbbQE&sz=w1200",
-        "driveFileId": "1GSY0u_S8BLIDewTfRJlvyu8PbBccbbQE",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1GSY0u_S8BLIDewTfRJlvyu8PbBccbbQE&sz=w600",
+        "id": "1oZCcdzPFL7q419SPhdtaPCjAAFB9mSrG",
+        "driveFileId": "1oZCcdzPFL7q419SPhdtaPCjAAFB9mSrG",
+        "url": "https://drive.google.com/thumbnail?id=1oZCcdzPFL7q419SPhdtaPCjAAFB9mSrG&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1oZCcdzPFL7q419SPhdtaPCjAAFB9mSrG&sz=w600",
         "stage": "During",
-        "caption": "During Activity Documentation #3",
-        "capturedAt": "2026-08-15T08:18:41.981Z",
-        "locationName": "TURN OUT #4-L (0+000) to STAFF GAUGE (0+000)",
-        "canalSegment": "",
-        "lat": 9.33191,
-        "lng": 118.433571
+        "caption": "During Activity Documentation #3"
+      },
+      {
+        "id": "1WfgmuGepJ4v5tPi0MnMU8XzggALYGCi6",
+        "driveFileId": "1WfgmuGepJ4v5tPi0MnMU8XzggALYGCi6",
+        "url": "https://drive.google.com/thumbnail?id=1WfgmuGepJ4v5tPi0MnMU8XzggALYGCi6&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1WfgmuGepJ4v5tPi0MnMU8XzggALYGCi6&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #4"
+      },
+      {
+        "id": "1WnoZOGPjcehsvSgjYpkq9kCvA-OyC7d7",
+        "driveFileId": "1WnoZOGPjcehsvSgjYpkq9kCvA-OyC7d7",
+        "url": "https://drive.google.com/thumbnail?id=1WnoZOGPjcehsvSgjYpkq9kCvA-OyC7d7&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1WnoZOGPjcehsvSgjYpkq9kCvA-OyC7d7&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #5"
+      },
+      {
+        "id": "18b-Tf4Tw1zB22e3zaxkLbkUSU63vNpyX",
+        "driveFileId": "18b-Tf4Tw1zB22e3zaxkLbkUSU63vNpyX",
+        "url": "https://drive.google.com/thumbnail?id=18b-Tf4Tw1zB22e3zaxkLbkUSU63vNpyX&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=18b-Tf4Tw1zB22e3zaxkLbkUSU63vNpyX&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #6"
+      },
+      {
+        "id": "1BqHE1rYINb1yL2QsqOwxwsGcgN297K24",
+        "driveFileId": "1BqHE1rYINb1yL2QsqOwxwsGcgN297K24",
+        "url": "https://drive.google.com/thumbnail?id=1BqHE1rYINb1yL2QsqOwxwsGcgN297K24&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1BqHE1rYINb1yL2QsqOwxwsGcgN297K24&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #7"
+      },
+      {
+        "id": "1ACu3JIC_gHlImeOp2tI6K77w6p0U-YxH",
+        "driveFileId": "1ACu3JIC_gHlImeOp2tI6K77w6p0U-YxH",
+        "url": "https://drive.google.com/thumbnail?id=1ACu3JIC_gHlImeOp2tI6K77w6p0U-YxH&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1ACu3JIC_gHlImeOp2tI6K77w6p0U-YxH&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #8"
+      },
+      {
+        "id": "11B_fXMJWqUD2LqthCUqe5eGggqGPAxIS",
+        "driveFileId": "11B_fXMJWqUD2LqthCUqe5eGggqGPAxIS",
+        "url": "https://drive.google.com/thumbnail?id=11B_fXMJWqUD2LqthCUqe5eGggqGPAxIS&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=11B_fXMJWqUD2LqthCUqe5eGggqGPAxIS&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #9"
+      },
+      {
+        "id": "1djIn7A89CSNhNq9Jpx0YnuM-1EMUpTdl",
+        "driveFileId": "1djIn7A89CSNhNq9Jpx0YnuM-1EMUpTdl",
+        "url": "https://drive.google.com/thumbnail?id=1djIn7A89CSNhNq9Jpx0YnuM-1EMUpTdl&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1djIn7A89CSNhNq9Jpx0YnuM-1EMUpTdl&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #10"
+      },
+      {
+        "id": "1Oesa6uV-Xl4O-fOJXJy54qqCobihkKWg",
+        "driveFileId": "1Oesa6uV-Xl4O-fOJXJy54qqCobihkKWg",
+        "url": "https://drive.google.com/thumbnail?id=1Oesa6uV-Xl4O-fOJXJy54qqCobihkKWg&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1Oesa6uV-Xl4O-fOJXJy54qqCobihkKWg&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #11"
+      },
+      {
+        "id": "1S16gbBi1W7WLlMQH0dP6GRryLillWBbV",
+        "driveFileId": "1S16gbBi1W7WLlMQH0dP6GRryLillWBbV",
+        "url": "https://drive.google.com/thumbnail?id=1S16gbBi1W7WLlMQH0dP6GRryLillWBbV&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1S16gbBi1W7WLlMQH0dP6GRryLillWBbV&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #12"
+      },
+      {
+        "id": "18puITEN7j-GlJDVGiB3HAEttOzgmtSsj",
+        "driveFileId": "18puITEN7j-GlJDVGiB3HAEttOzgmtSsj",
+        "url": "https://drive.google.com/thumbnail?id=18puITEN7j-GlJDVGiB3HAEttOzgmtSsj&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=18puITEN7j-GlJDVGiB3HAEttOzgmtSsj&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #13"
+      },
+      {
+        "id": "1msBOo3QqbrMZ3EN8wwbcPloONzuc1BZr",
+        "driveFileId": "1msBOo3QqbrMZ3EN8wwbcPloONzuc1BZr",
+        "url": "https://drive.google.com/thumbnail?id=1msBOo3QqbrMZ3EN8wwbcPloONzuc1BZr&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1msBOo3QqbrMZ3EN8wwbcPloONzuc1BZr&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #14"
       }
-    ]
+    ],
+    "photoUrl": "https://drive.google.com/thumbnail?id=1VZ-lTap6dNr_0UCSfQeJpgFQmaw-dT0c&sz=w1200",
+    "driveFolderId": "1IvMT3udhTQb2SuAcFQ7-vC8CKV8FImrf",
+    "synced": true
+  },
+  {
+    "id": "rep-1786850060251",
+    "title": "Desilting / Clearing of Canal (Mechanical) - MAIN CANAL THRESHER CROSSING (16+844)",
+    "categoryMode": "maintenance",
+    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+    "status": "In Progress",
+    "approvalStatus": "Approved",
+    "createdAt": "8/16/2026, 11:14:20 AM (2026-08-16T03:14:20.251Z)",
+    "locationName": "MAIN CANAL THRESHER CROSSING (16+844)",
+    "lat": 13.355792,
+    "lng": 121.165004,
+    "maintenanceActivity": "Desilting / Clearing of Canal (Mechanical)",
+    "photos": [
+      {
+        "id": "1V3w316GCeAafSjP4MqeBLJ6OEYa4B48J",
+        "driveFileId": "1V3w316GCeAafSjP4MqeBLJ6OEYa4B48J",
+        "url": "https://drive.google.com/thumbnail?id=1V3w316GCeAafSjP4MqeBLJ6OEYa4B48J&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1V3w316GCeAafSjP4MqeBLJ6OEYa4B48J&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #1"
+      }
+    ],
+    "photoUrl": "https://drive.google.com/thumbnail?id=1V3w316GCeAafSjP4MqeBLJ6OEYa4B48J&sz=w1200",
+    "driveFolderId": "14gpEXDL7X8f0Vukjkxe_VdXFxiLOHskw",
+    "synced": true
+  },
+  {
+    "id": "rep-workflow-test-1786772944810",
+    "title": "Desilting / Clearing of Canal (Manual) - LATERAL F (0+332.7)",
+    "categoryMode": "maintenance",
+    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+    "nisBinding": "f-1786778534394-26",
+    "status": "In Progress",
+    "approvalStatus": "Approved",
+    "createdAt": "8/15/2026, 1:49:04 PM (2026-08-15T05:49:04.810Z)",
+    "locationName": "LATERAL F (0+332.7)",
+    "canalSegment": "f-1786778534394-26",
+    "lat": 13.35,
+    "lng": 121.17,
+    "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
+    "photos": [
+      {
+        "id": "1YYmDU6MOM0qZYdSXRbrQA4I2VW1anx6W",
+        "driveFileId": "1YYmDU6MOM0qZYdSXRbrQA4I2VW1anx6W",
+        "url": "https://drive.google.com/thumbnail?id=1YYmDU6MOM0qZYdSXRbrQA4I2VW1anx6W&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1YYmDU6MOM0qZYdSXRbrQA4I2VW1anx6W&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #1"
+      },
+      {
+        "id": "1icflPS9EVySSvkBmzAbwHVePabPH8L8p",
+        "driveFileId": "1icflPS9EVySSvkBmzAbwHVePabPH8L8p",
+        "url": "https://drive.google.com/thumbnail?id=1icflPS9EVySSvkBmzAbwHVePabPH8L8p&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1icflPS9EVySSvkBmzAbwHVePabPH8L8p&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #2"
+      }
+    ],
+    "photoUrl": "https://drive.google.com/thumbnail?id=1YYmDU6MOM0qZYdSXRbrQA4I2VW1anx6W&sz=w1200",
+    "driveFolderId": "1dWlg0n7aNLW1Vcba3cSmJRNe7Nun-gjf",
+    "synced": true
   },
   {
     "id": "rep-1786787052760",
@@ -1539,1320 +1912,228 @@
     "maintenanceActivity": "Desilting / Clearing of Canal (Mechanical)",
     "photos": [
       {
-        "id": "1WMpZbHZUAlg-hM78m8d_YNytjH6_Azih",
-        "url": "https://drive.google.com/thumbnail?id=1WMpZbHZUAlg-hM78m8d_YNytjH6_Azih&sz=w1200",
-        "driveFileId": "1WMpZbHZUAlg-hM78m8d_YNytjH6_Azih",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1WMpZbHZUAlg-hM78m8d_YNytjH6_Azih&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #1",
-        "capturedAt": "2026-08-15T09:44:12.760Z",
-        "locationName": "MAIN CANAL BULLCART 18 (15+204) to MAIN CANAL THRESHER CROSSING (13+623)",
-        "canalSegment": "",
-        "lat": 13.343329,
-        "lng": 121.161849
-      },
-      {
-        "id": "1p7ZpERBs9Op_JUtDS14I4pu_B1xf2MpG",
-        "url": "https://drive.google.com/thumbnail?id=1p7ZpERBs9Op_JUtDS14I4pu_B1xf2MpG&sz=w1200",
-        "driveFileId": "1p7ZpERBs9Op_JUtDS14I4pu_B1xf2MpG",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1p7ZpERBs9Op_JUtDS14I4pu_B1xf2MpG&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #2",
-        "capturedAt": "2026-08-15T09:44:12.760Z",
-        "locationName": "MAIN CANAL BULLCART 18 (15+204) to MAIN CANAL THRESHER CROSSING (13+623)",
-        "canalSegment": "",
+        "id": "15A4XWu5uxNQVwNlJgisFAX73rOweVoKc",
+        "driveFileId": "15A4XWu5uxNQVwNlJgisFAX73rOweVoKc",
+        "url": "https://drive.google.com/thumbnail?id=15A4XWu5uxNQVwNlJgisFAX73rOweVoKc&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=15A4XWu5uxNQVwNlJgisFAX73rOweVoKc&sz=w600",
+        "stage": "After",
+        "caption": "After Activity Documentation #1",
         "lat": 13.343329,
         "lng": 121.161849
       },
       {
         "id": "19_jrtOSRTImFnB3uVOAngFbMucbdfHft",
-        "url": "https://drive.google.com/thumbnail?id=19_jrtOSRTImFnB3uVOAngFbMucbdfHft&sz=w1200",
         "driveFileId": "19_jrtOSRTImFnB3uVOAngFbMucbdfHft",
+        "url": "https://drive.google.com/thumbnail?id=19_jrtOSRTImFnB3uVOAngFbMucbdfHft&sz=w1200",
         "thumbnailUrl": "https://drive.google.com/thumbnail?id=19_jrtOSRTImFnB3uVOAngFbMucbdfHft&sz=w600",
         "stage": "During",
+        "caption": "During Activity Documentation #2",
+        "lat": 13.343329,
+        "lng": 121.161849
+      },
+      {
+        "id": "1p7ZpERBs9Op_JUtDS14I4pu_B1xf2MpG",
+        "driveFileId": "1p7ZpERBs9Op_JUtDS14I4pu_B1xf2MpG",
+        "url": "https://drive.google.com/thumbnail?id=1p7ZpERBs9Op_JUtDS14I4pu_B1xf2MpG&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1p7ZpERBs9Op_JUtDS14I4pu_B1xf2MpG&sz=w600",
+        "stage": "During",
         "caption": "During Activity Documentation #3",
-        "capturedAt": "2026-08-15T09:44:12.760Z",
-        "locationName": "MAIN CANAL BULLCART 18 (15+204) to MAIN CANAL THRESHER CROSSING (13+623)",
-        "canalSegment": "",
         "lat": 13.343329,
         "lng": 121.161849
       },
       {
-        "id": "15A4XWu5uxNQVwNlJgisFAX73rOweVoKc",
-        "url": "https://drive.google.com/thumbnail?id=15A4XWu5uxNQVwNlJgisFAX73rOweVoKc&sz=w1200",
-        "driveFileId": "15A4XWu5uxNQVwNlJgisFAX73rOweVoKc",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=15A4XWu5uxNQVwNlJgisFAX73rOweVoKc&sz=w600",
-        "stage": "After",
-        "caption": "After Activity Documentation #4",
-        "capturedAt": "2026-08-15T09:44:12.760Z",
-        "locationName": "MAIN CANAL BULLCART 18 (15+204) to MAIN CANAL THRESHER CROSSING (13+623)",
-        "canalSegment": "",
+        "id": "1WMpZbHZUAlg-hM78m8d_YNytjH6_Azih",
+        "driveFileId": "1WMpZbHZUAlg-hM78m8d_YNytjH6_Azih",
+        "url": "https://drive.google.com/thumbnail?id=1WMpZbHZUAlg-hM78m8d_YNytjH6_Azih&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1WMpZbHZUAlg-hM78m8d_YNytjH6_Azih&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #4",
         "lat": 13.343329,
         "lng": 121.161849
       }
     ],
-    "photoUrl": "https://drive.google.com/thumbnail?id=1WMpZbHZUAlg-hM78m8d_YNytjH6_Azih&sz=w1200"
+    "photoUrl": "https://drive.google.com/thumbnail?id=15A4XWu5uxNQVwNlJgisFAX73rOweVoKc&sz=w1200",
+    "driveFolderId": "1pu34gn8AnQaXowv5tYoSyRJik5iF6pI1"
   },
   {
-    "id": "rep-1787037338803",
-    "title": "Desilting / Clearing of Canal (Manual) - CALAPAN DAM MAIN CANAL LEFT (1+933.3)",
+    "id": "rep-1786782300549",
+    "title": "Gate Lubrication - LATERAL C-SOUTH (0+183 to 0+472)",
     "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
-    "status": "Completed",
-    "approvalStatus": "Approved",
-    "createdAt": "2026-08-18T07:15:38.803Z",
-    "lat": 13.4,
-    "lng": 121.19,
-    "locationName": "CALAPAN DAM MAIN CANAL LEFT (1+933.3)",
-    "canalSegment": "CALAPAN DAM MAIN CANAL LEFT",
-    "completionPercent": 100,
-    "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
-    "reporterName": "asa",
-    "reporterRole": "Developer",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "asa (2026-08-18T07:15:38.802Z)",
-    "remarks": "sasa",
-    "synced": true,
-    "photos": [
-      {
-        "id": "1pmL7AdIKEcX_rXzV6o4tX5Fi425ddfgp",
-        "url": "https://drive.google.com/thumbnail?id=1pmL7AdIKEcX_rXzV6o4tX5Fi425ddfgp&sz=w1200",
-        "driveFileId": "1pmL7AdIKEcX_rXzV6o4tX5Fi425ddfgp",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1pmL7AdIKEcX_rXzV6o4tX5Fi425ddfgp&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #1",
-        "capturedAt": "2026-08-18T07:15:38.803Z",
-        "locationName": "CALAPAN DAM MAIN CANAL LEFT (1+933.3)",
-        "canalSegment": "CALAPAN DAM MAIN CANAL LEFT",
-        "lat": 13.4,
-        "lng": 121.19
-      }
-    ],
-    "photoUrl": "https://drive.google.com/thumbnail?id=1pmL7AdIKEcX_rXzV6o4tX5Fi425ddfgp&sz=w1200"
-  },
-  {
-    "id": "rep-1787049927741",
-    "title": "Desilting / Clearing of Canal (Manual) - LATERAL C (7+501.8)",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
-    "lat": 13.366262607704549,
-    "lng": 121.18306964635852,
-    "locationName": "LATERAL C (7+501.8)",
-    "pathCoords": [
-      [
-        13.366262772144955,
-        121.18306683093944
-      ]
-    ],
-    "canalSegment": "LATERAL C (7+501.8)",
-    "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
-    "performedBy": "IMO, IA",
-    "performedByList": [
-      "IMO",
-      "IA"
-    ],
-    "performedByIA": "SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.",
-    "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO; by IA: SAMAHANG MAGPAPATUBIG NG BAYANAN 2 IRRIGATORS' ASSOCIATION, INC.",
-    "status": "Completed",
-    "approvalStatus": "Approved",
-    "approvedBy": "Rei Maminta",
-    "approvedAt": "2026-08-18T10:45:27.741Z",
-    "remarks": "Desilting and clearing operations was completed along BACO-BUCAYAO RIVER IRRIGATION SYSTEM Main Canal by IMO.",
-    "reporterName": "Rei Maminta",
-    "reporterRole": "Developer",
-    "reporterDesignation": "Supervising Engineer A",
-    "verifierDesignation": "Supervising Engineer",
-    "revisionNumber": 0,
-    "revisionHistory": [],
-    "createdAt": "2026-08-18T10:45:27.741Z",
-    "synced": true,
-    "photos": [
-      {
-        "id": "1Xz6TcIaroU2RaCpQlII17ZvZbVVxeyA6",
-        "url": "https://drive.google.com/thumbnail?id=1Xz6TcIaroU2RaCpQlII17ZvZbVVxeyA6&sz=w1200",
-        "driveFileId": "1Xz6TcIaroU2RaCpQlII17ZvZbVVxeyA6",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1Xz6TcIaroU2RaCpQlII17ZvZbVVxeyA6&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #1",
-        "capturedAt": "2026-08-18T10:45:27.741Z",
-        "locationName": "LATERAL C (7+501.8)",
-        "canalSegment": "LATERAL C (7+501.8)",
-        "lat": 13.366262607704549,
-        "lng": 121.18306964635852
-      },
-      {
-        "id": "1vQTSckHxhp5cGlSEWC9HD4L_xfoab1v4",
-        "url": "https://drive.google.com/thumbnail?id=1vQTSckHxhp5cGlSEWC9HD4L_xfoab1v4&sz=w1200",
-        "driveFileId": "1vQTSckHxhp5cGlSEWC9HD4L_xfoab1v4",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1vQTSckHxhp5cGlSEWC9HD4L_xfoab1v4&sz=w600",
-        "stage": "After",
-        "caption": "After Activity Documentation #2",
-        "capturedAt": "2026-08-18T10:45:27.741Z",
-        "locationName": "LATERAL C (7+501.8)",
-        "canalSegment": "LATERAL C (7+501.8)",
-        "lat": 13.366262607704549,
-        "lng": 121.18306964635852
-      },
-      {
-        "id": "1w9mE0N5a6rUChCMhjeZNcDUfIA5WSkar",
-        "url": "https://drive.google.com/thumbnail?id=1w9mE0N5a6rUChCMhjeZNcDUfIA5WSkar&sz=w1200",
-        "driveFileId": "1w9mE0N5a6rUChCMhjeZNcDUfIA5WSkar",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1w9mE0N5a6rUChCMhjeZNcDUfIA5WSkar&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #3",
-        "capturedAt": "2026-08-18T10:45:27.741Z",
-        "locationName": "LATERAL C (7+501.8)",
-        "canalSegment": "LATERAL C (7+501.8)",
-        "lat": 13.366262607704549,
-        "lng": 121.18306964635852
-      },
-      {
-        "id": "13UQaBK33_bYHW89SMbfrAM9IYsbpUv2a",
-        "url": "https://drive.google.com/thumbnail?id=13UQaBK33_bYHW89SMbfrAM9IYsbpUv2a&sz=w1200",
-        "driveFileId": "13UQaBK33_bYHW89SMbfrAM9IYsbpUv2a",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=13UQaBK33_bYHW89SMbfrAM9IYsbpUv2a&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #4",
-        "capturedAt": "2026-08-18T10:45:27.741Z",
-        "locationName": "LATERAL C (7+501.8)",
-        "canalSegment": "LATERAL C (7+501.8)",
-        "lat": 13.366262607704549,
-        "lng": 121.18306964635852
-      },
-      {
-        "id": "1q2asOD2wCSyWfp1z8QDAqEuEVlmuQaxz",
-        "url": "https://drive.google.com/thumbnail?id=1q2asOD2wCSyWfp1z8QDAqEuEVlmuQaxz&sz=w1200",
-        "driveFileId": "1q2asOD2wCSyWfp1z8QDAqEuEVlmuQaxz",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1q2asOD2wCSyWfp1z8QDAqEuEVlmuQaxz&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #5",
-        "capturedAt": "2026-08-18T10:45:27.741Z",
-        "locationName": "LATERAL C (7+501.8)",
-        "canalSegment": "LATERAL C (7+501.8)",
-        "lat": 13.366262607704549,
-        "lng": 121.18306964635852
-      },
-      {
-        "id": "1ziOcXCFJ-Bt3ucCs8VL0gTv9SiBlTLf_",
-        "url": "https://drive.google.com/thumbnail?id=1ziOcXCFJ-Bt3ucCs8VL0gTv9SiBlTLf_&sz=w1200",
-        "driveFileId": "1ziOcXCFJ-Bt3ucCs8VL0gTv9SiBlTLf_",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1ziOcXCFJ-Bt3ucCs8VL0gTv9SiBlTLf_&sz=w600",
-        "stage": "After",
-        "caption": "After Activity Documentation #6",
-        "capturedAt": "2026-08-18T10:45:27.741Z",
-        "locationName": "LATERAL C (7+501.8)",
-        "canalSegment": "LATERAL C (7+501.8)",
-        "lat": 13.366262607704549,
-        "lng": 121.18306964635852
-      }
-    ],
-    "photoUrl": "https://drive.google.com/thumbnail?id=1Xz6TcIaroU2RaCpQlII17ZvZbVVxeyA6&sz=w1200",
-    "completionPercent": 100,
-    "desiltingVolumeM3": 0
-  },
-  {
-    "id": "wmr-260823-23471356-bbris",
-    "title": "Canal Repair / Construction - LATERAL F END OF CANAL (2+209)",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
-    "lat": 13.366079,
-    "lng": 121.176355,
-    "locationName": "LATERAL F END OF CANAL (2+209)",
-    "pathCoords": [
-      [
-        13.366079,
-        121.176355
-      ]
-    ],
-    "canalSegment": "LATERAL F END OF CANAL (2+209)",
-    "maintenanceActivity": "Canal Repair / Construction",
-    "performedBy": "IMO, IA",
-    "performedByList": [
-      "IMO",
-      "IA"
-    ],
-    "performedByIA": "MAIN AND LATERAL E CANAL IRRIGATORS' ASSOCIATION INC.",
-    "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO; by IA: MAIN AND LATERAL E CANAL IRRIGATORS' ASSOCIATION INC.",
-    "status": "Completed",
-    "currentTier": "Pending_NIS_Preparer",
-    "submittedByUserId": "usr-dev-01",
-    "submittedByUsername": "dev_master",
-    "submittedByRole": "Developer",
-    "approvalStatus": "Approved",
-    "approvedBy": "Field Personnel Test",
-    "approvedAt": "2026-08-23T15:47:13.561Z",
-    "remarks": "Maintenance activity performed efficiently along LATERAL F END OF CANAL (2+209).",
-    "reporterName": "Field Personnel Test",
-    "reporterRole": "Developer",
-    "reporterDesignation": "Field Personnel",
-    "verifierName": "NIS Activity focal",
-    "verifierDesignation": "NIS preparer",
-    "revisionNumber": 0,
-    "revisionHistory": [],
-    "createdAt": "2026-08-23T15:47:13.561Z",
-    "synced": true,
-    "photos": [
-      {
-        "id": "photo-1787499894597-jicvot",
-        "url": "",
-        "stage": "Before",
-        "caption": "Before #1",
-        "capturedAt": "2024-04-22T23:37:12.986Z",
-        "sizeBytes": 300605,
-        "framingConfig": {
-          "mode": "fit-width",
-          "zoom": 1,
-          "panStep": -8,
-          "offsetXPercent": 0,
-          "offsetYPercent": 0,
-          "naturalWidth": 1536,
-          "naturalHeight": 2048,
-          "naturalAspectRatio": 0.75
-        },
-        "canalSegment": "LATERAL F END OF CANAL (2+209)",
-        "featureName": "NIS",
-        "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-        "locationName": "LATERAL F END OF CANAL (2+209)",
-        "lat": 13.366079,
-        "lng": 121.176355
-      },
-      {
-        "id": "photo-1787499894694-smqyyb",
-        "url": "",
-        "stage": "During",
-        "caption": "During #1",
-        "capturedAt": "2024-04-22T23:36:55.827Z",
-        "sizeBytes": 294048,
-        "framingConfig": {
-          "mode": "fit-width",
-          "zoom": 1,
-          "panStep": -2,
-          "offsetXPercent": 0,
-          "offsetYPercent": 0,
-          "naturalWidth": 1536,
-          "naturalHeight": 2048,
-          "naturalAspectRatio": 0.75
-        },
-        "canalSegment": "LATERAL F END OF CANAL (2+209)",
-        "featureName": "NIS",
-        "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-        "locationName": "LATERAL F END OF CANAL (2+209)",
-        "lat": 13.366079,
-        "lng": 121.176355
-      },
-      {
-        "id": "photo-1787499894780-xfgqtj",
-        "url": "",
-        "stage": "During",
-        "caption": "During #2",
-        "capturedAt": "2024-04-22T23:36:51.804Z",
-        "sizeBytes": 295844,
-        "framingConfig": {
-          "mode": "fit-width",
-          "zoom": 1,
-          "panStep": -6,
-          "offsetXPercent": 0,
-          "offsetYPercent": 0,
-          "naturalWidth": 1536,
-          "naturalHeight": 2048,
-          "naturalAspectRatio": 0.75
-        },
-        "canalSegment": "LATERAL F END OF CANAL (2+209)",
-        "featureName": "NIS",
-        "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-        "locationName": "LATERAL F END OF CANAL (2+209)",
-        "lat": 13.366079,
-        "lng": 121.176355
-      },
-      {
-        "id": "photo-1787499894827-rvgha0",
-        "url": "",
-        "stage": "During",
-        "caption": "During #3",
-        "capturedAt": "2024-04-22T23:33:32.942Z",
-        "sizeBytes": 274584,
-        "framingConfig": {
-          "mode": "fit-width",
-          "zoom": 0.95,
-          "panStep": -8,
-          "offsetXPercent": 0,
-          "offsetYPercent": 0,
-          "naturalWidth": 1536,
-          "naturalHeight": 2048,
-          "naturalAspectRatio": 0.75
-        },
-        "canalSegment": "LATERAL F END OF CANAL (2+209)",
-        "featureName": "NIS",
-        "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-        "locationName": "LATERAL F END OF CANAL (2+209)",
-        "lat": 13.366079,
-        "lng": 121.176355
-      },
-      {
-        "id": "photo-1787499894880-xk372x",
-        "url": "",
-        "stage": "During",
-        "caption": "During #4",
-        "capturedAt": "2024-04-22T23:33:24.866Z",
-        "sizeBytes": 302373,
-        "framingConfig": {
-          "mode": "fit-width",
-          "zoom": 1,
-          "panStep": -2,
-          "offsetXPercent": 0,
-          "offsetYPercent": 0,
-          "naturalWidth": 1224,
-          "naturalHeight": 1632,
-          "naturalAspectRatio": 0.75
-        },
-        "canalSegment": "LATERAL F END OF CANAL (2+209)",
-        "featureName": "NIS",
-        "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-        "locationName": "LATERAL F END OF CANAL (2+209)",
-        "lat": 13.366079,
-        "lng": 121.176355
-      }
-    ],
-    "photoUrl": "",
-    "completionPercent": 100,
-    "desiltingVolumeM3": 0,
-    "revisions": [
-      {
-        "revisionNumber": 1,
-        "createdAt": "2026-08-23T15:47:13.561Z",
-        "createdBy": "Field Personnel Test",
-        "createdById": "usr-dev-01",
-        "createdRole": "Developer",
-        "changeSummary": "Initial field submission",
-        "snapshot": {
-          "id": "wmr-260823-23471356-bbris",
-          "title": "Canal Repair / Construction - LATERAL F END OF CANAL (2+209)",
-          "reportType": "maintenance",
-          "categoryMode": "maintenance",
-          "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-          "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
-          "lat": 13.366079,
-          "lng": 121.176355,
-          "locationName": "LATERAL F END OF CANAL (2+209)",
-          "pathCoords": [
-            [
-              13.366079,
-              121.176355
-            ]
-          ],
-          "canalSegment": "LATERAL F END OF CANAL (2+209)",
-          "maintenanceActivity": "Canal Repair / Construction",
-          "performedBy": "IMO, IA",
-          "performedByList": [
-            "IMO",
-            "IA"
-          ],
-          "performedByIA": "MAIN AND LATERAL E CANAL IRRIGATORS' ASSOCIATION INC.",
-          "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO; by IA: MAIN AND LATERAL E CANAL IRRIGATORS' ASSOCIATION INC.",
-          "status": "Completed",
-          "currentTier": "Pending_NIS_Preparer",
-          "submittedByUserId": "usr-dev-01",
-          "submittedByUsername": "dev_master",
-          "submittedByRole": "Developer",
-          "approvalStatus": "Approved",
-          "approvedBy": "Field Personnel Test",
-          "approvedAt": "2026-08-23T15:47:13.561Z",
-          "remarks": "Maintenance activity performed efficiently along LATERAL F END OF CANAL (2+209).",
-          "reporterName": "Field Personnel Test",
-          "reporterRole": "Developer",
-          "reporterDesignation": "Field Personnel",
-          "verifierName": "NIS Activity focal",
-          "verifierDesignation": "NIS preparer",
-          "revisionNumber": 0,
-          "revisionHistory": [],
-          "createdAt": "2026-08-23T15:47:13.561Z",
-          "synced": true,
-          "photos": [
-            {
-              "id": "photo-1787499894597-jicvot",
-              "url": "",
-              "stage": "Before",
-              "caption": "Before #1",
-              "capturedAt": "2024-04-22T23:37:12.986Z",
-              "sizeBytes": 300605,
-              "framingConfig": {
-                "mode": "fit-width",
-                "zoom": 1,
-                "panStep": -8,
-                "offsetXPercent": 0,
-                "offsetYPercent": 0,
-                "naturalWidth": 1536,
-                "naturalHeight": 2048,
-                "naturalAspectRatio": 0.75
-              },
-              "canalSegment": "LATERAL F END OF CANAL (2+209)",
-              "featureName": "NIS",
-              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-              "locationName": "LATERAL F END OF CANAL (2+209)",
-              "lat": 13.366079,
-              "lng": 121.176355
-            },
-            {
-              "id": "photo-1787499894694-smqyyb",
-              "url": "",
-              "stage": "During",
-              "caption": "During #1",
-              "capturedAt": "2024-04-22T23:36:55.827Z",
-              "sizeBytes": 294048,
-              "framingConfig": {
-                "mode": "fit-width",
-                "zoom": 1,
-                "panStep": -2,
-                "offsetXPercent": 0,
-                "offsetYPercent": 0,
-                "naturalWidth": 1536,
-                "naturalHeight": 2048,
-                "naturalAspectRatio": 0.75
-              },
-              "canalSegment": "LATERAL F END OF CANAL (2+209)",
-              "featureName": "NIS",
-              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-              "locationName": "LATERAL F END OF CANAL (2+209)",
-              "lat": 13.366079,
-              "lng": 121.176355
-            },
-            {
-              "id": "photo-1787499894780-xfgqtj",
-              "url": "",
-              "stage": "During",
-              "caption": "During #2",
-              "capturedAt": "2024-04-22T23:36:51.804Z",
-              "sizeBytes": 295844,
-              "framingConfig": {
-                "mode": "fit-width",
-                "zoom": 1,
-                "panStep": -6,
-                "offsetXPercent": 0,
-                "offsetYPercent": 0,
-                "naturalWidth": 1536,
-                "naturalHeight": 2048,
-                "naturalAspectRatio": 0.75
-              },
-              "canalSegment": "LATERAL F END OF CANAL (2+209)",
-              "featureName": "NIS",
-              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-              "locationName": "LATERAL F END OF CANAL (2+209)",
-              "lat": 13.366079,
-              "lng": 121.176355
-            },
-            {
-              "id": "photo-1787499894827-rvgha0",
-              "url": "",
-              "stage": "During",
-              "caption": "During #3",
-              "capturedAt": "2024-04-22T23:33:32.942Z",
-              "sizeBytes": 274584,
-              "framingConfig": {
-                "mode": "fit-width",
-                "zoom": 0.95,
-                "panStep": -8,
-                "offsetXPercent": 0,
-                "offsetYPercent": 0,
-                "naturalWidth": 1536,
-                "naturalHeight": 2048,
-                "naturalAspectRatio": 0.75
-              },
-              "canalSegment": "LATERAL F END OF CANAL (2+209)",
-              "featureName": "NIS",
-              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-              "locationName": "LATERAL F END OF CANAL (2+209)",
-              "lat": 13.366079,
-              "lng": 121.176355
-            },
-            {
-              "id": "photo-1787499894880-xk372x",
-              "url": "",
-              "stage": "During",
-              "caption": "During #4",
-              "capturedAt": "2024-04-22T23:33:24.866Z",
-              "sizeBytes": 302373,
-              "framingConfig": {
-                "mode": "fit-width",
-                "zoom": 1,
-                "panStep": -2,
-                "offsetXPercent": 0,
-                "offsetYPercent": 0,
-                "naturalWidth": 1224,
-                "naturalHeight": 1632,
-                "naturalAspectRatio": 0.75
-              },
-              "canalSegment": "LATERAL F END OF CANAL (2+209)",
-              "featureName": "NIS",
-              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-              "locationName": "LATERAL F END OF CANAL (2+209)",
-              "lat": 13.366079,
-              "lng": 121.176355
-            }
-          ],
-          "photoUrl": "",
-          "completionPercent": 100,
-          "desiltingVolumeM3": 0
-        }
-      }
-    ],
-    "activeRevisionNumber": 1
-  },
-  {
-    "id": "wmr-260823-23360318-bbris",
-    "title": "Desilting / Clearing of Canal (Manual) - LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
-    "lat": 13.319597,
-    "lng": 121.149345,
-    "secondLat": 13.328402,
-    "secondLng": 121.140641,
-    "locationName": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-    "pathCoords": [
-      [
-        13.319597,
-        121.149345
-      ],
-      [
-        13.319584397765334,
-        121.14936883989616
-      ],
-      [
-        13.319473,
-        121.149253
-      ],
-      [
-        13.319177,
-        121.148829
-      ],
-      [
-        13.319036,
-        121.148597
-      ],
-      [
-        13.318945,
-        121.148676
-      ],
-      [
-        13.319639,
-        121.148047
-      ],
-      [
-        13.320013,
-        121.14773
-      ],
-      [
-        13.320721,
-        121.14712
-      ],
-      [
-        13.321372,
-        121.146527
-      ],
-      [
-        13.32176,
-        121.146153
-      ],
-      [
-        13.321936,
-        121.146013
-      ],
-      [
-        13.322195,
-        121.145856
-      ],
-      [
-        13.32257,
-        121.145666
-      ],
-      [
-        13.322935,
-        121.145469
-      ],
-      [
-        13.323483,
-        121.145072
-      ],
-      [
-        13.323795,
-        121.144811
-      ],
-      [
-        13.324357,
-        121.144362
-      ],
-      [
-        13.324364,
-        121.144357
-      ],
-      [
-        13.324804,
-        121.144021
-      ],
-      [
-        13.325255,
-        121.143711
-      ],
-      [
-        13.325727,
-        121.143375
-      ],
-      [
-        13.326095,
-        121.143125
-      ],
-      [
-        13.326495,
-        121.142856
-      ],
-      [
-        13.326709,
-        121.142656
-      ],
-      [
-        13.327115,
-        121.142183
-      ],
-      [
-        13.32759,
-        121.141657
-      ],
-      [
-        13.327895,
-        121.141308
-      ],
-      [
-        13.328373,
-        121.140779
-      ],
-      [
-        13.328426827549992,
-        121.14065147997086
-      ],
-      [
-        13.328402,
-        121.140641
-      ]
-    ],
-    "canalSegment": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-    "segmentDistanceMeters": 1497,
-    "segmentDistanceFormatted": "1.50 km (1,497 m)",
-    "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
-    "performedBy": "IMO",
-    "performedByList": [
-      "IMO"
-    ],
-    "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO",
-    "status": "Completed",
-    "currentTier": "Pending_NIS_Preparer",
-    "submittedByUserId": "usr-dev-01",
-    "submittedByUsername": "dev_master",
-    "submittedByRole": "Developer",
-    "approvalStatus": "Approved",
-    "approvedBy": "Field Personnel Test",
-    "approvedAt": "2026-08-23T15:36:03.187Z",
-    "remarks": "Canal clearing and desilting was completed along 1497 meters of LATERAL A3 BULLCART 1 (0+108. 6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988) by IMO to restore unobstructed conveyance.",
-    "reporterName": "Field Personnel Test",
-    "reporterRole": "Developer",
-    "reporterDesignation": "Field Personnel",
-    "verifierName": "NIS Activity focal",
-    "verifierDesignation": "NIS preparer",
-    "revisionNumber": 0,
-    "revisionHistory": [],
-    "createdAt": "2026-08-23T15:36:03.187Z",
-    "synced": true,
-    "photos": [
-      {
-        "id": "photo-1787499090399-fv7kw9",
-        "url": "",
-        "stage": "Before",
-        "caption": "Before #1",
-        "capturedAt": "2026-08-17T12:58:32.000Z",
-        "sizeBytes": 290380,
-        "framingConfig": {
-          "mode": "fit-width",
-          "zoom": 1,
-          "panStep": 0,
-          "offsetXPercent": 0,
-          "offsetYPercent": 0,
-          "naturalWidth": 3264,
-          "naturalHeight": 1504,
-          "naturalAspectRatio": 2.1702127659574466
-        },
-        "canalSegment": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-        "featureName": "NIS",
-        "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-        "locationName": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-        "lat": 13.319597,
-        "lng": 121.149345
-      },
-      {
-        "id": "photo-1787499106500-x6tjek",
-        "url": "",
-        "stage": "During",
-        "caption": "During #1",
-        "capturedAt": "2026-08-17T12:58:32.000Z",
-        "sizeBytes": 290380,
-        "framingConfig": {
-          "mode": "fit-width",
-          "zoom": 1,
-          "panStep": 0,
-          "offsetXPercent": 0,
-          "offsetYPercent": 0,
-          "naturalWidth": 3264,
-          "naturalHeight": 1504,
-          "naturalAspectRatio": 2.1702127659574466
-        },
-        "canalSegment": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-        "featureName": "NIS",
-        "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-        "locationName": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-        "lat": 13.319597,
-        "lng": 121.149345
-      },
-      {
-        "id": "photo-1787499106627-ok1d7u",
-        "url": "",
-        "stage": "During",
-        "caption": "During #2",
-        "capturedAt": "2026-08-17T12:58:32.000Z",
-        "sizeBytes": 284121,
-        "framingConfig": {
-          "mode": "fit-width",
-          "zoom": 1,
-          "panStep": 0,
-          "offsetXPercent": 0,
-          "offsetYPercent": 0,
-          "naturalWidth": 3264,
-          "naturalHeight": 1504,
-          "naturalAspectRatio": 2.1702127659574466
-        },
-        "canalSegment": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-        "featureName": "NIS",
-        "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-        "locationName": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-        "lat": 13.319597,
-        "lng": 121.149345
-      },
-      {
-        "id": "photo-1787499106722-9k4qc7",
-        "url": "",
-        "stage": "During",
-        "caption": "During #3",
-        "capturedAt": "2026-08-17T12:58:32.000Z",
-        "sizeBytes": 304060,
-        "framingConfig": {
-          "mode": "fit-width",
-          "zoom": 1,
-          "panStep": 0,
-          "offsetXPercent": 0,
-          "offsetYPercent": 0,
-          "naturalWidth": 4624,
-          "naturalHeight": 2136,
-          "naturalAspectRatio": 2.1647940074906367
-        },
-        "canalSegment": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-        "featureName": "NIS",
-        "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-        "locationName": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-        "lat": 13.319597,
-        "lng": 121.149345
-      }
-    ],
-    "photoUrl": "",
-    "completionPercent": 100,
-    "desiltingVolumeM3": 0,
-    "revisions": [
-      {
-        "revisionNumber": 1,
-        "createdAt": "2026-08-23T15:36:03.187Z",
-        "createdBy": "Field Personnel Test",
-        "createdById": "usr-dev-01",
-        "createdRole": "Developer",
-        "changeSummary": "Initial field submission",
-        "snapshot": {
-          "id": "wmr-260823-23360318-bbris",
-          "title": "Desilting / Clearing of Canal (Manual) - LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-          "reportType": "maintenance",
-          "categoryMode": "maintenance",
-          "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-          "nisBinding": "BACO-BUCAYAO RIVER IRRIGATION SYSTEM",
-          "lat": 13.319597,
-          "lng": 121.149345,
-          "secondLat": 13.328402,
-          "secondLng": 121.140641,
-          "locationName": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-          "pathCoords": [
-            [
-              13.319597,
-              121.149345
-            ],
-            [
-              13.319584397765334,
-              121.14936883989616
-            ],
-            [
-              13.319473,
-              121.149253
-            ],
-            [
-              13.319177,
-              121.148829
-            ],
-            [
-              13.319036,
-              121.148597
-            ],
-            [
-              13.318945,
-              121.148676
-            ],
-            [
-              13.319639,
-              121.148047
-            ],
-            [
-              13.320013,
-              121.14773
-            ],
-            [
-              13.320721,
-              121.14712
-            ],
-            [
-              13.321372,
-              121.146527
-            ],
-            [
-              13.32176,
-              121.146153
-            ],
-            [
-              13.321936,
-              121.146013
-            ],
-            [
-              13.322195,
-              121.145856
-            ],
-            [
-              13.32257,
-              121.145666
-            ],
-            [
-              13.322935,
-              121.145469
-            ],
-            [
-              13.323483,
-              121.145072
-            ],
-            [
-              13.323795,
-              121.144811
-            ],
-            [
-              13.324357,
-              121.144362
-            ],
-            [
-              13.324364,
-              121.144357
-            ],
-            [
-              13.324804,
-              121.144021
-            ],
-            [
-              13.325255,
-              121.143711
-            ],
-            [
-              13.325727,
-              121.143375
-            ],
-            [
-              13.326095,
-              121.143125
-            ],
-            [
-              13.326495,
-              121.142856
-            ],
-            [
-              13.326709,
-              121.142656
-            ],
-            [
-              13.327115,
-              121.142183
-            ],
-            [
-              13.32759,
-              121.141657
-            ],
-            [
-              13.327895,
-              121.141308
-            ],
-            [
-              13.328373,
-              121.140779
-            ],
-            [
-              13.328426827549992,
-              121.14065147997086
-            ],
-            [
-              13.328402,
-              121.140641
-            ]
-          ],
-          "canalSegment": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-          "segmentDistanceMeters": 1497,
-          "segmentDistanceFormatted": "1.50 km (1,497 m)",
-          "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
-          "performedBy": "IMO",
-          "performedByList": [
-            "IMO"
-          ],
-          "performedByDetails": "by Mindoro Oriental-Marinduque-Romblon IMO",
-          "status": "Completed",
-          "currentTier": "Pending_NIS_Preparer",
-          "submittedByUserId": "usr-dev-01",
-          "submittedByUsername": "dev_master",
-          "submittedByRole": "Developer",
-          "approvalStatus": "Approved",
-          "approvedBy": "Field Personnel Test",
-          "approvedAt": "2026-08-23T15:36:03.187Z",
-          "remarks": "Canal clearing and desilting was completed along 1497 meters of LATERAL A3 BULLCART 1 (0+108. 6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988) by IMO to restore unobstructed conveyance.",
-          "reporterName": "Field Personnel Test",
-          "reporterRole": "Developer",
-          "reporterDesignation": "Field Personnel",
-          "verifierName": "NIS Activity focal",
-          "verifierDesignation": "NIS preparer",
-          "revisionNumber": 0,
-          "revisionHistory": [],
-          "createdAt": "2026-08-23T15:36:03.187Z",
-          "synced": true,
-          "photos": [
-            {
-              "id": "photo-1787499090399-fv7kw9",
-              "url": "",
-              "stage": "Before",
-              "caption": "Before #1",
-              "capturedAt": "2026-08-17T12:58:32.000Z",
-              "sizeBytes": 290380,
-              "framingConfig": {
-                "mode": "fit-width",
-                "zoom": 1,
-                "panStep": 0,
-                "offsetXPercent": 0,
-                "offsetYPercent": 0,
-                "naturalWidth": 3264,
-                "naturalHeight": 1504,
-                "naturalAspectRatio": 2.1702127659574466
-              },
-              "canalSegment": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-              "featureName": "NIS",
-              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-              "locationName": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-              "lat": 13.319597,
-              "lng": 121.149345
-            },
-            {
-              "id": "photo-1787499106500-x6tjek",
-              "url": "",
-              "stage": "During",
-              "caption": "During #1",
-              "capturedAt": "2026-08-17T12:58:32.000Z",
-              "sizeBytes": 290380,
-              "framingConfig": {
-                "mode": "fit-width",
-                "zoom": 1,
-                "panStep": 0,
-                "offsetXPercent": 0,
-                "offsetYPercent": 0,
-                "naturalWidth": 3264,
-                "naturalHeight": 1504,
-                "naturalAspectRatio": 2.1702127659574466
-              },
-              "canalSegment": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-              "featureName": "NIS",
-              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-              "locationName": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-              "lat": 13.319597,
-              "lng": 121.149345
-            },
-            {
-              "id": "photo-1787499106627-ok1d7u",
-              "url": "",
-              "stage": "During",
-              "caption": "During #2",
-              "capturedAt": "2026-08-17T12:58:32.000Z",
-              "sizeBytes": 284121,
-              "framingConfig": {
-                "mode": "fit-width",
-                "zoom": 1,
-                "panStep": 0,
-                "offsetXPercent": 0,
-                "offsetYPercent": 0,
-                "naturalWidth": 3264,
-                "naturalHeight": 1504,
-                "naturalAspectRatio": 2.1702127659574466
-              },
-              "canalSegment": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-              "featureName": "NIS",
-              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-              "locationName": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-              "lat": 13.319597,
-              "lng": 121.149345
-            },
-            {
-              "id": "photo-1787499106722-9k4qc7",
-              "url": "",
-              "stage": "During",
-              "caption": "During #3",
-              "capturedAt": "2026-08-17T12:58:32.000Z",
-              "sizeBytes": 304060,
-              "framingConfig": {
-                "mode": "fit-width",
-                "zoom": 1,
-                "panStep": 0,
-                "offsetXPercent": 0,
-                "offsetYPercent": 0,
-                "naturalWidth": 4624,
-                "naturalHeight": 2136,
-                "naturalAspectRatio": 2.1647940074906367
-              },
-              "canalSegment": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-              "featureName": "NIS",
-              "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-              "locationName": "LATERAL A3 BULLCART 1 (0+108.6) to LATERAL A COMBI TO & INLET ROAD CROSSING (4+988)",
-              "lat": 13.319597,
-              "lng": 121.149345
-            }
-          ],
-          "photoUrl": "",
-          "completionPercent": 100,
-          "desiltingVolumeM3": 0
-        }
-      }
-    ],
-    "activeRevisionNumber": 1
-  },
-  {
-    "id": "WMR-MOM-BB-2026-REV01",
-    "title": "Desilting / Clearing of Canal (Mechanical) - Main Canal Station 0+100 to 0+450",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "maintenanceActivity": "Desilting / Clearing of Canal (Mechanical)",
-    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
-    "nisBinding": "Baco-Bucayao RIS",
-    "canalSegment": "MC-LAT-A-01",
-    "locationName": "Main Canal Station 0+100 to 0+450",
-    "lat": 13.3524,
-    "lng": 121.1845,
-    "secondLat": 13.3558,
-    "secondLng": 121.1872,
-    "segmentDistanceMeters": 350,
-    "segmentDistanceFormatted": "350.0 m",
-    "depthMeters": 1.4,
-    "widthMeters": 2.2,
-    "calculatedVolumeM3": 1078,
-    "dimensionDetailsFormatted": "Depth: 1.4m, Width: 2.2m, Length: 350.0m → Vol: 1,078 m³",
-    "status": "In Progress",
-    "currentTier": "Pending_NIS_Preparer",
-    "approvalStatus": "Pending_PreApproval",
-    "reporterName": "Engr. Juan Dela Cruz",
-    "reporterRole": "Field Personnel",
-    "submittedByUserId": "usr-fld-mom-01",
-    "submittedByUsername": "field_momaro_1",
-    "submittedByRole": "Field Personnel",
-    "createdAt": "2026-08-21T15:34:01.661Z",
-    "remarks": "Heavy sedimentation along the outer canal bend. Crew deployed with 0.8m³ backhoe.",
-    "synced": true,
-    "revisions": [
-      {
-        "revisionNumber": 1,
-        "createdAt": "2026-08-21T15:34:01.661Z",
-        "createdBy": "Engr. Juan Dela Cruz",
-        "createdById": "usr-fld-mom-01",
-        "createdRole": "Field Personnel",
-        "changeSummary": "Initial field measurement survey",
-        "snapshot": {
-          "locationName": "Main Canal Station 0+100 to 0+300",
-          "segmentDistanceMeters": 200,
-          "depthMeters": 0.9,
-          "widthMeters": 2,
-          "calculatedVolumeM3": 360,
-          "dimensionDetailsFormatted": "Depth: 0.9m, Width: 2.0m, Length: 200.0m → Vol: 360 m³",
-          "remarks": "Initial visual estimate before full stationing run."
-        }
-      },
-      {
-        "revisionNumber": 2,
-        "createdAt": "2026-08-22T15:34:01.660Z",
-        "createdBy": "Engr. Juan Dela Cruz",
-        "createdById": "usr-fld-mom-01",
-        "createdRole": "Field Personnel",
-        "changeSummary": "Updated stationing length from 200m to 350m and measured silt depth to 1.4m",
-        "snapshot": {
-          "locationName": "Main Canal Station 0+100 to 0+450",
-          "segmentDistanceMeters": 350,
-          "depthMeters": 1.4,
-          "widthMeters": 2.2,
-          "calculatedVolumeM3": 1078,
-          "dimensionDetailsFormatted": "Depth: 1.4m, Width: 2.2m, Length: 350.0m → Vol: 1,078 m³",
-          "remarks": "Heavy sedimentation along the outer canal bend. Crew deployed with 0.8m³ backhoe."
-        }
-      }
-    ],
-    "activeRevisionNumber": 2,
-    "photos": [
-      {
-        "id": "p1",
-        "url": "https://images.unsplash.com/photo-1541888946425-d0fbb180c5f5?w=500&q=80",
-        "stage": "Before",
-        "caption": "Heavy Siltation Before Work"
-      }
-    ]
-  },
-  {
-    "id": "rep-1786776977859",
-    "title": "Temporary Fix - LATERAL A-NORTH-1 (3+282.5 to 1+658.8)",
-    "reportType": "maintenance",
-    "lat": 9.363940706438887,
-    "lng": 118.4758758544922,
-    "canalSegment": "f-1786776781867-30",
+    "lat": 9.327993,
+    "lng": 118.449295,
+    "canalSegment": "f-1786777131418-29",
     "parcelId": "",
     "completionPercent": 100,
     "desiltingVolumeM3": 1200,
     "status": "Completed",
-    "remarks": "Sample remarks",
-    "reporterName": "Rei Sample PHotos",
-    "reporterRole": "Field Personnel",
-    "createdAt": "2026-08-15T06:56:17.859Z",
+    "remarks": "Maintenance activity performed efficiently along LATERAL C-SOUTH (0+183 to 0+472).",
+    "reporterName": "Field Engr test 2",
+    "reporterRole": "O&M Engineer",
+    "approvalStatus": "PreApproved",
+    "preApprovedBy": "Field Engr test 2",
+    "createdAt": "2026-08-15T08:25:00.549Z",
     "synced": true,
-    "photoUrl": "",
-    "hazardSeverity": null
-  },
-  {
-    "id": "rep-test-1786769325150",
-    "title": "Test Report Photo Metadata",
-    "reportType": "maintenance",
-    "lat": 13.25,
-    "lng": 121.25,
-    "canalSegment": "MC-01",
-    "parcelId": "LOT-100",
-    "completionPercent": 0,
-    "desiltingVolumeM3": 0,
-    "status": "In Progress",
-    "remarks": "Test remarks",
-    "reporterName": "Engr. Test",
-    "reporterRole": "Field Engineer",
-    "createdAt": "2026-08-15T04:48:45.151Z",
-    "synced": true,
-    "photoUrl": "",
-    "hazardSeverity": null
-  },
-  {
-    "id": "rep-maint-desilt-1786802167125",
-    "title": "Canal Desilting Segment Accomplishment",
-    "reportType": "maintenance",
+    "photoUrl": "https://drive.google.com/thumbnail?id=1YfGY-h6NZJWaXrDCTFRJ-AJir4YiZe83&sz=w1200",
+    "hazardSeverity": null,
     "categoryMode": "maintenance",
-    "imoOffice": "Palawan IMO",
-    "nisBinding": "Malatgao RIS",
-    "status": "Completed",
-    "approvalStatus": "Pending_PreApproval",
-    "createdAt": "2026-08-15T13:56:07.174Z",
-    "lat": 9.332,
-    "lng": 118.421,
-    "secondLat": 9.345,
-    "secondLng": 118.432,
-    "locationName": "Malatgao Main Canal Sta 0+000 to Sta 0+500",
-    "canalSegment": "Malatgao Main Canal",
-    "segmentDistanceMeters": 500,
-    "segmentDistanceFormatted": "500.0 m (0.50 km)",
-    "maintenanceActivity": "Desilting / Clearing of Canal (Mechanical)",
-    "reporterName": "Field Engr Palawan",
-    "reporterRole": "Field Personnel",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Pending (N/A)",
-    "remarks": "Mechanical desilting accomplished.",
-    "synced": true,
-    "photos": []
-  },
-  {
-    "id": "rep-maint-paint-1786802167125",
-    "title": "Painting of Steel Turnout Gates",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Palawan IMO",
-    "nisBinding": "Malatgao RIS",
-    "status": "Completed",
-    "approvalStatus": "Pending_PreApproval",
-    "createdAt": "2026-08-15T13:56:12.507Z",
-    "lat": 9.335,
-    "lng": 118.428,
-    "locationName": "Turnout Gate No. 3",
-    "maintenanceActivity": "Painting",
-    "reporterName": "Painter Team",
-    "reporterRole": "Field Personnel",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Pending (N/A)",
-    "remarks": "Coating applied.",
-    "synced": true,
-    "photos": []
-  },
-  {
-    "id": "rep-2pt-dist-1786791272524",
-    "title": "Canal Desilting Segment Accomplishment",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Palawan IMO",
-    "nisBinding": "Malatgao RIS",
-    "status": "Completed",
-    "approvalStatus": "Pending_PreApproval",
-    "createdAt": "2026-08-15T10:54:32.573Z",
-    "lat": 9.332,
-    "lng": 118.421,
-    "secondLat": 9.345,
-    "secondLng": 118.432,
-    "locationName": "Malatgao Main Canal Sta 0+100 to Sta 1+550",
-    "canalSegment": "Malatgao Main Canal",
-    "segmentDistanceMeters": 1.45,
-    "segmentDistanceFormatted": "1.45 km (1,450 m)",
-    "maintenanceActivity": "Desilting / Clearing of Canal (Mechanical)",
-    "reporterName": "Field Engr Test",
-    "reporterRole": "Field Personnel",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Pending (N/A)",
-    "remarks": "Completed 1.45 km mechanical desilting accomplishment.",
-    "synced": true,
+    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+    "nisBinding": "f-1786777131418-29",
+    "secondLat": 9.325949,
+    "secondLng": 118.447669,
+    "locationName": "LATERAL C-SOUTH (0+183 to 0+472)",
+    "pathCoords": [
+      [
+        9.327993,
+        118.449295
+      ],
+      [
+        9.327372,
+        118.448788
+      ],
+      [
+        9.325949,
+        118.447669
+      ]
+    ],
+    "maintenanceActivity": "Gate Lubrication",
+    "preApprovedAt": "2026-08-15T08:25:00.549Z",
     "photos": [
       {
-        "id": "1e8RiSk6b-lGw9tDOPxmzvjW1SdqcY1W2",
-        "url": "https://drive.google.com/thumbnail?id=1e8RiSk6b-lGw9tDOPxmzvjW1SdqcY1W2&sz=w1200",
-        "driveFileId": "1e8RiSk6b-lGw9tDOPxmzvjW1SdqcY1W2",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1e8RiSk6b-lGw9tDOPxmzvjW1SdqcY1W2&sz=w600",
-        "stage": "After",
-        "caption": "After Activity Documentation #1",
-        "capturedAt": "2026-08-15T10:54:32.573Z",
-        "locationName": "Malatgao Main Canal Sta 0+100 to Sta 1+550",
-        "canalSegment": "Malatgao Main Canal",
-        "lat": 9.332,
-        "lng": 118.421
+        "id": "1YfGY-h6NZJWaXrDCTFRJ-AJir4YiZe83",
+        "driveFileId": "1YfGY-h6NZJWaXrDCTFRJ-AJir4YiZe83",
+        "url": "https://drive.google.com/thumbnail?id=1YfGY-h6NZJWaXrDCTFRJ-AJir4YiZe83&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1YfGY-h6NZJWaXrDCTFRJ-AJir4YiZe83&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #1",
+        "lat": 9.327993,
+        "lng": 118.449295
+      },
+      {
+        "id": "11V7l_RDlPI3vtWJip-b526bId6UQAfcT",
+        "driveFileId": "11V7l_RDlPI3vtWJip-b526bId6UQAfcT",
+        "url": "https://drive.google.com/thumbnail?id=11V7l_RDlPI3vtWJip-b526bId6UQAfcT&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=11V7l_RDlPI3vtWJip-b526bId6UQAfcT&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #2",
+        "lat": 9.327993,
+        "lng": 118.449295
+      },
+      {
+        "id": "1J2yhuWq8Q-3BbQsFy2ySdsSMzPStPbbz",
+        "driveFileId": "1J2yhuWq8Q-3BbQsFy2ySdsSMzPStPbbz",
+        "url": "https://drive.google.com/thumbnail?id=1J2yhuWq8Q-3BbQsFy2ySdsSMzPStPbbz&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1J2yhuWq8Q-3BbQsFy2ySdsSMzPStPbbz&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #3",
+        "lat": 9.327993,
+        "lng": 118.449295
       }
     ],
-    "photoUrl": "/api/drive/photo/1e8RiSk6b-lGw9tDOPxmzvjW1SdqcY1W2"
+    "driveFolderId": "1BD5mbKa5M4tnPhzy4bt1nv9358DgZaUp"
+  },
+  {
+    "id": "rep-1786781921981",
+    "title": "Desilting / Clearing of Canal (Manual) - TURN OUT #4-L (0+000) to STAFF GAUGE (0+000)",
+    "reportType": "maintenance",
+    "lat": 9.33191,
+    "lng": 118.433571,
+    "canalSegment": "",
+    "parcelId": "",
+    "completionPercent": 100,
+    "desiltingVolumeM3": 1200,
+    "status": "Completed",
+    "remarks": "Maintenance activity performed efficiently along TURN OUT #4-L (0+000) to STAFF GAUGE (0+000).",
+    "reporterName": "Sample report",
+    "reporterRole": "Developer",
+    "approvalStatus": "Approved",
+    "preApprovedBy": null,
+    "createdAt": "2026-08-15T08:18:41.981Z",
+    "synced": true,
+    "photoUrl": "https://drive.google.com/thumbnail?id=1GSY0u_S8BLIDewTfRJlvyu8PbBccbbQE&sz=w1200",
+    "hazardSeverity": null,
+    "categoryMode": "maintenance",
+    "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
+    "secondLat": 9.3383,
+    "secondLng": 118.43866,
+    "locationName": "TURN OUT #4-L (0+000) to STAFF GAUGE (0+000)",
+    "pathCoords": [
+      [
+        9.33191,
+        118.433571
+      ],
+      [
+        9.331917200756223,
+        118.4335621816826
+      ],
+      [
+        9.332435,
+        118.433985
+      ],
+      [
+        9.332987,
+        118.434424
+      ],
+      [
+        9.333717,
+        118.43501
+      ],
+      [
+        9.335088,
+        118.436106
+      ],
+      [
+        9.336171,
+        118.436985
+      ],
+      [
+        9.336386,
+        118.437146
+      ],
+      [
+        9.337225,
+        118.437812
+      ],
+      [
+        9.3383,
+        118.43866
+      ]
+    ],
+    "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
+    "approvedBy": "Sample report",
+    "approvedAt": "2026-08-15T08:18:41.981Z",
+    "photos": [
+      {
+        "id": "1GSY0u_S8BLIDewTfRJlvyu8PbBccbbQE",
+        "driveFileId": "1GSY0u_S8BLIDewTfRJlvyu8PbBccbbQE",
+        "url": "https://drive.google.com/thumbnail?id=1GSY0u_S8BLIDewTfRJlvyu8PbBccbbQE&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1GSY0u_S8BLIDewTfRJlvyu8PbBccbbQE&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #1",
+        "lat": 9.33191,
+        "lng": 118.433571
+      },
+      {
+        "id": "1gJDkT7X_pJl4iTn-NT-GyjcU_xMoCES_",
+        "driveFileId": "1gJDkT7X_pJl4iTn-NT-GyjcU_xMoCES_",
+        "url": "https://drive.google.com/thumbnail?id=1gJDkT7X_pJl4iTn-NT-GyjcU_xMoCES_&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1gJDkT7X_pJl4iTn-NT-GyjcU_xMoCES_&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #2",
+        "lat": 9.33191,
+        "lng": 118.433571
+      },
+      {
+        "id": "1TNKd4MMsac-zERpk4piQOzDNHT9aNYBz",
+        "driveFileId": "1TNKd4MMsac-zERpk4piQOzDNHT9aNYBz",
+        "url": "https://drive.google.com/thumbnail?id=1TNKd4MMsac-zERpk4piQOzDNHT9aNYBz&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1TNKd4MMsac-zERpk4piQOzDNHT9aNYBz&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #3",
+        "lat": 9.33191,
+        "lng": 118.433571
+      }
+    ],
+    "driveFolderId": "16rbWVQFtT3pqwDmAjJhXn2Ai4Skf0H3c"
   },
   {
     "id": "rep-maint-verify-1786779608111",
@@ -2872,7 +2153,7 @@
     "preApprovedBy": null,
     "createdAt": "2026-08-15T07:40:08.111Z",
     "synced": true,
-    "photoUrl": "/api/drive/photo/1YRECFscm1aNRkukure1gtJAV3Cl1x_fu",
+    "photoUrl": "https://drive.google.com/thumbnail?id=1SFF-Tre2MBdBgcjjt5WFiIX8F0hPRVQC&sz=w1200",
     "hazardSeverity": null,
     "categoryMode": "maintenance",
     "imoOffice": "Mindoro Oriental-Marinduque-Romblon IMO",
@@ -2880,292 +2161,27 @@
     "locationName": "Baco Siphon Sta. 3+000",
     "photos": [
       {
-        "id": "1YRECFscm1aNRkukure1gtJAV3Cl1x_fu",
-        "url": "https://drive.google.com/thumbnail?id=1YRECFscm1aNRkukure1gtJAV3Cl1x_fu&sz=w1200",
-        "driveFileId": "1YRECFscm1aNRkukure1gtJAV3Cl1x_fu",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1YRECFscm1aNRkukure1gtJAV3Cl1x_fu&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #1",
-        "capturedAt": "2026-08-15T07:40:08.111Z",
-        "locationName": "Baco Siphon Sta. 3+000",
-        "canalSegment": "MC-Siphon-01",
-        "lat": 13.355,
-        "lng": 121.168
-      },
-      {
         "id": "1SFF-Tre2MBdBgcjjt5WFiIX8F0hPRVQC",
-        "url": "https://drive.google.com/thumbnail?id=1SFF-Tre2MBdBgcjjt5WFiIX8F0hPRVQC&sz=w1200",
         "driveFileId": "1SFF-Tre2MBdBgcjjt5WFiIX8F0hPRVQC",
+        "url": "https://drive.google.com/thumbnail?id=1SFF-Tre2MBdBgcjjt5WFiIX8F0hPRVQC&sz=w1200",
         "thumbnailUrl": "https://drive.google.com/thumbnail?id=1SFF-Tre2MBdBgcjjt5WFiIX8F0hPRVQC&sz=w600",
         "stage": "During",
-        "caption": "During Activity Documentation #2",
-        "capturedAt": "2026-08-15T07:40:08.111Z",
-        "locationName": "Baco Siphon Sta. 3+000",
-        "canalSegment": "MC-Siphon-01",
+        "caption": "During Activity Documentation #1",
+        "lat": 13.355,
+        "lng": 121.168
+      },
+      {
+        "id": "1YRECFscm1aNRkukure1gtJAV3Cl1x_fu",
+        "driveFileId": "1YRECFscm1aNRkukure1gtJAV3Cl1x_fu",
+        "url": "https://drive.google.com/thumbnail?id=1YRECFscm1aNRkukure1gtJAV3Cl1x_fu&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1YRECFscm1aNRkukure1gtJAV3Cl1x_fu&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #2",
         "lat": 13.355,
         "lng": 121.168
       }
-    ]
-  },
-  {
-    "id": "rep-maint-test-occ-1786779405624",
-    "title": "Mamburao Canal Gate Maintenance",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Occidental Mindoro IMO",
-    "nisBinding": "Mamburao RIS",
-    "locationName": "Mamburao Main Canal Turnout 2",
-    "canalSegment": "MC-Turnout-2",
-    "lat": 13.22,
-    "lng": 120.6,
-    "status": "Completed",
-    "remarks": "Gate clearing and gear lubrication completed",
-    "reporterName": "Field Officer Occ Mindoro 01",
-    "reporterRole": "Field Personnel",
-    "createdAt": "2026-08-15T07:36:45.624Z",
-    "synced": true,
-    "photos": [
-      {
-        "id": "1LUlICaaGi3WSU1QxT_ay9SeRhoAUlS-O",
-        "url": "https://drive.google.com/thumbnail?id=1LUlICaaGi3WSU1QxT_ay9SeRhoAUlS-O&sz=w1200",
-        "driveFileId": "1LUlICaaGi3WSU1QxT_ay9SeRhoAUlS-O",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1LUlICaaGi3WSU1QxT_ay9SeRhoAUlS-O&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #1",
-        "capturedAt": "2026-08-15T07:36:45.624Z",
-        "locationName": "Mamburao Main Canal Turnout 2",
-        "canalSegment": "MC-Turnout-2",
-        "lat": 13.22,
-        "lng": 120.6
-      },
-      {
-        "id": "1UhvVMPUEPTULUTxKcGgrqGABS4XV_0Xg",
-        "url": "https://drive.google.com/thumbnail?id=1UhvVMPUEPTULUTxKcGgrqGABS4XV_0Xg&sz=w1200",
-        "driveFileId": "1UhvVMPUEPTULUTxKcGgrqGABS4XV_0Xg",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1UhvVMPUEPTULUTxKcGgrqGABS4XV_0Xg&sz=w600",
-        "stage": "After",
-        "caption": "After Activity Documentation #2",
-        "capturedAt": "2026-08-15T07:36:45.624Z",
-        "locationName": "Mamburao Main Canal Turnout 2",
-        "canalSegment": "MC-Turnout-2",
-        "lat": 13.22,
-        "lng": 120.6
-      }
     ],
-    "photoUrl": "/api/drive/photo/1LUlICaaGi3WSU1QxT_ay9SeRhoAUlS-O"
-  },
-  {
-    "id": "rep-auto-route-1786789198985",
-    "title": "Canal Clearing and Desilting - Sta 3+000",
-    "reportType": "maintenance",
-    "lat": 9.3301,
-    "lng": 118.425,
-    "canalSegment": "",
-    "parcelId": "",
-    "completionPercent": 0,
-    "desiltingVolumeM3": 0,
-    "status": "In Progress",
-    "remarks": "Manual clearing operations underway.",
-    "reporterName": "Field Engr Palawan",
-    "reporterRole": "Field Personnel",
-    "approvalStatus": "Pending_PreApproval",
-    "preApprovedBy": null,
-    "createdAt": "2026-08-15T10:19:59.036Z",
-    "synced": true,
-    "hazardSeverity": null,
-    "categoryMode": "maintenance",
-    "imoOffice": "Palawan IMO",
-    "nisBinding": "Malatgao RIS",
-    "locationName": "Malatgao Main Canal Lateral B",
-    "maintenanceActivity": "Desilting / Clearing of Canal (Manual)",
-    "photos": [
-      {
-        "id": "1nWTCTnS0H0TdL80_lkpg81deZrRVMpjv",
-        "url": "https://drive.google.com/thumbnail?id=1nWTCTnS0H0TdL80_lkpg81deZrRVMpjv&sz=w1200",
-        "driveFileId": "1nWTCTnS0H0TdL80_lkpg81deZrRVMpjv",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1nWTCTnS0H0TdL80_lkpg81deZrRVMpjv&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #1",
-        "capturedAt": "2026-08-15T10:19:59.036Z",
-        "locationName": "Malatgao Main Canal Lateral B",
-        "canalSegment": "",
-        "lat": 9.3301,
-        "lng": 118.425
-      }
-    ],
-    "photoUrl": "/api/drive/photo/1nWTCTnS0H0TdL80_lkpg81deZrRVMpjv"
-  },
-  {
-    "id": "rep-clean-drive-1786789233023",
-    "title": "Occidental Mindoro Dam Intake Inspection",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Occidental Mindoro IMO",
-    "nisBinding": "Mamburao RIS",
-    "status": "Completed",
-    "approvalStatus": "Pending_PreApproval",
-    "createdAt": "2026-08-15T10:20:36.373Z",
-    "lat": 13.2201,
-    "lng": 120.612,
-    "locationName": "Mamburao River Dam Intake",
-    "maintenanceActivity": "Brass dam / dredging at water source",
-    "reporterName": "Engr Occ Mindoro",
-    "reporterRole": "O&M Engineer",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Pending (N/A)",
-    "remarks": "Dam intake dredged and desilted.",
-    "synced": true,
-    "photos": [
-      {
-        "id": "15-2p2eCc7FhZ6TlKAvsLIIfO5NDJtjXh",
-        "url": "https://drive.google.com/thumbnail?id=15-2p2eCc7FhZ6TlKAvsLIIfO5NDJtjXh&sz=w1200",
-        "driveFileId": "15-2p2eCc7FhZ6TlKAvsLIIfO5NDJtjXh",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=15-2p2eCc7FhZ6TlKAvsLIIfO5NDJtjXh&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #1",
-        "capturedAt": "2026-08-15T10:20:36.373Z",
-        "locationName": "Mamburao River Dam Intake",
-        "lat": 13.2201,
-        "lng": 120.612
-      }
-    ],
-    "photoUrl": "/api/drive/photo/15-2p2eCc7FhZ6TlKAvsLIIfO5NDJtjXh"
-  },
-  {
-    "id": "rep-maint-dredge-1786802167125",
-    "title": "Water Source Dredging / Brass Dam",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Occidental Mindoro IMO",
-    "nisBinding": "Mamburao RIS",
-    "status": "Completed",
-    "approvalStatus": "Pending_PreApproval",
-    "createdAt": "2026-08-15T13:56:09.989Z",
-    "lat": 13.2201,
-    "lng": 120.612,
-    "secondLat": 13.225,
-    "secondLng": 120.615,
-    "locationName": "Mamburao River Dam Intake",
-    "canalSegment": "Mamburao Main Intake",
-    "segmentDistanceMeters": 200,
-    "segmentDistanceFormatted": "200.0 m",
-    "maintenanceActivity": "Brass dam / dredging at water source",
-    "reporterName": "Field Engr Occ Mindoro",
-    "reporterRole": "Field Personnel",
-    "preApprovedBy": "Pending (N/A)",
-    "approvedBy": "Pending (N/A)",
-    "remarks": "Sand pile earth volume dredged.",
-    "synced": true,
-    "photos": []
-  },
-  {
-    "id": "rep-pimo-verify-1786784428909",
-    "title": "Palawan Malatgao Siphon Gate Servicing",
-    "reportType": "maintenance",
-    "lat": 9.3245,
-    "lng": 118.4211,
-    "canalSegment": "",
-    "parcelId": "",
-    "completionPercent": 0,
-    "desiltingVolumeM3": 0,
-    "status": "Completed",
-    "remarks": "Gate servicing completed and lubricated in Malatgao RIS.",
-    "reporterName": "Engr. Palawan O&M",
-    "reporterRole": "O&M Engineer",
-    "approvalStatus": "Pending_PreApproval",
-    "preApprovedBy": null,
-    "createdAt": "2026-08-15T09:00:28.968Z",
-    "synced": true,
-    "hazardSeverity": null,
-    "categoryMode": "maintenance",
-    "imoOffice": "Palawan IMO",
-    "nisBinding": "Malatgao RIS",
-    "locationName": "Malatgao Main Canal Sta 1+200",
-    "maintenanceActivity": "Gate Lubrication",
-    "photos": [
-      {
-        "id": "1YFg0gsd1Z055Tr-jwz8NOrSHH8eDNRK1",
-        "url": "https://drive.google.com/thumbnail?id=1YFg0gsd1Z055Tr-jwz8NOrSHH8eDNRK1&sz=w1200",
-        "driveFileId": "1YFg0gsd1Z055Tr-jwz8NOrSHH8eDNRK1",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1YFg0gsd1Z055Tr-jwz8NOrSHH8eDNRK1&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #1",
-        "capturedAt": "2026-08-15T09:00:28.968Z",
-        "locationName": "Malatgao Main Canal Sta 1+200",
-        "canalSegment": "",
-        "lat": 9.3245,
-        "lng": 118.4211
-      }
-    ],
-    "photoUrl": "/api/drive/photo/1YFg0gsd1Z055Tr-jwz8NOrSHH8eDNRK1"
-  },
-  {
-    "id": "rep-maint-test-pal-1786779457734",
-    "title": "Malatgao RIS Main Canal Dredging",
-    "reportType": "maintenance",
-    "categoryMode": "maintenance",
-    "imoOffice": "Palawan IMO",
-    "nisBinding": "Malatgao RIS",
-    "locationName": "Malatgao Main Canal Sta. 0+800",
-    "canalSegment": "MC-01",
-    "lat": 9.3,
-    "lng": 118.25,
-    "status": "In Progress",
-    "remarks": "Heavy silt and debris dredging along Malatgao headworks",
-    "reporterName": "Field Officer Palawan 01",
-    "reporterRole": "Field Personnel",
-    "createdAt": "2026-08-15T07:37:37.734Z",
-    "synced": true,
-    "photos": [
-      {
-        "id": "1AS4MFgLJQ9kazQDvVtY6bVdvcafMw64W",
-        "url": "https://drive.google.com/thumbnail?id=1AS4MFgLJQ9kazQDvVtY6bVdvcafMw64W&sz=w1200",
-        "driveFileId": "1AS4MFgLJQ9kazQDvVtY6bVdvcafMw64W",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1AS4MFgLJQ9kazQDvVtY6bVdvcafMw64W&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #1",
-        "capturedAt": "2026-08-15T07:37:37.734Z",
-        "locationName": "Malatgao Main Canal Sta. 0+800",
-        "canalSegment": "MC-01",
-        "lat": 9.3,
-        "lng": 118.25
-      },
-      {
-        "id": "1kQKgW97h-07N5fANZcF5A9-vfD68EL1-",
-        "url": "https://drive.google.com/thumbnail?id=1kQKgW97h-07N5fANZcF5A9-vfD68EL1-&sz=w1200",
-        "driveFileId": "1kQKgW97h-07N5fANZcF5A9-vfD68EL1-",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1kQKgW97h-07N5fANZcF5A9-vfD68EL1-&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #2",
-        "capturedAt": "2026-08-15T07:37:37.734Z",
-        "locationName": "Malatgao Main Canal Sta. 0+800",
-        "canalSegment": "MC-01",
-        "lat": 9.3,
-        "lng": 118.25
-      }
-    ],
-    "photoUrl": "/api/drive/photo/1AS4MFgLJQ9kazQDvVtY6bVdvcafMw64W"
-  },
-  {
-    "id": "rep-maint-live-1786779250183",
-    "title": "Live Maintenance Photo Upload Test",
-    "reportType": "maintenance",
-    "lat": 13.35,
-    "lng": 121.17,
-    "canalSegment": "MC-01",
-    "parcelId": "",
-    "completionPercent": 0,
-    "desiltingVolumeM3": 0,
-    "status": "In Progress",
-    "remarks": "Field desilting photo documentation test in designated MOMARO IMO Drive folder",
-    "reporterName": "Field Officer MOMARO 01",
-    "reporterRole": "Field Personnel",
-    "approvalStatus": "Pending_PreApproval",
-    "preApprovedBy": null,
-    "createdAt": "2026-08-15T07:34:10.183Z",
-    "synced": true,
-    "hazardSeverity": null,
-    "photos": []
+    "driveFolderId": "1L0h9kn5xIvLtObXmJSw4MqooAetgpH8t"
   },
   {
     "id": "rep-maint-test-photo-1786779382605",
@@ -3186,33 +2202,28 @@
     "synced": true,
     "photos": [
       {
-        "id": "1rN8yqzQZmZHWqSBSy_rf5O2JXI-yr6Sr",
-        "url": "https://drive.google.com/thumbnail?id=1rN8yqzQZmZHWqSBSy_rf5O2JXI-yr6Sr&sz=w1200",
-        "driveFileId": "1rN8yqzQZmZHWqSBSy_rf5O2JXI-yr6Sr",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1rN8yqzQZmZHWqSBSy_rf5O2JXI-yr6Sr&sz=w600",
-        "stage": "Before",
-        "caption": "Before Activity Documentation #1",
-        "capturedAt": "2026-08-15T07:36:22.605Z",
-        "locationName": "Baco Main Canal Sta. 2+100",
-        "canalSegment": "MC-01",
+        "id": "1gsGuD_rIkiD8uVFCVdymsE_RSSsuq6z8",
+        "driveFileId": "1gsGuD_rIkiD8uVFCVdymsE_RSSsuq6z8",
+        "url": "https://drive.google.com/thumbnail?id=1gsGuD_rIkiD8uVFCVdymsE_RSSsuq6z8&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1gsGuD_rIkiD8uVFCVdymsE_RSSsuq6z8&sz=w600",
+        "stage": "During",
+        "caption": "During Activity Documentation #1",
         "lat": 13.355,
         "lng": 121.168
       },
       {
-        "id": "1gsGuD_rIkiD8uVFCVdymsE_RSSsuq6z8",
-        "url": "https://drive.google.com/thumbnail?id=1gsGuD_rIkiD8uVFCVdymsE_RSSsuq6z8&sz=w1200",
-        "driveFileId": "1gsGuD_rIkiD8uVFCVdymsE_RSSsuq6z8",
-        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1gsGuD_rIkiD8uVFCVdymsE_RSSsuq6z8&sz=w600",
-        "stage": "During",
-        "caption": "During Activity Documentation #2",
-        "capturedAt": "2026-08-15T07:36:22.605Z",
-        "locationName": "Baco Main Canal Sta. 2+100",
-        "canalSegment": "MC-01",
+        "id": "1rN8yqzQZmZHWqSBSy_rf5O2JXI-yr6Sr",
+        "driveFileId": "1rN8yqzQZmZHWqSBSy_rf5O2JXI-yr6Sr",
+        "url": "https://drive.google.com/thumbnail?id=1rN8yqzQZmZHWqSBSy_rf5O2JXI-yr6Sr&sz=w1200",
+        "thumbnailUrl": "https://drive.google.com/thumbnail?id=1rN8yqzQZmZHWqSBSy_rf5O2JXI-yr6Sr&sz=w600",
+        "stage": "Before",
+        "caption": "Before Activity Documentation #2",
         "lat": 13.355,
         "lng": 121.168
       }
     ],
-    "photoUrl": "/api/drive/photo/1rN8yqzQZmZHWqSBSy_rf5O2JXI-yr6Sr"
+    "photoUrl": "https://drive.google.com/thumbnail?id=1gsGuD_rIkiD8uVFCVdymsE_RSSsuq6z8&sz=w1200",
+    "driveFolderId": "1PJynAWqbFbTxurw2rxZpu0ChzNRbRotZ"
   },
   {
     "id": "rep-maint-test-photo-1786779304082",
@@ -3232,7 +2243,32 @@
     "preApprovedBy": null,
     "createdAt": "2026-08-15T07:35:04.082Z",
     "synced": true,
+    "photoUrl": "",
     "hazardSeverity": null,
-    "photos": []
+    "driveFolderId": "1nwrarjOHsgPRyMWteXgAR9Men5tcsM8i",
+    "imoOffice": "MOMARO"
+  },
+  {
+    "id": "rep-maint-live-1786779250183",
+    "title": "Live Maintenance Photo Upload Test",
+    "reportType": "maintenance",
+    "lat": 13.35,
+    "lng": 121.17,
+    "canalSegment": "MC-01",
+    "parcelId": "",
+    "completionPercent": 0,
+    "desiltingVolumeM3": 0,
+    "status": "In Progress",
+    "remarks": "Field desilting photo documentation test in designated MOMARO IMO Drive folder",
+    "reporterName": "Field Officer MOMARO 01",
+    "reporterRole": "Field Personnel",
+    "approvalStatus": "Pending_PreApproval",
+    "preApprovedBy": null,
+    "createdAt": "2026-08-15T07:34:10.183Z",
+    "synced": true,
+    "photoUrl": "",
+    "hazardSeverity": null,
+    "driveFolderId": "1KrKfjnXOJVoSN3qCfBE_BDAdEPMOVo9q",
+    "imoOffice": "MOMARO"
   }
 ]

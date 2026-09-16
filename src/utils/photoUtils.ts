@@ -44,10 +44,12 @@ export function resolvePhotoAttachmentUrl(photo?: PhotoAttachment | any): string
     if (cached) return cached;
   }
 
-  // 5. Offline detection: Prefer local server proxy if offline so local server disk cache is tried first
+  // 5. Offline detection:
   const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
-  if (isOffline && cleanId) {
-    return `/api/drive/photo/${cleanId}`;
+  if (isOffline) {
+    // When offline, if the photo was in IndexedDB it would already be returned above.
+    // Do not return an unreachable server proxy URL or external CDN URL that throws broken image errors.
+    return '';
   }
 
   // 6. Online: Direct Google Drive thumbnail CDN with high resolution (works across static hosting, offline caches, & local dev)
@@ -71,6 +73,17 @@ export function resolvePhotoAttachmentUrl(photo?: PhotoAttachment | any): string
   }
 
   return '';
+}
+
+function showOfflineFallback(target: HTMLImageElement, message: string) {
+  target.style.display = 'none';
+  const parent = target.parentElement;
+  if (parent && !parent.querySelector('.img-doc-fallback, .img-fallback')) {
+    const fallback = document.createElement('div');
+    fallback.className = 'img-fallback w-full h-full min-h-[100px] flex flex-col items-center justify-center text-slate-400 text-xs p-3 text-center bg-slate-900/90 rounded-lg select-none';
+    fallback.innerHTML = `<span class="text-xl mb-1 opacity-60">📷</span><span class="text-[11px] font-medium text-slate-400">${message}</span>`;
+    parent.prepend(fallback);
+  }
 }
 
 /**
@@ -100,6 +113,8 @@ export function handleImageFallback(
     return;
   }
 
+  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+
   // Step 0b: Check IndexedDB asynchronously
   if (lookupKey) {
     getCachedPhotoDB(lookupKey).then(cached => {
@@ -108,24 +123,18 @@ export function handleImageFallback(
         target.style.display = '';
         const existingFallback = target.parentElement?.querySelector('.img-doc-fallback, .img-fallback');
         if (existingFallback) existingFallback.remove();
+      } else if (isOffline) {
+        showOfflineFallback(target, fallbackMessage);
       }
-    }).catch(() => {});
-  }
-
-  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
-
-  // If offline, do NOT attempt remote CDN requests that will throw unhandled network errors
-  if (isOffline) {
-    target.style.display = 'none';
-    const parent = target.parentElement;
-    if (parent && !parent.querySelector('.img-doc-fallback, .img-fallback')) {
-      const fallback = document.createElement('div');
-      fallback.className = 'img-fallback w-full h-full min-h-[100px] flex flex-col items-center justify-center text-slate-400 text-xs p-3 text-center bg-slate-900/90 rounded-lg select-none';
-      fallback.innerHTML = `<span class="text-xl mb-1 opacity-60">📷</span><span class="text-[11px] font-medium text-slate-400">${fallbackMessage}</span>`;
-      parent.prepend(fallback);
-    }
+    }).catch(() => {
+      if (isOffline) showOfflineFallback(target, fallbackMessage);
+    });
+  } else if (isOffline) {
+    showOfflineFallback(target, fallbackMessage);
     return;
   }
+
+  if (isOffline) return;
 
   if (cleanId) {
     const currentSrc = target.src || '';
@@ -193,15 +202,16 @@ export function captureAndCacheImageElement(img: HTMLImageElement, photo?: any):
     const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
     if (dataUrl && dataUrl.startsWith('data:image/')) {
       saveCachedPhotoDB(cleanId, dataUrl).catch(() => {});
-      return;
     }
   } catch (_) {
-    // If canvas was tainted by cross-origin, attempt direct fetch if online
+    // Canvas was tainted by cross-origin restrictions on Google Drive
   }
 
+  // Fallback: If canvas failed (due to tainted canvas on cross-origin Google Drive),
+  // fetch from our same-origin backend proxy (/api/drive/photo/...) which bypasses browser CORS!
   if (typeof navigator !== 'undefined' && navigator.onLine) {
-    const fetchUrl = img.src || `/api/drive/photo/${cleanId}`;
-    fetch(fetchUrl, { mode: 'cors' })
+    const proxyUrl = `/api/drive/photo/${cleanId}`;
+    fetch(proxyUrl)
       .then(res => res.ok ? res.blob() : null)
       .then(blob => {
         if (blob && blob.size > 500) {

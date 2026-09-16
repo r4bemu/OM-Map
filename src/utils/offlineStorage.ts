@@ -432,13 +432,12 @@ export async function cacheReportPhotosClient(
 
       if (inMemoryPhotoCache.has(cleanId)) continue;
 
+      // Same-origin proxy is the primary, reliable mechanism that avoids browser CORS errors
       const urls: string[] = [
-        `/api/drive/photo/${cleanId}`,
-        `https://drive.google.com/thumbnail?id=${cleanId}&sz=w1200`,
-        `https://lh3.googleusercontent.com/d/${cleanId}`
+        `/api/drive/photo/${cleanId}`
       ];
-      if (p.url && !p.url.startsWith('data:image/')) {
-        urls.unshift(p.url);
+      if (typeof navigator !== 'undefined' && navigator.onLine) {
+        urls.push(`https://drive.google.com/thumbnail?id=${cleanId}&sz=w1200`);
       }
       candidates.push({ key: cleanId, urls, reportId: rep.id });
     }

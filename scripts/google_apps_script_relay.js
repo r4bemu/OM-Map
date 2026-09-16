@@ -163,7 +163,8 @@ function doPost(e) {
       try { sFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch(_) {}
     }
 
-    // 3. Save Structured Raw Data JSON File
+    // 3. Save Structured Raw Data JSON File (Sanitized of redundant duplicate base64 in snapshots)
+    report = sanitizeReportGas(report);
     var jsonFileName = 'Data_' + reportId + '.json';
     var jsonContent = JSON.stringify(report, null, 2);
     var jsonFiles = reportFolder.getFilesByName(jsonFileName);
@@ -172,6 +173,13 @@ function doPost(e) {
     } else {
       var jFile = reportFolder.createFile(jsonFileName, jsonContent, MimeType.PLAIN_TEXT);
       try { jFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch(_) {}
+    }
+
+    // 4. Update Fast Reports Index Cache in IMO Parent Folder
+    try {
+      updateImoReportsIndex(parentFolder, report);
+    } catch (indexErr) {
+      Logger.log('Could not update Reports_Index.json: ' + indexErr);
     }
 
     return createJsonResponse({
@@ -196,7 +204,8 @@ function doPost(e) {
 function doGet(e) {
   var action = (e && e.parameter && e.parameter.action) || 'ping';
   if (action === 'getReports' || action === 'listReports') {
-    return handleGetReports(e.parameter.imo);
+    var forceRefresh = (e && e.parameter && (e.parameter.refresh === 'true' || e.parameter.forceRefresh === 'true'));
+    return handleGetReports(e.parameter.imo, forceRefresh);
   }
   return createJsonResponse({
     status: 'online',
@@ -205,9 +214,8 @@ function doGet(e) {
   });
 }
 
-function handleGetReports(requestedImo) {
+function handleGetReports(requestedImo, forceRefresh) {
   try {
-    var results = [];
     var foldersToScan = [];
 
     if (requestedImo && requestedImo !== 'All IMOs' && requestedImo !== 'Regional Office IV-B') {
@@ -228,15 +236,19 @@ function handleGetReports(requestedImo) {
       }
     }
 
+    var allReports = [];
     for (var i = 0; i < foldersToScan.length; i++) {
       var item = foldersToScan[i];
-      scanFolderForReports(item.folder, item.imo, results, 0);
+      var imoReports = getReportsForImoFolder(item.folder, item.imo, forceRefresh);
+      for (var j = 0; j < imoReports.length; j++) {
+        allReports.push(imoReports[j]);
+      }
     }
 
     // Deduplicate by report ID
     var reportMap = {};
-    for (var r = 0; r < results.length; r++) {
-      var rep = results[r];
+    for (var r = 0; r < allReports.length; r++) {
+      var rep = allReports[r];
       if (rep && rep.id) {
         if (!reportMap[rep.id]) {
           reportMap[rep.id] = rep;
@@ -268,6 +280,120 @@ function handleGetReports(requestedImo) {
       reports: []
     });
   }
+}
+
+function getReportsForImoFolder(folder, imoName, forceRefresh) {
+  var indexFileName = 'Reports_Index.json';
+  if (!forceRefresh) {
+    var indexFiles = folder.getFilesByName(indexFileName);
+    if (indexFiles.hasNext()) {
+      try {
+        var content = indexFiles.next().getBlob().getDataAsString();
+        var cached = JSON.parse(content);
+        if (Array.isArray(cached) && cached.length > 0) {
+          Logger.log('Using cached Reports_Index.json for ' + imoName + ' (' + cached.length + ' reports)');
+          return cached;
+        }
+      } catch (err) {
+        Logger.log('Could not parse Reports_Index.json for ' + imoName + ': ' + err);
+      }
+    }
+  }
+
+  // Scan folder if index not found or refresh forced
+  var scanned = [];
+  scanFolderForReports(folder, imoName, scanned, 0);
+
+  // Deduplicate
+  var reportMap = {};
+  for (var r = 0; r < scanned.length; r++) {
+    var rep = scanned[r];
+    if (rep && rep.id) {
+      reportMap[rep.id] = rep;
+    }
+  }
+  var list = [];
+  for (var id in reportMap) {
+    list.push(sanitizeReportGas(reportMap[id]));
+  }
+
+  // Write index for future requests
+  try {
+    var serialized = JSON.stringify(list, null, 2);
+    var existingIndex = folder.getFilesByName(indexFileName);
+    if (existingIndex.hasNext()) {
+      existingIndex.next().setContent(serialized);
+    } else {
+      var created = folder.createFile(indexFileName, serialized, MimeType.PLAIN_TEXT);
+      try { created.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch(_) {}
+    }
+  } catch (e) {
+    Logger.log('Failed to save Reports_Index.json for ' + imoName + ': ' + e);
+  }
+
+  return list;
+}
+
+function updateImoReportsIndex(parentFolder, newReport) {
+  var indexFileName = 'Reports_Index.json';
+  var indexFiles = parentFolder.getFilesByName(indexFileName);
+  var reports = [];
+  var indexFile = null;
+
+  if (indexFiles.hasNext()) {
+    indexFile = indexFiles.next();
+    try {
+      var content = indexFile.getBlob().getDataAsString();
+      reports = JSON.parse(content);
+      if (!Array.isArray(reports)) reports = [];
+    } catch (_) {
+      reports = [];
+    }
+  }
+
+  // Deduplicate / replace with updated report
+  var updated = [newReport];
+  for (var i = 0; i < reports.length; i++) {
+    if (reports[i] && reports[i].id !== newReport.id) {
+      updated.push(reports[i]);
+    }
+  }
+
+  var serialized = JSON.stringify(updated, null, 2);
+  if (indexFile) {
+    indexFile.setContent(serialized);
+  } else {
+    var created = parentFolder.createFile(indexFileName, serialized, MimeType.PLAIN_TEXT);
+    try { created.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch(_) {}
+  }
+}
+
+function sanitizeReportGas(report) {
+  if (!report) return report;
+  if (report.revisions && Array.isArray(report.revisions)) {
+    for (var r = 0; r < report.revisions.length; r++) {
+      var rev = report.revisions[r];
+      if (rev && rev.snapshot) {
+        if (rev.snapshot.photoUrl && typeof rev.snapshot.photoUrl === 'string' && rev.snapshot.photoUrl.indexOf('data:image/') === 0) {
+          rev.snapshot.photoUrl = report.photoUrl || '';
+        }
+        if (rev.snapshot.photos && Array.isArray(rev.snapshot.photos)) {
+          for (var p = 0; p < rev.snapshot.photos.length; p++) {
+            var ph = rev.snapshot.photos[p];
+            if (ph) {
+              if (ph.url && typeof ph.url === 'string' && ph.url.indexOf('data:image/') === 0) {
+                ph.url = (report.photos && report.photos[p]) ? report.photos[p].url : '';
+              }
+              delete ph.dataUrl;
+              delete ph.sourceDataUrl;
+            }
+          }
+        }
+        delete rev.snapshot.revisions;
+      }
+    }
+  }
+  return report;
 }
 
 function scanFolderForReports(parentFolder, imoName, results, depth) {
