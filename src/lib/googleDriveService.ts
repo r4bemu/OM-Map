@@ -356,7 +356,7 @@ export const getAppsScriptUrl = (): string => {
   return (
     metaEnv.VITE_GOOGLE_APPS_SCRIPT_URL ||
     (typeof process !== 'undefined' && (process as any).env?.GOOGLE_APPS_SCRIPT_URL) ||
-    'https://script.google.com/macros/s/AKfycbzJxZNSBbuY7WA1n7ad2A5zQuEKHp1z3aQg8MTU0Z67sT890jrQYq79aWuTwoMwAjyGaQ/exec'
+    'https://script.google.com/macros/s/AKfycbxZEpUDziCqwek33bsGMHB2ejFJ7ZHntGxhAEJ6BV5__NyvRjcq2f0e0Ob5PHrNniQ2VQ/exec'
   );
 };
 
