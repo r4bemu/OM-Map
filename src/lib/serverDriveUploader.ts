@@ -164,37 +164,6 @@ export async function getOrRefreshServerDriveToken(providedToken?: string): Prom
     return saToken;
   }
 
-  // 2. Fallback to OAuth 2.0 refresh token
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
-
-  if (clientId && clientSecret && refreshToken) {
-    try {
-      const res = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_id: clientId,
-          client_secret: clientSecret,
-          refresh_token: refreshToken,
-          grant_type: 'refresh_token'
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.access_token) {
-          saveServerDriveToken(data.access_token, data.expires_in || 3500);
-          return data.access_token;
-        }
-      } else {
-        console.warn('Failed to refresh token using GOOGLE_REFRESH_TOKEN:', await res.text());
-      }
-    } catch (err) {
-      console.warn('Error auto-refreshing Google Drive token:', err);
-    }
-  }
-
   return getServerDriveToken();
 }
 
@@ -481,6 +450,8 @@ export async function uploadReportViaAppsScript(
 }
 
 // Upload a complete field report directly into the designated Google Drive IMO folder
+// STRICT RULE: Never use service_account.json to upload (service accounts have 0MB storage quota on Google Drive).
+// All uploads strictly go through Google Apps Script Relay (executing as drive owner).
 export async function uploadReportToTargetDriveFolder(
   report: any,
   providedToken?: string
@@ -495,293 +466,22 @@ export async function uploadReportToTargetDriveFolder(
     };
   }
 
-  // Priority 1: Google Apps Script Web App Relay (Permanent, zero OAuth expiry)
+  // Priority 1: Google Apps Script Web App Relay (Permanent, zero OAuth expiry, executes with drive owner storage quota)
   const appsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
   if (appsScriptUrl && appsScriptUrl.trim()) {
     console.log(`🚀 Routing report ${report.id} via permanent Google Apps Script relay`);
     return await uploadReportViaAppsScript(appsScriptUrl.trim(), report);
   }
 
-  const accessToken = await getOrRefreshServerDriveToken(providedToken);
-
-  if (!accessToken) {
-    console.warn('⚠️ Google Drive Access Token not available on server. Report saved locally.');
-    return {
-      success: false,
-      reportFolderId: '',
-      photoCount: 0,
-      message: 'Server Google Drive sync token not active. Report saved to local database.'
-    };
-  }
-
-  try {
-    // Route to the designated IMO folder:
-    // MOMARO: "1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb"
-    // Occidental Mindoro: "1EUAFseU-S5laT0oxRIEwBuXRgppqOUUf"
-    // Palawan: "1bzraus7QiL8U3ZDSwLfgfLvdc1G5yMKB"
-    const imoOffice = report.imoOffice || 'Mindoro Oriental-Marinduque-Romblon IMO';
-    const parentFolderId = getDesignatedFolderForImo(imoOffice);
-
-    console.log(`📁 Routing report ${report.id} to designated Google Drive folder for ${imoOffice} (${parentFolderId})`);
-
-    // 1. Create subfolder for this specific report inside target Drive folder: {Report ID}_{Sanitized Title (Max 30 chars)}
-    const safeTitle = (report.title || 'Report').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
-    const reportId = report.id || generateWmrReportId(report.nisBinding, report.imoOffice);
-    const reportFolderName = `${reportId}_${safeTitle}`;
-    const reportFolderId = await getOrCreateFolderOnDrive(accessToken, reportFolderName, parentFolderId);
-
-    // 2. Format Human-Readable Text Summary Document
-    const textSummary = `
-===================================================================
-NATIONAL IRRIGATION ADMINISTRATION (NIA) REGION IV-B
-O&M FIELD MAINTENANCE & OPERATIONAL REPORT
-===================================================================
-Report ID:         ${report.id}
-Report Title:      ${report.title}
-Report Category:   ${report.categoryMode || report.reportType || 'Field Inspection'}
-IMO Office:        ${imoOffice}
-NIS Binding:       ${report.nisBinding || 'N/A'}
-Status:            ${report.status || 'Submitted'}
-Approval Status:   ${report.approvalStatus || 'Pending_PreApproval'}
-Created At:        ${new Date(report.createdAt || Date.now()).toLocaleString()} (${report.createdAt})
-
--------------------------------------------------------------------
-1. LOCATION & SPATIAL DATA
--------------------------------------------------------------------
-Location Name:     ${report.locationName || 'N/A'}
-Canal Segment:     ${report.canalSegment || 'N/A'}
-Parcel ID:         ${report.parcelId || 'N/A'}
-Latitude (GPS):    ${report.lat ?? 'N/A'}
-Longitude (GPS):   ${report.lng ?? 'N/A'}
-${report.secondLat !== undefined ? `Second Latitude:   ${report.secondLat}\n` : ''}${report.secondLng !== undefined ? `Second Longitude:  ${report.secondLng}\n` : ''}
--------------------------------------------------------------------
-2. FIELD PARTICULARS & MAINTENANCE METRICS
--------------------------------------------------------------------
-Maintenance Activity:  ${report.maintenanceActivity || 'N/A'}
-Accomplishment Dist:   ${report.segmentDistanceFormatted || (report.segmentDistanceMeters ? `${report.segmentDistanceMeters.toLocaleString()} m` : 'N/A')}
-Estimated Depth:       ${report.depthMeters !== undefined ? `${report.depthMeters} m` : 'N/A'}
-Estimated Width:       ${report.widthMeters !== undefined ? `${report.widthMeters} m` : 'N/A'}
-Sand Pile Height (H):  ${report.sandPileHeightMeters !== undefined ? `${report.sandPileHeightMeters} m` : 'N/A'}
-Painting Area:         ${report.paintedAreaSqm !== undefined ? `${report.paintedAreaSqm} m²` : 'N/A'}
-Calculated Volume:     ${report.calculatedVolumeM3 !== undefined ? `${report.calculatedVolumeM3} m³` : (report.desiltingVolumeM3 ? `${report.desiltingVolumeM3} m³` : 'N/A')}
-Dimension Details:     ${report.dimensionDetailsFormatted || 'N/A'}
-Completion Rate:       ${report.completionPercent !== undefined ? `${report.completionPercent}%` : 'N/A'}
-
--------------------------------------------------------------------
-3. HYDROLOGICAL & OPERATIONAL VARIABLES
--------------------------------------------------------------------
-Operational State:     ${report.operationalState || 'N/A'}
-Water Level Gauge:     ${report.waterLevelMeters !== undefined ? `${report.waterLevelMeters} meters` : 'N/A'}
-Discharge Flow Rate:   ${report.dischargeFlowM3s !== undefined ? `${report.dischargeFlowM3s} m³/s` : 'N/A'}
-Gate Opening:          ${report.gateOpeningCm !== undefined ? `${report.gateOpeningCm} cm` : 'N/A'}
-Water Quality:         ${report.waterQuality || 'N/A'}
-Service Area:          ${report.beneficiaryServiceArea || 'N/A'}
-Operational Incident:  ${report.operationalIncident || 'N/A'}
-
--------------------------------------------------------------------
-4. INSPECTOR & SUBMISSION DETAILS
--------------------------------------------------------------------
-Reporter Name:     ${report.reporterName || 'NIA Field Personnel'}
-Reporter Role:     ${report.reporterRole || 'Field Personnel'}
-Pre-Approved By:   ${report.preApprovedBy || 'Pending'} (${report.preApprovedAt || 'N/A'})
-Final Approved By: ${report.approvedBy || 'Pending'} (${report.approvedAt || 'N/A'})
-
--------------------------------------------------------------------
-5. REMARKS & FIELD NOTES
--------------------------------------------------------------------
-${report.remarks || 'No additional remarks provided.'}
-
--------------------------------------------------------------------
-6. ATTACHED INSPECTION PHOTOS
--------------------------------------------------------------------
-Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)}
-===================================================================
-`;
-
-    // 3. Upload ALL Attached High-Resolution Inspection Photos FIRST & Pre-Cache on Disk
-    let photoCount = 0;
-    const photosList = Array.isArray(report.photos) && report.photos.length > 0 
-      ? report.photos 
-      : (report.photoUrl ? [{ id: 'p1', url: report.photoUrl, stage: 'Photo' }] : []);
-
-    const DRIVE_CACHE_DIR = path.join(DATA_DIR, 'drive_cache');
-    if (!fs.existsSync(DRIVE_CACHE_DIR)) {
-      try { fs.mkdirSync(DRIVE_CACHE_DIR, { recursive: true }); } catch (e) {}
-    }
-
-    const updatedPhotos: any[] = [];
-
-    for (let i = 0; i < photosList.length; i++) {
-      const photo = { ...photosList[i] };
-      if (!photo || !photo.url) {
-        updatedPhotos.push(photo);
-        continue;
-      }
-
-      const stageName = ((photo.stage || ('Stage_' + (i + 1))) as string).replace(/[^a-zA-Z0-9]/g, '');
-      const photoImo = photo.imoOffice || report.imoOffice || imoOffice;
-      const photoLoc = photo.locationName || report.locationName || 'Irrigation Facility';
-      const photoCanal = photo.canalSegment || report.canalSegment || '';
-      const photoParcel = photo.parcelId || report.parcelId || '';
-      const photoLat = photo.lat ?? report.lat ?? '';
-      const photoLng = photo.lng ?? report.lng ?? '';
-      const capturedDate = photo.capturedAt || report.createdAt || new Date().toISOString();
-
-      const photoDescription = 'NIA O&M Field Photo | IMO: ' + photoImo + ' | Location: ' + photoLoc + (photoCanal ? ' | Canal: ' + photoCanal : '') + (photoParcel ? ' | Parcel: ' + photoParcel : '') + ' | GPS: ' + photoLat + ', ' + photoLng + ' | Stage: ' + (photo.stage || 'During') + ' | Captured: ' + capturedDate;
-
-      const photoAppProps: Record<string, string> = {
-        imoOffice: String(photoImo),
-        locationName: String(photoLoc),
-        canalSegment: String(photoCanal),
-        parcelId: String(photoParcel),
-        reportId: String(report.id || ''),
-        stage: String(photo.stage || 'During'),
-        lat: String(photoLat),
-        lng: String(photoLng),
-        capturedAt: String(capturedDate)
-      };
-
-      let uploadedDriveFile: any = null;
-      let rawImageBuffer: Buffer | null = null;
-
-      if (photo.url.startsWith('data:image/')) {
-        try {
-          const matches = photo.url.match(/^data:(image\/[^;]+);base64,([\s\S]+)$/);
-          if (matches) {
-            const rawMime = matches[1].toLowerCase();
-            const cleanBase64 = matches[2].replace(/[\r\n\s]/g, '');
-            rawImageBuffer = Buffer.from(cleanBase64, 'base64');
-            
-            let ext = 'jpeg';
-            if (rawMime.includes('png')) ext = 'png';
-            else if (rawMime.includes('webp')) ext = 'webp';
-            else if (rawMime.includes('gif')) ext = 'gif';
-            else if (rawMime.includes('heic')) ext = 'heic';
-            else if (rawMime.includes('jpg') || rawMime.includes('jpeg')) ext = 'jpg';
-
-            const photoFileName = 'Photo_' + (i + 1) + '_' + stageName + '.' + ext;
-            uploadedDriveFile = await uploadBinaryToFolder(accessToken, reportFolderId, photoFileName, rawImageBuffer, rawMime, {
-              description: photoDescription,
-              appProperties: photoAppProps
-            });
-            photoCount++;
-            console.log('[Photo Upload] Successfully uploaded Photo ' + (i + 1) + '/' + photosList.length + ' (' + stageName + ') to Drive folder ' + reportFolderId);
-          }
-        } catch (e) {
-          console.warn('[Photo Upload] Failed to upload base64 photo ' + (i + 1) + ' to Drive:', e);
-        }
-      } else if (photo.url.startsWith('http://') || photo.url.startsWith('https://')) {
-        try {
-          const imgRes = await fetch(photo.url);
-          if (imgRes.ok) {
-            const arrayBuffer = await imgRes.arrayBuffer();
-            rawImageBuffer = Buffer.from(arrayBuffer);
-            const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
-            let ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
-
-            const photoFileName = 'Photo_' + (i + 1) + '_' + stageName + '.' + ext;
-            uploadedDriveFile = await uploadBinaryToFolder(accessToken, reportFolderId, photoFileName, rawImageBuffer, contentType, {
-              description: photoDescription,
-              appProperties: photoAppProps
-            });
-            photoCount++;
-            console.log('[Photo Upload] Successfully uploaded remote photo ' + (i + 1) + '/' + photosList.length + ' to Drive folder ' + reportFolderId);
-          }
-        } catch (e) {
-          console.warn('[Photo Upload] Failed to upload remote photo ' + (i + 1) + ' to Drive:', e);
-        }
-      }
-
-      if (uploadedDriveFile && uploadedDriveFile.id) {
-        const fileId = uploadedDriveFile.id;
-        photo.id = fileId;
-        photo.driveFileId = fileId;
-        photo.url = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1200';
-        photo.thumbnailUrl = uploadedDriveFile.thumbnailLink || ('https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1200');
-
-        // Pre-cache on disk immediately
-        if (rawImageBuffer && rawImageBuffer.length > 0) {
-          try {
-            fs.writeFileSync(path.join(DRIVE_CACHE_DIR, 'photo_' + fileId + '.bin'), rawImageBuffer);
-          } catch (_) {}
-        }
-      }
-
-      updatedPhotos.push(photo);
-    }
-
-    report.photos = updatedPhotos;
-    if (updatedPhotos[0]?.url) {
-      report.photoUrl = updatedPhotos[0].url;
-    }
-
-    // 4. Upload Human-Readable Audit Summary Text File & Raw Data JSON (with populated Drive File IDs)
-    const summaryFileName = 'Summary_' + report.id + '.txt';
-    await uploadTextFileToFolder(accessToken, reportFolderId, summaryFileName, textSummary, 'text/plain');
-
-    const jsonFileName = 'Data_' + report.id + '.json';
-    await uploadTextFileToFolder(accessToken, reportFolderId, jsonFileName, JSON.stringify(report, null, 2), 'application/json');
-
-    // 5. Update local and remote Drive Manifest for instant single-request sync
-    try {
-      const localManifest = loadLocalManifest() || {
-        version: 1,
-        lastUpdated: new Date().toISOString(),
-        hash: '',
-        totalReports: 0,
-        reportsIndex: {}
-      };
-
-      localManifest.reportsIndex[report.id] = {
-        id: report.id,
-        folderId: reportFolderId,
-        folderName: 'wmr-' + report.id,
-        imoOffice: String(report.imoOffice || imoOffice),
-        nisBinding: report.nisBinding,
-        modifiedTime: new Date().toISOString(),
-        photoCount,
-        title: report.title,
-        status: report.status
-      };
-      localManifest.totalReports = Object.keys(localManifest.reportsIndex).length;
-      localManifest.version = (localManifest.version || 0) + 1;
-      localManifest.lastUpdated = new Date().toISOString();
-      localManifest.hash = computeManifestHash(localManifest.reportsIndex);
-
-      saveLocalManifest(localManifest);
-
-      // Asynchronously upload/update manifest in the target IMO folder (non-blocking)
-      findRemoteManifestInFolder(accessToken, parentFolderId).then(existing => {
-        uploadOrUpdateRemoteManifest(accessToken, parentFolderId, localManifest, existing?.id);
-      }).catch(e => console.warn('Manifest drive upload notice:', e));
-    } catch (mErr) {
-      console.warn('Local manifest update notice:', mErr);
-    }
-
-    console.log('[Drive Sync] Completed Google Drive sync for Report ' + report.title + '. Folder ID: ' + reportFolderId + ', Uploaded Photos: ' + photoCount);
-    return {
-      success: true,
-      reportFolderId,
-      photoCount,
-      message: 'Report and ' + photoCount + ' photo(s) successfully backed up to designated Google Drive folder for ' + imoOffice + '.'
-    };
-  } catch (err: any) {
-    const rawMsg = String(err?.message || err || '');
-    const isQuotaError = rawMsg.includes('storageQuotaExceeded') || rawMsg.includes('quota');
-    if (isQuotaError) {
-      console.warn('⚠️ Google Drive storageQuotaExceeded error detected: Service accounts do not have quota on personal @gmail.com folders. User OAuth connection required.');
-    } else {
-      console.error('❌ Error uploading report to Google Drive:', err);
-    }
-    return {
-      success: false,
-      reportFolderId: '',
-      photoCount: 0,
-      message: isQuotaError
-        ? 'Google Drive storage quota exceeded or service account quota restricted. Report safely stored in local database.'
-        : 'Failed to upload to Google Drive: ' + (err.message || err)
-    };
-  }
+  // Safety Warning: Service Accounts have 0 MB storage quota on personal Google Drive and fail with 403 storageQuotaExceeded.
+  // Direct Drive upload is safely bypassed and the report is preserved in the local server database.
+  console.warn('⚠️ Google Apps Script relay URL (GOOGLE_APPS_SCRIPT_URL) is not configured. Direct Drive upload bypassed to prevent quota failure; report safely stored in local database.');
+  return {
+    success: false,
+    reportFolderId: '',
+    photoCount: 0,
+    message: 'Google Apps Script relay (GOOGLE_APPS_SCRIPT_URL) is not configured. Report safely stored in local server database.'
+  };
 }
 
 function findLocalFileRecursively(dir: string, fileId: string): string | null {
@@ -1398,11 +1098,242 @@ export async function fetchReportsFromAllDriveFolders(
     return filterByImo(driveReportsCache);
   }
 
-  // Priority 1: Google Apps Script Web App Relay (Permanent, zero OAuth expiry)
+  // Priority 1: Google Drive v3 REST API (Permanent Machine-to-Machine via Service Account Key or provided token)
+  const token = await getOrRefreshServerDriveToken(providedToken);
+  if (token) {
+    try {
+      console.log('🌐 Fetching reports from Google Drive v3 REST API via Service Account...');
+      const DRIVE_CACHE_DIR = path.join(DATA_DIR, 'drive_cache');
+      if (!fs.existsSync(DRIVE_CACHE_DIR)) {
+        try { fs.mkdirSync(DRIVE_CACHE_DIR, { recursive: true }); } catch (e) {}
+      }
+
+      let folders: Record<string, string> = {
+        'Mindoro Oriental-Marinduque-Romblon IMO': '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb',
+        'Occidental Mindoro IMO': '1EUAFseU-S5laT0oxRIEwBuXRgppqOUUf',
+        'Palawan IMO': '1bzraus7QiL8U3ZDSwLfgfLvdc1G5yMKB'
+      };
+
+      if (isImoSpecific && targetImo) {
+        const lower = targetImo.toLowerCase();
+        const filtered: Record<string, string> = {};
+        if (lower.includes('momaro') || lower.includes('oriental') || lower.includes('marinduque') || lower.includes('romblon')) {
+          filtered['Mindoro Oriental-Marinduque-Romblon IMO'] = '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb';
+        } else if (lower.includes('occidental') || lower.includes('omimo')) {
+          filtered['Occidental Mindoro IMO'] = '1EUAFseU-S5laT0oxRIEwBuXRgppqOUUf';
+        } else if (lower.includes('palawan') || lower.includes('pimo') || lower.includes('palimo')) {
+          filtered['Palawan IMO'] = '1bzraus7QiL8U3ZDSwLfgfLvdc1G5yMKB';
+        }
+        if (Object.keys(filtered).length > 0) {
+          folders = filtered;
+        }
+      }
+
+      const localBackup = loadServerReportsInternal();
+      const localManifest = loadLocalManifest();
+
+      // -------------------------------------------------------------
+      // STEP 1: FAST 1-REQUEST MANIFEST VERIFICATION ACROSS DRIVE (if NOT forceRefresh)
+      // -------------------------------------------------------------
+      if (!forceRefresh) {
+        const manifestResults = await Promise.all(
+          Object.entries(folders).map(async ([imoName, folderId]) => {
+            const remote = await findRemoteManifestInFolder(token, folderId);
+            if (remote) {
+              const downloaded = await downloadRemoteManifest(token, remote.id);
+              return { imoName, folderId, remoteManifest: downloaded, remoteFileId: remote.id };
+            }
+            return { imoName, folderId, remoteManifest: null, remoteFileId: undefined };
+          })
+        );
+
+        const validRemoteManifests = manifestResults.filter(r => r.remoteManifest !== null);
+
+        if (validRemoteManifests.length > 0) {
+          const combinedReportsIndex: Record<string, ReportManifestEntry> = {};
+          for (const vm of validRemoteManifests) {
+            if (vm.remoteManifest && vm.remoteManifest.reportsIndex) {
+              Object.assign(combinedReportsIndex, vm.remoteManifest.reportsIndex);
+            }
+          }
+
+          const remoteHash = computeManifestHash(combinedReportsIndex);
+          const localHash = localManifest?.hash;
+
+          // Fast Path: Hashes match & all reports present in local disk cache
+          if (remoteHash === localHash && localBackup.length >= Object.keys(combinedReportsIndex).length && Object.keys(combinedReportsIndex).length > 0) {
+            console.log('⚡ Instant Sync: Drive manifest hash (' + remoteHash + ') matches local cache. 0 deep API calls needed!');
+            driveReportsCache = localBackup;
+            driveReportsCacheTime = Date.now();
+            return filterByImo(driveReportsCache);
+          }
+        }
+      }
+
+      // -------------------------------------------------------------
+      // STEP 2: COMPLETE DRIVE CRAWL & PHOTO LOCAL CACHING
+      // -------------------------------------------------------------
+      console.log('🔄 Performing thorough Google Drive folder inspection & photo cache synchronization...');
+      const fetchedReports: any[] = [];
+      const newManifestIndex: Record<string, ReportManifestEntry> = {};
+
+      await Promise.all(Object.entries(folders).map(async ([imoName, folderId]) => {
+        try {
+          const q = "'" + folderId + "' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
+          const url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id,name)&pageSize=100&supportsAllDrives=true&includeItemsFromAllDrives=true';
+          const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+          if (!res.ok) return;
+          const data = await res.json();
+          const isDevTestFolder = (name: string) => {
+            const lower = name.toLowerCase();
+            return lower.startsWith('mock-') ||
+                   lower === 'mock' ||
+                   lower === '__test__';
+          };
+
+          const subfolders = (data.files || []).filter((f: any) => 
+            !isDevTestFolder(f.name) && (
+              f.name.startsWith('wmr-') || 
+              f.name.startsWith('WMR-') || 
+              f.name.startsWith('rep-') || 
+              f.name.startsWith('REP_') || 
+              f.name.startsWith('Report_') || 
+              f.name.toLowerCase().includes('report') || 
+              /^\d{6,}_/.test(f.name) ||
+              f.name.includes('_')
+            )
+          );
+
+          await Promise.all(subfolders.map(async (sub: any) => {
+            try {
+              const subQ = "'" + sub.id + "' in parents and trashed = false";
+              const subUrl = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(subQ) + '&fields=files(id,name,mimeType,thumbnailLink,size)&pageSize=50&supportsAllDrives=true&includeItemsFromAllDrives=true';
+              const subRes = await fetch(subUrl, { headers: { Authorization: 'Bearer ' + token } });
+              if (!subRes.ok) return;
+              const subData = await subRes.json();
+              const files = subData.files || [];
+
+              const imageFiles = files
+                .filter((f: any) => f.mimeType?.startsWith('image/') || /\.(jpe?g|png|webp|heic)$/i.test(f.name))
+                .sort((a: any, b: any) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+              // Pre-cache all discovered images to disk if missing
+              await Promise.all(imageFiles.map(async (img: any) => {
+                const cacheDest = path.join(DRIVE_CACHE_DIR, 'photo_' + img.id + '.bin');
+                if (!fs.existsSync(cacheDest) || fs.statSync(cacheDest).size === 0) {
+                  try {
+                    const buf = await downloadDriveBinaryBuffer(token, img.id);
+                    if (buf && buf.length > 0) {
+                      fs.writeFileSync(cacheDest, buf);
+                    }
+                  } catch (_) {}
+                }
+              }));
+
+              const dataJson = files.find((f: any) => f.name.startsWith('Data_') && f.name.endsWith('.json'));
+              if (dataJson) {
+                const jsonText = await downloadDriveFileText(token, dataJson.id);
+                const parsed = JSON.parse(jsonText);
+                if (parsed && parsed.id) {
+                  parsed.photos = imageFiles.map((pf: any, idx: number) => {
+                    let stage: 'Before' | 'During' | 'After' = 'During';
+                    const lowerName = pf.name.toLowerCase();
+                    if (lowerName.includes('before')) stage = 'Before';
+                    else if (lowerName.includes('after')) stage = 'After';
+
+                    return {
+                      id: pf.id,
+                      url: '/api/drive/photo/' + pf.id,
+                      driveFileId: pf.id,
+                      thumbnailUrl: pf.thumbnailLink,
+                      stage,
+                      caption: stage + ' Activity Documentation #' + (idx + 1),
+                      capturedAt: parsed.createdAt || new Date().toISOString(),
+                      locationName: parsed.locationName,
+                      canalSegment: parsed.canalSegment,
+                      lat: parsed.lat,
+                      lng: parsed.lng
+                    };
+                  });
+                  parsed.photoUrl = parsed.photos[0]?.url;
+                  parsed.synced = true;
+                  fetchedReports.push(parsed);
+
+                  newManifestIndex[parsed.id] = {
+                    id: parsed.id,
+                    folderId: sub.id,
+                    folderName: sub.name,
+                    imoOffice: imoName,
+                    nisBinding: parsed.nisBinding,
+                    modifiedTime: parsed.createdAt || new Date().toISOString(),
+                    dataFileId: dataJson.id,
+                    title: parsed.title,
+                    status: parsed.status
+                  };
+                  return;
+                }
+              }
+
+              const summaryFile = files.find((f: any) => f.name.startsWith('Summary_') && f.name.endsWith('.txt'));
+              if (summaryFile) {
+                const sumText = await downloadDriveFileText(token, summaryFile.id);
+                const report = parseSummaryToReport(sumText, sub.name, files, imoName);
+                if (report && report.id) {
+                  fetchedReports.push(report);
+                  newManifestIndex[report.id] = {
+                    id: report.id,
+                    folderId: sub.id,
+                    folderName: sub.name,
+                    imoOffice: imoName,
+                    nisBinding: report.nisBinding,
+                    modifiedTime: report.createdAt || new Date().toISOString(),
+                    title: report.title,
+                    status: report.status
+                  };
+                }
+              }
+            } catch (subErr) {
+              console.warn('Error reading subfolder ' + sub.name + ':', subErr);
+            }
+          }));
+        } catch (fErr) {
+          console.warn('Error reading IMO folder ' + imoName + ':', fErr);
+        }
+      }));
+
+      const mergedMap = new Map<string, any>();
+      [...localBackup, ...fetchedReports].forEach(r => { if (r && r.id) mergedMap.set(r.id, r); });
+      const merged = Array.from(mergedMap.values());
+      saveServerReportsInternal(merged);
+      driveReportsCache = merged;
+      driveReportsCacheTime = Date.now();
+
+      // Create and upload manifest
+      const manifest: DriveManifest = {
+        version: (localManifest?.version || 0) + 1,
+        lastUpdated: new Date().toISOString(),
+        hash: computeManifestHash(newManifestIndex),
+        totalReports: Object.keys(newManifestIndex).length,
+        reportsIndex: newManifestIndex
+      };
+      saveLocalManifest(manifest);
+
+      Object.values(folders).forEach(fId => {
+        uploadOrUpdateRemoteManifest(token, fId, manifest).catch(e => console.warn('Drive manifest upload notice:', e));
+      });
+
+      console.log('✅ Google Drive Service Account sync complete with ' + merged.length + ' total reports.');
+      return filterByImo(driveReportsCache);
+    } catch (saErr) {
+      console.warn('Google Drive Service Account report fetch warning:', saErr);
+    }
+  }
+
+  // Priority 2: Google Apps Script Web App Relay Fallback
   const appsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
   if (appsScriptUrl && appsScriptUrl.trim()) {
     try {
-      console.log('🌐 Fetching reports from Google Drive via Apps Script relay...');
+      console.log('🌐 Fetching reports from Google Drive via Apps Script relay fallback...');
       const imoParam = (targetImo && targetImo !== 'All IMOs' && targetImo !== 'Regional Office IV-B') 
         ? `&imo=${encodeURIComponent(targetImo)}` 
         : '';
@@ -1411,7 +1342,7 @@ export async function fetchReportsFromAllDriveFolders(
       if (res.ok) {
         const data = await res.json();
         if (data && Array.isArray(data.reports)) {
-          console.log(`✅ Retrieved ${data.reports.length} report(s) directly from Google Drive!`);
+          console.log(`✅ Retrieved ${data.reports.length} report(s) directly from Google Drive via Apps Script relay!`);
           driveReportsCache = data.reports;
           driveReportsCacheTime = Date.now();
           saveServerReportsInternal(data.reports);
@@ -1419,240 +1350,18 @@ export async function fetchReportsFromAllDriveFolders(
         }
       }
     } catch (relayErr) {
-      console.warn('Apps Script getReports fetch warning:', relayErr);
+      console.warn('Apps Script getReports fallback warning:', relayErr);
     }
   }
 
-  const token = await getOrRefreshServerDriveToken(providedToken);
-  if (!token) {
-    console.warn('⚠️ No Google Drive token available to fetch reports.');
-    return filterByImo(driveReportsCache);
-  }
-
-  const DRIVE_CACHE_DIR = path.join(DATA_DIR, 'drive_cache');
-  if (!fs.existsSync(DRIVE_CACHE_DIR)) {
-    try { fs.mkdirSync(DRIVE_CACHE_DIR, { recursive: true }); } catch (e) {}
-  }
-
-  try {
-    let folders: Record<string, string> = {
-      'Mindoro Oriental-Marinduque-Romblon IMO': '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb',
-      'Occidental Mindoro IMO': '1EUAFseU-S5laT0oxRIEwBuXRgppqOUUf',
-      'Palawan IMO': '1bzraus7QiL8U3ZDSwLfgfLvdc1G5yMKB'
-    };
-
-    if (isImoSpecific && targetImo) {
-      const lower = targetImo.toLowerCase();
-      const filtered: Record<string, string> = {};
-      if (lower.includes('momaro') || lower.includes('oriental') || lower.includes('marinduque') || lower.includes('romblon')) {
-        filtered['Mindoro Oriental-Marinduque-Romblon IMO'] = '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb';
-      } else if (lower.includes('occidental') || lower.includes('omimo')) {
-        filtered['Occidental Mindoro IMO'] = '1EUAFseU-S5laT0oxRIEwBuXRgppqOUUf';
-      } else if (lower.includes('palawan') || lower.includes('pimo') || lower.includes('palimo')) {
-        filtered['Palawan IMO'] = '1bzraus7QiL8U3ZDSwLfgfLvdc1G5yMKB';
-      }
-      if (Object.keys(filtered).length > 0) {
-        folders = filtered;
-      }
-    }
-
-    const localBackup = loadServerReportsInternal();
-    const localManifest = loadLocalManifest();
-
-    // -------------------------------------------------------------
-    // STEP 1: FAST 1-REQUEST MANIFEST VERIFICATION ACROSS DRIVE (if NOT forceRefresh)
-    // -------------------------------------------------------------
-    if (!forceRefresh) {
-      const manifestResults = await Promise.all(
-        Object.entries(folders).map(async ([imoName, folderId]) => {
-          const remote = await findRemoteManifestInFolder(token, folderId);
-          if (remote) {
-            const downloaded = await downloadRemoteManifest(token, remote.id);
-            return { imoName, folderId, remoteManifest: downloaded, remoteFileId: remote.id };
-          }
-          return { imoName, folderId, remoteManifest: null, remoteFileId: undefined };
-        })
-      );
-
-      const validRemoteManifests = manifestResults.filter(r => r.remoteManifest !== null);
-
-      if (validRemoteManifests.length > 0) {
-        const combinedReportsIndex: Record<string, ReportManifestEntry> = {};
-        for (const vm of validRemoteManifests) {
-          if (vm.remoteManifest && vm.remoteManifest.reportsIndex) {
-            Object.assign(combinedReportsIndex, vm.remoteManifest.reportsIndex);
-          }
-        }
-
-        const remoteHash = computeManifestHash(combinedReportsIndex);
-        const localHash = localManifest?.hash;
-        const localReportIds = new Set(localBackup.map((r: any) => r.id));
-
-        // Fast Path: Hashes match & all reports present in local disk cache
-        if (remoteHash === localHash && localBackup.length >= Object.keys(combinedReportsIndex).length) {
-          console.log('⚡ Instant Sync: Drive manifest hash (' + remoteHash + ') matches local cache. 0 deep API calls needed!');
-          driveReportsCache = localBackup;
-          driveReportsCacheTime = Date.now();
-          return filterByImo(driveReportsCache);
-        }
-      }
-    }
-
-    // -------------------------------------------------------------
-    // STEP 2: COMPLETE DRIVE CRAWL & PHOTO LOCAL CACHING
-    // -------------------------------------------------------------
-    console.log('🔄 Performing thorough Google Drive folder inspection & photo cache synchronization...');
-    const fetchedReports: any[] = [];
-    const newManifestIndex: Record<string, ReportManifestEntry> = {};
-
-    await Promise.all(Object.entries(folders).map(async ([imoName, folderId]) => {
-      try {
-        const q = "'" + folderId + "' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
-        const url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id,name)&pageSize=100&supportsAllDrives=true&includeItemsFromAllDrives=true';
-        const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-        if (!res.ok) return;
-        const data = await res.json();
-        const isDevTestFolder = (name: string) => {
-          const lower = name.toLowerCase();
-          return lower.startsWith('mock-') ||
-                 lower === 'mock' ||
-                 lower === '__test__';
-        };
-
-        const subfolders = (data.files || []).filter((f: any) => 
-          !isDevTestFolder(f.name) && (
-            f.name.startsWith('wmr-') || 
-            f.name.startsWith('WMR-') || 
-            f.name.startsWith('rep-') || 
-            f.name.startsWith('Report_') || 
-            f.name.toLowerCase().includes('report') || 
-            /^\d{6,}_/.test(f.name) ||
-            f.name.includes('_')
-          )
-        );
-
-        await Promise.all(subfolders.map(async (sub: any) => {
-          try {
-            const subQ = "'" + sub.id + "' in parents and trashed = false";
-            const subUrl = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(subQ) + '&fields=files(id,name,mimeType,thumbnailLink,size)&pageSize=50&supportsAllDrives=true&includeItemsFromAllDrives=true';
-            const subRes = await fetch(subUrl, { headers: { Authorization: 'Bearer ' + token } });
-            if (!subRes.ok) return;
-            const subData = await subRes.json();
-            const files = subData.files || [];
-
-            const imageFiles = files
-              .filter((f: any) => f.mimeType?.startsWith('image/') || /\.(jpe?g|png|webp|heic)$/i.test(f.name))
-              .sort((a: any, b: any) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-
-            // Pre-cache all discovered images to disk if missing
-            await Promise.all(imageFiles.map(async (img: any) => {
-              const cacheDest = path.join(DRIVE_CACHE_DIR, 'photo_' + img.id + '.bin');
-              if (!fs.existsSync(cacheDest) || fs.statSync(cacheDest).size === 0) {
-                try {
-                  const buf = await downloadDriveBinaryBuffer(token, img.id);
-                  if (buf && buf.length > 0) {
-                    fs.writeFileSync(cacheDest, buf);
-                  }
-                } catch (_) {}
-              }
-            }));
-
-            const dataJson = files.find((f: any) => f.name.startsWith('Data_') && f.name.endsWith('.json'));
-            if (dataJson) {
-              const jsonText = await downloadDriveFileText(token, dataJson.id);
-              const parsed = JSON.parse(jsonText);
-              if (parsed && parsed.id) {
-                parsed.photos = imageFiles.map((pf: any, idx: number) => {
-                  let stage: 'Before' | 'During' | 'After' = 'During';
-                  const lowerName = pf.name.toLowerCase();
-                  if (lowerName.includes('before')) stage = 'Before';
-                  else if (lowerName.includes('after')) stage = 'After';
-
-                  return {
-                    id: pf.id,
-                    url: '/api/drive/photo/' + pf.id,
-                    driveFileId: pf.id,
-                    thumbnailUrl: pf.thumbnailLink,
-                    stage,
-                    caption: stage + ' Activity Documentation #' + (idx + 1),
-                    capturedAt: parsed.createdAt || new Date().toISOString(),
-                    locationName: parsed.locationName,
-                    canalSegment: parsed.canalSegment,
-                    lat: parsed.lat,
-                    lng: parsed.lng
-                  };
-                });
-                parsed.photoUrl = parsed.photos[0]?.url;
-                parsed.synced = true;
-                fetchedReports.push(parsed);
-
-                newManifestIndex[parsed.id] = {
-                  id: parsed.id,
-                  folderId: sub.id,
-                  folderName: sub.name,
-                  imoOffice: imoName,
-                  nisBinding: parsed.nisBinding,
-                  modifiedTime: parsed.createdAt || new Date().toISOString(),
-                  dataFileId: dataJson.id,
-                  title: parsed.title,
-                  status: parsed.status
-                };
-                return;
-              }
-            }
-
-            const summaryFile = files.find((f: any) => f.name.startsWith('Summary_') && f.name.endsWith('.txt'));
-            if (summaryFile) {
-              const sumText = await downloadDriveFileText(token, summaryFile.id);
-              const report = parseSummaryToReport(sumText, sub.name, files, imoName);
-              if (report && report.id) {
-                fetchedReports.push(report);
-                newManifestIndex[report.id] = {
-                  id: report.id,
-                  folderId: sub.id,
-                  folderName: sub.name,
-                  imoOffice: imoName,
-                  nisBinding: report.nisBinding,
-                  modifiedTime: report.createdAt || new Date().toISOString(),
-                  title: report.title,
-                  status: report.status
-                };
-              }
-            }
-          } catch (subErr) {
-            console.warn('Error reading subfolder ' + sub.name + ':', subErr);
-          }
-        }));
-      } catch (fErr) {
-        console.warn('Error reading IMO folder ' + imoName + ':', fErr);
-      }
-    }));
-
-    const mergedMap = new Map<string, any>();
-    [...localBackup, ...fetchedReports].forEach(r => { if (r && r.id) mergedMap.set(r.id, r); });
-    const merged = Array.from(mergedMap.values());
-    saveServerReportsInternal(merged);
-    driveReportsCache = merged;
+  // Priority 3: Local Server Database Fallback
+  const localBackup = loadServerReportsInternal();
+  if (localBackup && localBackup.length > 0) {
+    console.log(`📁 Loaded ${localBackup.length} reports from local server database fallback.`);
+    driveReportsCache = localBackup;
     driveReportsCacheTime = Date.now();
-
-    // Create and upload manifest
-    const manifest: DriveManifest = {
-      version: (localManifest?.version || 0) + 1,
-      lastUpdated: new Date().toISOString(),
-      hash: computeManifestHash(newManifestIndex),
-      totalReports: Object.keys(newManifestIndex).length,
-      reportsIndex: newManifestIndex
-    };
-    saveLocalManifest(manifest);
-
-    Object.values(folders).forEach(fId => {
-      uploadOrUpdateRemoteManifest(token, fId, manifest).catch(e => console.warn('Drive manifest upload notice:', e));
-    });
-
-    console.log('✅ Google Drive sync complete with ' + merged.length + ' total reports.');
-    return filterByImo(driveReportsCache);
-  } catch (err) {
-    console.error('Error fetching reports from Google Drive:', err);
     return filterByImo(driveReportsCache);
   }
+
+  return filterByImo(driveReportsCache);
 }

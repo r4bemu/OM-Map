@@ -468,10 +468,13 @@ export async function createApp() {
 
   // API Routes
   app.get('/api/health', (req, res) => {
+    const hasServiceAccount = fs.existsSync(path.join(process.cwd(), 'service_account.json')) ||
+      Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
     res.json({
       status: 'ok',
       serverTime: new Date().toISOString(),
-      hasDriveRefreshToken: Boolean(process.env.GOOGLE_REFRESH_TOKEN),
+      hasServiceAccount,
+      hasAppsScript: Boolean(process.env.GOOGLE_APPS_SCRIPT_URL),
       hasDriveAccessToken: Boolean(process.env.GOOGLE_DRIVE_ACCESS_TOKEN)
     });
   });
@@ -1451,20 +1454,23 @@ export async function createApp() {
     }
   });
 
-  // Check Google Drive Backend Upload Status
+  // Check Google Drive Backend Status
   app.get('/api/drive/status', async (req, res) => {
     const appsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
     const token = await getOrRefreshServerDriveToken();
     const folderId = getTargetFolderId();
-    const hasRefreshToken = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN);
+    const hasServiceAccount = fs.existsSync(path.join(process.cwd(), 'service_account.json')) ||
+      Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
     res.json({
       active: !!appsScriptUrl || !!token,
       hasAppsScript: !!appsScriptUrl,
-      hasRefreshToken,
-      mode: appsScriptUrl 
+      hasServiceAccount,
+      mode: hasServiceAccount && appsScriptUrl
+        ? 'Service Account (Read) + Apps Script Relay (Upload)'
+        : hasServiceAccount 
+        ? 'Service Account REST API (Read Only)' 
+        : appsScriptUrl 
         ? 'Permanent Google Apps Script Relay (Active)' 
-        : hasRefreshToken 
-        ? 'Long-Term Auto Refresh Token (Active)' 
         : token 
         ? 'Session Access Token' 
         : 'Inactive',
