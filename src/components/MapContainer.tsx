@@ -30,7 +30,7 @@ import {
   Plus,
   Minus
 } from 'lucide-react';
-import { detectNearestGISFeature, calculateCanalPathBetweenPoints, getFeatureName, haversineDistanceMeters } from '../utils/gisLocationUtils';
+import { detectNearestGISFeature, calculateCanalPathBetweenPoints, getFeatureName, haversineDistanceMeters, NearestGISFeatureResult } from '../utils/gisLocationUtils';
 import { getIsoWeekInfo } from '../utils/weekUtils';
 import { 
   STRUCTURE_BLUE_COLOR, 
@@ -217,6 +217,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const onSelectFeatureRef = useRef(onSelectFeature);
   const onTriggerReportFromMapRef = useRef(onTriggerReportFromMap);
   const onSelectReportRef = useRef(onSelectReport);
+  const layersRef = useRef(layers);
+  const selectedFeaturePropsRef = useRef(selectedFeatureProps);
 
   useEffect(() => { isMapPickerActiveRef.current = isMapPickerActive; }, [isMapPickerActive]);
   useEffect(() => { isPoint1SetRef.current = isPoint1Set; }, [isPoint1Set]);
@@ -230,6 +232,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   useEffect(() => { onSelectFeatureRef.current = onSelectFeature; }, [onSelectFeature]);
   useEffect(() => { onTriggerReportFromMapRef.current = onTriggerReportFromMap; }, [onTriggerReportFromMap]);
   useEffect(() => { onSelectReportRef.current = onSelectReport; }, [onSelectReport]);
+  useEffect(() => { layersRef.current = layers; }, [layers]);
+  useEffect(() => { selectedFeaturePropsRef.current = selectedFeatureProps; }, [selectedFeatureProps]);
 
   // Update picker state when initial coordinates change or picker opens/closes
   useEffect(() => {
@@ -900,8 +904,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               if (e && e.originalEvent) {
                 L.DomEvent.stopPropagation(e);
               }
+              const curLatlng = e.latlng || (typeof (leafletLayer as any).getLatLng === 'function' ? (leafletLayer as any).getLatLng() : null);
+              if (curLatlng && isValidCoord(curLatlng.lat, curLatlng.lng)) {
+                (leafletLayer as any)._lastClickLatLng = [curLatlng.lat, curLatlng.lng];
+              }
               if (isMapPickerActiveRef.current) {
-                const curLatlng = e.latlng || (typeof (leafletLayer as any).getLatLng === 'function' ? (leafletLayer as any).getLatLng() : null);
                 if (curLatlng && isValidCoord(curLatlng.lat, curLatlng.lng)) {
                   const isPt1Set = isPoint1SetRef.current && pickerPt1Ref.current && isValidCoord(pickerPt1Ref.current[0], pickerPt1Ref.current[1]);
                   if (!isPt1Set) {
@@ -943,38 +950,80 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 return '[blank]';
               };
 
-              let featureCoords: [number, number] | undefined = undefined;
-              if (typeof (leafletLayer as any).getLatLng === 'function') {
-                const ll = (leafletLayer as any).getLatLng();
-                if (ll) featureCoords = [ll.lat, ll.lng];
-              } else if (typeof (leafletLayer as any).getBounds === 'function') {
-                const c = (leafletLayer as any).getBounds().getCenter();
-                if (c) featureCoords = [c.lat, c.lng];
+              let featureCoords: [number, number] | undefined = (leafletLayer as any)._lastClickLatLng;
+              if (!featureCoords) {
+                if (typeof (leafletLayer as any).getLatLng === 'function') {
+                  const ll = (leafletLayer as any).getLatLng();
+                  if (ll) featureCoords = [ll.lat, ll.lng];
+                } else if (typeof (leafletLayer as any).getBounds === 'function') {
+                  const c = (leafletLayer as any).getBounds().getCenter();
+                  if (c) featureCoords = [c.lat, c.lng];
+                }
               }
 
-              let resolvedName = getFeatureName(props, 'Layer Attributes', featureCoords);
-              const cCategory = detectCanalCategory(props);
-              const cType = detectCanalType(props, layer.name, resolvedName);
-              if (cType === 'Farm Ditch' && featureCoords) {
+              let featInfo: NearestGISFeatureResult | null = null;
+              if (featureCoords && layersRef.current && layersRef.current.length > 0) {
+                try {
+                  featInfo = detectNearestGISFeature(featureCoords[0], featureCoords[1], layersRef.current);
+                } catch (err) {
+                  console.warn('Error detecting nearest GIS feature for popup:', err);
+                }
+              }
+
+              let resolvedName = featInfo?.locationName || getFeatureName(props, 'Layer Attributes', featureCoords);
+              const cCategory = featInfo?.canalCategory || detectCanalCategory(props);
+              const cType = featInfo?.canalType || detectCanalType(props, layer.name, resolvedName);
+              if (cType === 'Farm Ditch' && featureCoords && (!featInfo || !featInfo.locationName.startsWith('Farm ditch'))) {
                 resolvedName = `Farm ditch @${featureCoords[0].toFixed(5)}, ${featureCoords[1].toFixed(5)}`;
               }
 
               const isCanal = !layer.category?.includes('Structure') && layer.geometryType !== 'Point' && !layer.name.toLowerCase().includes('structure');
-              const typeLabel = cType === 'Main' ? 'Main Canal' : cType === 'Lateral' ? 'Lateral' : cType === 'Farm Ditch' ? 'Farm Ditch' : 'Canal';
+              const typeLabel = cType === 'Main' || cType === 'Main Canal' ? 'Main Canal' : cType === 'Lateral' ? 'Lateral' : cType === 'Farm Ditch' ? 'Farm Ditch' : 'Canal';
               const classificationBadge = isCanal ? `${cCategory} • ${typeLabel}` : 'Structure';
               const descVal = getAttrVal(['Description', 'description', 'DESCRIPTION', 'desc', 'Desc', 'remarks_1', 'remarks', 'Remarks']);
               const showDesc = descVal !== '[blank]' && descVal.toLowerCase() !== resolvedName.toLowerCase();
 
+              const isDitch = cType === 'Farm Ditch' || (resolvedName && resolvedName.toLowerCase().startsWith('farm ditch'));
+              const hasStationing = featInfo && featInfo.stationingLabel && !isDitch;
+
               return `
-                <div class="p-3 space-y-2 min-w-[220px] max-w-sm font-sans text-xs text-slate-200">
-                  <div class="border-b border-slate-700 pb-1.5 flex items-center justify-between gap-2">
-                    <span class="font-bold text-xs text-cyan-400 leading-snug break-words block">
+                <div class="p-3 space-y-2 min-w-[240px] max-w-sm font-sans text-xs text-slate-200">
+                  <div class="border-b border-slate-700 pb-1.5 flex items-start justify-between gap-2">
+                    <span class="font-bold text-xs text-cyan-400 leading-snug break-words block flex-1">
                       ${resolvedName}
                     </span>
-                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 shrink-0 font-medium">
+                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 shrink-0 font-medium mt-0.5">
                       ${classificationBadge}
                     </span>
                   </div>
+
+                  ${hasStationing ? `
+                    <div class="bg-cyan-950/40 border border-cyan-800/50 rounded-lg p-2 space-y-1 text-[11px]">
+                      <div class="flex items-center justify-between gap-2">
+                        <span class="text-slate-400 font-medium flex items-center gap-1.5">
+                          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                          <span>Canal Stationing:</span>
+                        </span>
+                        <span class="font-mono font-bold text-cyan-300 bg-cyan-900/70 px-2 py-0.5 rounded text-[10px] border border-cyan-700/60 shadow-sm">
+                          STA. ${featInfo.stationingLabel}
+                        </span>
+                      </div>
+                      ${featInfo.referenceContext ? `
+                        <div class="text-[9.5px] font-mono text-cyan-300/80 bg-slate-900/60 px-1.5 py-0.5 rounded border border-slate-800 break-words leading-tight">
+                          🎯 ${featInfo.referenceContext}
+                        </div>
+                      ` : ''}
+                    </div>
+                  ` : isDitch ? `
+                    <div class="bg-amber-950/30 border border-amber-800/40 rounded-lg p-2 space-y-0.5 text-[11px]">
+                      <div class="flex items-center justify-between gap-1 text-[10px] text-amber-300 font-semibold">
+                        <span>Farm Ditch (Unstationed)</span>
+                        <span class="text-amber-200 font-mono">Unlined</span>
+                      </div>
+                      <div class="text-[9.5px] text-slate-400 leading-tight">Ditches naturally do not have station names.</div>
+                    </div>
+                  ` : ''}
+
                   ${showDesc ? `
                     <div class="space-y-1 bg-slate-950/80 p-2 rounded-lg border border-slate-800 text-[11px]">
                       <div class="flex justify-between gap-2 items-start">
@@ -983,6 +1032,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                       </div>
                     </div>
                   ` : ''}
+
                   <div class="flex flex-col gap-1.5 mt-2">
                     <button id="inspect-btn-${inspectId}" class="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-md transition flex items-center justify-center gap-1 cursor-pointer">
                       Inspect Attribute Details
@@ -1076,27 +1126,33 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               } catch (err) {}
 
               const latlng = e.popup?.getLatLng();
-              if (latlng) {
-                setActivePopupCoords([latlng.lat, latlng.lng]);
+              const clickCoords: [number, number] | undefined = latlng
+                ? [latlng.lat, latlng.lng]
+                : (leafletLayer as any)._lastClickLatLng;
+
+              if (clickCoords) {
+                setActivePopupCoords(clickCoords);
                 setActivePopupProps(props);
               }
+
+              // If Attribute Inspector is ALREADY open, dynamically update it to this newly clicked feature and clicked coordinates!
+              if (selectedFeaturePropsRef.current) {
+                onSelectFeatureRef.current?.(props, layer.category, clickCoords);
+              }
+
               const btn = document.getElementById(`inspect-btn-${inspectId}`);
               if (btn) {
                 btn.onclick = (evt) => {
                   evt.stopPropagation();
-                  const curLatlng = e.popup?.getLatLng();
-                  if (curLatlng) {
-                    onSelectFeatureRef.current?.(props, layer.category, [curLatlng.lat, curLatlng.lng]);
-                  }
+                  onSelectFeatureRef.current?.(props, layer.category, clickCoords);
                 };
               }
               const createReportBtn = document.getElementById(`create-report-btn-${inspectId}`);
               if (createReportBtn) {
                 createReportBtn.onclick = (evt) => {
                   evt.stopPropagation();
-                  const curLatlng = e.popup?.getLatLng();
-                  if (curLatlng) {
-                    onTriggerReportFromMapRef.current?.(curLatlng.lat, curLatlng.lng);
+                  if (clickCoords) {
+                    onTriggerReportFromMapRef.current?.(clickCoords[0], clickCoords[1]);
                     e.popup?.close();
                   }
                 };

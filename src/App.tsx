@@ -2284,6 +2284,7 @@ export default function App() {
         selectedFeatureType={selectedFeatureType}
         selectedReport={selectedReport}
         coords={selectedCoords}
+        layers={layers}
         onClose={() => {
           setSelectedFeatureProps(null);
           setSelectedReport(undefined);

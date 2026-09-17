@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { 
   X, 
   CheckCircle2, 
@@ -20,9 +20,9 @@ import {
   FileDown,
   Loader2
 } from 'lucide-react';
-import { FieldReport, UserRole, ApprovalStatus, AuthUser } from '../types';
+import { FieldReport, UserRole, ApprovalStatus, AuthUser, GISLayer } from '../types';
 import { downloadReportPdf } from '../utils/reportPdfBuilder';
-import { isSyntheticFeatureId } from '../utils/gisLocationUtils';
+import { isSyntheticFeatureId, detectNearestGISFeature, getFeatureName, NearestGISFeatureResult } from '../utils/gisLocationUtils';
 import { detectCanalCategory, detectCanalType } from '../utils/canalLayerClassifier';
 import { resolvePhotoAttachmentUrl, handleImageFallback, captureAndCacheImageElement } from '../utils/photoUtils';
 
@@ -32,6 +32,7 @@ interface AttributeInspectorProps {
   selectedFeatureType?: string;
   selectedReport?: FieldReport;
   coords?: [number, number];
+  layers?: GISLayer[];
   onClose: () => void;
   onOpenReportForFeature: (canalSegment?: string, parcelId?: string, coords?: [number, number]) => void;
   onEditReport?: (report: FieldReport) => void;
@@ -98,6 +99,7 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
   selectedFeatureType,
   selectedReport,
   coords,
+  layers,
   onClose,
   onOpenReportForFeature,
   onEditReport,
@@ -128,6 +130,13 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
     };
   }, [selectedFeatureProps, selectedReport, onClose]);
 
+  const nearestGIS = useMemo(() => {
+    if (coords && coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1]) && layers && layers.length > 0) {
+      return detectNearestGISFeature(coords[0], coords[1], layers);
+    }
+    return null;
+  }, [coords, layers, selectedFeatureProps]);
+
   if (!selectedFeatureProps && !selectedReport) return null;
 
   const getFeatureHeadingName = (props: any): string => {
@@ -146,10 +155,10 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
 
   const title = selectedReport
     ? selectedReport.title
-    : getFeatureHeadingName(selectedFeatureProps);
+    : (nearestGIS?.locationName || getFeatureName(selectedFeatureProps, getFeatureHeadingName(selectedFeatureProps), coords));
 
-  const canalCode = selectedFeatureProps?.canal_code || selectedReport?.canalSegment;
-  const parcelId = selectedFeatureProps?.parcel_id || selectedReport?.parcelId;
+  const canalCode = nearestGIS?.canalCode || selectedFeatureProps?.canal_code || selectedReport?.canalSegment;
+  const parcelId = nearestGIS?.parcelId || selectedFeatureProps?.parcel_id || selectedReport?.parcelId;
 
   // Approval Pipeline State Helpers
   const approvalStatus: ApprovalStatus = selectedReport?.approvalStatus || 'Approved';
@@ -638,10 +647,42 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
         {/* Feature Property Table View */}
         {selectedFeatureProps && !selectedReport && (
           <div className="space-y-3">
+            {/* Canal Stationing & Calibration Banner */}
+            {(nearestGIS || coords) && (
+              <div className="flex items-start gap-2.5 p-3 bg-gradient-to-r from-cyan-950/60 to-slate-800/80 rounded-xl border border-cyan-500/40 text-xs shadow-sm">
+                <MapPin className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[10px] text-cyan-400 uppercase font-bold tracking-wider">
+                      {nearestGIS?.canalType === 'Farm Ditch' ? 'Location (Farm Ditch)' : 'Canal & Survey Stationing'}
+                    </span>
+                    {nearestGIS?.stationingLabel && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-900/90 text-cyan-200 border border-cyan-500/50 shadow-sm">
+                        STA. {nearestGIS.stationingLabel}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-sm font-bold text-white font-heading break-words leading-tight">
+                    {nearestGIS?.locationName || getFeatureName(selectedFeatureProps, 'Spatial Feature', coords)}
+                  </div>
+                  {nearestGIS?.referenceContext && (
+                    <div className="inline-flex items-center gap-1 text-[9.5px] font-mono text-cyan-300/90 bg-cyan-950/90 px-2 py-0.5 rounded border border-cyan-800/60">
+                      <span>🎯 {nearestGIS.referenceContext}</span>
+                    </div>
+                  )}
+                  {coords && (
+                    <div className="text-[10px] font-mono text-slate-400 pt-0.5">
+                      Coordinates: {coords[0].toFixed(5)}, {coords[1].toFixed(5)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Canal Category & Type Summary Banner */}
             {(() => {
-              const cat = detectCanalCategory(selectedFeatureProps);
-              const typ = detectCanalType(selectedFeatureProps);
+              const cat = nearestGIS?.canalCategory || detectCanalCategory(selectedFeatureProps);
+              const typ = nearestGIS?.canalType || detectCanalType(selectedFeatureProps);
               const isCanal = selectedFeatureType?.includes('Canal') || selectedFeatureProps?.canal || selectedFeatureProps?.canal_type || selectedFeatureProps?.Length || selectedFeatureProps?.LENGTH;
               if (!isCanal && cat === 'Uncategorized' && typ === 'Unclassified') return null;
               return (
