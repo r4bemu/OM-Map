@@ -970,38 +970,18 @@ export async function fetchGISLayersFromDrive(
     });
   };
 
-  // Priority 1: Google Apps Script Web App Relay
-  const appsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
-  if (appsScriptUrl && appsScriptUrl.trim()) {
-    try {
-      console.log('🌐 Fetching GIS layers from Google Drive via Apps Script relay...');
-      const imoParam = isImoSpecific ? `&imo=${encodeURIComponent(targetImo!)}` : '';
-      const fetchUrl = `${appsScriptUrl.trim()}?action=getGISLayers${imoParam}`;
-      const res = await fetch(fetchUrl, { signal: AbortSignal.timeout(8000) });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.success && Array.isArray(data.layers) && data.layers.length > 0) {
-          console.log(`✅ Retrieved ${data.layers.length} GIS layer(s) from Google Drive via Apps Script relay!`);
-          return filterByImo(data.layers);
-        }
-      }
-    } catch (gasErr) {
-      console.warn('Apps Script getGISLayers notice:', gasErr);
-    }
-  }
-
-  // Priority 2: Google Drive v3 REST API (if token available)
+  // Priority 1: Google Drive v3 REST API (Permanent Machine-to-Machine via Service Account Key or provided token)
   const token = await getOrRefreshServerDriveToken(providedToken);
   if (token) {
     try {
-      console.log('🌐 Scanning Google Drive folders via Drive REST API...');
+      console.log('🌐 Scanning Google Drive folders via native Drive REST API (Service Account)...');
       const foldersToScan = [
-        { id: '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb', imo: 'Mindoro Oriental-Marinduque-Romblon IMO' },
         { id: '1LdKe-iTgeF_nEy-eRcJwkYAqmj0DwEm0', imo: 'Mindoro Oriental-Marinduque-Romblon IMO' },
-        { id: '1EUAFseU-S5laT0oxRIEwBuXRgppqOUUf', imo: 'Occidental Mindoro IMO' },
+        { id: '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb', imo: 'Mindoro Oriental-Marinduque-Romblon IMO' },
         { id: '1IBqpIgac41KSVc3UBq-xONJVxyNwjX_0', imo: 'Occidental Mindoro IMO' },
-        { id: '1bzraus7QiL8U3ZDSwLfgfLvdc1G5yMKB', imo: 'Palawan IMO' },
-        { id: '1xqXBkJAscqqCDgQRFbCAyQh46baehrQ1', imo: 'Palawan IMO' }
+        { id: '1EUAFseU-S5laT0oxRIEwBuXRgppqOUUf', imo: 'Occidental Mindoro IMO' },
+        { id: '1xqXBkJAscqqCDgQRFbCAyQh46baehrQ1', imo: 'Palawan IMO' },
+        { id: '1bzraus7QiL8U3ZDSwLfgfLvdc1G5yMKB', imo: 'Palawan IMO' }
       ];
       if (process.env.GOOGLE_DRIVE_FOLDER_ID && !foldersToScan.some(f => f.id === process.env.GOOGLE_DRIVE_FOLDER_ID)) {
         foldersToScan.push({ id: process.env.GOOGLE_DRIVE_FOLDER_ID, imo: 'All IMOs' });
@@ -1037,11 +1017,31 @@ export async function fetchGISLayersFromDrive(
       }
 
       if (driveLayers.length > 0) {
-        console.log(`✅ Retrieved ${driveLayers.length} GIS layer(s) directly from Google Drive v3 API!`);
+        console.log(`✅ Retrieved ${driveLayers.length} GIS layer(s) directly from Google Drive v3 API via Service Account!`);
         return filterByImo(driveLayers);
       }
     } catch (apiErr) {
       console.warn('Google Drive v3 API layers scan warning:', apiErr);
+    }
+  }
+
+  // Priority 2: Google Apps Script Web App Relay
+  const appsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
+  if (appsScriptUrl && appsScriptUrl.trim()) {
+    try {
+      console.log('🌐 Fetching GIS layers from Google Drive via Apps Script relay...');
+      const imoParam = isImoSpecific ? `&imo=${encodeURIComponent(targetImo!)}` : '';
+      const fetchUrl = `${appsScriptUrl.trim()}?action=getGISLayers${imoParam}`;
+      const res = await fetch(fetchUrl, { signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.layers) && data.layers.length > 0) {
+          console.log(`✅ Retrieved ${data.layers.length} GIS layer(s) from Google Drive via Apps Script relay!`);
+          return filterByImo(data.layers);
+        }
+      }
+    } catch (gasErr) {
+      console.warn('Apps Script getGISLayers notice:', gasErr);
     }
   }
 
