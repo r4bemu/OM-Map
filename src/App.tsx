@@ -595,7 +595,14 @@ export default function App() {
       const imoToFetch = (isImoScoped && userAssignedImo !== 'All IMOs')
         ? userAssignedImo
         : (targetImo || effectiveImo);
-      const res = await fetch(`/api/drive/imo-layers?role=${encodeURIComponent(role)}&imo=${encodeURIComponent(imoToFetch)}`);
+      const driveToken = getAccessToken();
+      const headers: Record<string, string> = {};
+      if (driveToken) {
+        headers['x-google-drive-token'] = driveToken;
+      }
+      const res = await fetch(`/api/drive/imo-layers?role=${encodeURIComponent(role)}&imo=${encodeURIComponent(imoToFetch)}`, {
+        headers
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.layers && Array.isArray(data.layers)) {
@@ -647,7 +654,10 @@ export default function App() {
             const fixedColor = classification.color;
 
             const shortImo = getShortImoName(dlItem.imoOffice);
-            const resolvedName = shortImo ? `${shortImo} - ${subCat}` : `${subCat}`;
+            const rawItemName = (dlItem.fileName || dlItem.name || '').replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+            const resolvedName = dlItem.name && dlItem.name.includes(shortImo) 
+              ? dlItem.name 
+              : (shortImo ? `${shortImo} - ${rawItemName || subCat}` : (rawItemName || subCat));
             return { subCat, parentCat, fixedColor, resolvedName };
           };
 
@@ -684,7 +694,9 @@ export default function App() {
                 // Cache Miss or Newer Version: Download & Parse
                 downloadedCount++;
                 try {
-                  const fileRes = await fetch(`/api/drive/file/${dl.driveFileId}`);
+                  const fileRes = await fetch(`/api/drive/file/${dl.driveFileId}`, {
+                    headers
+                  });
                   if (fileRes.ok) {
                     const arrayBuffer = await fileRes.arrayBuffer();
                     const fileObj = new File([arrayBuffer], (dl as any).fileName || dl.name || `${dl.id}.geojson`);

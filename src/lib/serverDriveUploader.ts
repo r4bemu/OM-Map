@@ -784,11 +784,123 @@ Total Photos: ${report.photos ? report.photos.length : (report.photoUrl ? 1 : 0)
   }
 }
 
-// List all vector GIS files (KMZ, KML, GeoJSON) in a specific Drive folder
+function findLocalFileRecursively(dir: string, fileId: string): string | null {
+  if (!fs.existsSync(dir)) return null;
+  const items = fs.readdirSync(dir);
+  for (const it of items) {
+    const full = path.join(dir, it);
+    if (fs.statSync(full).isDirectory()) {
+      const sub = findLocalFileRecursively(full, fileId);
+      if (sub) return sub;
+    } else {
+      const cleanIt = it.replace(/[^a-zA-Z0-9_-]/g, '_');
+      if (fileId.includes(cleanIt) || cleanIt.includes(fileId.replace('local-', '')) || fileId.includes(it.replace(/\.[^/.]+$/, ''))) {
+        return full;
+      }
+    }
+  }
+  return null;
+}
+
+export function loadLocalGISLayersFallback(targetImo?: string): any[] {
+  const possibleDirs = [
+    path.join(process.cwd(), 'data', 'gis_network'),
+    'C:\\Users\\r4bem\\OneDrive\\EMU-PC1 (Desktop)\\NIA FOLDER\\OPERATIONS\\O&M Web App\\GeoJSON - CANAL NETWORK'
+  ];
+
+  let targetDir = '';
+  for (const d of possibleDirs) {
+    if (fs.existsSync(d)) {
+      targetDir = d;
+      break;
+    }
+  }
+  if (!targetDir) return [];
+
+  const results: any[] = [];
+  const seenNames = new Set<string>();
+
+  const imoFolders = [
+    { dirName: 'MOMARO', imo: 'Mindoro Oriental-Marinduque-Romblon IMO' },
+    { dirName: 'OMIMO', imo: 'Occidental Mindoro IMO' },
+    { dirName: 'PIMO', imo: 'Palawan IMO' }
+  ];
+
+  for (const item of imoFolders) {
+    const subPath = path.join(targetDir, item.dirName);
+    if (fs.existsSync(subPath)) {
+      const files = fs.readdirSync(subPath);
+      for (const f of files) {
+        if (f.endsWith('.geojson') || f.endsWith('.kml') || f.endsWith('.json')) {
+          const filePath = path.join(subPath, f);
+          const stats = fs.statSync(filePath);
+          const fileId = `local-${item.dirName.toLowerCase()}-${f.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+          seenNames.add(f);
+          results.push({
+            id: `drive-${fileId}`,
+            driveFileId: fileId,
+            name: f.replace(/\.[^/.]+$/, '').replace(/_/g, ' '),
+            fileName: f,
+            mimeType: 'application/geo+json',
+            sizeBytes: stats.size,
+            driveModifiedTime: stats.mtime.toISOString(),
+            uploadedAt: stats.mtime.toISOString(),
+            imoOffice: item.imo,
+            localFilePath: filePath,
+            source: 'Google Drive'
+          });
+        }
+      }
+    }
+  }
+
+  // Also scan top-level files if any
+  try {
+    const topFiles = fs.readdirSync(targetDir);
+    for (const f of topFiles) {
+      const filePath = path.join(targetDir, f);
+      if (!fs.statSync(filePath).isDirectory() && (f.endsWith('.geojson') || f.endsWith('.kml') || f.endsWith('.json'))) {
+        if (seenNames.has(f)) continue;
+        seenNames.add(f);
+        const stats = fs.statSync(filePath);
+        let detectedImo = 'Mindoro Oriental-Marinduque-Romblon IMO';
+        const fLow = f.toLowerCase();
+        if (fLow.includes('amnay') || fLow.includes('caguray') || fLow.includes('lumintao') || fLow.includes('mongpong') || fLow.includes('pagbahan')) {
+          detectedImo = 'Occidental Mindoro IMO';
+        } else if (fLow.includes('batang') || fLow.includes('malatgao')) {
+          detectedImo = 'Palawan IMO';
+        }
+
+        const fileId = `local-${detectedImo.substring(0, 3).toLowerCase()}-${f.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+        results.push({
+          id: `drive-${fileId}`,
+          driveFileId: fileId,
+          name: f.replace(/\.[^/.]+$/, '').replace(/_/g, ' '),
+          fileName: f,
+          mimeType: 'application/geo+json',
+          sizeBytes: stats.size,
+          driveModifiedTime: stats.mtime.toISOString(),
+          uploadedAt: stats.mtime.toISOString(),
+          imoOffice: detectedImo,
+          localFilePath: filePath,
+          source: 'Google Drive'
+        });
+      }
+    }
+  } catch (_) {}
+
+  return results;
+}
+
+// List all vector GIS files (KMZ, KML, GeoJSON) in a specific Drive folder (recursive up to depth 4)
 export async function listDriveGISFilesInFolder(
   accessToken: string,
-  folderId: string
-): Promise<Array<{ id: string; name: string; mimeType: string; size?: string; modifiedTime?: string }>> {
+  folderId: string,
+  depth: number = 0,
+  seenFileIds: Set<string> = new Set()
+): Promise<Array<{ id: string; name: string; mimeType: string; size?: string; modifiedTime?: string; folderId?: string }>> {
+  if (depth > 4 || !accessToken) return [];
+
   const query = "'" + folderId + "' in parents and trashed = false";
   const url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(query) + '&fields=files(id,name,mimeType,size,modifiedTime)&pageSize=100&supportsAllDrives=true&includeItemsFromAllDrives=true';
 
@@ -802,38 +914,214 @@ export async function listDriveGISFilesInFolder(
   }
 
   const data = await res.json();
-  const allFiles = data.files || [];
+  const allItems = data.files || [];
+  const results: Array<{ id: string; name: string; mimeType: string; size?: string; modifiedTime?: string; folderId?: string }> = [];
 
-  return allFiles.filter((f: any) => {
-    const name = (f.name || '').toLowerCase();
-    return name.endsWith('.kmz') || 
-           name.endsWith('.kml') || 
-           name.endsWith('.geojson') || 
-           name.endsWith('.json') ||
-           f.mimeType === 'application/vnd.google-earth.kmz' ||
-           f.mimeType === 'application/vnd.google-earth.kml+xml' ||
-           f.mimeType === 'application/geo+json' ||
-           f.mimeType === 'application/json';
-  });
+  for (const item of allItems) {
+    if (seenFileIds.has(item.id)) continue;
+
+    if (item.mimeType === 'application/vnd.google-apps.folder') {
+      const subItems = await listDriveGISFilesInFolder(accessToken, item.id, depth + 1, seenFileIds);
+      results.push(...subItems);
+    } else {
+      const name = (item.name || '').toLowerCase();
+      const isGis = name.endsWith('.kmz') || 
+                    name.endsWith('.kml') || 
+                    name.endsWith('.geojson') || 
+                    name.endsWith('.json') ||
+                    item.mimeType === 'application/vnd.google-earth.kmz' ||
+                    item.mimeType === 'application/vnd.google-earth.kml+xml' ||
+                    item.mimeType === 'application/geo+json' ||
+                    item.mimeType === 'application/json';
+
+      if (isGis && !name.includes('reports_index') && !name.startsWith('data_') && !name.startsWith('summary_') && !name.startsWith('photo_')) {
+        seenFileIds.add(item.id);
+        results.push({
+          ...item,
+          folderId
+        });
+      }
+    }
+  }
+
+  return results;
 }
 
-// Download binary buffer of a Drive file
+// Discover and fetch GIS layers with multi-tier priority: Apps Script Relay -> Drive API -> Local fallback
+export async function fetchGISLayersFromDrive(
+  providedToken?: string,
+  targetImo?: string
+): Promise<any[]> {
+  const isImoSpecific = Boolean(targetImo && targetImo !== 'All IMOs' && targetImo !== 'Regional Office IV-B');
+
+  const filterByImo = (list: any[]) => {
+    if (!isImoSpecific || !targetImo) return list;
+    const lower = targetImo.toLowerCase();
+    const isMOMARO = (str: string) => str.includes('momaro') || str.includes('oriental') || str.includes('marinduque') || str.includes('romblon');
+    const isOccidental = (str: string) => str.includes('occidental') || str.includes('omimo');
+    const isPalawan = (str: string) => str.includes('palawan') || str.includes('pimo') || str.includes('palimo');
+
+    return list.filter(r => {
+      const rImo = (r.imoOffice || r.imo || '').toLowerCase();
+      if (isMOMARO(lower) && isMOMARO(rImo)) return true;
+      if (isOccidental(lower) && isOccidental(rImo)) return true;
+      if (isPalawan(lower) && isPalawan(rImo)) return true;
+      return rImo.includes(lower) || lower.includes(rImo);
+    });
+  };
+
+  // Priority 1: Google Apps Script Web App Relay
+  const appsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
+  if (appsScriptUrl && appsScriptUrl.trim()) {
+    try {
+      console.log('🌐 Fetching GIS layers from Google Drive via Apps Script relay...');
+      const imoParam = isImoSpecific ? `&imo=${encodeURIComponent(targetImo!)}` : '';
+      const fetchUrl = `${appsScriptUrl.trim()}?action=getGISLayers${imoParam}`;
+      const res = await fetch(fetchUrl, { signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.layers) && data.layers.length > 0) {
+          console.log(`✅ Retrieved ${data.layers.length} GIS layer(s) from Google Drive via Apps Script relay!`);
+          return filterByImo(data.layers);
+        }
+      }
+    } catch (gasErr) {
+      console.warn('Apps Script getGISLayers notice:', gasErr);
+    }
+  }
+
+  // Priority 2: Google Drive v3 REST API (if token available)
+  const token = await getOrRefreshServerDriveToken(providedToken);
+  if (token) {
+    try {
+      console.log('🌐 Scanning Google Drive folders via Drive REST API...');
+      const foldersToScan = [
+        { id: '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb', imo: 'Mindoro Oriental-Marinduque-Romblon IMO' },
+        { id: '1LdKe-iTgeF_nEy-eRcJwkYAqmj0DwEm0', imo: 'Mindoro Oriental-Marinduque-Romblon IMO' },
+        { id: '1EUAFseU-S5laT0oxRIEwBuXRgppqOUUf', imo: 'Occidental Mindoro IMO' },
+        { id: '1IBqpIgac41KSVc3UBq-xONJVxyNwjX_0', imo: 'Occidental Mindoro IMO' },
+        { id: '1bzraus7QiL8U3ZDSwLfgfLvdc1G5yMKB', imo: 'Palawan IMO' },
+        { id: '1xqXBkJAscqqCDgQRFbCAyQh46baehrQ1', imo: 'Palawan IMO' }
+      ];
+      if (process.env.GOOGLE_DRIVE_FOLDER_ID && !foldersToScan.some(f => f.id === process.env.GOOGLE_DRIVE_FOLDER_ID)) {
+        foldersToScan.push({ id: process.env.GOOGLE_DRIVE_FOLDER_ID, imo: 'All IMOs' });
+      }
+
+      const driveLayers: any[] = [];
+      const seenIds = new Set<string>();
+
+      for (const folder of foldersToScan) {
+        if (isImoSpecific && targetImo && !filterByImo([{ imoOffice: folder.imo }]).length && folder.imo !== 'All IMOs') {
+          continue;
+        }
+        try {
+          const files = await listDriveGISFilesInFolder(token, folder.id);
+          for (const f of files) {
+            if (seenIds.has(f.id)) continue;
+            seenIds.add(f.id);
+            driveLayers.push({
+              id: `drive-${f.id}`,
+              driveFileId: f.id,
+              name: f.name,
+              fileName: f.name,
+              mimeType: f.mimeType,
+              sizeBytes: f.size ? parseInt(f.size, 10) : 0,
+              driveModifiedTime: f.modifiedTime || new Date().toISOString(),
+              uploadedAt: f.modifiedTime || new Date().toISOString(),
+              imoOffice: folder.imo,
+              driveFolderId: folder.id,
+              source: 'Google Drive'
+            });
+          }
+        } catch (_) {}
+      }
+
+      if (driveLayers.length > 0) {
+        console.log(`✅ Retrieved ${driveLayers.length} GIS layer(s) directly from Google Drive v3 API!`);
+        return filterByImo(driveLayers);
+      }
+    } catch (apiErr) {
+      console.warn('Google Drive v3 API layers scan warning:', apiErr);
+    }
+  }
+
+  // Priority 3: Local GIS Network Repository Fallback (ensures canal networks load reliably)
+  const localLayers = loadLocalGISLayersFallback(targetImo);
+  if (localLayers.length > 0) {
+    console.log(`📂 Loaded ${localLayers.length} GIS canal network layers from local repository fallback.`);
+    return filterByImo(localLayers);
+  }
+
+  return [];
+}
+
+// Download binary buffer of a Drive file with multi-tier fallback
 export async function downloadDriveBinaryBuffer(
   accessToken: string,
   fileId: string
 ): Promise<Buffer> {
-  const url = 'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media&supportsAllDrives=true';
-  const res = await fetch(url, {
-    headers: { Authorization: 'Bearer ' + accessToken }
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error('Failed to download Drive file ' + fileId + ': ' + err);
+  // If fileId points to a local file
+  if (fileId.startsWith('local-')) {
+    const localDir = path.join(process.cwd(), 'data', 'gis_network');
+    const altDir = 'C:\\Users\\r4bem\\OneDrive\\EMU-PC1 (Desktop)\\NIA FOLDER\\OPERATIONS\\O&M Web App\\GeoJSON - CANAL NETWORK';
+    for (const d of [localDir, altDir]) {
+      if (fs.existsSync(d)) {
+        const found = findLocalFileRecursively(d, fileId);
+        if (found) {
+          return fs.readFileSync(found);
+        }
+      }
+    }
   }
 
-  const arrayBuffer = await res.arrayBuffer();
-  return Buffer.from(arrayBuffer);
+  // 1. Try Google Drive API v3 if accessToken is provided
+  if (accessToken && accessToken.trim()) {
+    try {
+      const url = 'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media&supportsAllDrives=true';
+      const res = await fetch(url, {
+        headers: { Authorization: 'Bearer ' + accessToken }
+      });
+      if (res.ok) {
+        const arrayBuffer = await res.arrayBuffer();
+        return Buffer.from(arrayBuffer);
+      }
+    } catch (apiErr) {
+      console.warn(`Drive API download failed for ${fileId}, trying relay:`, apiErr);
+    }
+  }
+
+  // 2. Try Apps Script relay if configured
+  const appsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
+  if (appsScriptUrl && appsScriptUrl.trim()) {
+    try {
+      const relayUrl = `${appsScriptUrl.trim()}?action=getDriveFile&fileId=${encodeURIComponent(fileId)}`;
+      const res = await fetch(relayUrl, { signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const json = await res.json();
+          if (json.base64) {
+            return Buffer.from(json.base64, 'base64');
+          }
+          return Buffer.from(JSON.stringify(json));
+        } else {
+          const text = await res.text();
+          return Buffer.from(text, 'utf-8');
+        }
+      }
+    } catch (relayErr) {
+      console.warn(`Apps Script download relay failed for ${fileId}:`, relayErr);
+    }
+  }
+
+  // 3. Fallback: check local files in data/gis_network
+  const localDir = path.join(process.cwd(), 'data', 'gis_network');
+  const found = findLocalFileRecursively(localDir, fileId);
+  if (found) {
+    return fs.readFileSync(found);
+  }
+
+  throw new Error('Failed to download Drive file ' + fileId + ': No valid token, relay response, or local file');
 }
 
 // Download text of a Drive file
@@ -841,17 +1129,8 @@ export async function downloadDriveFileText(
   accessToken: string,
   fileId: string
 ): Promise<string> {
-  const url = 'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media&supportsAllDrives=true';
-  const res = await fetch(url, {
-    headers: { Authorization: 'Bearer ' + accessToken }
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error('Failed to download Drive text file ' + fileId + ': ' + err);
-  }
-
-  return await res.text();
+  const buffer = await downloadDriveBinaryBuffer(accessToken, fileId);
+  return buffer.toString('utf-8');
 }
 
 // Helper to parse human-readable Summary text into a complete FieldReport object

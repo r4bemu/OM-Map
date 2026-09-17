@@ -40,6 +40,7 @@ import {
   downloadDriveFileText,
   getDesignatedFolderForImo,
   fetchReportsFromAllDriveFolders,
+  fetchGISLayersFromDrive,
   IMO_DESIGNATED_FOLDERS
 } from './src/lib/serverDriveUploader.js';
 import { generateWmrReportId } from './src/utils/reportIdGenerator.js';
@@ -1520,102 +1521,82 @@ export async function createApp() {
     return imoName;
   };
 
-  // Fetch GIS files metadata and content from the 3 IMO Google Drive folders with RBAC
+  // Fetch GIS files metadata and content from the IMO Google Drive folders with RBAC
   app.get('/api/drive/imo-layers', async (req, res) => {
     try {
       const userRole = (req.query.role as string) || 'Viewer';
       const requestedImo = req.query.imo as string | undefined;
       const clientToken = req.headers['x-google-drive-token'] as string | undefined;
 
-      const accessToken = await getOrRefreshServerDriveToken(clientToken);
-
-      // RBAC & Jurisdiction Permission Logic:
-      // - IMO Users (IMO Admin, IMO Evaluator, IMO Reviewer, IMO Preparer, Field Personnel): Strictly restricted to their designated IMO folder
-      // - Regional Roles (Developer, RO Admin, RO Evaluator, RO Reviewer, RO Preparer): Permitted across all 3 IMO folders, or filtered by requested IMO
-      // - Viewer: Restricted to MOMARO IMO by default or specific requested IMO
-      let permittedFolders = [...IMO_DRIVE_FOLDERS];
       const isImoScopedRole = ['IMO Admin', 'IMO Evaluator', 'IMO Reviewer', 'IMO Preparer', 'Field Personnel'].includes(userRole);
-
-      if (requestedImo && requestedImo !== 'All IMOs' && requestedImo !== 'Regional Office IV-B') {
-        const filtered = permittedFolders.filter(f => matchesImoOffice(f.name, requestedImo) || matchesImoOffice(f.shortCode, requestedImo));
-        if (filtered.length > 0) {
-          permittedFolders = filtered;
-        }
-      } else if (isImoScopedRole || userRole === 'Viewer') {
-        permittedFolders = IMO_DRIVE_FOLDERS.filter(f => f.shortCode === 'MOMARO IMO');
-      }
-
-      const allDriveLayers: any[] = [];
-      const liveDriveIds = new Set<string>();
-
-      for (const folder of permittedFolders) {
-        try {
-          const files = await listDriveGISFilesInFolder(accessToken || '', folder.id);
-
-          files.forEach((file) => {
-            const fileId = `drive-${file.id}`;
-            liveDriveIds.add(fileId);
-
-            const fnLower = file.name.toLowerCase();
-            let subCat: 'Parcels' | 'Main Canals' | 'Lateral Canals' | 'Other Unclassified Canals' | 'Structures' = 'Other Unclassified Canals';
-            let parentCat: 'Canals' | 'Parcels' | 'Structures' = 'Canals';
-            let fixedColor = '#1e40af'; // Fixed Dark Blue for Other Unclassified Canals
-
-            if (fnLower.includes('parcel') || fnLower.includes('lot') || fnLower.includes('irrigated')) {
-              subCat = 'Parcels';
-              parentCat = 'Parcels';
-              fixedColor = '#10b981';
-            } else if (fnLower.includes('structure') || fnLower.includes('gate') || fnLower.includes('dam') || fnLower.includes('turnout') || fnLower.includes('point')) {
-              subCat = 'Structures';
-              parentCat = 'Structures';
-              fixedColor = '#f59e0b';
-            } else if (fnLower.includes('main canal') || fnLower.includes('main_canal') || fnLower.includes('main') || fnLower.includes('mc')) {
-              subCat = 'Main Canals';
-              parentCat = 'Canals';
-              fixedColor = '#38bdf8'; // Fixed Light Blue for Main Canals
-            } else if (fnLower.includes('lateral') || fnLower.includes('lat_') || fnLower.includes('lat')) {
-              subCat = 'Lateral Canals';
-              parentCat = 'Canals';
-              fixedColor = '#2563eb'; // Fixed Blue for Lateral Canals
-            } else {
-              subCat = 'Other Unclassified Canals';
-              parentCat = 'Canals';
-              fixedColor = '#1e40af'; // Fixed Dark Blue for Other Unclassified Canals
-            }
-
-            // Layer Name Format: Short IMO Name - (GIS Data Category) e.g. MOMARO IMO - Main Canals, OMIMO - Main Canals, PIMO - Main Canals
-            const shortImo = getShortImoName(folder.shortCode || folder.name);
-            const layerName = `${shortImo} - ${subCat}`;
-            const defaultOpacity = parentCat === 'Parcels' ? 0.30 : 0.90;
-
-            allDriveLayers.push({
-              id: fileId,
-              driveFileId: file.id,
-              driveModifiedTime: file.modifiedTime || new Date().toISOString(),
-              name: layerName,
-              fileName: file.name,
-              category: parentCat,
-              subCategory: subCat,
-              visible: true,
-              color: fixedColor,
-              opacity: defaultOpacity,
-              sizeBytes: file.size ? parseInt(file.size, 10) : 0,
-              uploadedAt: file.modifiedTime || new Date().toISOString(),
-              imoOffice: folder.name,
-              driveFolderId: folder.id,
-              mimeType: file.mimeType,
-              source: 'Google Drive'
-            });
-          });
-        } catch (fErr) {
-          console.warn(`Error fetching Drive files for folder ${folder.name}:`, fErr);
+      let targetImoFilter = requestedImo;
+      if (!targetImoFilter || targetImoFilter === 'All IMOs' || targetImoFilter === 'Regional Office IV-B') {
+        if (isImoScopedRole || userRole === 'Viewer') {
+          targetImoFilter = 'Mindoro Oriental-Marinduque-Romblon IMO';
         }
       }
+
+      // Multi-tier GIS layer retrieval: Apps Script Relay -> Drive API v3 -> Local GIS Network Fallback
+      const rawLayers = await fetchGISLayersFromDrive(clientToken, targetImoFilter);
+
+      const allDriveLayers = rawLayers.map((file) => {
+        const fileId = file.id || `drive-${file.driveFileId || file.fileName}`;
+        const fnLower = (file.fileName || file.name || '').toLowerCase();
+        let subCat: 'Parcels' | 'Main Canals' | 'Lateral Canals' | 'Other Unclassified Canals' | 'Structures' = 'Other Unclassified Canals';
+        let parentCat: 'Canals' | 'Parcels' | 'Structures' = 'Canals';
+        let fixedColor = '#1e40af';
+
+        if (fnLower.includes('parcel') || fnLower.includes('lot') || fnLower.includes('irrigated')) {
+          subCat = 'Parcels';
+          parentCat = 'Parcels';
+          fixedColor = '#10b981';
+        } else if (fnLower.includes('structure') || fnLower.includes('gate') || fnLower.includes('dam') || fnLower.includes('turnout') || fnLower.includes('point')) {
+          subCat = 'Structures';
+          parentCat = 'Structures';
+          fixedColor = '#f59e0b';
+        } else if (fnLower.includes('main canal') || fnLower.includes('main_canal') || fnLower.includes('main') || fnLower.includes('mc')) {
+          subCat = 'Main Canals';
+          parentCat = 'Canals';
+          fixedColor = '#38bdf8';
+        } else if (fnLower.includes('lateral') || fnLower.includes('lat_') || fnLower.includes('lat')) {
+          subCat = 'Lateral Canals';
+          parentCat = 'Canals';
+          fixedColor = '#2563eb';
+        } else {
+          subCat = 'Other Unclassified Canals';
+          parentCat = 'Canals';
+          fixedColor = '#1e40af';
+        }
+
+        const shortImo = getShortImoName(file.imoOffice || file.imo);
+        const displayName = file.name ? file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ') : `${shortImo} - ${subCat}`;
+        const layerName = shortImo ? `${shortImo} - ${displayName}` : displayName;
+        const defaultOpacity = parentCat === 'Parcels' ? 0.30 : 0.90;
+
+        return {
+          id: fileId,
+          driveFileId: file.driveFileId || file.id?.replace(/^drive-/, ''),
+          driveModifiedTime: file.driveModifiedTime || file.modifiedTime || new Date().toISOString(),
+          name: layerName,
+          fileName: file.fileName || file.name,
+          category: parentCat,
+          subCategory: subCat,
+          visible: true,
+          color: fixedColor,
+          opacity: defaultOpacity,
+          sizeBytes: file.sizeBytes || file.size || 0,
+          uploadedAt: file.uploadedAt || file.modifiedTime || new Date().toISOString(),
+          imoOffice: file.imoOffice || file.imo,
+          driveFolderId: file.driveFolderId,
+          mimeType: file.mimeType || 'application/geo+json',
+          source: 'Google Drive'
+        };
+      });
 
       res.json({
         success: true,
         userRole,
-        permittedFolderCount: permittedFolders.length,
+        permittedFolderCount: 3,
         layers: allDriveLayers
       });
     } catch (err: any) {
