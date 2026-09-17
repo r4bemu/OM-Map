@@ -40,6 +40,8 @@ import {
 } from '../utils/activityColors';
 import { 
   classifyVectorItem, 
+  detectCanalCategory,
+  detectCanalType,
   BLUE_PALETTE, 
   STROKE_WEIGHTS 
 } from '../utils/canalLayerClassifier';
@@ -777,6 +779,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         const geoJsonLayer = (L as any).geoJSON(layer.data, {
           smoothFactor: 1.2,
           filter: (feature: any) => {
+            if (!feature || !feature.geometry || !feature.geometry.coordinates) {
+              return false;
+            }
             const geomType = feature?.geometry?.type || '';
 
             // Ignore any polygon / area geometries entirely
@@ -937,17 +942,26 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 return '[blank]';
               };
 
-              const nameVal = getAttrVal(['Name', 'name', 'NAME', 'canal_name', 'station_name', 'title', 'Title', 'label']);
-              const descVal = getAttrVal(['Description', 'description', 'DESCRIPTION', 'desc', 'Desc', 'remarks', 'Remarks']);
+              const resolvedName = getFeatureName(props, 'Layer Attributes');
+              const cCategory = detectCanalCategory(props);
+              const cType = detectCanalType(props, layer.name, resolvedName);
+              const isCanal = !layer.category?.includes('Structure') && layer.geometryType !== 'Point' && !layer.name.toLowerCase().includes('structure');
+              const typeLabel = cType === 'Main' ? 'Main Canal' : cType === 'Lateral' ? 'Lateral' : cType === 'Farm Ditch' ? 'Farm Ditch' : 'Canal';
+              const classificationBadge = isCanal ? `${cCategory} • ${typeLabel}` : 'Structure';
+              const descVal = getAttrVal(['Description', 'description', 'DESCRIPTION', 'desc', 'Desc', 'remarks_1', 'remarks', 'Remarks']);
+              const showDesc = descVal !== '[blank]' && descVal.toLowerCase() !== resolvedName.toLowerCase();
 
               return `
                 <div class="p-3 space-y-2 min-w-[220px] max-w-sm font-sans text-xs text-slate-200">
-                  <div class="border-b border-slate-700 pb-1.5">
+                  <div class="border-b border-slate-700 pb-1.5 flex items-center justify-between gap-2">
                     <span class="font-bold text-xs text-cyan-400 leading-snug break-words block">
-                      ${nameVal !== '[blank]' ? nameVal : 'Layer Attributes'}
+                      ${resolvedName}
+                    </span>
+                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 shrink-0 font-medium">
+                      ${classificationBadge}
                     </span>
                   </div>
-                  ${descVal !== '[blank]' ? `
+                  ${showDesc ? `
                     <div class="space-y-1 bg-slate-950/80 p-2 rounded-lg border border-slate-800 text-[11px]">
                       <div class="flex justify-between gap-2 items-start">
                         <span class="text-slate-400 font-medium shrink-0">Description:</span>

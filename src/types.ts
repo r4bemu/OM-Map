@@ -209,6 +209,9 @@ export interface GISLayer {
   approvedAt?: string;
 }
 
+export type CanalCategory = 'Lined' | 'Unlined' | 'Uncategorized';
+export type CanalType = 'Main' | 'Lateral' | 'Farm Ditch' | 'Unclassified';
+
 export interface LocationPick {
   lat: number;
   lng: number;
@@ -217,6 +220,8 @@ export interface LocationPick {
   featureName?: string;
   featureCode?: string;
   referenceContext?: string;
+  canalCategory?: CanalCategory;
+  canalType?: CanalType;
 }
 
 export interface FieldReport {
@@ -238,6 +243,8 @@ export interface FieldReport {
   
   // Auto-detected details from map
   canalSegment?: string;
+  canalCategory?: CanalCategory;
+  canalType?: CanalType;
   parcelId?: string;
   structureName?: string;
 

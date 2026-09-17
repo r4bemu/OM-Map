@@ -45,7 +45,9 @@ import {
   PhotoAttachment, 
   UserRole,
   AuthUser,
-  GISLayer
+  GISLayer,
+  CanalCategory,
+  CanalType
 } from '../types';
 import { detectNearestGISFeature, calculateCanalPathBetweenPoints, haversineDistanceMeters, isSyntheticFeatureId } from '../utils/gisLocationUtils';
 import { getIAsForContext, resolveCanonicalNis, IrrigatorsAssociation } from '../data/irrigatorsAssociations';
@@ -217,6 +219,8 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
   const [detectedParcelId, setDetectedParcelId] = useState<string | undefined>(initialParcelId);
   const [detectedPathCoords, setDetectedPathCoords] = useState<[number, number][] | undefined>(undefined);
   const [detectedReferenceContext, setDetectedReferenceContext] = useState<string | undefined>(editingReport?.referenceContext);
+  const [detectedCanalCategory, setDetectedCanalCategory] = useState<CanalCategory | undefined>(editingReport?.canalCategory);
+  const [detectedCanalType, setDetectedCanalType] = useState<CanalType | undefined>(editingReport?.canalType);
 
   // Status: In Progress, Completed, or Suspended (No pre-select: User must choose)
   const [status, setStatus] = useState<'In Progress' | 'Completed' | 'Suspended' | ''>('');
@@ -684,6 +688,8 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
         setDetectedParcelId(resolvedParcel);
         setDetectedPathCoords([[feat.snappedCoords[0], feat.snappedCoords[1]]]);
         setDetectedReferenceContext(feat.referenceContext);
+        setDetectedCanalCategory(feat.canalCategory);
+        setDetectedCanalType(feat.canalType);
       } else if (lat2 !== undefined && lng2 !== undefined) {
         const pathRes = calculateCanalPathBetweenPoints(
           { lat: lat1, lng: lng1 },
@@ -697,6 +703,8 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
         setDetectedParcelId(resolvedParcel);
         setDetectedPathCoords(pathRes.pathCoords);
         setDetectedReferenceContext(pathRes.referenceContext);
+        setDetectedCanalCategory(pathRes.canalCategory);
+        setDetectedCanalType(pathRes.canalType);
       }
     } else {
       setDetectedLocationName('');
@@ -704,6 +712,8 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
       if (!initialParcelId) setDetectedParcelId(undefined);
       setDetectedPathCoords(undefined);
       setDetectedReferenceContext(undefined);
+      setDetectedCanalCategory(undefined);
+      setDetectedCanalType(undefined);
     }
   }, [lat1, lng1, lat2, lng2, locationMode, layers, initialCanalSegment, initialParcelId]);
 
@@ -1347,6 +1357,8 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
         referenceContext: detectedReferenceContext || editingReport?.referenceContext,
 
         canalSegment: cleanCanalSegment,
+        canalCategory: detectedCanalCategory || editingReport?.canalCategory || 'Uncategorized',
+        canalType: detectedCanalType || editingReport?.canalType || 'Unclassified',
         parcelId: detectedParcelId,
 
         segmentDistanceMeters: calculatedMeters,

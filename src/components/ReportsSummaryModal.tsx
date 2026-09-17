@@ -51,6 +51,7 @@ import {
   ORDERED_APPROVAL_TIERS,
   TIER_CONFIG
 } from '../utils/approvalHierarchyEngine';
+import { getReportCanalCategoryAndType, formatCanalClassification } from '../utils/canalLayerClassifier';
 
 interface ReportsSummaryModalProps {
   isOpen: boolean;
@@ -373,6 +374,9 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
       });
 
       let totalDistance = 0;
+      let totalLinedDist = 0;
+      let totalUnlinedDist = 0;
+      let totalUncategorizedDist = 0;
       let totalDesilting = 0;
       let totalPainting = 0;
       let completed = 0;
@@ -383,6 +387,10 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
       item.reports.forEach(r => {
         if (typeof r.segmentDistanceMeters === 'number' && !isNaN(r.segmentDistanceMeters) && r.segmentDistanceMeters > 0) {
           totalDistance += r.segmentDistanceMeters;
+          const { category } = getReportCanalCategoryAndType(r);
+          if (category === 'Lined') totalLinedDist += r.segmentDistanceMeters;
+          else if (category === 'Unlined') totalUnlinedDist += r.segmentDistanceMeters;
+          else totalUncategorizedDist += r.segmentDistanceMeters;
         }
         const vol = r.calculatedVolumeM3 || r.desiltingVolumeM3;
         if (typeof vol === 'number' && !isNaN(vol) && vol > 0) {
@@ -402,6 +410,9 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
         label: item.label,
         reports: item.reports,
         totalDistanceMeters: totalDistance,
+        totalLinedDist,
+        totalUnlinedDist,
+        totalUncategorizedDist,
         totalDesiltingM3: totalDesilting,
         totalPaintingSqm: totalPainting,
         completedCount: completed,
@@ -424,9 +435,47 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
     let structureCount = 0;
     let maintainedByIACount = 0;
 
+    // Detailed Accomplishment Distance breakdown by Category & Type
+    let linedMainDist = 0;
+    let linedLateralDist = 0;
+    let linedFarmDitchDist = 0;
+    let linedOtherDist = 0;
+
+    let unlinedMainDist = 0;
+    let unlinedLateralDist = 0;
+    let unlinedFarmDitchDist = 0;
+    let unlinedOtherDist = 0;
+
+    let uncategorizedMainDist = 0;
+    let uncategorizedLateralDist = 0;
+    let uncategorizedFarmDitchDist = 0;
+    let uncategorizedOtherDist = 0;
+
     filteredReports.forEach(r => {
-      if (typeof r.segmentDistanceMeters === 'number' && !isNaN(r.segmentDistanceMeters) && r.segmentDistanceMeters > 0) {
-        totalDist += r.segmentDistanceMeters;
+      const dist = (typeof r.segmentDistanceMeters === 'number' && !isNaN(r.segmentDistanceMeters) && r.segmentDistanceMeters > 0)
+        ? r.segmentDistanceMeters
+        : 0;
+
+      if (dist > 0) {
+        totalDist += dist;
+        const { category, type } = getReportCanalCategoryAndType(r);
+
+        if (category === 'Lined') {
+          if (type === 'Main') linedMainDist += dist;
+          else if (type === 'Lateral') linedLateralDist += dist;
+          else if (type === 'Farm Ditch') linedFarmDitchDist += dist;
+          else linedOtherDist += dist;
+        } else if (category === 'Unlined') {
+          if (type === 'Main') unlinedMainDist += dist;
+          else if (type === 'Lateral') unlinedLateralDist += dist;
+          else if (type === 'Farm Ditch') unlinedFarmDitchDist += dist;
+          else unlinedOtherDist += dist;
+        } else {
+          if (type === 'Main') uncategorizedMainDist += dist;
+          else if (type === 'Lateral') uncategorizedLateralDist += dist;
+          else if (type === 'Farm Ditch') uncategorizedFarmDitchDist += dist;
+          else uncategorizedOtherDist += dist;
+        }
       }
       
       const vol = r.calculatedVolumeM3 || r.desiltingVolumeM3;
@@ -481,6 +530,10 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
       }
     });
 
+    const totalLinedDist = linedMainDist + linedLateralDist + linedFarmDitchDist + linedOtherDist;
+    const totalUnlinedDist = unlinedMainDist + unlinedLateralDist + unlinedFarmDitchDist + unlinedOtherDist;
+    const totalUncategorizedDist = uncategorizedMainDist + uncategorizedLateralDist + uncategorizedFarmDitchDist + uncategorizedOtherDist;
+
     return {
       count: filteredReports.length,
       totalDistanceKm: (totalDist / 1000).toFixed(2),
@@ -490,7 +543,26 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
       completed,
       approved,
       structureCount,
-      maintainedByIACount
+      maintainedByIACount,
+
+      // Breakdown Metrics
+      linedMainDist,
+      linedLateralDist,
+      linedFarmDitchDist,
+      linedOtherDist,
+      totalLinedDist,
+
+      unlinedMainDist,
+      unlinedLateralDist,
+      unlinedFarmDitchDist,
+      unlinedOtherDist,
+      totalUnlinedDist,
+
+      uncategorizedMainDist,
+      uncategorizedLateralDist,
+      uncategorizedFarmDitchDist,
+      uncategorizedOtherDist,
+      totalUncategorizedDist
     };
   }, [filteredReports]);
 
@@ -561,6 +633,9 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
         'IMO Office',
         'NIS Binding',
         'Location / Stationing',
+        'Canal Category',
+        'Canal Type',
+        'Canal Classification',
         'Particulars / Maintenance Activity',
         'Accomplishment Distance (Meters)',
         'Accomplishment Distance (km)',
@@ -585,6 +660,9 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
         'IMO Office',
         'NIS Binding',
         'Location / Stationing',
+        'Canal Category',
+        'Canal Type',
+        'Canal Classification',
         'Canal Segment / Structure',
         'Operational State',
         'Discharge Flow (m3/s)',
@@ -609,6 +687,7 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
         const distM = r.segmentDistanceMeters || 0;
         const distKm = (distM / 1000).toFixed(3);
         const vol = r.calculatedVolumeM3 || r.desiltingVolumeM3 || 0;
+        const { category, type, classification } = getReportCanalCategoryAndType(r);
 
         if (isMaint) {
           return [
@@ -618,6 +697,9 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
             `"${r.imoOffice || ''}"`,
             `"${r.nisBinding || ''}"`,
             `"${(r.locationName || '').replace(/"/g, '""')}"`,
+            `"${category}"`,
+            `"${type}"`,
+            `"${classification}"`,
             `"${(r.maintenanceActivity || r.title || '').replace(/"/g, '""')}"`,
             distM,
             distKm,
@@ -644,6 +726,9 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
             `"${r.imoOffice || ''}"`,
             `"${r.nisBinding || ''}"`,
             `"${(r.locationName || '').replace(/"/g, '""')}"`,
+            `"${category}"`,
+            `"${type}"`,
+            `"${classification}"`,
             `"${(r.canalSegment || r.structureName || '').replace(/"/g, '""')}"`,
             `"${r.operationalState || 'Fully Operational'}"`,
             r.dischargeFlowM3s ?? '',
@@ -1049,6 +1134,207 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
 
             {/* Clustered Content Area */}
             <div className="flex-1 overflow-y-auto min-h-0 p-3 sm:p-5 space-y-4">
+
+              {/* Maintenance Physical Accomplishments Breakdown Matrix Banner */}
+              {summaryMode === 'maintenance' && (
+                <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
+                        <Ruler className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-white font-heading flex items-center gap-2 flex-wrap">
+                          <span>Physical Accomplishment Distance Matrix</span>
+                          <span className="text-[10.5px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                            Total: {maintenanceKPIs.totalDistanceKm} km ({maintenanceKPIs.totalDistanceMeters.toLocaleString()} m)
+                          </span>
+                        </h3>
+                        <p className="text-[11px] text-slate-400">
+                          Accredited linear measurement divided into canal category (Lined vs Unlined) and canal type (Main vs Lateral)
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-slate-400">Approved Reports:</span>
+                      <span className="font-mono font-bold text-cyan-400">
+                        {maintenanceKPIs.approved}/{maintenanceKPIs.count}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 4-Column Core Matrix: Lined (Main), Lined (Lateral), Unlined (Main), Unlined (Lateral) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {/* 1. Lined Canal (Main) */}
+                    <div className="bg-slate-900/90 border border-teal-500/30 rounded-xl p-3 space-y-1 relative overflow-hidden group hover:border-teal-400/50 transition shadow-inner">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-teal-300 uppercase tracking-wider">
+                          Lined Canals (Main)
+                        </span>
+                        <span className="w-2.5 h-2.5 rounded-full bg-teal-400 ring-2 ring-teal-500/20" />
+                      </div>
+                      <div className="text-xl sm:text-2xl font-black font-mono text-white">
+                        {maintenanceKPIs.linedMainDist >= 1000 
+                          ? `${(maintenanceKPIs.linedMainDist / 1000).toFixed(2)} km`
+                          : `${maintenanceKPIs.linedMainDist.toLocaleString()} m`}
+                      </div>
+                      <div className="text-[10.5px] text-slate-400 font-mono">
+                        {maintenanceKPIs.linedMainDist.toLocaleString()} linear meters
+                      </div>
+                    </div>
+
+                    {/* 2. Lined Canal (Lateral) */}
+                    <div className="bg-slate-900/90 border border-emerald-500/30 rounded-xl p-3 space-y-1 relative overflow-hidden group hover:border-emerald-400/50 transition shadow-inner">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider">
+                          Lined Canals (Lateral)
+                        </span>
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-500/20" />
+                      </div>
+                      <div className="text-xl sm:text-2xl font-black font-mono text-white">
+                        {maintenanceKPIs.linedLateralDist >= 1000 
+                          ? `${(maintenanceKPIs.linedLateralDist / 1000).toFixed(2)} km`
+                          : `${maintenanceKPIs.linedLateralDist.toLocaleString()} m`}
+                      </div>
+                      <div className="text-[10.5px] text-slate-400 font-mono">
+                        {maintenanceKPIs.linedLateralDist.toLocaleString()} linear meters
+                      </div>
+                    </div>
+
+                    {/* 3. Unlined Canal (Main) */}
+                    <div className="bg-slate-900/90 border border-amber-500/30 rounded-xl p-3 space-y-1 relative overflow-hidden group hover:border-amber-400/50 transition shadow-inner">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+                          Unlined Canals (Main)
+                        </span>
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-amber-500/20" />
+                      </div>
+                      <div className="text-xl sm:text-2xl font-black font-mono text-white">
+                        {maintenanceKPIs.unlinedMainDist >= 1000 
+                          ? `${(maintenanceKPIs.unlinedMainDist / 1000).toFixed(2)} km`
+                          : `${maintenanceKPIs.unlinedMainDist.toLocaleString()} m`}
+                      </div>
+                      <div className="text-[10.5px] text-slate-400 font-mono">
+                        {maintenanceKPIs.unlinedMainDist.toLocaleString()} linear meters
+                      </div>
+                    </div>
+
+                    {/* 4. Unlined Canal (Lateral) */}
+                    <div className="bg-slate-900/90 border border-orange-500/30 rounded-xl p-3 space-y-1 relative overflow-hidden group hover:border-orange-400/50 transition shadow-inner">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-orange-300 uppercase tracking-wider">
+                          Unlined Canals (Lateral)
+                        </span>
+                        <span className="w-2.5 h-2.5 rounded-full bg-orange-400 ring-2 ring-orange-500/20" />
+                      </div>
+                      <div className="text-xl sm:text-2xl font-black font-mono text-white">
+                        {maintenanceKPIs.unlinedLateralDist >= 1000 
+                          ? `${(maintenanceKPIs.unlinedLateralDist / 1000).toFixed(2)} km`
+                          : `${maintenanceKPIs.unlinedLateralDist.toLocaleString()} m`}
+                      </div>
+                      <div className="text-[10.5px] text-slate-400 font-mono">
+                        {maintenanceKPIs.unlinedLateralDist.toLocaleString()} linear meters
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Category Summary Bar & Additional Metrics */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs border-t border-slate-800/80">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <div className="flex items-center gap-1.5 font-mono">
+                        <span className="text-slate-400">Total Lined:</span>
+                        <strong className="text-teal-300">
+                          {maintenanceKPIs.totalLinedDist >= 1000 
+                            ? `${(maintenanceKPIs.totalLinedDist / 1000).toFixed(2)} km` 
+                            : `${maintenanceKPIs.totalLinedDist.toLocaleString()} m`}
+                        </strong>
+                      </div>
+                      <span className="text-slate-700">|</span>
+                      <div className="flex items-center gap-1.5 font-mono">
+                        <span className="text-slate-400">Total Unlined:</span>
+                        <strong className="text-amber-300">
+                          {maintenanceKPIs.totalUnlinedDist >= 1000 
+                            ? `${(maintenanceKPIs.totalUnlinedDist / 1000).toFixed(2)} km` 
+                            : `${maintenanceKPIs.totalUnlinedDist.toLocaleString()} m`}
+                        </strong>
+                      </div>
+                      {maintenanceKPIs.totalUncategorizedDist > 0 && (
+                        <>
+                          <span className="text-slate-700">|</span>
+                          <div className="flex items-center gap-1.5 font-mono">
+                            <span className="text-slate-400">Uncategorized:</span>
+                            <strong className="text-slate-300">
+                              {maintenanceKPIs.totalUncategorizedDist >= 1000 
+                                ? `${(maintenanceKPIs.totalUncategorizedDist / 1000).toFixed(2)} km` 
+                                : `${maintenanceKPIs.totalUncategorizedDist.toLocaleString()} m`}
+                            </strong>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-3 flex-wrap text-[11px] font-mono">
+                      {maintenanceKPIs.totalDesiltingM3 > 0 && (
+                        <span className="text-amber-300">
+                          Desilted: <strong>{maintenanceKPIs.totalDesiltingM3.toLocaleString()} m³</strong>
+                        </span>
+                      )}
+                      {maintenanceKPIs.totalPaintingSqm > 0 && (
+                        <span className="text-purple-300">
+                          Painted: <strong>{maintenanceKPIs.totalPaintingSqm.toLocaleString()} m²</strong>
+                        </span>
+                      )}
+                      <span className="text-cyan-300">
+                        Maintained by IA: <strong>{maintenanceKPIs.maintainedByIACount}</strong>
+                      </span>
+                      {maintenanceKPIs.structureCount > 0 && (
+                        <span className="text-blue-300">
+                          Structures: <strong>{maintenanceKPIs.structureCount}</strong>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Operational Flow Summary Banner */}
+              {summaryMode === 'operational' && (
+                <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 shrink-0">
+                      <Activity className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white font-heading">
+                        Operational Status & Discharge Flow Summary
+                      </h3>
+                      <p className="text-[11px] text-slate-400">
+                        Water delivery, operational integrity, and discharge readings
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5 flex-wrap text-xs font-mono">
+                    <div className="px-2.5 py-1 rounded-lg bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
+                      Fully Operational: <strong>{operationalKPIs.fullyOperational}</strong>
+                    </div>
+                    {operationalKPIs.restrictedFlow > 0 && (
+                      <div className="px-2.5 py-1 rounded-lg bg-amber-950/40 border border-amber-500/30 text-amber-300">
+                        Restricted: <strong>{operationalKPIs.restrictedFlow}</strong>
+                      </div>
+                    )}
+                    {operationalKPIs.criticalInoperative > 0 && (
+                      <div className="px-2.5 py-1 rounded-lg bg-rose-950/40 border border-rose-500/30 text-rose-300">
+                        Critical: <strong>{operationalKPIs.criticalInoperative}</strong>
+                      </div>
+                    )}
+                    <div className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-200">
+                      Avg Discharge: <strong>{operationalKPIs.avgDischarge} m³/s</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {clusteredGroups.length === 0 ? (
                 <div className="p-10 sm:p-14 text-center bg-slate-950/50 rounded-2xl border border-slate-800/80 space-y-2.5">
                   <FileText className="w-10 h-10 text-slate-600 mx-auto" />
@@ -1092,9 +1378,21 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
                           {summaryMode === 'maintenance' ? (
                             <>
                               {cluster.totalDistanceMeters > 0 && (
-                                <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-emerald-950/40 border border-emerald-500/40 rounded-lg text-emerald-300 font-bold font-mono flex items-center gap-1.5 text-[11px] sm:text-xs">
-                                  <Ruler className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                                  <span>{cluster.totalDistanceMeters >= 1000 ? `${(cluster.totalDistanceMeters / 1000).toFixed(2)} km` : `${cluster.totalDistanceMeters.toLocaleString()} m`}</span>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-emerald-950/40 border border-emerald-500/40 rounded-lg text-emerald-300 font-bold font-mono flex items-center gap-1.5 text-[11px] sm:text-xs">
+                                    <Ruler className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                    <span>{cluster.totalDistanceMeters >= 1000 ? `${(cluster.totalDistanceMeters / 1000).toFixed(2)} km` : `${cluster.totalDistanceMeters.toLocaleString()} m`}</span>
+                                  </div>
+                                  {cluster.totalLinedDist > 0 && (
+                                    <div className="px-2 py-0.5 rounded-lg bg-teal-950/40 border border-teal-500/30 text-teal-300 text-[10.5px] font-mono font-medium">
+                                      Lined: {cluster.totalLinedDist >= 1000 ? `${(cluster.totalLinedDist / 1000).toFixed(2)} km` : `${cluster.totalLinedDist.toLocaleString()} m`}
+                                    </div>
+                                  )}
+                                  {cluster.totalUnlinedDist > 0 && (
+                                    <div className="px-2 py-0.5 rounded-lg bg-amber-950/40 border border-amber-500/30 text-amber-300 text-[10.5px] font-mono font-medium">
+                                      Unlined: {cluster.totalUnlinedDist >= 1000 ? `${(cluster.totalUnlinedDist / 1000).toFixed(2)} km` : `${cluster.totalUnlinedDist.toLocaleString()} m`}
+                                    </div>
+                                  )}
                                 </div>
                               )}
 

@@ -23,6 +23,7 @@ import {
 import { FieldReport, UserRole, ApprovalStatus, AuthUser } from '../types';
 import { downloadReportPdf } from '../utils/reportPdfBuilder';
 import { isSyntheticFeatureId } from '../utils/gisLocationUtils';
+import { detectCanalCategory, detectCanalType } from '../utils/canalLayerClassifier';
 import { resolvePhotoAttachmentUrl, handleImageFallback, captureAndCacheImageElement } from '../utils/photoUtils';
 
 interface AttributeInspectorProps {
@@ -314,6 +315,16 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                 </div>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 font-mono">
                   2-Point Segment
+                </span>
+              </div>
+            )}
+
+            {/* Canal Classification (Category & Type) */}
+            {(selectedReport.canalCategory || selectedReport.canalType) && (
+              <div className="flex items-center justify-between p-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-xs">
+                <span className="block text-[10px] text-slate-400 uppercase font-bold">Canal Classification</span>
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-cyan-950/80 text-cyan-300 border border-cyan-700/50">
+                  {selectedReport.canalCategory || 'Uncategorized'} • {selectedReport.canalType === 'Main' ? 'Main Canal' : selectedReport.canalType === 'Lateral' ? 'Lateral Canal' : selectedReport.canalType === 'Farm Ditch' ? 'Farm Ditch' : (selectedReport.canalType || 'Canal')}
                 </span>
               </div>
             )}
@@ -623,6 +634,22 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
         {/* Feature Property Table View */}
         {selectedFeatureProps && !selectedReport && (
           <div className="space-y-3">
+            {/* Canal Category & Type Summary Banner */}
+            {(() => {
+              const cat = detectCanalCategory(selectedFeatureProps);
+              const typ = detectCanalType(selectedFeatureProps);
+              const isCanal = selectedFeatureType?.includes('Canal') || selectedFeatureProps?.canal || selectedFeatureProps?.canal_type || selectedFeatureProps?.Length || selectedFeatureProps?.LENGTH;
+              if (!isCanal && cat === 'Uncategorized' && typ === 'Unclassified') return null;
+              return (
+                <div className="flex items-center justify-between p-2.5 bg-cyan-950/30 border border-cyan-800/40 rounded-xl text-xs">
+                  <span className="text-[10px] text-cyan-400 uppercase font-bold">Classification</span>
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-cyan-900/60 text-cyan-200 border border-cyan-700/60">
+                    {cat} • {typ === 'Main' ? 'Main Canal' : typ === 'Lateral' ? 'Lateral Canal' : typ === 'Farm Ditch' ? 'Farm Ditch' : 'Canal'}
+                  </span>
+                </div>
+              );
+            })()}
+
             {/* Desilting Progress Header for Canals */}
             {selectedFeatureProps.completion_pct !== undefined && (
               <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700 space-y-2">

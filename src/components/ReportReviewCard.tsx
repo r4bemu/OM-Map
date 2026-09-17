@@ -24,6 +24,7 @@ import {
   canUserEditReport 
 } from '../utils/approvalHierarchyEngine';
 import { resolvePhotoAttachmentUrl, handleImageFallback, captureAndCacheImageElement } from '../utils/photoUtils';
+import { getReportCanalCategoryAndType } from '../utils/canalLayerClassifier';
 
 interface ReportReviewCardProps {
   report: FieldReport;
@@ -218,6 +219,10 @@ export const ReportReviewCard: React.FC<ReportReviewCardProps> = ({
     return null;
   }, [report.suspensionReason, report.rejectionReason, report.tierHistory, report.reporterName, report.verifierName]);
 
+  const canalClassification = useMemo(() => {
+    return getReportCanalCategoryAndType(report).classification;
+  }, [report]);
+
   return (
     <div className="p-4 sm:p-5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800/90 rounded-2xl transition shadow-sm space-y-3.5">
       {/* 1. Header Row: Customer/Reporter Profile + Rating Category & Work Status */}
@@ -278,6 +283,10 @@ export const ReportReviewCard: React.FC<ReportReviewCardProps> = ({
         <span className="text-slate-300">
           Variation: <strong className="text-slate-200 font-normal">{variationText}</strong>
         </span>
+        <span className="text-slate-600">|</span>
+        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-teal-500/15 text-teal-300 border border-teal-500/30">
+          {canalClassification}
+        </span>
       </div>
 
       {/* 3. Review Body Message & Technical Specifications (Shopee Quality & Performance style) */}
@@ -290,6 +299,12 @@ export const ReportReviewCard: React.FC<ReportReviewCardProps> = ({
                 <span className="text-slate-400">Accomplishment:</span>
                 <span className="text-emerald-300 font-mono font-semibold">
                   {report.segmentDistanceFormatted || (report.segmentDistanceMeters && report.segmentDistanceMeters > 0 ? `${report.segmentDistanceMeters >= 1000 ? `${(report.segmentDistanceMeters / 1000).toFixed(2)} km` : `${report.segmentDistanceMeters.toLocaleString()} m`}` : 'Point Structure')}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-slate-400">Classification:</span>
+                <span className="text-teal-300 font-mono font-semibold">
+                  {canalClassification}
                 </span>
               </div>
               {(report.calculatedVolumeM3 || report.desiltingVolumeM3) ? (

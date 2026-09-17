@@ -1,4 +1,5 @@
-import { GISLayer, LocationPick } from '../types';
+import { GISLayer, LocationPick, CanalCategory, CanalType } from '../types';
+import { detectCanalCategory, detectCanalType } from './canalLayerClassifier';
 
 /**
  * Calculates Euclidean distance between two lat/lng points in meters approximately
@@ -413,38 +414,63 @@ export function isSyntheticFeatureId(val: any): boolean {
 /**
  * Safely extracts the official Name from feature properties or falls back to default.
  * Filters out raw internal synthetic IDs (f-1786...) and checks remarks, canal_type, NIS.
+ * Formats unnamed canals as "Unnamed Canal (Canal ID:###)".
  */
 export function getFeatureName(props: any, defaultFallback = 'Main Canal'): string {
   if (!props || typeof props !== 'object') return defaultFallback;
 
+  const isGenericStatusOrLining = (str: string) => {
+    const s = str.trim().toLowerCase();
+    return (
+      s === 'lined' ||
+      s === 'unlined' ||
+      s === 'in good condition' ||
+      s === 'for regular inspecton' ||
+      s === 'for regular inspection' ||
+      s === 'good condition'
+    );
+  };
+
   const candidates = [
+    props.canal,
+    props['NAME OF CA'],
+    props.canal_name, props.Canal_Name, props.CANAL_NAME,
     props.Name, props.name, props.NAME,
     props.remarks, props.Remarks, props.REMARKS,
-    props.canal_name, props.Canal_Name, props.CANAL_NAME,
+    props.remarks_1,
     props.station_name, props.Station_Name,
     props.parcel_name, props.Parcel_Name,
     props.title, props.Title,
     props.label, props.Label,
     props.system_name, props.System_Name,
-    props.canal_type ? `${props.canal_type}${props.NIS ? ` (${props.NIS})` : ''}` : undefined,
     props.station_code,
-    props.NIS ? `${props.NIS} Main Canal` : undefined,
+    props.canal_type ? `${props.canal_type}${props.NIS ? ` (${props.NIS})` : ''}` : undefined,
     props.source_layer ? String(props.source_layer).replace(/_/g, ' ') : undefined
   ];
 
   for (const val of candidates) {
     if (val !== undefined && val !== null) {
-      const str = String(val).trim();
+      let str = String(val).trim();
+      str = str.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
       if (
         str !== '' &&
         str !== '[blank]' &&
         str.toLowerCase() !== 'null' &&
         str.toLowerCase() !== 'undefined' &&
-        !isSyntheticFeatureId(str)
+        !isSyntheticFeatureId(str) &&
+        !isGenericStatusOrLining(str)
       ) {
-        return str;
+        // Strip any accidental "Lined" or "Unlined" prefix
+        str = str.replace(/^(?:unlined|lined)\s*[-:]?\s*/i, '').trim();
+        if (str !== '') return str;
       }
     }
+  }
+
+  // If no name found (e.g. Pagbahan RIS): format as "Unnamed Canal (Canal ID:###)"
+  const idVal = props.id ?? props.canal_id ?? props.ID ?? props.Canal_ID ?? props.FID;
+  if (idVal !== undefined && idVal !== null && String(idVal).trim() !== '') {
+    return `Unnamed Canal (Canal ID:${idVal})`;
   }
 
   return defaultFallback;
@@ -468,6 +494,10 @@ export interface NearestGISFeatureResult {
   locationName: string;
   stationingLabel: string;
   canalCode?: string;
+  canalCategory?: CanalCategory;
+  canalType?: CanalType;
+  declaredStationStart?: string;
+  declaredStationEnd?: string;
   parcelId?: string;
   structureName?: string;
   nearestFeatureName?: string;
@@ -635,10 +665,15 @@ export function detectNearestGISFeature(
             }
           }
 
+          const structCat = detectCanalCategory(props);
+          const structType = detectCanalType(props, layer.name, name);
+
           bestResult = {
             locationName: formattedName,
             stationingLabel: stLabel || '0+000',
             canalCode: canalCode,
+            canalCategory: structCat,
+            canalType: structType,
             structureName: name,
             nearestFeatureName: name,
             nearestFeatureType: layer.category || 'Structure',
@@ -734,22 +769,68 @@ export function detectNearestGISFeature(
     }
 
     const rawCode = bestLineCandidate.props.canal_code || bestLineCandidate.props.canal_id || bestLineCandidate.props.station_code;
-    const canalCode = (rawCode && !isSyntheticFeatureId(rawCode)) ? rawCode : (canalName !== 'Main Canal' ? canalName : 'CNL-MAIN');
+    const canalCode = (rawCode && !isSyntheticFeatureId(rawCode))
+      ? rawCode
+      : (canalName !== 'Main Canal' && !canalName.startsWith('Unnamed Canal')
+          ? canalName
+          : (bestLineCandidate.props.id ? `CNL-${bestLineCandidate.props.id}` : 'CNL-MAIN'));
 
-    // Calculate 3-tier validated canal stationing once for the winning line
-    const stationInfo = calculateCanalStationing(bestDistAlongLine, orientedCoords, canalName, layers, isReversed);
+    // Check declared line stationing (station__1, station__2, station_1, station_2, STATIONING)
+    const rawS1 = bestLineCandidate.props.station__1 || bestLineCandidate.props.station_1;
+    const rawS2 = bestLineCandidate.props.station__2 || bestLineCandidate.props.station_2;
+    let s1 = parseStationingFromText(rawS1);
+    let s2 = parseStationingFromText(rawS2);
+
+    if (s1 === null && bestLineCandidate.props.STATIONING) {
+      const matches = [...String(bestLineCandidate.props.STATIONING).matchAll(/(\d+)\+(\d+(?:\.\d+)?)/g)];
+      if (matches.length >= 2) {
+        s1 = parseInt(matches[0][1], 10) * 1000 + parseFloat(matches[0][2]);
+        s2 = parseInt(matches[1][1], 10) * 1000 + parseFloat(matches[1][2]);
+      } else if (matches.length === 1) {
+        s1 = parseInt(matches[0][1], 10) * 1000 + parseFloat(matches[0][2]);
+      }
+    }
+
+    let stationMeters: number;
+    let stationingLabel: string;
+    let referenceContext: string;
+    let calibrationMethod: string;
+
+    if (s1 !== null && s2 !== null) {
+      const minS = Math.min(s1, s2);
+      const maxS = Math.max(s1, s2);
+      const span = maxS - minS;
+      const progressRatio = cumulativeDist > 0 ? Math.max(0, Math.min(1, bestDistAlongLine / cumulativeDist)) : 0;
+      stationMeters = minS + progressRatio * span;
+      stationingLabel = formatStationingNumber(stationMeters);
+      referenceContext = `Declared Line Stationing: ${rawS1 || formatStationingNumber(s1)} to ${rawS2 || formatStationingNumber(s2)}`;
+      calibrationMethod = 'declared_attribute';
+    } else {
+      const stationInfo = calculateCanalStationing(bestDistAlongLine, orientedCoords, canalName, layers, isReversed);
+      stationMeters = stationInfo.stationMeters;
+      stationingLabel = stationInfo.stationingLabel;
+      referenceContext = stationInfo.referenceContext;
+      calibrationMethod = stationInfo.calibrationMethod;
+    }
+
+    const cCategory = detectCanalCategory(bestLineCandidate.props);
+    const cType = detectCanalType(bestLineCandidate.props, undefined, canalName);
 
     bestResult = {
-      locationName: `${canalName} (${stationInfo.stationingLabel})`,
-      stationingLabel: stationInfo.stationingLabel,
+      locationName: `${canalName} (${stationingLabel})`,
+      stationingLabel,
       canalCode,
+      canalCategory: cCategory,
+      canalType: cType,
+      declaredStationStart: s1 !== null ? formatStationingNumber(Math.min(s1, s2 ?? s1)) : undefined,
+      declaredStationEnd: s2 !== null ? formatStationingNumber(Math.max(s1, s2)) : undefined,
       nearestFeatureName: canalName,
       nearestFeatureType: 'Canal Line',
       snappedCoords: bestPointAlongLine,
-      distanceAlongLineMeters: Math.round(stationInfo.stationMeters),
+      distanceAlongLineMeters: Math.round(stationMeters),
       featureCoordinates: orientedCoords,
-      referenceContext: stationInfo.referenceContext,
-      calibrationMethod: stationInfo.calibrationMethod,
+      referenceContext,
+      calibrationMethod,
       imo: bestLineCandidate.featureImo,
       nis: bestLineCandidate.featureNis,
       province: bestLineCandidate.featureProv,
@@ -898,6 +979,8 @@ export function calculateCanalPathBetweenPoints(
       pathCoords: [[loc1.lat, loc1.lng], [loc2.lat, loc2.lng]],
       locationName,
       canalCode,
+      canalCategory: feat1.canalCategory || feat2.canalCategory || 'Uncategorized',
+      canalType: feat1.canalType || feat2.canalType || 'Unclassified',
       parcelId,
       distanceMeters: Math.round(directDist),
       totalDistanceMeters: Math.round(directDist),
@@ -945,6 +1028,8 @@ export function calculateCanalPathBetweenPoints(
     pathCoords: fullPathCoords,
     locationName,
     canalCode,
+    canalCategory: feat1.canalCategory || feat2.canalCategory || 'Uncategorized',
+    canalType: feat1.canalType || feat2.canalType || 'Unclassified',
     parcelId,
     distanceMeters: Math.round(totalDistanceMeters),
     totalDistanceMeters: Math.round(totalDistanceMeters),

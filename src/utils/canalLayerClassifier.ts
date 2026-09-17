@@ -1,4 +1,4 @@
-import { GISLayer } from '../types';
+import { GISLayer, CanalCategory, CanalType, FieldReport } from '../types';
 
 /**
  * Standard O&M Blue Color & Linestring Hierarchy for Vector Layers
@@ -26,6 +26,155 @@ export const STROKE_WEIGHTS = {
 export type CanalHierarchyType = 'Main Canals' | 'Lateral Canals' | 'Other Unclassified Canals' | 'Structures';
 
 /**
+ * Detects canal category: Lined, Unlined, or Uncategorized
+ */
+export function detectCanalCategory(props: any): CanalCategory {
+  if (!props || typeof props !== 'object') return 'Uncategorized';
+
+  const text = [
+    props.canal_type,
+    props.Canal_Type,
+    props.CANAL_TYPE,
+    props.type,
+    props.remarks,
+    props.Remarks,
+    props.remarks_1,
+    props.description
+  ].filter(Boolean).map(v => String(v).trim().toLowerCase()).join(' ');
+
+  if (/\bunlined\b/.test(text) || /\bearth\b/.test(text) || text.includes('un-lined')) {
+    return 'Unlined';
+  }
+  if (/\blined\b/.test(text) || text.includes('concrete') || text.includes('grouted')) {
+    return 'Lined';
+  }
+  return 'Uncategorized';
+}
+
+/**
+ * Detects canal type: Main, Lateral, Farm Ditch, or Unclassified
+ */
+export function detectCanalType(props: any, layerName?: string, name?: string): CanalType {
+  const candidateTexts = [
+    props?.canaltype,
+    props?.CanalType,
+    props?.canal,
+    props?.['NAME OF CA'],
+    props?.remarks,
+    props?.Remarks,
+    props?.REMARKS,
+    props?.remarks_1,
+    props?.canal_name,
+    props?.Canal_Name,
+    props?.CANAL_NAME,
+    props?.Name,
+    props?.name,
+    props?.NAME,
+    props?.canalSegment,
+    name,
+    layerName
+  ].filter(Boolean).map(v => String(v).toLowerCase()).join(' ');
+
+  // Farm Ditch check
+  if (
+    candidateTexts.includes('farm ditch') ||
+    candidateTexts.includes('farm_ditch') ||
+    /\bmfd\b/.test(candidateTexts) ||
+    /\bsfd\b/.test(candidateTexts) ||
+    /\bditch\b/.test(candidateTexts)
+  ) {
+    return 'Farm Ditch';
+  }
+
+  // Main Canal check
+  if (
+    candidateTexts.includes('main canal') ||
+    candidateTexts.includes('main_canal') ||
+    /\bmain\b/.test(candidateTexts) ||
+    /\bmc\b/.test(candidateTexts) ||
+    /\bmc\s*\d+/.test(candidateTexts)
+  ) {
+    return 'Main';
+  }
+
+  // Lateral Canal check
+  if (
+    candidateTexts.includes('lateral') ||
+    candidateTexts.includes('sub-lateral') ||
+    candidateTexts.includes('sub lateral') ||
+    candidateTexts.includes('supply canal') ||
+    /\blat\b/.test(candidateTexts) ||
+    /\blat\s*[a-z0-9]/.test(candidateTexts)
+  ) {
+    return 'Lateral';
+  }
+
+  return 'Unclassified';
+}
+
+/**
+ * Formats combination label for Category and Type
+ * e.g. "Lined (Main)", "Lined (Lateral)", "Unlined (Main)", "Uncategorized (Lateral)"
+ */
+export function formatCanalClassification(cat: CanalCategory, type: CanalType): string {
+  const typeLabel = type === 'Main' ? 'Main' : type === 'Lateral' ? 'Lateral' : type === 'Farm Ditch' ? 'Farm Ditch' : 'Unclassified';
+  return `${cat} (${typeLabel})`;
+}
+
+/**
+ * Resolves the canal category and type from a FieldReport object,
+ * utilizing existing explicit fields or falling back to analyzing the report attributes.
+ */
+export function getReportCanalCategoryAndType(report: Partial<FieldReport>): {
+  category: CanalCategory;
+  type: CanalType;
+  classification: string;
+} {
+  let category: CanalCategory = report.canalCategory || 'Uncategorized';
+  let type: CanalType = report.canalType || 'Unclassified';
+
+  // Fallback category detection if uncategorized
+  if (category === 'Uncategorized') {
+    const text = [
+      report.locationName,
+      report.canalSegment,
+      report.title,
+      report.remarks
+    ].filter(Boolean).join(' ').toLowerCase();
+
+    if (/\bunlined\b|\bearth\b/.test(text) || text.includes('un-lined')) {
+      category = 'Unlined';
+    } else if (/\blined\b/.test(text) || text.includes('concrete') || text.includes('grouted')) {
+      category = 'Lined';
+    }
+  }
+
+  // Fallback type detection if unclassified
+  if (type === 'Unclassified') {
+    const text = [
+      report.locationName,
+      report.canalSegment,
+      report.title,
+      report.remarks
+    ].filter(Boolean).join(' ').toLowerCase();
+
+    if (text.includes('farm ditch') || /\bmfd\b|\bsfd\b|\bditch\b/.test(text)) {
+      type = 'Farm Ditch';
+    } else if (text.includes('main canal') || /\bmain\b|\bmc\b/.test(text)) {
+      type = 'Main';
+    } else if (text.includes('lateral') || /\blat\b|\blat\s*[a-z0-9]/.test(text)) {
+      type = 'Lateral';
+    }
+  }
+
+  return {
+    category,
+    type,
+    classification: formatCanalClassification(category, type)
+  };
+}
+
+/**
  * Classifies a layer or feature into the standard Canal & Structure hierarchy.
  */
 export function classifyVectorItem(
@@ -40,24 +189,39 @@ export function classifyVectorItem(
   weight: number;
   opacity: number;
   isStructure: boolean;
+  canalCategory: CanalCategory;
+  canalType: CanalType;
 } {
   const nameStr = String(layerName || '').toLowerCase();
   const catStr = String(layerCategory || '').toLowerCase();
   const subCatStr = String(layerSubCategory || '').toLowerCase();
   const geomStr = String(geomType || '').toLowerCase();
 
-  const featName = String(
-    featureProps?.Name ||
-    featureProps?.name ||
-    featureProps?.NAME ||
-    featureProps?.canal_name ||
-    featureProps?.NAME_OF_CANAL ||
-    featureProps?.canalSegment ||
-    featureProps?.Canal_Type ||
-    featureProps?.canal_type ||
-    featureProps?.type ||
-    ''
-  ).toLowerCase();
+  const cCategory = detectCanalCategory(featureProps);
+  const cType = detectCanalType(featureProps, layerName);
+
+  // Collect candidate text for structure detection and naming
+  const rawCanalType = String(featureProps?.canal_type || featureProps?.Canal_Type || '').trim().toLowerCase();
+  const isLinedValue = rawCanalType === 'lined' || rawCanalType === 'unlined';
+
+  const featText = [
+    featureProps?.Name,
+    featureProps?.name,
+    featureProps?.NAME,
+    featureProps?.canal,
+    featureProps?.['NAME OF CA'],
+    featureProps?.canal_name,
+    featureProps?.NAME_OF_CANAL,
+    featureProps?.canalSegment,
+    featureProps?.remarks,
+    featureProps?.Remarks,
+    featureProps?.REMARKS,
+    featureProps?.remarks_1,
+    featureProps?.canaltype,
+    !isLinedValue ? featureProps?.canal_type : '',
+    !isLinedValue ? featureProps?.Canal_Type : '',
+    featureProps?.type
+  ].filter(Boolean).map(v => String(v).toLowerCase()).join(' ');
 
   // 1. Check if Structure (Point or named structure / gate / dam / intake)
   const isStructure =
@@ -67,13 +231,13 @@ export function classifyVectorItem(
     nameStr.includes('structure') ||
     nameStr.includes('gate') ||
     nameStr.includes('dam') ||
-    featName.includes('dam') ||
-    featName.includes('intake') ||
-    featName.includes('gate') ||
-    featName.includes('turnout') ||
-    featName.includes('flume') ||
-    featName.includes('culvert') ||
-    featName.includes('siphon');
+    featText.includes('dam') ||
+    featText.includes('intake') ||
+    featText.includes('gate') ||
+    featText.includes('turnout') ||
+    featText.includes('flume') ||
+    featText.includes('culvert') ||
+    featText.includes('siphon');
 
   if (isStructure) {
     return {
@@ -81,21 +245,22 @@ export function classifyVectorItem(
       color: BLUE_PALETTE.STRUCTURE,
       weight: STROKE_WEIGHTS.STRUCTURE_BORDER,
       opacity: 1.0,
-      isStructure: true
+      isStructure: true,
+      canalCategory: cCategory,
+      canalType: cType
     };
   }
 
   // 2. Check if Main Canal
   const isMainCanal =
+    cType === 'Main' ||
     subCatStr.includes('main') ||
     nameStr.includes('main canal') ||
     nameStr.includes('main_canal') ||
-    nameStr.includes('main') ||
-    nameStr.includes('mc') ||
-    featName.includes('main canal') ||
-    featName.includes('main_canal') ||
-    featName.includes('main') ||
-    featName.includes('mc');
+    featText.includes('main canal') ||
+    featText.includes('main_canal') ||
+    /\bmain\b/.test(featText) ||
+    /\bmc\b/.test(featText);
 
   if (isMainCanal) {
     return {
@@ -103,31 +268,24 @@ export function classifyVectorItem(
       color: BLUE_PALETTE.MAIN_CANAL,
       weight: STROKE_WEIGHTS.MAIN_CANAL,
       opacity: 0.95,
-      isStructure: false
+      isStructure: false,
+      canalCategory: cCategory,
+      canalType: 'Main'
     };
   }
 
   // 3. Check if Lateral Canal
   const isLateral =
+    cType === 'Lateral' ||
     subCatStr.includes('lateral') ||
     nameStr.includes('lateral') ||
     nameStr.includes('sub-lateral') ||
     nameStr.includes('sub lateral') ||
-    nameStr.includes('lat') ||
-    featName.includes('lateral') ||
-    featName.includes('sub-lateral') ||
-    featName.includes('sub lateral') ||
-    featName.includes('lat a') ||
-    featName.includes('lat b') ||
-    featName.includes('lat c') ||
-    featName.includes('lat d') ||
-    featName.includes('lat e') ||
-    featName.includes('lat f') ||
-    featName.includes('lat g') ||
-    featName.includes('lat h') ||
-    featName.includes('sub-lat') ||
-    featName.includes('lat_') ||
-    featName.includes('lat');
+    featText.includes('lateral') ||
+    featText.includes('sub-lateral') ||
+    featText.includes('sub lateral') ||
+    featText.includes('supply canal') ||
+    /\blat\b/.test(featText);
 
   if (isLateral) {
     return {
@@ -135,17 +293,21 @@ export function classifyVectorItem(
       color: BLUE_PALETTE.LATERAL_CANAL,
       weight: STROKE_WEIGHTS.LATERAL_CANAL,
       opacity: 0.90,
-      isStructure: false
+      isStructure: false,
+      canalCategory: cCategory,
+      canalType: 'Lateral'
     };
   }
 
-  // 4. Default: Unclassified / Other Canal
+  // 4. Default: Unclassified / Farm Ditch / Other Canal
   return {
     hierarchyType: 'Other Unclassified Canals',
     color: BLUE_PALETTE.UNCLASSIFIED_CANAL,
     weight: STROKE_WEIGHTS.UNCLASSIFIED_CANAL,
     opacity: 0.85,
-    isStructure: false
+    isStructure: false,
+    canalCategory: cCategory,
+    canalType: cType
   };
 }
 
