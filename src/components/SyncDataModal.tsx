@@ -319,7 +319,7 @@ export const SyncDataModal: React.FC<SyncDataModalProps> = ({
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-bold text-slate-100 font-heading">Confirm Full System Overhaul</h3>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Wipe local device cache and freshly re-seed all GIS layers and reports from the cloud.
+                  Wipe local device cache and freshly re-sync all data. Google Drive strictly supersedes GIS layers (empty Drive folders clear local layers), while historical field reports are safeguarded and preserved.
                 </p>
               </div>
               <button

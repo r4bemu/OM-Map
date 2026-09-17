@@ -9,7 +9,6 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { GISLayer, UserRole, FieldReport } from '../types';
-import { clearAllLayersDB } from '../utils/offlineStorage';
 import { exportLayerToGeoJson } from '../utils/geoJsonExport';
 
 interface LayerPanelProps {
@@ -108,20 +107,6 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
 
   const downloadLayerAsGeoJSON = (layer: GISLayer) => {
     exportLayerToGeoJson(layer, fieldReports);
-  };
-
-  const handleClearDriveCache = async () => {
-    if (confirm('Clear Google Drive vector feature cache to test cold downloading?\n\nYour custom layer configurations, colors, names, and opacity settings will be 100% PRESERVED.\n\nProceed?')) {
-      try {
-        await fetch('/api/drive/clear-cache', { method: 'POST' });
-        await clearAllLayersDB();
-        if (onSyncDriveLayers) {
-          onSyncDriveLayers();
-        }
-      } catch (e: any) {
-        alert('Failed to clear cache: ' + e?.message);
-      }
-    }
   };
 
   return (
@@ -313,16 +298,6 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
               >
                 <RotateCcw className="w-2.5 h-2.5" />
                 <span>Sync Drive</span>
-              </button>
-            )}
-
-            {currentRole === 'Developer' && (
-              <button
-                onClick={handleClearDriveCache}
-                className="px-2 py-1 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-500/30 rounded-lg text-[9px] font-mono transition cursor-pointer"
-                title="Safe Purge Server Cache & Cold Download"
-              >
-                Purge Cache
               </button>
             )}
           </div>

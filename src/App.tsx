@@ -586,8 +586,8 @@ export default function App() {
   const [isSyncingDrive, setIsSyncingDrive] = useState(false);
   const [syncProgress, setSyncProgress] = useState<{ current: number; total: number } | null>(null);
 
-  // Auto Sync GIS Layers from Google Drive IMO Folders with RBAC (Cache-First Zero-Byte Fast Fetching)
-  const syncIMOFolderLayers = useCallback(async (role: UserRole, targetImo?: string) => {
+  // Auto Sync GIS Layers from Google Drive IMO Folders with RBAC (Google Drive strictly supersedes in overhaul mode)
+  const syncIMOFolderLayers = useCallback(async (role: UserRole, targetImo?: string, isOverhaul: boolean = false) => {
     if (!authenticatedUser) return;
     setIsSyncingDrive(true);
     setSyncProgress(null);
@@ -608,8 +608,8 @@ export default function App() {
             return !nameLower.includes('parcel') && !nameLower.includes('land_parcel') && !nameLower.includes('lot');
           });
 
-          // 1. Check existing IndexedDB cached layers first
-          const rawCached = await getCachedLayersDB();
+          // 1. Check existing IndexedDB cached layers first (bypassed during overhaul to force cold fresh download)
+          const rawCached = !isOverhaul ? await getCachedLayersDB() : null;
           const cachedMap = new Map<string, GISLayer>();
           if (rawCached && Array.isArray(rawCached)) {
             rawCached.forEach(l => {
@@ -658,8 +658,8 @@ export default function App() {
             nonParcelDriveLayers.map(async (dl) => {
               const details = resolveLayerDetails(dl);
 
-              // Fast Path: Check if layer is already parsed and stored in IndexedDB with identical driveModifiedTime
-              const cached = (dl.driveFileId ? cachedMap.get(dl.driveFileId) : null) || cachedMap.get(dl.id);
+              // Fast Path: Check if layer is already parsed and stored in IndexedDB with identical driveModifiedTime (only in non-overhaul mode)
+              const cached = !isOverhaul ? ((dl.driveFileId ? cachedMap.get(dl.driveFileId) : null) || cachedMap.get(dl.id)) : null;
               const isMatch = Boolean(
                 cached &&
                 cached.data &&
@@ -724,21 +724,40 @@ export default function App() {
             const validLayers = nonParcelDriveLayers.filter(
               l => l.data && Array.isArray(l.data.features) && l.data.features.length > 0 && l.geometryType !== ('Polygon' as any)
             );
-            if (validLayers.length === 0) {
-              return prev.filter(l => l.geometryType !== ('Polygon' as any) && (l as any).category !== 'Parcels');
-            }
 
-            const cleanPrev = prev.filter(l => l.geometryType !== ('Polygon' as any) && (l as any).category !== 'Parcels');
-            const existingMap = new Map(cleanPrev.map(l => [l.id, l]));
-            for (const dl of validLayers) {
-              existingMap.set(dl.id, dl);
+            if (isOverhaul) {
+              // IN OVERHAUL / SUPERSEDE MODE: Google Drive strictly supersedes!
+              // Eliminate all previous Drive layers within the target IMO scope.
+              const preservedNonTargetLayers = prev.filter(l => {
+                const isDrive = l.source === 'Google Drive' || Boolean(l.driveFileId) || String(l.id).startsWith('drive-');
+                if (!isDrive) return true; // preserve custom user uploads
+                if (isImoScoped && imoToFetch !== 'All IMOs') {
+                  return l.imoOffice && !matchesImoOffice(l.imoOffice, imoToFetch);
+                }
+                return false; // In All IMOs overhaul, replace all Drive layers
+              });
+
+              const nextLayers = [...preservedNonTargetLayers, ...validLayers];
+              saveCachedLayersDB(nextLayers).catch(() => {});
+              return nextLayers;
+            } else {
+              // IN SMART SYNC / REGULAR SYNC: Safe & additive
+              if (validLayers.length === 0) {
+                return prev.filter(l => l.geometryType !== ('Polygon' as any) && (l as any).category !== 'Parcels');
+              }
+
+              const cleanPrev = prev.filter(l => l.geometryType !== ('Polygon' as any) && (l as any).category !== 'Parcels');
+              const existingMap = new Map(cleanPrev.map(l => [l.id, l]));
+              for (const dl of validLayers) {
+                existingMap.set(dl.id, dl);
+              }
+              let merged: GISLayer[] = Array.from(existingMap.values()) as GISLayer[];
+              if (isImoScoped && imoToFetch !== 'All IMOs') {
+                merged = merged.filter(l => !l.imoOffice || matchesImoOffice(l.imoOffice, imoToFetch));
+              }
+              saveCachedLayersDB(merged).catch(() => {});
+              return merged;
             }
-            let merged: GISLayer[] = Array.from(existingMap.values()) as GISLayer[];
-            if (isImoScoped && imoToFetch !== 'All IMOs') {
-              merged = merged.filter(l => !l.imoOffice || matchesImoOffice(l.imoOffice, imoToFetch));
-            }
-            saveCachedLayersDB(merged).catch(() => {});
-            return merged;
           });
         }
       }
@@ -1717,31 +1736,33 @@ export default function App() {
         }
       }
 
-      // 1. Wipe local layer & manifest caches (safe purge)
+      // 1. Wipe local & server layer caches (safe purge)
+      const targetImo = effectiveImo;
+      try {
+        await fetch('/api/drive/clear-cache', { method: 'POST' });
+      } catch (cErr) {
+        console.warn('Server Drive cache clear notice during overhaul:', cErr);
+      }
       await clearAllLayersDB();
+      setLayers(prev => prev.filter(l => {
+        const isDrive = l.source === 'Google Drive' || Boolean(l.driveFileId) || String(l.id).startsWith('drive-');
+        if (!isDrive) return true;
+        if (isImoScoped && targetImo !== 'All IMOs') {
+          return l.imoOffice && !matchesImoOffice(l.imoOffice, targetImo);
+        }
+        return false;
+      }));
       setLastOverhaulTimestamp();
       await new Promise(r => setTimeout(r, 400));
       setStep('upload', 'done');
 
-      // 2. Re-download fresh layers from Google Drive & server
+      // 2. Re-download fresh layers from Google Drive (Google Drive strictly supersedes GIS data)
       setStep('layers', 'active');
-      setSyncStatusMessage('Downloading fresh GIS layers and canal networks...');
-      const targetImo = effectiveImo;
+      setSyncStatusMessage('Synchronizing fresh GIS layers from Google Drive (Drive supersedes)...');
       try {
-        await syncIMOFolderLayers(activeRole, targetImo);
+        await syncIMOFolderLayers(activeRole, targetImo, true);
       } catch (lErr) {
         console.warn('Overhaul layer sync notice:', lErr);
-        try {
-          const layerRes = await fetch(`/api/layers?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`);
-          if (layerRes.ok) {
-            const lData = await layerRes.json();
-            if (Array.isArray(lData.layers) && lData.layers.length > 0) {
-              const clean = lData.layers.filter((l: any) => !isMockLayer(l) && l.geometryType !== 'Polygon' && l.category !== 'Parcels');
-              setLayers(clean);
-              await saveCachedLayersDB(clean);
-            }
-          }
-        } catch (_) {}
       }
       setStep('layers', 'done');
 
@@ -2238,7 +2259,7 @@ export default function App() {
           setIsUploadOpen(true);
         }}
         currentRole={activeRole}
-        onSyncDriveLayers={() => syncIMOFolderLayers(activeRole, locationFilter.imo)}
+        onSyncDriveLayers={() => syncIMOFolderLayers(activeRole, locationFilter.imo, true)}
         isSyncingDrive={isSyncingDrive}
       />
 

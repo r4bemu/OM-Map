@@ -1684,30 +1684,24 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
         }
       }
 
-      // 2. Evict vector feature geometries from persistent_layers.json while PRESERVING layer settings (color, opacity, visibility, name)
+      // 2. Remove all Drive layers from persistent_layers.json completely (Google Drive is authoritative for GIS vector layers)
       if (fs.existsSync(LAYERS_FILE)) {
         try {
           const content = fs.readFileSync(LAYERS_FILE, 'utf-8');
           const layers = JSON.parse(content);
           if (Array.isArray(layers)) {
-            const stripped = layers.map((l: any) => {
-              if (l.source === 'Google Drive' || l.driveFileId || (l.id && String(l.id).startsWith('drive-'))) {
-                return {
-                  ...l,
-                  data: { type: 'FeatureCollection', features: [] },
-                  featureCount: 0
-                };
-              }
-              return l;
+            const nonDriveLayers = layers.filter((l: any) => {
+              const isDrive = l.source === 'Google Drive' || Boolean(l.driveFileId) || (l.id && String(l.id).startsWith('drive-'));
+              return !isDrive;
             });
-            safeWriteJsonSync(LAYERS_FILE, stripped);
+            safeWriteJsonSync(LAYERS_FILE, nonDriveLayers);
           }
         } catch (e) {}
       }
 
       res.json({ 
         success: true, 
-        message: 'Google Drive vector feature cache evicted! All layer configurations & color settings preserved.' 
+        message: 'Google Drive vector feature cache evicted! Server Drive layers cleared.' 
       });
     } catch (err: any) {
       res.status(500).json({ error: err.message || 'Failed to clear Drive cache' });
