@@ -290,7 +290,11 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
               <div className="flex items-start gap-2 p-2.5 bg-slate-800/40 rounded-xl border border-slate-700/40 text-xs">
                 <MapPin className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
                 <div className="min-w-0 flex-1">
-                  <span className="block text-[10px] text-slate-400 uppercase font-bold">Location &amp; Stationing</span>
+                  <span className="block text-[10px] text-slate-400 uppercase font-bold">
+                    {selectedReport.canalType === 'Farm Ditch' || selectedReport.locationName?.toLowerCase().includes('farm ditch')
+                      ? 'Location (Farm Ditch)'
+                      : 'Location & Stationing'}
+                  </span>
                   <span className="text-slate-200 font-semibold break-words">{selectedReport.locationName}</span>
                   {selectedReport.referenceContext && (
                     <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded text-[9.5px] font-mono bg-cyan-950/60 text-cyan-300 border border-cyan-500/30">

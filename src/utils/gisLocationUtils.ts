@@ -416,8 +416,20 @@ export function isSyntheticFeatureId(val: any): boolean {
  * Filters out raw internal synthetic IDs (f-1786...) and checks remarks, canal_type, NIS.
  * Formats unnamed canals as "Unnamed Canal (Canal ID:###)".
  */
-export function getFeatureName(props: any, defaultFallback = 'Main Canal'): string {
+export function getFeatureName(props: any, defaultFallback = 'Main Canal', coords?: [number, number]): string {
   if (!props || typeof props !== 'object') return defaultFallback;
+
+  // Farm Ditch linestrings do not have station names; reflect as "Farm ditch @Latitude, longitude"
+  const detectedType = detectCanalType(props);
+  if (detectedType === 'Farm Ditch') {
+    if (coords && coords.length >= 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+      return `Farm ditch @${coords[0].toFixed(5)}, ${coords[1].toFixed(5)}`;
+    }
+    if (props.lat !== undefined && props.lng !== undefined && !isNaN(Number(props.lat)) && !isNaN(Number(props.lng))) {
+      return `Farm ditch @${Number(props.lat).toFixed(5)}, ${Number(props.lng).toFixed(5)}`;
+    }
+    return 'Farm ditch';
+  }
 
   const isGenericStatusOrLining = (str: string) => {
     const s = str.trim().toLowerCase();
@@ -815,28 +827,60 @@ export function detectNearestGISFeature(
 
     const cCategory = detectCanalCategory(bestLineCandidate.props);
     const cType = detectCanalType(bestLineCandidate.props, undefined, canalName);
+    const isFarmDitch = cType === 'Farm Ditch' || canalName.toLowerCase().includes('farm ditch') || canalName.toLowerCase().includes('ditch');
 
-    bestResult = {
-      locationName: `${canalName} (${stationingLabel})`,
-      stationingLabel,
-      canalCode,
-      canalCategory: cCategory,
-      canalType: cType,
-      declaredStationStart: s1 !== null ? formatStationingNumber(Math.min(s1, s2 ?? s1)) : undefined,
-      declaredStationEnd: s2 !== null ? formatStationingNumber(Math.max(s1, s2)) : undefined,
-      nearestFeatureName: canalName,
-      nearestFeatureType: 'Canal Line',
-      snappedCoords: bestPointAlongLine,
-      distanceAlongLineMeters: Math.round(stationMeters),
-      featureCoordinates: orientedCoords,
-      referenceContext,
-      calibrationMethod,
-      imo: bestLineCandidate.featureImo,
-      nis: bestLineCandidate.featureNis,
-      province: bestLineCandidate.featureProv,
-      municipality: bestLineCandidate.featureMuni,
-      barangay: bestLineCandidate.featureBrgy
-    };
+    if (isFarmDitch) {
+      const latStr = bestPointAlongLine[0].toFixed(5);
+      const lngStr = bestPointAlongLine[1].toFixed(5);
+      const ditchName = `Farm ditch @${latStr}, ${lngStr}`;
+      const fdCode = (bestLineCandidate.props.canal_code && !isSyntheticFeatureId(bestLineCandidate.props.canal_code))
+        ? bestLineCandidate.props.canal_code
+        : (bestLineCandidate.props.id ? `FD-${bestLineCandidate.props.id}` : 'FD');
+
+      bestResult = {
+        locationName: ditchName,
+        stationingLabel: '', // Ditches naturally do not have station names
+        canalCode: fdCode,
+        canalCategory: cCategory, // Categorized as unlined in general unless declared lined
+        canalType: 'Farm Ditch',
+        declaredStationStart: undefined,
+        declaredStationEnd: undefined,
+        nearestFeatureName: ditchName,
+        nearestFeatureType: 'Farm Ditch Line',
+        snappedCoords: bestPointAlongLine,
+        distanceAlongLineMeters: Math.round(bestDistAlongLine),
+        featureCoordinates: orientedCoords,
+        referenceContext: 'Farm Ditch (No Stationing)',
+        calibrationMethod: 'farm_ditch_unstationed',
+        imo: bestLineCandidate.featureImo,
+        nis: bestLineCandidate.featureNis,
+        province: bestLineCandidate.featureProv,
+        municipality: bestLineCandidate.featureMuni,
+        barangay: bestLineCandidate.featureBrgy
+      };
+    } else {
+      bestResult = {
+        locationName: `${canalName} (${stationingLabel})`,
+        stationingLabel,
+        canalCode,
+        canalCategory: cCategory,
+        canalType: cType,
+        declaredStationStart: s1 !== null ? formatStationingNumber(Math.min(s1, s2 ?? s1)) : undefined,
+        declaredStationEnd: s2 !== null ? formatStationingNumber(Math.max(s1, s2)) : undefined,
+        nearestFeatureName: canalName,
+        nearestFeatureType: 'Canal Line',
+        snappedCoords: bestPointAlongLine,
+        distanceAlongLineMeters: Math.round(stationMeters),
+        featureCoordinates: orientedCoords,
+        referenceContext,
+        calibrationMethod,
+        imo: bestLineCandidate.featureImo,
+        nis: bestLineCandidate.featureNis,
+        province: bestLineCandidate.featureProv,
+        municipality: bestLineCandidate.featureMuni,
+        barangay: bestLineCandidate.featureBrgy
+      };
+    }
   }
 
   return bestResult;
@@ -948,7 +992,16 @@ export function calculateCanalPathBetweenPoints(
   const canalName1 = cleanCanalBaseName(feat1.nearestFeatureName || feat1.locationName || 'Main Canal');
   const canalName2 = cleanCanalBaseName(feat2.nearestFeatureName || feat2.locationName || 'Main Canal');
 
-  if (
+  const isDitchPath = feat1.canalType === 'Farm Ditch' || feat2.canalType === 'Farm Ditch' ||
+    canalName1.toLowerCase().includes('farm ditch') || canalName2.toLowerCase().includes('farm ditch') ||
+    canalName1.toLowerCase().includes('ditch') || canalName2.toLowerCase().includes('ditch');
+
+  if (isDitchPath) {
+    // Farm Ditches naturally do not have station names; format as "Farm ditch @Latitude, longitude"
+    const pt1Str = `@${l1Lat.toFixed(5)}, ${l1Lng.toFixed(5)}`;
+    const pt2Str = `@${l2Lat.toFixed(5)}, ${l2Lng.toFixed(5)}`;
+    locationName = `Farm ditch ${pt1Str} to ${pt2Str}`;
+  } else if (
     canalName1 === canalName2 &&
     !feat1.isStructurePoint &&
     !feat2.isStructurePoint &&
@@ -969,18 +1022,28 @@ export function calculateCanalPathBetweenPoints(
     locationName = `${name1} to ${name2}`;
   }
 
-  const refContext = feat1.referenceContext && feat2.referenceContext
-    ? (feat1.referenceContext === feat2.referenceContext ? feat1.referenceContext : `${feat1.referenceContext} | ${feat2.referenceContext}`)
-    : (feat1.referenceContext || feat2.referenceContext || undefined);
+  const refContext = isDitchPath
+    ? 'Farm Ditch Reach (No Survey Stationing)'
+    : (feat1.referenceContext && feat2.referenceContext
+        ? (feat1.referenceContext === feat2.referenceContext ? feat1.referenceContext : `${feat1.referenceContext} | ${feat2.referenceContext}`)
+        : (feat1.referenceContext || feat2.referenceContext || undefined));
+
+  const resolvedCategory = isDitchPath
+    ? ((feat1.canalCategory === 'Lined' || feat2.canalCategory === 'Lined') ? 'Lined' : 'Unlined')
+    : (feat1.canalCategory || feat2.canalCategory || 'Uncategorized');
+  const resolvedType = isDitchPath ? 'Farm Ditch' : (feat1.canalType || feat2.canalType || 'Unclassified');
+  const resolvedCanalCode = isDitchPath
+    ? ((feat1.canalCode && !feat1.canalCode.startsWith('CNL-MAIN') ? feat1.canalCode : feat2.canalCode) || 'FD')
+    : canalCode;
 
   if (lineFeatures.length === 0) {
     const directDist = haversineDistanceMeters(loc1.lat, loc1.lng, loc2.lat, loc2.lng);
     return {
       pathCoords: [[loc1.lat, loc1.lng], [loc2.lat, loc2.lng]],
       locationName,
-      canalCode,
-      canalCategory: feat1.canalCategory || feat2.canalCategory || 'Uncategorized',
-      canalType: feat1.canalType || feat2.canalType || 'Unclassified',
+      canalCode: resolvedCanalCode,
+      canalCategory: resolvedCategory,
+      canalType: resolvedType,
       parcelId,
       distanceMeters: Math.round(directDist),
       totalDistanceMeters: Math.round(directDist),
@@ -1027,9 +1090,9 @@ export function calculateCanalPathBetweenPoints(
   return {
     pathCoords: fullPathCoords,
     locationName,
-    canalCode,
-    canalCategory: feat1.canalCategory || feat2.canalCategory || 'Uncategorized',
-    canalType: feat1.canalType || feat2.canalType || 'Unclassified',
+    canalCode: resolvedCanalCode,
+    canalCategory: resolvedCategory,
+    canalType: resolvedType,
     parcelId,
     distanceMeters: Math.round(totalDistanceMeters),
     totalDistanceMeters: Math.round(totalDistanceMeters),

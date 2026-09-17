@@ -942,9 +942,22 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 return '[blank]';
               };
 
-              const resolvedName = getFeatureName(props, 'Layer Attributes');
+              let featureCoords: [number, number] | undefined = undefined;
+              if (typeof (leafletLayer as any).getLatLng === 'function') {
+                const ll = (leafletLayer as any).getLatLng();
+                if (ll) featureCoords = [ll.lat, ll.lng];
+              } else if (typeof (leafletLayer as any).getBounds === 'function') {
+                const c = (leafletLayer as any).getBounds().getCenter();
+                if (c) featureCoords = [c.lat, c.lng];
+              }
+
+              let resolvedName = getFeatureName(props, 'Layer Attributes', featureCoords);
               const cCategory = detectCanalCategory(props);
               const cType = detectCanalType(props, layer.name, resolvedName);
+              if (cType === 'Farm Ditch' && featureCoords) {
+                resolvedName = `Farm ditch @${featureCoords[0].toFixed(5)}, ${featureCoords[1].toFixed(5)}`;
+              }
+
               const isCanal = !layer.category?.includes('Structure') && layer.geometryType !== 'Point' && !layer.name.toLowerCase().includes('structure');
               const typeLabel = cType === 'Main' ? 'Main Canal' : cType === 'Lateral' ? 'Lateral' : cType === 'Farm Ditch' ? 'Farm Ditch' : 'Canal';
               const classificationBadge = isCanal ? `${cCategory} • ${typeLabel}` : 'Structure';

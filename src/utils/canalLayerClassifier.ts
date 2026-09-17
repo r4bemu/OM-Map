@@ -36,18 +36,25 @@ export function detectCanalCategory(props: any): CanalCategory {
     props.Canal_Type,
     props.CANAL_TYPE,
     props.type,
+    props.Type,
     props.remarks,
     props.Remarks,
     props.remarks_1,
-    props.description
+    props.description,
+    props.canal,
+    props.canaltype
   ].filter(Boolean).map(v => String(v).trim().toLowerCase()).join(' ');
 
-  if (/\bunlined\b/.test(text) || /\bearth\b/.test(text) || text.includes('un-lined')) {
-    return 'Unlined';
-  }
   if (/\blined\b/.test(text) || text.includes('concrete') || text.includes('grouted')) {
     return 'Lined';
   }
+
+  // Ditches in general are categorized as unlined
+  const isDitch = text.includes('ditch') || text.includes('mfd') || text.includes('sfd') || detectCanalType(props) === 'Farm Ditch';
+  if (/\bunlined\b/.test(text) || /\bearth\b/.test(text) || text.includes('un-lined') || isDitch) {
+    return 'Unlined';
+  }
+
   return 'Uncategorized';
 }
 
@@ -56,10 +63,15 @@ export function detectCanalCategory(props: any): CanalCategory {
  */
 export function detectCanalType(props: any, layerName?: string, name?: string): CanalType {
   const candidateTexts = [
+    props?.canal_type,
+    props?.Canal_Type,
+    props?.CANAL_TYPE,
     props?.canaltype,
     props?.CanalType,
     props?.canal,
     props?.['NAME OF CA'],
+    props?.type,
+    props?.Type,
     props?.remarks,
     props?.Remarks,
     props?.REMARKS,
@@ -79,6 +91,7 @@ export function detectCanalType(props: any, layerName?: string, name?: string): 
   if (
     candidateTexts.includes('farm ditch') ||
     candidateTexts.includes('farm_ditch') ||
+    candidateTexts.includes('farmditch') ||
     /\bmfd\b/.test(candidateTexts) ||
     /\bsfd\b/.test(candidateTexts) ||
     /\bditch\b/.test(candidateTexts)
@@ -165,6 +178,11 @@ export function getReportCanalCategoryAndType(report: Partial<FieldReport>): {
     } else if (text.includes('lateral') || /\blat\b|\blat\s*[a-z0-9]/.test(text)) {
       type = 'Lateral';
     }
+  }
+
+  // Farm ditches are in general categorized as unlined
+  if (type === 'Farm Ditch' && category === 'Uncategorized') {
+    category = 'Unlined';
   }
 
   return {

@@ -93,10 +93,23 @@ function parseStationing(locationName?: string, report?: FieldReport): {
   let structureUnits = '';
   let condition = 'In good condition / Maintained';
 
-  // Check if structure activity
-  const isStructure = act.includes('Dam') || act.includes('Intake') || act.includes('Gate') || act.includes('Diversion') || act.includes('Staff gauge') || act.includes('dredging');
+  // Check if ditch / farm ditch
+  const isDitch = report?.canalType === 'Farm Ditch' ||
+    loc.toLowerCase().includes('farm ditch') ||
+    canalName.toLowerCase().includes('farm ditch');
 
-  if (isStructure) {
+  // Check if structure activity
+  const isStructure = !isDitch && (act.includes('Dam') || act.includes('Intake') || act.includes('Gate') || act.includes('Diversion') || act.includes('Staff gauge') || act.includes('dredging'));
+
+  if (isDitch) {
+    if (!canalName || canalName === 'Main Canal' || canalName === 'Lateral Canal') {
+      canalName = loc || 'Farm Ditch';
+    }
+    const actLower = act.toLowerCase();
+    if (actLower.includes('desilting') || actLower.includes('dredging')) condition = 'Silted farm ditch';
+    else if (actLower.includes('herbicide') || actLower.includes('weed') || actLower.includes('clearing')) condition = 'Heavy weed growth';
+    else condition = 'Maintained farm ditch';
+  } else if (isStructure) {
     if (act.includes('Dam') || act.includes('dredging')) structureType = 'Dam';
     else if (act.includes('Intake')) structureType = 'Intake';
     else if (act.includes('Gate') || act.includes('Lubrication')) structureType = 'Steel gates';
@@ -138,14 +151,16 @@ function parseStationing(locationName?: string, report?: FieldReport): {
     else if (actLower.includes('other')) condition = 'Inspection required';
   }
 
-  // Attempt to extract stationing regex "X+XXX"
-  const stationMatches = loc.match(/(\d+\+\d+(\.\d+)?)/g);
-  if (stationMatches && stationMatches.length >= 2) {
-    fromStation = stationMatches[0];
-    toStation = stationMatches[1];
-  } else if (stationMatches && stationMatches.length === 1) {
-    fromStation = stationMatches[0];
-    if (structureType) structureStation = stationMatches[0];
+  // Attempt to extract stationing regex "X+XXX" ONLY for non-ditches
+  if (!isDitch) {
+    const stationMatches = loc.match(/(\d+\+\d+(\.\d+)?)/g);
+    if (stationMatches && stationMatches.length >= 2) {
+      fromStation = stationMatches[0];
+      toStation = stationMatches[1];
+    } else if (stationMatches && stationMatches.length === 1) {
+      fromStation = stationMatches[0];
+      if (structureType) structureStation = stationMatches[0];
+    }
   }
 
   return {
@@ -350,6 +365,10 @@ export const Form691WeeklyReport: React.FC<Form691WeeklyReportProps> = ({
             ? (rep.segmentDistanceMeters / 1000).toFixed(3)
             : (rep.calculatedVolumeM3 ? '' : '');
 
+          const isDitch = rep.canalType === 'Farm Ditch' ||
+            (rep.locationName && rep.locationName.toLowerCase().includes('farm ditch')) ||
+            (parsed.canalName && parsed.canalName.toLowerCase().includes('farm ditch'));
+
           // Remarks construction
           let remarks = rep.remarks || '';
           if (!remarks || remarks.startsWith('Maintenance activity performed')) {
@@ -358,12 +377,12 @@ export const Form691WeeklyReport: React.FC<Form691WeeklyReportProps> = ({
 
           return {
             id: rep.id,
-            canalName: parsed.canalName || rep.canalSegment || 'Main Canal',
+            canalName: parsed.canalName || rep.canalSegment || (isDitch ? 'Farm Ditch' : 'Main Canal'),
             lengthCanalKm: rep.segmentDistanceMeters ? (rep.segmentDistanceMeters / 1000).toFixed(3) : '',
             noOfStructures: parsed.structureUnits || (parsed.structureType ? '1' : ''),
             maintainedByIA: rep.reporterRole === 'Field Personnel' ? 'YES' : 'NO',
-            fromStation: parsed.fromStation || (rep.segmentDistanceMeters ? '0+000.00' : ''),
-            toStation: parsed.toStation || (rep.segmentDistanceMeters ? `${(rep.segmentDistanceMeters).toFixed(2)}` : ''),
+            fromStation: isDitch ? '' : (parsed.fromStation || (rep.segmentDistanceMeters ? '0+000.00' : '')),
+            toStation: isDitch ? '' : (parsed.toStation || (rep.segmentDistanceMeters ? `${(rep.segmentDistanceMeters).toFixed(2)}` : '')),
             lengthKm: distKm,
             canalCondition: !parsed.structureType ? parsed.condition : '',
             structureType: parsed.structureType,
@@ -406,15 +425,18 @@ export const Form691WeeklyReport: React.FC<Form691WeeklyReportProps> = ({
           const rows = reps.map(rep => {
             const parsed = parseStationing(rep.locationName, rep);
             const distKm = rep.segmentDistanceMeters ? (rep.segmentDistanceMeters / 1000).toFixed(3) : '';
+            const isDitch = rep.canalType === 'Farm Ditch' ||
+              (rep.locationName && rep.locationName.toLowerCase().includes('farm ditch')) ||
+              (parsed.canalName && parsed.canalName.toLowerCase().includes('farm ditch'));
             let remarks = rep.remarks || `${rep.maintenanceActivity || 'Maintenance action'} conducted along ${rep.locationName || groupTitle} by ${rep.reporterName || 'NIA O&M Personnel'}.`;
             return {
               id: rep.id,
-              canalName: parsed.canalName || rep.canalSegment || 'Main Canal',
+              canalName: parsed.canalName || rep.canalSegment || (isDitch ? 'Farm Ditch' : 'Main Canal'),
               lengthCanalKm: distKm,
               noOfStructures: parsed.structureUnits || (parsed.structureType ? '1' : ''),
               maintainedByIA: rep.reporterRole === 'Field Personnel' ? 'YES' : 'NO',
-              fromStation: parsed.fromStation || (rep.segmentDistanceMeters ? '0+000.00' : ''),
-              toStation: parsed.toStation || (rep.segmentDistanceMeters ? `${(rep.segmentDistanceMeters).toFixed(2)}` : ''),
+              fromStation: isDitch ? '' : (parsed.fromStation || (rep.segmentDistanceMeters ? '0+000.00' : '')),
+              toStation: isDitch ? '' : (parsed.toStation || (rep.segmentDistanceMeters ? `${(rep.segmentDistanceMeters).toFixed(2)}` : '')),
               lengthKm: distKm,
               canalCondition: !parsed.structureType ? parsed.condition : '',
               structureType: parsed.structureType,
