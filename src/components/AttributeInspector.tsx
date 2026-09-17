@@ -132,7 +132,7 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
 
   const nearestGIS = useMemo(() => {
     if (coords && coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1]) && layers && layers.length > 0) {
-      return detectNearestGISFeature(coords[0], coords[1], layers);
+      return detectNearestGISFeature(coords[0], coords[1], layers, selectedFeatureProps);
     }
     return null;
   }, [coords, layers, selectedFeatureProps]);

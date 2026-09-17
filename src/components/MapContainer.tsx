@@ -775,7 +775,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     });
 
     sortedLayers.forEach((layer) => {
-      if (!layer.visible || !layer.data) return;
+      if (layer.visible === false || !layer.data) return;
 
       const isCanalLayer = layer.category === 'Canals' || layer.category === 'Canal Networks' || layer.geometryType === 'LineString' || layer.name.toLowerCase().includes('canal');
       const isStructureLayer = layer.category === 'Structures' || layer.geometryType === 'Point' || layer.name.toLowerCase().includes('structure');
@@ -923,6 +923,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                   } catch (_) {}
                   return;
                 }
+              } else {
+                // Outside location selector mode: immediately select feature and open Attribute Inspector with clicked coordinates!
+                if (curLatlng && isValidCoord(curLatlng.lat, curLatlng.lng)) {
+                  onSelectFeatureRef.current?.(props, layer.category, [curLatlng.lat, curLatlng.lng]);
+                }
               }
             });
 
@@ -964,7 +969,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               let featInfo: NearestGISFeatureResult | null = null;
               if (featureCoords && layersRef.current && layersRef.current.length > 0) {
                 try {
-                  featInfo = detectNearestGISFeature(featureCoords[0], featureCoords[1], layersRef.current);
+                  featInfo = detectNearestGISFeature(featureCoords[0], featureCoords[1], layersRef.current, props);
                 } catch (err) {
                   console.warn('Error detecting nearest GIS feature for popup:', err);
                 }

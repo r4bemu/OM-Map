@@ -687,7 +687,7 @@ export default function App() {
                 dl.category = details.parentCat;
                 dl.subCategory = details.subCat;
                 dl.name = details.resolvedName;
-                dl.visible = cached.visible !== undefined ? cached.visible : dl.visible;
+                dl.visible = cached.visible !== undefined ? cached.visible : (dl.visible !== undefined ? dl.visible : true);
                 dl.opacity = cached.opacity !== undefined ? cached.opacity : dl.opacity;
                 dl.color = details.fixedColor;
                 dl.driveModifiedTime = cached.driveModifiedTime || dl.driveModifiedTime;
@@ -717,6 +717,7 @@ export default function App() {
                     dl.subCategory = updatedDetails.subCat;
                     dl.name = updatedDetails.resolvedName;
                     dl.color = updatedDetails.fixedColor;
+                    dl.visible = dl.visible !== undefined ? dl.visible : true;
                   }
                 } catch (pErr) {
                   console.warn(`Failed to parse Drive file content for ${dl.name}:`, pErr);

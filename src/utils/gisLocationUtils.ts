@@ -180,7 +180,7 @@ export function getCanalReferenceAnchors(
   }
 
   layers.forEach((layer) => {
-    if (!layer.visible || !layer.data || !layer.data.features) return;
+    if (layer.visible === false || !layer.data || !layer.data.features) return;
 
     layer.data.features.forEach((feature: any) => {
       const geom = feature.geometry;
@@ -602,7 +602,8 @@ export interface NearestGISFeatureResult {
 export function detectNearestGISFeature(
   lat: number,
   lng: number,
-  layers: GISLayer[]
+  layers: GISLayer[],
+  preferredProps?: any
 ): NearestGISFeatureResult {
   const numLat = Number(lat);
   const numLng = Number(lng);
@@ -631,7 +632,7 @@ export function detectNearestGISFeature(
   } | null = null;
 
   layers.forEach((layer) => {
-    if (!layer.visible || !layer.data || !layer.data.features) return;
+    if (layer.visible === false || !layer.data || !layer.data.features) return;
 
     const layerImo = layer.name.includes('Palawan') 
       ? 'PALAWAN IMO' 
@@ -664,16 +665,25 @@ export function detectNearestGISFeature(
       const featureMuni = props.Municipality || props.municipality;
       const featureBrgy = props.Barangay || props.barangay;
 
+      const isPreferred = Boolean(
+        preferredProps && (
+          props === preferredProps ||
+          (preferredProps.id !== undefined && props.id !== undefined && String(props.id) === String(preferredProps.id)) ||
+          (preferredProps.canal_id !== undefined && props.canal_id !== undefined && String(props.canal_id) === String(preferredProps.canal_id) && preferredProps.canal_id !== null) ||
+          (preferredProps.station_code && props.station_code === preferredProps.station_code)
+        )
+      );
+
       if (geom.type === 'Point' && geom.coordinates) {
         const [fLng, fLat] = geom.coordinates;
         // Bounding box filter: structures must be within ~500m (0.005 deg) to consider
-        if (Math.abs(fLat - lat) > 0.005 || Math.abs(fLng - lng) > 0.005) {
+        if (!isPreferred && (Math.abs(fLat - lat) > 0.005 || Math.abs(fLng - lng) > 0.005)) {
           return;
         }
 
         const dist = haversineDistanceMeters(lat, lng, fLat, fLng);
-        if (dist < minDistance && dist < 25) {
-          minDistance = dist;
+        if (isPreferred || (dist < minDistance && dist < 25)) {
+          minDistance = isPreferred ? 0 : dist;
           isLineWinner = false;
 
           const name = getFeatureName(props, props.station_code || 'Structure Gate', [fLat, fLng]);
@@ -700,7 +710,7 @@ export function detectNearestGISFeature(
             let nearestCanalName = '';
 
             layers.forEach((l) => {
-              if (!l.visible || !l.data || !l.data.features) return;
+              if (l.visible === false || !l.data || !l.data.features) return;
               l.data.features.forEach((feat: any) => {
                 const g = feat.geometry;
                 if (!g || (g.type !== 'LineString' && g.type !== 'MultiLineString')) return;
@@ -778,7 +788,7 @@ export function detectNearestGISFeature(
         polylines.forEach((lineCoords) => {
           if (lineCoords.length < 2) return;
 
-          // Fast bounding box check on linestring: skip lines further than ~2.2km (0.02 deg) from click
+          // Fast bounding box check on linestring: skip lines further than ~2.2km (0.02 deg) from click unless preferred
           let lineMinLat = Infinity, lineMaxLat = -Infinity, lineMinLng = Infinity, lineMaxLng = -Infinity;
           for (let i = 0; i < lineCoords.length; i++) {
             const pt = lineCoords[i];
@@ -787,7 +797,7 @@ export function detectNearestGISFeature(
             if (pt[1] < lineMinLng) lineMinLng = pt[1];
             if (pt[1] > lineMaxLng) lineMaxLng = pt[1];
           }
-          if (lat < lineMinLat - 0.02 || lat > lineMaxLat + 0.02 || lng < lineMinLng - 0.02 || lng > lineMaxLng + 0.02) {
+          if (!isPreferred && (lat < lineMinLat - 0.02 || lat > lineMaxLat + 0.02 || lng < lineMinLng - 0.02 || lng > lineMaxLng + 0.02)) {
             return;
           }
 
@@ -802,8 +812,8 @@ export function detectNearestGISFeature(
             }
           }
 
-          if (lineMinDist < minDistance) {
-            minDistance = lineMinDist;
+          if (isPreferred || lineMinDist < minDistance) {
+            minDistance = isPreferred ? 0 : lineMinDist;
             isLineWinner = true;
             bestLineCandidate = {
               minDist: lineMinDist,
@@ -995,7 +1005,7 @@ export function calculateCanalPathBetweenPoints(
   const collectLines = (filterBbox: boolean) => {
     const list: { id: string; name: string; canalCode?: string; coords: [number, number][] }[] = [];
     layers.forEach((layer) => {
-      if (!layer.visible || !layer.data || !layer.data.features) return;
+      if (layer.visible === false || !layer.data || !layer.data.features) return;
       layer.data.features.forEach((feature: any) => {
         const geom = feature.geometry;
         const props = feature.properties || {};
