@@ -326,8 +326,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         if (seq !== calculationSeqRef.current) return;
         const feat = detectNearestGISFeature(coords[0], coords[1], layers);
         if (seq !== calculationSeqRef.current) return;
-        const customName = point1PropsRef.current ? getFeatureName(point1PropsRef.current, '') : '';
-        setPickerLocationName(customName || feat.locationName);
+        const customName = point1PropsRef.current ? getFeatureName(point1PropsRef.current, '', coords) : '';
+        const name = customName ? (feat.stationingLabel && !customName.includes('+') && !customName.startsWith('Farm ditch') ? `${customName} (${feat.stationingLabel})` : customName) : feat.locationName;
+        setPickerLocationName(name);
         setPickerCanalCode(point1PropsRef.current?.canal_code || feat.canalCode);
         setPickerParcelId(point1PropsRef.current?.parcel_id || feat.parcelId);
       });
@@ -396,7 +397,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       });
     } else {
       setPickerPathResult(null);
-      const optName = featureProps ? getFeatureName(featureProps, '') : '';
+      const optName = featureProps ? getFeatureName(featureProps, '', coords) : '';
       if (optName) {
         setPickerLocationName(optName);
         setPickerCanalCode(featureProps?.canal_code);
@@ -407,8 +408,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         if (seq !== calculationSeqRef.current) return;
         const feat = detectNearestGISFeature(coords[0], coords[1], layers);
         if (seq !== calculationSeqRef.current) return;
-        const customName = featureProps ? getFeatureName(featureProps, '') : '';
-        const name = customName || feat.locationName;
+        const customName = featureProps ? getFeatureName(featureProps, '', coords) : '';
+        const name = customName ? (feat.stationingLabel && !customName.includes('+') && !customName.startsWith('Farm ditch') ? `${customName} (${feat.stationingLabel})` : customName) : feat.locationName;
         setPickerLocationName(name);
         setPickerCanalCode(featureProps?.canal_code || feat.canalCode);
         setPickerParcelId(featureProps?.parcel_id || feat.parcelId);

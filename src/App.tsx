@@ -52,6 +52,7 @@ import {
   sanitizeLayerToBlueHierarchy, 
   BLUE_PALETTE 
 } from './utils/canalLayerClassifier';
+import { getFeatureName } from './utils/gisLocationUtils';
 
 import { Navbar } from './components/Navbar';
 import { MobileBottomNav } from './components/MobileBottomNav';
@@ -1923,7 +1924,7 @@ export default function App() {
             }
 
             if (coords) {
-              const actualName = props.Name || props.name || props.NAME || props.canal_name || props.station_name || props.station_code || 'Unnamed Feature';
+              const actualName = getFeatureName(props, 'Unnamed Feature', coords);
               const locationSub = props.NIS ? `${props.NIS}${props.Municipality ? ` • ${props.Municipality}` : ''}` : props.Municipality || props.Barangay || '';
               const dedupKey = `${actualName}_${coords[0].toFixed(4)}_${coords[1].toFixed(4)}`;
 

@@ -412,16 +412,68 @@ export function isSyntheticFeatureId(val: any): boolean {
 }
 
 /**
+ * Checks if a string represents a generic canal type or lining status rather than a specific canal name.
+ */
+export function isGenericTypeOrStatus(str: any): boolean {
+  if (!str) return true;
+  const s = String(str).trim().toLowerCase();
+  return (
+    s === '' ||
+    s === 'null' ||
+    s === 'undefined' ||
+    s === '[blank]' ||
+    s === 'lined' ||
+    s === 'unlined' ||
+    s === 'main' ||
+    s === 'main canal' ||
+    s === 'lateral' ||
+    s === 'lateral canal' ||
+    s === 'sub lateral' ||
+    s === 'sub-lateral' ||
+    s === 'sub - lateral' ||
+    s === 'supply canal' ||
+    s === 'in good condition' ||
+    s === 'for regular inspection' ||
+    s === 'for regular inspecton' ||
+    s === 'good condition' ||
+    s === 'earth' ||
+    s === 'concrete' ||
+    s === 'grouted riprap' ||
+    s === 'uncategorized' ||
+    s === 'unclassified'
+  );
+}
+
+export function isLiningOnly(str: any): boolean {
+  if (!str) return false;
+  const s = String(str).trim().toLowerCase();
+  return s === 'lined' || s === 'unlined' || s === 'earth' || s === 'concrete';
+}
+
+export function cleanCanalPrefix(str: string): string {
+  if (!str) return str;
+  return str.replace(/^(?:unlined|lined)\s*[-:]?\s*/i, '').trim();
+}
+
+/**
  * Safely extracts the official Name from feature properties or falls back to default.
- * Filters out raw internal synthetic IDs (f-1786...) and checks remarks, canal_type, NIS.
- * Formats unnamed canals as "Unnamed Canal (Canal ID:###)".
+ * Resolves upstream corrupted table joins by prioritizing specific remarks over corrupted canal fields,
+ * specific canal_type (for systems where remarks is generic/empty), and specific canal names.
+ * Ditches reflect as "Farm ditch @lat, lng", and unnamed canals reflect as "Unnamed Canal (Canal ID:###)".
  */
 export function getFeatureName(props: any, defaultFallback = 'Main Canal', coords?: [number, number]): string {
   if (!props || typeof props !== 'object') return defaultFallback;
 
-  // Farm Ditch linestrings do not have station names; reflect as "Farm ditch @Latitude, longitude"
-  const detectedType = detectCanalType(props);
-  if (detectedType === 'Farm Ditch') {
+  // 1. Farm Ditch check:
+  // Reflect canal name classified as farm ditch / ditch as "Farm ditch @Latitude, longitude"
+  const cTypeRaw = String(props.canal_type || props.Canal_Type || props.canaltype || '').toLowerCase();
+  const cCanalRaw = String(props.canal || '').toLowerCase();
+  const remRaw = String(props.remarks || props.Remarks || '').toLowerCase();
+  const isDitch = detectCanalType(props) === 'Farm Ditch' ||
+    cTypeRaw.includes('ditch') || cCanalRaw.includes('ditch') || remRaw.includes('ditch') ||
+    /\bmfd\b/.test(cTypeRaw) || /\bsfd\b/.test(cTypeRaw) || /\bmfd\b/.test(cCanalRaw);
+
+  if (isDitch) {
     if (coords && coords.length >= 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
       return `Farm ditch @${coords[0].toFixed(5)}, ${coords[1].toFixed(5)}`;
     }
@@ -431,57 +483,74 @@ export function getFeatureName(props: any, defaultFallback = 'Main Canal', coord
     return 'Farm ditch';
   }
 
-  const isGenericStatusOrLining = (str: string) => {
-    const s = str.trim().toLowerCase();
-    return (
-      s === 'lined' ||
-      s === 'unlined' ||
-      s === 'in good condition' ||
-      s === 'for regular inspecton' ||
-      s === 'for regular inspection' ||
-      s === 'good condition'
-    );
-  };
-
-  const candidates = [
-    props.canal,
+  // 2. High Priority Explicit Survey Names:
+  const explicitCandidates = [
     props['NAME OF CA'],
     props.canal_name, props.Canal_Name, props.CANAL_NAME,
     props.Name, props.name, props.NAME,
-    props.remarks, props.Remarks, props.REMARKS,
-    props.remarks_1,
     props.station_name, props.Station_Name,
-    props.parcel_name, props.Parcel_Name,
-    props.title, props.Title,
-    props.label, props.Label,
-    props.system_name, props.System_Name,
-    props.station_code,
-    props.canal_type ? `${props.canal_type}${props.NIS ? ` (${props.NIS})` : ''}` : undefined,
-    props.source_layer ? String(props.source_layer).replace(/_/g, ' ') : undefined
+    props.parcel_name, props.Parcel_Name
   ];
 
-  for (const val of candidates) {
-    if (val !== undefined && val !== null) {
-      let str = String(val).trim();
-      str = str.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
-      if (
-        str !== '' &&
-        str !== '[blank]' &&
-        str.toLowerCase() !== 'null' &&
-        str.toLowerCase() !== 'undefined' &&
-        !isSyntheticFeatureId(str) &&
-        !isGenericStatusOrLining(str)
-      ) {
-        // Strip any accidental "Lined" or "Unlined" prefix
-        str = str.replace(/^(?:unlined|lined)\s*[-:]?\s*/i, '').trim();
-        if (str !== '') return str;
+  for (const c of explicitCandidates) {
+    if (c !== undefined && c !== null) {
+      const s = String(c).trim().replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
+      if (!isGenericTypeOrStatus(s) && !isSyntheticFeatureId(s)) {
+        const cleaned = cleanCanalPrefix(s);
+        if (cleaned) return cleaned;
       }
     }
   }
 
-  // If no name found (e.g. Pagbahan RIS): format as "Unnamed Canal (Canal ID:###)"
-  const idVal = props.id ?? props.canal_id ?? props.ID ?? props.Canal_ID ?? props.FID;
-  if (idVal !== undefined && idVal !== null && String(idVal).trim() !== '') {
+  // 3. Smart comparison between remarks vs canal_type vs canal:
+  const rem = props.remarks || props.Remarks || props.REMARKS || props.remarks_1;
+  const cType = props.canal_type || props.Canal_Type || props.CANAL_TYPE;
+  const cCanal = props.canal || props.Canal || props.CANAL;
+
+  const remIsSpecific = rem && !isGenericTypeOrStatus(rem) && !isSyntheticFeatureId(String(rem));
+  const typeIsSpecific = cType && !isGenericTypeOrStatus(cType) && !isSyntheticFeatureId(String(cType));
+  const canalIsSpecific = cCanal && !isGenericTypeOrStatus(cCanal) && !isSyntheticFeatureId(String(cCanal));
+
+  // If remarks is specific: wins over shifted/corrupted props.canal (Baco-Bucayao, Cantingas, Mag-asawang Tubig, Amnay, Caguray, Lumintao, Batang-Batang, Malatgao)
+  if (remIsSpecific) {
+    return cleanCanalPrefix(String(rem).trim());
+  }
+
+  // If canal_type is specific: wins over missing/generic remarks (Bansud, Pula)
+  if (typeIsSpecific) {
+    return cleanCanalPrefix(String(cType).trim());
+  }
+
+  // If canal field is specific: e.g. Mongpong "MC 5", Caguray "MAIN CANAL  SUPPLY I"
+  if (canalIsSpecific) {
+    return cleanCanalPrefix(String(cCanal).trim());
+  }
+
+  // 4. Semi-generic fallbacks: prefer canal > remarks > canal_type (excluding pure lining words)
+  if (cCanal && !isSyntheticFeatureId(String(cCanal)) && !isLiningOnly(cCanal)) {
+    const s = String(cCanal).trim();
+    if (s && s.toLowerCase() !== 'null' && s.toLowerCase() !== 'undefined' && s !== '[blank]') {
+      return s;
+    }
+  }
+
+  if (rem && !isSyntheticFeatureId(String(rem)) && !isLiningOnly(rem)) {
+    const s = String(rem).trim();
+    if (s && s.toLowerCase() !== 'null' && s.toLowerCase() !== 'undefined' && s !== '[blank]') {
+      return s;
+    }
+  }
+
+  if (cType && !isSyntheticFeatureId(String(cType)) && !isLiningOnly(cType)) {
+    const s = String(cType).trim();
+    if (s && s.toLowerCase() !== 'null' && s.toLowerCase() !== 'undefined' && s !== '[blank]') {
+      return s;
+    }
+  }
+
+  // 5. Unnamed Canal fallback with Canal ID (e.g. Pagbahan RIS)
+  const idVal = props.id ?? props.canal_id ?? props.ID ?? props.FID;
+  if (idVal !== undefined && idVal !== null && String(idVal).trim() !== '' && String(idVal) !== 'null') {
     return `Unnamed Canal (Canal ID:${idVal})`;
   }
 
@@ -576,7 +645,7 @@ export function detectNearestGISFeature(
       const props = feature.properties || {};
       const geom = feature.geometry;
 
-      if (!geom) return;
+      if (!geom || !geom.coordinates) return;
 
       // Quick bounding box check: if geometry is further than 1.0 degree lat/lng (~111km) away, skip
       if (geom.coordinates) {
@@ -607,7 +676,7 @@ export function detectNearestGISFeature(
           minDistance = dist;
           isLineWinner = false;
 
-          const name = getFeatureName(props, props.station_code || 'Structure Gate');
+          const name = getFeatureName(props, props.station_code || 'Structure Gate', [fLat, fLng]);
           const titleStr = `${name} ${props.station_code || ''}`;
           const parsedSt = parseStationingFromText(titleStr);
 
@@ -658,7 +727,7 @@ export function detectNearestGISFeature(
                   if (proj.distanceMeters < nearestCanalDist && proj.distanceMeters < 100) {
                     nearestCanalDist = proj.distanceMeters;
                     nearestCanalLine = lCoords;
-                    nearestCanalName = getFeatureName(feat.properties || {}, 'Main Canal');
+                    nearestCanalName = getFeatureName(feat.properties || {}, 'Main Canal', [fLat, fLng]);
                     if (feat.properties?.canal_code) canalCode = feat.properties.canal_code;
                   }
                 });
@@ -754,7 +823,7 @@ export function detectNearestGISFeature(
 
   // If the closest candidate is a canal line, orient downstream & calculate stationing ONCE
   if (isLineWinner && bestLineCandidate) {
-    const rawName = getFeatureName(bestLineCandidate.props, 'Main Canal');
+    const rawName = getFeatureName(bestLineCandidate.props, 'Main Canal', [lat, lng]);
     const canalName = cleanCanalBaseName(rawName);
 
     const { orientedCoords, isReversed } = orientLinestringDownstream(bestLineCandidate.lineCoords, canalName, layers);
@@ -808,7 +877,8 @@ export function detectNearestGISFeature(
     let referenceContext: string;
     let calibrationMethod: string;
 
-    if (s1 !== null && s2 !== null) {
+    // Only apply declared stationing if span > 0 (avoid placeholder 0+000 to 0+000)
+    if (s1 !== null && s2 !== null && Math.abs(s2 - s1) > 0) {
       const minS = Math.min(s1, s2);
       const maxS = Math.max(s1, s2);
       const span = maxS - minS;
@@ -929,7 +999,7 @@ export function calculateCanalPathBetweenPoints(
       layer.data.features.forEach((feature: any) => {
         const geom = feature.geometry;
         const props = feature.properties || {};
-        if (!geom) return;
+        if (!geom || !geom.coordinates) return;
 
         const addCandidate = (coords: [number, number][], id: string) => {
           if (coords.length < 2) return;
@@ -946,7 +1016,7 @@ export function calculateCanalPathBetweenPoints(
           }
           list.push({
             id,
-            name: getFeatureName(props, 'Main Canal'),
+            name: getFeatureName(props, 'Main Canal', coords[0]),
             canalCode: props.canal_code,
             coords
           });
@@ -972,19 +1042,23 @@ export function calculateCanalPathBetweenPoints(
   // Calculate Point 1 & Point 2 display names
   let name1 = feat1.locationName;
   if (pt1Props) {
-    const rawName = getFeatureName(pt1Props, '');
-    if (rawName) {
+    const rawName = getFeatureName(pt1Props, '', [l1Lat, l1Lng]);
+    if (rawName && !rawName.startsWith('Farm ditch')) {
       const st1 = feat1.stationingLabel;
       name1 = (st1 && !rawName.includes('+')) ? `${rawName} (${st1})` : rawName;
+    } else if (rawName) {
+      name1 = rawName;
     }
   }
 
   let name2 = feat2.locationName;
   if (pt2Props) {
-    const rawName = getFeatureName(pt2Props, '');
-    if (rawName) {
+    const rawName = getFeatureName(pt2Props, '', [l2Lat, l2Lng]);
+    if (rawName && !rawName.startsWith('Farm ditch')) {
       const st2 = feat2.stationingLabel;
       name2 = (st2 && !rawName.includes('+')) ? `${rawName} (${st2})` : rawName;
+    } else if (rawName) {
+      name2 = rawName;
     }
   }
 
@@ -1004,12 +1078,15 @@ export function calculateCanalPathBetweenPoints(
   } else if (
     canalName1 === canalName2 &&
     !feat1.isStructurePoint &&
-    !feat2.isStructurePoint &&
-    !pt1Props?.name &&
-    !pt2Props?.name
+    !feat2.isStructurePoint
   ) {
-    let d1 = feat1.distanceAlongLineMeters || parseStationingFromText(feat1.stationingLabel) || 0;
-    let d2 = feat2.distanceAlongLineMeters || parseStationingFromText(feat2.stationingLabel) || 0;
+    const getMeters = (feat: NearestGISFeatureResult) => {
+      const parsed = parseStationingFromText(feat.stationingLabel);
+      if (parsed !== null && !isNaN(parsed)) return parsed;
+      return feat.distanceAlongLineMeters ?? 0;
+    };
+    let d1 = getMeters(feat1);
+    let d2 = getMeters(feat2);
     if (d1 > d2) {
       const temp = d1;
       d1 = d2;
