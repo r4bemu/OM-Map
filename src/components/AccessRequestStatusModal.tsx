@@ -6,7 +6,8 @@ import {
   XCircle, 
   RefreshCw, 
   Edit3, 
-  LogOut 
+  LogOut,
+  ArrowRight
 } from 'lucide-react';
 import { AccessRequest } from '../types';
 
@@ -14,8 +15,9 @@ interface AccessRequestStatusModalProps {
   isOpen: boolean;
   onClose: () => void;
   request: AccessRequest | null;
-  onRefresh: () => void;
+  onRefresh: () => Promise<void> | void;
   onEditDetails: () => void;
+  onProceedToApp?: () => void;
   isLight: boolean;
 }
 
@@ -25,9 +27,11 @@ export const AccessRequestStatusModal: React.FC<AccessRequestStatusModalProps> =
   request,
   onRefresh,
   onEditDetails,
+  onProceedToApp,
   isLight,
 }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [statusNotice, setStatusNotice] = useState<string | null>(null);
 
   if (!isOpen || !request) return null;
 
@@ -35,10 +39,17 @@ export const AccessRequestStatusModal: React.FC<AccessRequestStatusModalProps> =
   const isRejected = request.status === 'rejected';
   const isApproved = request.status === 'approved';
 
-  const handleRefreshClick = () => {
+  const handleRefreshClick = async () => {
     setIsRefreshing(true);
-    onRefresh();
-    setTimeout(() => setIsRefreshing(false), 600);
+    setStatusNotice(null);
+    try {
+      await onRefresh();
+      setStatusNotice(`Checked at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`);
+    } catch (_) {
+      setStatusNotice('Unable to connect to verification server. Please check internet.');
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const getApprovingBodyText = (office?: string) => {
@@ -239,19 +250,31 @@ export const AccessRequestStatusModal: React.FC<AccessRequestStatusModalProps> =
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
-            <button
-              type="button"
-              onClick={handleRefreshClick}
-              disabled={isRefreshing}
-              className={`flex-1 py-2.5 px-4 rounded-xl border text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer ${
-                isLight 
-                  ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800' 
-                  : 'bg-[#27272a] hover:bg-[#3f3f46] border-[#3f3f46] text-[#fafafa]'
-              }`}
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-emerald-500' : ''}`} />
-              <span>{isRefreshing ? 'Checking Server...' : 'Check Approval Status'}</span>
-            </button>
+            {isApproved ? (
+              <button
+                type="button"
+                onClick={onProceedToApp}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm border border-emerald-700/60 active:scale-[0.99]"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Enter Application &amp; Open Map</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            ) : isPending ? (
+              <button
+                type="button"
+                onClick={handleRefreshClick}
+                disabled={isRefreshing}
+                className={`flex-1 py-2.5 px-4 rounded-xl border text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer ${
+                  isLight 
+                    ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800' 
+                    : 'bg-[#27272a] hover:bg-[#3f3f46] border-[#3f3f46] text-[#fafafa]'
+                }`}
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-emerald-500' : ''}`} />
+                <span>{isRefreshing ? 'Checking Server...' : 'Check Approval Status'}</span>
+              </button>
+            ) : null}
 
             {isRejected && (
               <button
@@ -277,6 +300,12 @@ export const AccessRequestStatusModal: React.FC<AccessRequestStatusModalProps> =
               <span>Back to Portal</span>
             </button>
           </div>
+
+          {statusNotice && isPending && (
+            <p className="text-[11px] text-center text-amber-600 dark:text-amber-400 font-mono">
+              {statusNotice} — Still awaiting administrative approval.
+            </p>
+          )}
 
         </div>
 

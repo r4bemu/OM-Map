@@ -710,6 +710,7 @@ export async function createApp() {
   // Access Requests Management Endpoints
   app.get('/api/access-requests', async (req, res) => {
     try {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       const requests = await getAccessRequests();
       res.json(requests);
     } catch (err: any) {
@@ -720,6 +721,7 @@ export async function createApp() {
 
   app.get('/api/access-requests/user/:email', async (req, res) => {
     try {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       const email = req.params.email.toLowerCase().trim();
 
       // Master Developer instant bypass

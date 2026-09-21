@@ -19,6 +19,7 @@ import {
   authenticateUser, 
   fetchRemoteAuthUsers,
   fetchAccessRequestsApi,
+  fetchUserAccessRequestApi,
   submitAccessRequestApi,
   canUserManageRequests,
   DEVELOPER_EMAIL
@@ -89,10 +90,55 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     try {
       const reqs = await fetchAccessRequestsApi();
       setRequests(reqs);
+      return reqs;
     } catch (e) {
       console.warn('Could not load access requests:', e);
+      return [];
     }
   }, []);
+
+  // Helper to log in a user whose AccessRequest is approved
+  const loginApprovedUser = useCallback((approvedReq: AccessRequest, googlePicture?: string) => {
+    const userEmail = approvedReq.email.toLowerCase().trim();
+    const approvedUser: AuthUser = {
+      id: `usr-gauth-${approvedReq.id}`,
+      username: userEmail.split('@')[0].replace(/[^a-z0-9_]/g, '_'),
+      name: approvedReq.fullName,
+      role: approvedReq.assignedRole || approvedReq.requestedRole || 'Field Personnel',
+      passcode: 'GOOGLE_AUTH_SSO',
+      imoOffice: approvedReq.assignedOffice || approvedReq.requestedOffice,
+      nisBinding: approvedReq.assignedNis || (Array.isArray(approvedReq.requestedNisList) ? approvedReq.requestedNisList.join(', ') : 'All NIS'),
+      designation: approvedReq.designation,
+      contactNumber: approvedReq.contactNumber,
+      avatar: googlePicture || approvedReq.avatar,
+      email: userEmail,
+      provider: 'google'
+    };
+    setIsStatusModalOpen(false);
+    onLogin(approvedUser);
+  }, [onLogin]);
+
+  // Live-check approval status on demand directly from Firestore bypassing any cache
+  const handleCheckApprovalStatus = useCallback(async () => {
+    if (!statusModalRequest || !statusModalRequest.email) return;
+    try {
+      const [freshReq, reqs] = await Promise.all([
+        fetchUserAccessRequestApi(statusModalRequest.email),
+        loadRequests()
+      ]);
+      const matched = freshReq || reqs.find(r => r.email?.toLowerCase().trim() === statusModalRequest.email.toLowerCase().trim());
+      if (matched) {
+        setStatusModalRequest(matched);
+        if (matched.status === 'approved') {
+          loginApprovedUser(matched);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Error checking approval status:', err);
+      throw err;
+    }
+  }, [statusModalRequest, loadRequests, loginApprovedUser]);
 
   const loadUsers = useCallback(async () => {
     try {
@@ -200,31 +246,20 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           return;
         }
         
-        // 1. Check if there is an existing access request for this user
-        const existingReq = requests.find(r => r.email?.toLowerCase().trim() === userEmail);
+        // 1. Check if there is an existing access request for this user (fresh fetch from Firestore)
+        let userReq = await fetchUserAccessRequestApi(userEmail);
+        if (!userReq) {
+          userReq = requests.find(r => r.email?.toLowerCase().trim() === userEmail) || null;
+        }
 
-        if (existingReq) {
-          if (existingReq.status === 'approved') {
+        if (userReq) {
+          if (userReq.status === 'approved') {
             // User is approved -> Log in directly!
-            const approvedUser: AuthUser = {
-              id: `usr-gauth-${existingReq.id}`,
-              username: userEmail.split('@')[0].replace(/[^a-z0-9_]/g, '_'),
-              name: existingReq.fullName,
-              role: existingReq.assignedRole || existingReq.requestedRole || 'Field Personnel',
-              passcode: 'GOOGLE_AUTH_SSO',
-              imoOffice: existingReq.assignedOffice || existingReq.requestedOffice,
-              nisBinding: existingReq.assignedNis || (Array.isArray(existingReq.requestedNisList) ? existingReq.requestedNisList.join(', ') : 'All NIS'),
-              designation: existingReq.designation,
-              contactNumber: existingReq.contactNumber,
-              avatar: googleProfile.picture || existingReq.avatar,
-              email: userEmail,
-              provider: 'google'
-            };
-            onLogin(approvedUser);
+            loginApprovedUser(userReq, googleProfile.picture);
             return;
           } else {
             // Request is Pending or Rejected -> show status modal
-            setStatusModalRequest(existingReq);
+            setStatusModalRequest(userReq);
             setIsStatusModalOpen(true);
             return;
           }
@@ -552,7 +587,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         isOpen={isStatusModalOpen}
         onClose={() => setIsStatusModalOpen(false)}
         request={statusModalRequest}
-        onRefresh={loadRequests}
+        onRefresh={handleCheckApprovalStatus}
+        onProceedToApp={() => {
+          if (statusModalRequest && statusModalRequest.status === 'approved') {
+            loginApprovedUser(statusModalRequest);
+          }
+        }}
         onEditDetails={() => {
           if (statusModalRequest) {
             setGoogleSetupData({

@@ -1260,7 +1260,9 @@ const STORAGE_REQUESTS_KEY = 'ommap_access_requests_v3';
 
 export async function fetchAccessRequestsApi(): Promise<AccessRequest[]> {
   try {
-    const res = await fetch('/api/access-requests');
+    const res = await fetch(`/api/access-requests?t=${Date.now()}`, {
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+    });
     if (res.ok) {
       const data = await res.json();
       try { localStorage.setItem(STORAGE_REQUESTS_KEY, JSON.stringify(data)); } catch (_) {}
@@ -1281,7 +1283,9 @@ export async function fetchAccessRequestsApi(): Promise<AccessRequest[]> {
 export async function fetchUserAccessRequestApi(email: string): Promise<AccessRequest | null> {
   if (!email) return null;
   try {
-    const res = await fetch(`/api/access-requests/user/${encodeURIComponent(email.toLowerCase().trim())}`);
+    const res = await fetch(`/api/access-requests/user/${encodeURIComponent(email.toLowerCase().trim())}?t=${Date.now()}`, {
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+    });
     if (res.ok) {
       return await res.json();
     }
