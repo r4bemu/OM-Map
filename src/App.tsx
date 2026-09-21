@@ -39,7 +39,7 @@ import {
 import { getIsoWeekInfo, getAvailableWeeksFromReports, isReportInWeek } from './utils/weekUtils';
 import { parseGISFile } from './utils/kmzParser';
 import { getAccessToken, uploadMaintenanceReportToDrive, uploadReportViaAppsScriptClient } from './lib/googleDriveService';
-import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers, fetchAccessRequestsApi, canUserManageRequests, isImoScopedRole, matchesImoOffice } from './config/authUsers';
+import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers, fetchAccessRequestsApi, fetchUserAccessRequestApi, canUserManageRequests, isImoScopedRole, matchesImoOffice, DEVELOPER_EMAIL } from './config/authUsers';
 
 import { 
   MAINTENANCE_ACTIVITY_CONFIG, 
@@ -1095,6 +1095,36 @@ export default function App() {
       setIsOffline(false);
       try {
         setIsSyncing(true);
+
+        // Silent background identity verification upon internet reconnection
+        if (authenticatedUser?.email) {
+          const userEmail = authenticatedUser.email.toLowerCase().trim();
+          if (userEmail !== DEVELOPER_EMAIL.toLowerCase()) {
+            try {
+              const liveReq = await fetchUserAccessRequestApi(userEmail);
+              if (liveReq) {
+                if (liveReq.status === 'approved') {
+                  const updatedUser: AuthUser = {
+                    ...authenticatedUser,
+                    role: liveReq.assignedRole || liveReq.requestedRole || authenticatedUser.role,
+                    imoOffice: liveReq.assignedOffice || liveReq.requestedOffice || authenticatedUser.imoOffice,
+                    nisBinding: liveReq.assignedNis || authenticatedUser.nisBinding,
+                    designation: liveReq.designation || authenticatedUser.designation,
+                  };
+                  setAuthenticatedUser(updatedUser);
+                  saveAuthSession(updatedUser);
+                } else if (liveReq.status === 'rejected' || liveReq.status === 'pending') {
+                  console.warn(`User access was revoked/suspended while offline: ${userEmail}`);
+                  alert('Your account access has been suspended or updated by an Administrator. Offline sync paused.');
+                  return;
+                }
+              }
+            } catch (authErr) {
+              console.warn('Silent re-authentication check skipped:', authErr);
+            }
+          }
+        }
+
         const result = await syncOfflineQueueToServer();
         if (result.syncedCount > 0) {
           const res = await fetch(`/api/reports?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(effectiveImo)}`);

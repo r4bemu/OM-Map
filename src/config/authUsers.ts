@@ -85,6 +85,8 @@ export function matchesImoOffice(itemImo?: string, targetImo?: string): boolean 
   return r.includes(t) || t.includes(r);
 }
 
+export const DEVELOPER_EMAIL = 'r4b.emu@gmail.com';
+
 export const DEFAULT_AUTH_USERS: AuthUser[] = [
   // ==========================================
   // 1. MASTER DEVELOPER ACCOUNT (1 Account)
@@ -92,6 +94,7 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
   {
     id: 'usr-dev-01',
     username: 'dev_master',
+    email: DEVELOPER_EMAIL,
     name: 'Lead Systems Architect (Developer)',
     role: 'Developer',
     passcode: 'DEV9824X',
@@ -1207,6 +1210,7 @@ export async function rejectPendingGoogleAdmission(userId: string): Promise<bool
 
 export function canUserManageRequests(user?: AuthUser | null): boolean {
   if (!user) return false;
+  if (user.email && user.email.toLowerCase().trim() === DEVELOPER_EMAIL.toLowerCase()) return true;
   return (
     user.role === 'Developer' ||
     user.role === 'RO Admin' ||
@@ -1215,7 +1219,9 @@ export function canUserManageRequests(user?: AuthUser | null): boolean {
 }
 
 export function isMasterAdmin(user: AuthUser | null): boolean {
-  return user?.role === 'Developer';
+  if (!user) return false;
+  if (user.email && user.email.toLowerCase().trim() === DEVELOPER_EMAIL.toLowerCase()) return true;
+  return user.role === 'Developer';
 }
 
 export function isRegionalAdmin(user: AuthUser | null): boolean {

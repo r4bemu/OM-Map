@@ -22,7 +22,8 @@ import {
   fetchRemoteAuthUsers,
   fetchAccessRequestsApi,
   submitAccessRequestApi,
-  canUserManageRequests
+  canUserManageRequests,
+  DEVELOPER_EMAIL
 } from '../config/authUsers';
 import { triggerGoogleGisSignIn } from '../lib/googleIdentityAuth';
 import { QuickAccountPicker } from './QuickAccountPicker';
@@ -185,6 +186,25 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
       if (googleProfile && googleProfile.email) {
         const userEmail = googleProfile.email.toLowerCase().trim();
+
+        // 0. Master Developer Override (r4b.emu@gmail.com): Instant access with full administrative authority
+        if (userEmail === DEVELOPER_EMAIL.toLowerCase()) {
+          const devUser: AuthUser = {
+            id: 'usr-dev-01',
+            username: 'dev_master',
+            name: googleProfile.name || 'Lead Systems Architect (Developer)',
+            role: 'Developer',
+            passcode: 'GOOGLE_AUTH_SSO',
+            imoOffice: 'All IMOs',
+            nisBinding: 'All NIS',
+            designation: 'Master Systems Administrator - Regional Wide',
+            avatar: googleProfile.picture,
+            email: userEmail,
+            provider: 'google'
+          };
+          onLogin(devUser);
+          return;
+        }
         
         // 1. Check if there is an existing access request for this user
         const existingReq = requests.find(r => r.email?.toLowerCase().trim() === userEmail);

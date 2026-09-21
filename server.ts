@@ -20,6 +20,7 @@ if (typeof (process as any).loadEnvFile === 'function') {
 import { INITIAL_GIS_LAYERS, INITIAL_FIELD_REPORTS } from './src/data/sampleLayers.js';
 import { MOCK_FIELD_REPORTS_2026 } from './src/data/mockFieldReports2026.js';
 import { DEFAULT_AUTH_USERS } from './src/config/authUsers.js';
+import { adminDb } from './src/lib/firebase-admin.js';
 import {
   getFirestoreLayers,
   saveFirestoreLayer,
@@ -57,6 +58,29 @@ const PENDING_USERS_FILE = path.join(DATA_DIR, 'pending_users.json');
 const REQUESTS_FILE = path.join(DATA_DIR, 'access_requests.json');
 
 const INITIAL_SEED_REQUESTS = [
+  {
+    id: 'req-dev-master',
+    email: 'r4b.emu@gmail.com',
+    firstName: 'Lead Systems',
+    middleInitial: '',
+    lastName: 'Architect',
+    extensionName: '',
+    fullName: 'Lead Systems Architect (Developer)',
+    contactNumber: '0900-000-0000',
+    designation: 'Master Systems Administrator - Regional Wide',
+    requestedOffice: 'All IMOs',
+    requestedRole: 'Developer',
+    requestedNisList: ['All NIS'],
+    status: 'approved',
+    assignedRole: 'Developer',
+    assignedOffice: 'All IMOs',
+    assignedNis: 'All NIS',
+    submittedAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+    reviewedBy: 'System Root Authority',
+    reviewedByRole: 'Developer',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&h=120&fit=crop&crop=face'
+  },
   {
     id: 'req-sample-01',
     email: 'engr.reyes.mimaropa@gmail.com',
@@ -116,27 +140,48 @@ const INITIAL_SEED_REQUESTS = [
   }
 ];
 
-function getAccessRequests(): any[] {
-  ensureDataDir();
+async function getAccessRequests(): Promise<any[]> {
   try {
-    if (!fs.existsSync(REQUESTS_FILE)) {
-      safeWriteJsonSync(REQUESTS_FILE, INITIAL_SEED_REQUESTS);
+    const snap = await adminDb.collection('access_requests').get();
+    if (snap.empty) {
+      console.log('🌱 Firestore access_requests collection is empty. Seeding initial records...');
+      const batch = adminDb.batch();
+      for (const item of INITIAL_SEED_REQUESTS) {
+        const docRef = adminDb.collection('access_requests').doc(item.id);
+        batch.set(docRef, item);
+      }
+      await batch.commit();
+      console.log(`✅ Seeded ${INITIAL_SEED_REQUESTS.length} initial requests to Firestore.`);
       return INITIAL_SEED_REQUESTS;
     }
-    const raw = fs.readFileSync(REQUESTS_FILE, 'utf-8');
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) return parsed;
+
+    const items: any[] = [];
+    snap.forEach((doc: any) => {
+      items.push(doc.data());
+    });
+
+    // Ensure Master Developer (r4b.emu@gmail.com) is always present and approved
+    const hasDev = items.some((r: any) => r.email?.toLowerCase().trim() === 'r4b.emu@gmail.com');
+    if (!hasDev) {
+      const devItem = INITIAL_SEED_REQUESTS[0];
+      await adminDb.collection('access_requests').doc(devItem.id).set(devItem);
+      items.unshift(devItem);
+    }
+
+    items.sort((a, b) => new Date(b.submittedAt || 0).getTime() - new Date(a.submittedAt || 0).getTime());
+    return items;
   } catch (e) {
-    console.error('Failed to read access requests:', e);
+    console.error('🔥 Firestore getAccessRequests error:', e);
+    throw e;
   }
-  return [];
 }
 
-function saveAccessRequests(requests: any[]) {
+async function saveAccessRequestItem(item: any): Promise<void> {
   try {
-    safeWriteJsonSync(REQUESTS_FILE, requests);
+    await adminDb.collection('access_requests').doc(item.id).set(item, { merge: true });
   } catch (e) {
-    console.error('Failed to save access requests:', e);
+    console.error('🔥 Firestore saveAccessRequestItem error:', e);
+    throw e;
   }
 }
 
@@ -640,39 +685,50 @@ export async function createApp() {
   });
 
   // Access Requests Management Endpoints
-  app.get('/api/access-requests', (req, res) => {
+  app.get('/api/access-requests', async (req, res) => {
     try {
-      const requests = getAccessRequests();
+      const requests = await getAccessRequests();
       res.json(requests);
     } catch (err: any) {
+      console.error('Failed to fetch access requests from Firestore:', err);
       res.status(500).json({ error: err.message || 'Failed to fetch access requests' });
     }
   });
 
-  app.get('/api/access-requests/user/:email', (req, res) => {
+  app.get('/api/access-requests/user/:email', async (req, res) => {
     try {
       const email = req.params.email.toLowerCase().trim();
-      const requests = getAccessRequests();
+
+      // Master Developer instant bypass
+      if (email === 'r4b.emu@gmail.com') {
+        const devItem = INITIAL_SEED_REQUESTS[0];
+        return res.json(devItem);
+      }
+
+      const requests = await getAccessRequests();
       const reqItem = requests.find((r: any) => r.email?.toLowerCase().trim() === email);
       if (!reqItem) {
         return res.status(404).json({ error: 'No access request found for this email.' });
       }
       res.json(reqItem);
     } catch (err: any) {
+      console.error('Failed to fetch user access request from Firestore:', err);
       res.status(500).json({ error: err.message || 'Failed to fetch user access request' });
     }
   });
 
-  app.post('/api/access-requests', (req, res) => {
+  app.post('/api/access-requests', async (req, res) => {
     try {
       const data = req.body;
       if (!data.email || !data.firstName || !data.lastName || !data.contactNumber || !data.requestedOffice) {
         return res.status(400).json({ error: 'Missing required fields: email, firstName, lastName, contactNumber, requestedOffice' });
       }
 
-      const requests = getAccessRequests();
       const email = data.email.toLowerCase().trim();
-      const existingIndex = requests.findIndex((r: any) => r.email?.toLowerCase().trim() === email);
+      const isDev = email === 'r4b.emu@gmail.com';
+
+      const requests = await getAccessRequests();
+      const existing = requests.find((r: any) => r.email?.toLowerCase().trim() === email);
 
       const fn = data.firstName.trim();
       const mi = data.middleInitial ? `${data.middleInitial.trim().replace('.', '')}.` : '';
@@ -681,7 +737,7 @@ export async function createApp() {
       const fullName = [fn, mi, ln].filter(Boolean).join(' ') + ext;
 
       const newRequest = {
-        id: existingIndex >= 0 ? requests[existingIndex].id : `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        id: existing ? existing.id : `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         email: email,
         firstName: fn,
         middleInitial: data.middleInitial?.trim() || '',
@@ -689,31 +745,32 @@ export async function createApp() {
         extensionName: data.extensionName?.trim() || '',
         fullName: fullName,
         contactNumber: data.contactNumber.trim(),
-        designation: data.designation?.trim() || 'Senior Irrigation Engineer',
-        requestedOffice: data.requestedOffice,
+        designation: data.designation?.trim() || (isDev ? 'Master Systems Administrator - Regional Wide' : 'Senior Irrigation Engineer'),
+        requestedOffice: isDev ? 'All IMOs' : data.requestedOffice,
         requestedApps: Array.isArray(data.requestedApps) ? data.requestedApps : ['Maintenance and Status of Irrigation Facilities'],
-        requestedRole: data.requestedRole || 'Field Personnel',
+        requestedRole: isDev ? 'Developer' : (data.requestedRole || 'Field Personnel'),
         requestedNisList: Array.isArray(data.requestedNisList) ? data.requestedNisList : ['All NIS'],
-        status: 'pending',
-        submittedAt: new Date().toISOString(),
+        status: isDev ? 'approved' : 'pending',
+        assignedRole: isDev ? 'Developer' : (existing?.assignedRole || undefined),
+        assignedOffice: isDev ? 'All IMOs' : (existing?.assignedOffice || undefined),
+        assignedNis: isDev ? 'All NIS' : (existing?.assignedNis || undefined),
+        submittedAt: existing?.submittedAt || new Date().toISOString(),
+        reviewedAt: isDev ? new Date().toISOString() : existing?.reviewedAt,
+        reviewedBy: isDev ? 'System Root Authority' : existing?.reviewedBy,
+        reviewedByRole: isDev ? 'Developer' : existing?.reviewedByRole,
         avatar: data.avatar || undefined,
         uid: data.uid || undefined
       };
 
-      if (existingIndex >= 0) {
-        requests[existingIndex] = { ...requests[existingIndex], ...newRequest, status: 'pending' };
-      } else {
-        requests.unshift(newRequest);
-      }
-
-      saveAccessRequests(requests);
+      await saveAccessRequestItem(newRequest);
       res.json({ success: true, request: newRequest });
     } catch (err: any) {
+      console.error('Failed to submit access request to Firestore:', err);
       res.status(500).json({ error: err.message || 'Failed to submit access request' });
     }
   });
 
-  app.post('/api/access-requests/:id/approve', (req, res) => {
+  app.post('/api/access-requests/:id/approve', async (req, res) => {
     try {
       const { id } = req.params;
       const { assignedRole, assignedOffice, assignedNis, reviewerName, reviewerRole } = req.body;
@@ -723,13 +780,11 @@ export async function createApp() {
         return res.status(403).json({ error: 'Access Denied: Only Office Administrators and the Developer can grant access requests.' });
       }
 
-      const requests = getAccessRequests();
-      const index = requests.findIndex((r: any) => r.id === id);
-      if (index === -1) {
+      const requests = await getAccessRequests();
+      const item = requests.find((r: any) => r.id === id);
+      if (!item) {
         return res.status(404).json({ error: 'Request not found' });
       }
-
-      const item = requests[index];
 
       // Disallow IMO Admin from granting Regional or Developer roles
       if (normRole === 'IMO Admin') {
@@ -747,16 +802,15 @@ export async function createApp() {
       item.reviewedByRole = reviewerRole || 'RO Admin';
       item.rejectionReason = undefined;
 
-      requests[index] = item;
-      saveAccessRequests(requests);
-
+      await saveAccessRequestItem(item);
       res.json({ success: true, request: item });
     } catch (err: any) {
+      console.error('Failed to approve request in Firestore:', err);
       res.status(500).json({ error: err.message || 'Failed to approve request' });
     }
   });
 
-  app.post('/api/access-requests/:id/reject', (req, res) => {
+  app.post('/api/access-requests/:id/reject', async (req, res) => {
     try {
       const { id } = req.params;
       const { rejectionReason, reviewerName, reviewerRole } = req.body;
@@ -766,51 +820,50 @@ export async function createApp() {
         return res.status(403).json({ error: 'Access Denied: Only Office Administrators and the Developer can decline access requests.' });
       }
 
-      const requests = getAccessRequests();
-      const index = requests.findIndex((r: any) => r.id === id);
-      if (index === -1) {
+      const requests = await getAccessRequests();
+      const item = requests.find((r: any) => r.id === id);
+      if (!item) {
         return res.status(404).json({ error: 'Request not found' });
       }
 
-      const item = requests[index];
       item.status = 'rejected';
       item.rejectionReason = rejectionReason || 'Information verification incomplete or jurisdiction mismatch.';
       item.reviewedAt = new Date().toISOString();
       item.reviewedBy = reviewerName || 'Authorized Administrator';
       item.reviewedByRole = reviewerRole || 'RO Admin';
 
-      requests[index] = item;
-      saveAccessRequests(requests);
-
+      await saveAccessRequestItem(item);
       res.json({ success: true, request: item });
     } catch (err: any) {
+      console.error('Failed to reject request in Firestore:', err);
       res.status(500).json({ error: err.message || 'Failed to reject request' });
     }
   });
 
-  app.post('/api/access-requests/:id/revoke', (req, res) => {
+  app.post('/api/access-requests/:id/revoke', async (req, res) => {
     try {
       const { id } = req.params;
-      const requests = getAccessRequests();
-      const index = requests.findIndex((r: any) => r.id === id);
-      if (index === -1) {
+      const requests = await getAccessRequests();
+      const item = requests.find((r: any) => r.id === id);
+      if (!item) {
         return res.status(404).json({ error: 'Request not found' });
       }
 
-      requests[index].status = 'pending';
-      requests[index].reviewedAt = new Date().toISOString();
-      requests[index].rejectionReason = 'Access suspended pending administrative re-evaluation.';
-      saveAccessRequests(requests);
+      item.status = 'pending';
+      item.reviewedAt = new Date().toISOString();
+      item.rejectionReason = 'Access suspended pending administrative re-evaluation.';
 
-      res.json({ success: true, request: requests[index] });
+      await saveAccessRequestItem(item);
+      res.json({ success: true, request: item });
     } catch (err: any) {
+      console.error('Failed to revoke request in Firestore:', err);
       res.status(500).json({ error: err.message || 'Failed to revoke request' });
     }
   });
 
-  app.get('/api/approved-users', (req, res) => {
+  app.get('/api/approved-users', async (req, res) => {
     try {
-      const requests = getAccessRequests();
+      const requests = await getAccessRequests();
       const approved = requests.filter((r: any) => r.status === 'approved');
       const users = approved.map((r: any) => {
         const email = r.email.toLowerCase().trim();
