@@ -176,9 +176,32 @@ async function getAccessRequests(): Promise<any[]> {
   }
 }
 
+function cleanFirestoreDoc<T extends Record<string, any>>(obj: T): T {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return (obj as any[])
+      .map(item => (typeof item === 'object' && item !== null ? cleanFirestoreDoc(item) : item))
+      .filter(item => item !== undefined) as any;
+  }
+  const cleaned: any = {};
+  for (const [key, val] of Object.entries(obj)) {
+    if (val !== undefined) {
+      if (val !== null && typeof val === 'object' && !(val instanceof Date)) {
+        cleaned[key] = cleanFirestoreDoc(val);
+      } else {
+        cleaned[key] = val;
+      }
+    }
+  }
+  return cleaned;
+}
+
 async function saveAccessRequestItem(item: any): Promise<void> {
   try {
-    await adminDb.collection('access_requests').doc(item.id).set(item, { merge: true });
+    const cleaned = cleanFirestoreDoc(item);
+    await adminDb.collection('access_requests').doc(cleaned.id).set(cleaned, { merge: true });
   } catch (e) {
     console.error('🔥 Firestore saveAccessRequestItem error:', e);
     throw e;
@@ -736,7 +759,7 @@ export async function createApp() {
       const ext = data.extensionName?.trim() ? `, ${data.extensionName.trim()}` : '';
       const fullName = [fn, mi, ln].filter(Boolean).join(' ') + ext;
 
-      const newRequest = {
+      const newRequest: any = {
         id: existing ? existing.id : `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         email: email,
         firstName: fn,
@@ -747,20 +770,31 @@ export async function createApp() {
         contactNumber: data.contactNumber.trim(),
         designation: data.designation?.trim() || (isDev ? 'Master Systems Administrator - Regional Wide' : 'Senior Irrigation Engineer'),
         requestedOffice: isDev ? 'All IMOs' : data.requestedOffice,
-        requestedApps: Array.isArray(data.requestedApps) ? data.requestedApps : ['Maintenance and Status of Irrigation Facilities'],
+        requestedApps: ['Maintenance and Status of Irrigation Facilities'],
         requestedRole: isDev ? 'Developer' : (data.requestedRole || 'Field Personnel'),
         requestedNisList: Array.isArray(data.requestedNisList) ? data.requestedNisList : ['All NIS'],
         status: isDev ? 'approved' : 'pending',
-        assignedRole: isDev ? 'Developer' : (existing?.assignedRole || undefined),
-        assignedOffice: isDev ? 'All IMOs' : (existing?.assignedOffice || undefined),
-        assignedNis: isDev ? 'All NIS' : (existing?.assignedNis || undefined),
-        submittedAt: existing?.submittedAt || new Date().toISOString(),
-        reviewedAt: isDev ? new Date().toISOString() : existing?.reviewedAt,
-        reviewedBy: isDev ? 'System Root Authority' : existing?.reviewedBy,
-        reviewedByRole: isDev ? 'Developer' : existing?.reviewedByRole,
-        avatar: data.avatar || undefined,
-        uid: data.uid || undefined
+        submittedAt: existing?.submittedAt || new Date().toISOString()
       };
+
+      if (isDev) {
+        newRequest.assignedRole = 'Developer';
+        newRequest.assignedOffice = 'All IMOs';
+        newRequest.assignedNis = 'All NIS';
+        newRequest.reviewedAt = new Date().toISOString();
+        newRequest.reviewedBy = 'System Root Authority';
+        newRequest.reviewedByRole = 'Developer';
+      } else if (existing) {
+        if (existing.assignedRole) newRequest.assignedRole = existing.assignedRole;
+        if (existing.assignedOffice) newRequest.assignedOffice = existing.assignedOffice;
+        if (existing.assignedNis) newRequest.assignedNis = existing.assignedNis;
+        if (existing.reviewedAt) newRequest.reviewedAt = existing.reviewedAt;
+        if (existing.reviewedBy) newRequest.reviewedBy = existing.reviewedBy;
+        if (existing.reviewedByRole) newRequest.reviewedByRole = existing.reviewedByRole;
+      }
+
+      if (data.avatar) newRequest.avatar = data.avatar;
+      if (data.uid) newRequest.uid = data.uid;
 
       await saveAccessRequestItem(newRequest);
       res.json({ success: true, request: newRequest });
@@ -800,7 +834,7 @@ export async function createApp() {
       item.reviewedAt = new Date().toISOString();
       item.reviewedBy = reviewerName || 'Authorized Administrator';
       item.reviewedByRole = reviewerRole || 'RO Admin';
-      item.rejectionReason = undefined;
+      delete item.rejectionReason;
 
       await saveAccessRequestItem(item);
       res.json({ success: true, request: item });

@@ -11,4 +11,8 @@ export const adminApp = !getApps().length
 
 export const adminAuth = getAuth(adminApp);
 export const adminDb = getFirestore(adminApp, FIRESTORE_DATABASE_ID);
+try {
+  adminDb.settings({ ignoreUndefinedProperties: true });
+} catch (_) {}
+
 

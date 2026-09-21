@@ -2,21 +2,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   X, 
   User, 
-  Mail, 
   Phone,
   Building2, 
   ShieldCheck, 
-  CheckSquare, 
-  Square, 
-  Sparkles, 
   ArrowRight, 
-  Check, 
   Briefcase,
   AlertCircle,
-  Clock,
-  Layers,
-  CheckCircle2,
-  Lock
+  Clock
 } from 'lucide-react';
 import { AccessRequest } from '../types';
 
@@ -42,54 +34,6 @@ export const ALL_OFFICES = [
   { label: 'Palawan IMO', value: 'Palawan IMO', short: 'Palawan IMO' },
 ] as const;
 
-export interface AvailableApp {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  isPrimary?: boolean;
-}
-
-export const AVAILABLE_APPLICATIONS: AvailableApp[] = [
-  {
-    id: 'app-om-map',
-    name: 'Maintenance and Status of Irrigation Facilities',
-    category: 'GIS & Field Operations',
-    description: 'Real-time canal network maps, facility condition monitoring, and spatial operations.',
-    isPrimary: true
-  },
-  {
-    id: 'app-interventions',
-    name: 'NIA-Assisted Interventions Report Generator',
-    category: 'Institutional Development & Reporting',
-    description: 'IDU agricultural interventions tracking, matrix calculations, and official PDF/Excel reporting.'
-  },
-  {
-    id: 'app-form-691',
-    name: 'Form 691 Operations & Automated Reporting',
-    category: 'Institutional Reporting',
-    description: 'Monthly irrigation status, crop yield, and official regional report compilation.'
-  },
-  {
-    id: 'app-canal-gis',
-    name: 'Canal Networks & Asset Inventory GIS',
-    category: 'Engineering & Infrastructure',
-    description: 'Spatial inventory of structures, control gates, flumes, and canal sections.'
-  },
-  {
-    id: 'app-idp-portal',
-    name: 'Institutional Development Program (IDP) & IA Portal',
-    category: 'Institutional Development',
-    description: 'Irrigators Association (IA) profiles, federation records, and farmer engagement.'
-  },
-  {
-    id: 'app-heavy-equipment',
-    name: 'Equipment & Heavy Machinery Tracking',
-    category: 'Asset Management',
-    description: 'Backhoe, excavator, and dredger equipment deployment and maintenance logs.'
-  }
-];
-
 export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = ({
   isOpen,
   onClose,
@@ -111,12 +55,6 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
 
   // Office Selection
   const [selectedOffice, setSelectedOffice] = useState<string>('Regional Office IV-B');
-
-  // Applications Access Choice (Default with Primary App checked)
-  const [selectedApps, setSelectedApps] = useState<string[]>([
-    'Maintenance and Status of Irrigation Facilities'
-  ]);
-  const [isAllApps, setIsAllApps] = useState(false);
 
   // Parse initial name from Google displayName
   useEffect(() => {
@@ -168,33 +106,6 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
     setContactNumber(digitsOnly);
   };
 
-  const toggleAppSelection = (appName: string) => {
-    if (isAllApps) {
-      setIsAllApps(false);
-      setSelectedApps(AVAILABLE_APPLICATIONS.map(a => a.name).filter(n => n !== appName));
-    } else {
-      setSelectedApps(prev => {
-        const next = prev.includes(appName) 
-          ? prev.filter(n => n !== appName) 
-          : [...prev, appName];
-        if (next.length === AVAILABLE_APPLICATIONS.length) {
-          setIsAllApps(true);
-        }
-        return next;
-      });
-    }
-  };
-
-  const handleToggleAllApps = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
-    setIsAllApps(checked);
-    if (checked) {
-      setSelectedApps(AVAILABLE_APPLICATIONS.map(a => a.name));
-    } else {
-      setSelectedApps(['Maintenance and Status of Irrigation Facilities']);
-    }
-  };
-
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -202,11 +113,6 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
 
     if (contactNumber.length < 11 || !contactNumber.startsWith('09')) {
       alert('Please enter a valid 11-digit mobile number starting with 09 (e.g. 09123456789).');
-      return;
-    }
-
-    if (selectedApps.length === 0) {
-      alert('Please select at least one application you require access to.');
       return;
     }
 
@@ -222,7 +128,7 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
       contactNumber: contactNumber.trim(),
       designation: designation.trim() || 'Authorized NIA Personnel',
       requestedOffice: selectedOffice,
-      requestedApps: selectedApps,
+      requestedApps: ['Maintenance and Status of Irrigation Facilities'],
       status: 'pending',
       avatar: initialData.photoURL || undefined,
       uid: initialData.uid
@@ -298,7 +204,7 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
             <div className="leading-relaxed">
               <span className="font-bold">Administrative Verification:</span>
               <p className="text-[11px] opacity-90 mt-0.5">
-                Your submitted details and selected applications will be forwarded to{' '}
+                Your submitted profile details will be forwarded to{' '}
                 <strong className="underline font-semibold">{approvingAuthorityLabel}</strong> for identity verification and role assignment.
               </p>
             </div>
@@ -471,94 +377,6 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
                 </option>
               ))}
             </select>
-          </div>
-
-          {/* Section 5: Choice of Applications to have Access with */}
-          <div className="space-y-2 pt-1 border-t border-slate-200 dark:border-slate-800">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <Layers className="w-4 h-4 text-[#009933]" />
-                <label className="font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                  5. Applications Access Request <span className="text-rose-500">*</span>
-                </label>
-              </div>
-              <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-                isLight ? 'bg-slate-100 text-slate-700 border-slate-200' : 'bg-slate-800 text-slate-400 border-slate-700'
-              }`}>
-                {selectedApps.length} of {AVAILABLE_APPLICATIONS.length} Apps Selected
-              </span>
-            </div>
-
-            {/* Master Checkbox */}
-            <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
-              isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-800/40 border-slate-700'
-            }`}>
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={isAllApps}
-                  onChange={handleToggleAllApps}
-                  className="w-4 h-4 rounded text-[#009933] focus:ring-[#009933] cursor-pointer"
-                />
-                <span className="font-bold text-xs text-slate-800 dark:text-slate-200">
-                  Select All Platform Applications
-                </span>
-              </label>
-              <span className="text-[10.5px] text-slate-500 font-mono">Full Suite Access</span>
-            </div>
-
-            {/* Applications List */}
-            <div className="space-y-2">
-              {AVAILABLE_APPLICATIONS.map((app) => {
-                const isSelected = isAllApps || selectedApps.includes(app.name);
-                return (
-                  <button
-                    key={app.id}
-                    type="button"
-                    onClick={() => toggleAppSelection(app.name)}
-                    className={`w-full p-3 rounded-xl border text-left transition flex items-start justify-between gap-3 cursor-pointer ${
-                      isSelected
-                        ? (isLight 
-                            ? 'bg-emerald-50/70 border-emerald-500/60 shadow-sm' 
-                            : 'bg-emerald-950/20 border-emerald-500/50')
-                        : (isLight 
-                            ? 'bg-white border-slate-200 hover:bg-slate-50' 
-                            : 'bg-slate-800/40 border-slate-700/80 hover:bg-slate-800')
-                    }`}
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className={`font-bold text-xs ${
-                          isSelected 
-                            ? (isLight ? 'text-emerald-950' : 'text-emerald-200') 
-                            : (isLight ? 'text-slate-800' : 'text-slate-200')
-                        }`}>
-                          {app.name}
-                        </span>
-                        {app.isPrimary && (
-                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded font-bold uppercase bg-[#009933] text-white">
-                            Active GIS
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[11px] text-slate-500 leading-snug">
-                        {app.description}
-                      </p>
-                    </div>
-
-                    <div className="mt-0.5 shrink-0">
-                      {isSelected ? (
-                        <div className="w-5 h-5 rounded-md bg-[#009933] flex items-center justify-center text-white shadow-sm">
-                          <Check className="w-3.5 h-3.5" />
-                        </div>
-                      ) : (
-                        <div className="w-5 h-5 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800" />
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
           {/* Action Buttons */}
