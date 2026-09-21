@@ -319,7 +319,7 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-mono font-bold uppercase text-[#009933]">
-                  ADMINISTRATIVE ACCESS GATEWAY
+                  ADMINISTRATIVE ACCESS CONTROL
                 </span>
                 <span className="text-[9px] px-2 py-0.2 rounded-full font-mono bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30">
                   {currentUser?.role || 'Administrator'}

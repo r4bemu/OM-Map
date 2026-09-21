@@ -310,7 +310,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                         ? 'bg-[#e6f5ea] text-[#00802b] border-[#009933]/30' 
                         : 'bg-[#009933]/20 text-[#009933] border-[#009933]/40'
                     }`}>
-                      SECURE GATEWAY
+                      OFFICIAL PORTAL
                     </span>
                   </div>
                   <h1 className={`text-xl sm:text-2xl font-bold font-heading ${
@@ -319,7 +319,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     Maintenance and Status of Irrigation Facilities
                   </h1>
                   <p className="text-[11px] text-slate-500 font-medium">
-                    National Irrigation Administration Operations &amp; GIS Gateway
+                    National Irrigation Administration Operations &amp; GIS Portal
                   </p>
                 </div>
               </div>
