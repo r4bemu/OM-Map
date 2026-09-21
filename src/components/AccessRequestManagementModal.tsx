@@ -207,6 +207,25 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
     return r.status === 'approved';
   }).length;
 
+  const getUserInitials = (req: AccessRequest) => {
+    if (req.firstName && req.lastName) {
+      return `${req.firstName.charAt(0)}${req.lastName.charAt(0)}`.toUpperCase();
+    }
+    if (req.fullName) {
+      const parts = req.fullName.trim().split(/\s+/).filter(Boolean);
+      if (parts.length >= 2) {
+        return `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`.toUpperCase();
+      }
+      if (parts.length === 1 && parts[0].length > 0) {
+        return parts[0].slice(0, 2).toUpperCase();
+      }
+    }
+    if (req.email) {
+      return req.email.slice(0, 2).toUpperCase();
+    }
+    return 'NIA';
+  };
+
   const handleCopyPhone = (id: string, phone: string) => {
     navigator.clipboard.writeText(phone);
     setCopiedPhoneId(id);
@@ -450,7 +469,7 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
               >
                 {availableOffices.map((off) => (
                   <option key={off} value={off}>
-                    {off === 'All' ? '?? Filter by Office (All Offices)' : off}
+                    {off === 'All' ? 'Filter by Office (All Offices)' : off}
                   </option>
                 ))}
               </select>
@@ -514,18 +533,18 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                       {req.avatar ? (
                         <img
                           src={req.avatar}
-                          alt={req.fullName}
+                          alt={req.fullName || 'User avatar'}
                           className="w-12 h-12 rounded-2xl object-cover border-2 border-emerald-500/40 shadow-sm shrink-0"
                         />
                       ) : (
                         <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-600 font-bold font-mono text-sm shrink-0">
-                          {req.firstName[0]}{req.lastName[0]}
+                          {getUserInitials(req)}
                         </div>
                       )}
 
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-bold text-sm truncate">{req.fullName}</h3>
+                          <h3 className="font-bold text-sm truncate">{req.fullName || req.email || 'Personnel'}</h3>
                           <span className={`text-[9px] font-mono px-2 py-0.2 rounded-full font-bold uppercase border ${
                             isPending
                               ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40'
@@ -548,19 +567,21 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
 
                           <span className="flex items-center gap-1 font-mono">
                             <Phone className="w-3 h-3 text-[#009933] shrink-0" />
-                            <strong className="text-slate-700 dark:text-slate-300">{req.contactNumber}</strong>
-                            <button
-                              type="button"
-                              onClick={() => handleCopyPhone(req.id, req.contactNumber)}
-                              className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition cursor-pointer"
-                              title="Copy Contact Number"
-                            >
-                              {copiedPhoneId === req.id ? (
-                                <Check className="w-3 h-3 text-emerald-600" />
-                              ) : (
-                                <Copy className="w-3 h-3 text-slate-400" />
-                              )}
-                            </button>
+                            <strong className="text-slate-700 dark:text-slate-300">{req.contactNumber || 'Not provided'}</strong>
+                            {req.contactNumber && (
+                              <button
+                                type="button"
+                                onClick={() => handleCopyPhone(req.id, req.contactNumber)}
+                                className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition cursor-pointer"
+                                title="Copy Contact Number"
+                              >
+                                {copiedPhoneId === req.id ? (
+                                  <Check className="w-3 h-3 text-emerald-600" />
+                                ) : (
+                                  <Copy className="w-3 h-3 text-slate-400" />
+                                )}
+                              </button>
+                            )}
                           </span>
                         </div>
 
@@ -568,11 +589,11 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 mt-2 text-xs">
                           <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
                             <Briefcase className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span className="truncate">Designation: <strong>{req.designation}</strong></span>
+                            <span className="truncate">Designation: <strong>{req.designation || 'Personnel'}</strong></span>
                           </div>
                           <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
                             <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span className="truncate">Office: <strong>{req.requestedOffice}</strong></span>
+                            <span className="truncate">Office: <strong>{req.requestedOffice || 'Regional Office IV-B'}</strong></span>
                           </div>
                         </div>
 
@@ -597,11 +618,11 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                           </div>
                         </div>
 
-                        {isApproved && req.reviewedBy && (
+                        {isApproved && (req.reviewedBy || req.assignedRole) && (
                           <div className="mt-2 text-[11px] p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300">
-                            Approved by: <strong>{req.reviewedBy}</strong> ({req.reviewedByRole}) on {new Date(req.reviewedAt || '').toLocaleDateString()}
+                            Approved by: <strong>{req.reviewedBy || 'Administrator'}</strong> {req.reviewedByRole ? `(${req.reviewedByRole})` : ''} on {req.reviewedAt ? new Date(req.reviewedAt).toLocaleDateString() : 'Active'}
                             <span className="block font-medium mt-0.5">
-                              Assigned Role: <strong>{req.assignedRole}</strong> � NIS: <strong>{req.assignedNis || 'All NIS'}</strong>
+                              Assigned Role: <strong>{req.assignedRole || 'Authorized Personnel'}</strong> • NIS: <strong>{req.assignedNis || 'All NIS'}</strong>
                             </span>
                           </div>
                         )}
