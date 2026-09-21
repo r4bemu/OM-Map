@@ -11,8 +11,6 @@ import {
   Sun, 
   Moon, 
   ArrowRight, 
-  HelpCircle, 
-  Sparkles,
   Users
 } from 'lucide-react';
 import { AuthUser, UserRole, AccessRequest } from '../types';
@@ -27,8 +25,6 @@ import {
 } from '../config/authUsers';
 import { triggerGoogleGisSignIn } from '../lib/googleIdentityAuth';
 import { QuickAccountPicker } from './QuickAccountPicker';
-import { RoleMatrixModal } from './RoleMatrixModal';
-import { GoogleAuthDomainModal } from './GoogleAuthDomainModal';
 import { GoogleProfileSetupModal, GoogleInitialData } from './GoogleProfileSetupModal';
 import { AccessRequestStatusModal } from './AccessRequestStatusModal';
 import { AccessRequestManagementModal } from './AccessRequestManagementModal';
@@ -59,8 +55,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [requests, setRequests] = useState<AccessRequest[]>([]);
 
   // Modals state
-  const [isRoleMatrixOpen, setIsRoleMatrixOpen] = useState(false);
-  const [isGoogleDomainModalOpen, setIsGoogleDomainModalOpen] = useState(false);
   const [isGoogleSetupModalOpen, setIsGoogleSetupModalOpen] = useState(false);
   const [googleSetupData, setGoogleSetupData] = useState<GoogleInitialData | null>(null);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
@@ -293,7 +287,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         }`}>
           <div>
             {/* Top Bar: Header & Theme Switcher */}
-            <div className="flex items-start justify-between gap-3 mb-6">
+            <div className="flex items-start justify-between gap-3 mb-5">
               <div className="flex items-center gap-3.5">
                 <img
                   src="/nia-logo.svg"
@@ -305,22 +299,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     <span className="text-[10px] font-mono font-bold tracking-widest uppercase text-[#009933]">
                       REGION IV-B MIMAROPA
                     </span>
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-bold border ${
-                      isLight 
-                        ? 'bg-[#e6f5ea] text-[#00802b] border-[#009933]/30' 
-                        : 'bg-[#009933]/20 text-[#009933] border-[#009933]/40'
-                    }`}>
-                      OFFICIAL PORTAL
-                    </span>
                   </div>
                   <h1 className={`text-xl sm:text-2xl font-bold font-heading ${
                     isLight ? 'text-slate-900' : 'text-white'
                   }`}>
                     Maintenance and Status of Irrigation Facilities
                   </h1>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    National Irrigation Administration Operations &amp; GIS Portal
-                  </p>
                 </div>
               </div>
 
@@ -355,20 +339,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   <span className="hidden sm:inline text-[10px]">Dark</span>
                 </button>
               </div>
-            </div>
-
-            {/* Intro */}
-            <div className="mb-5">
-              <h2 className={`text-sm font-bold ${
-                isLight ? 'text-slate-800' : 'text-slate-200'
-              }`}>
-                Authorized Personnel Sign-In
-              </h2>
-              <p className={`text-xs mt-0.5 ${
-                isLight ? 'text-slate-600' : 'text-slate-400'
-              }`}>
-                Access canal networks, Form 691 reports, AI tools, and 6-tier institutional approval workflows.
-              </p>
             </div>
 
             {/* Error Alert */}
@@ -412,17 +382,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 </svg>
                 <span>{isGoogleLoading ? 'Connecting to Google Account...' : 'Continue with Google Account'}</span>
               </button>
-
-              <div className="flex items-center justify-end mt-1.5">
-                <button
-                  type="button"
-                  onClick={() => setIsGoogleDomainModalOpen(true)}
-                  className="text-[10.5px] text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition cursor-pointer flex items-center gap-1"
-                >
-                  <span>Domain issues or quick email sign-in?</span>
-                  <Sparkles className="w-3 h-3 text-amber-500" />
-                </button>
-              </div>
             </div>
 
             {/* Divider */}
@@ -461,21 +420,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className={`block text-xs font-semibold ${
-                    isLight ? 'text-slate-700' : 'text-slate-300'
-                  }`}>
-                    Account Passcode
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setIsRoleMatrixOpen(true)}
-                    className="text-[11px] text-[#009933] hover:underline flex items-center gap-1 cursor-pointer font-medium"
-                  >
-                    <HelpCircle className="w-3 h-3" />
-                    <span>6-Tier Rights Matrix</span>
-                  </button>
-                </div>
+                <label className={`block text-xs font-semibold mb-1 ${
+                  isLight ? 'text-slate-700' : 'text-slate-300'
+                }`}>
+                  Account Passcode
+                </label>
                 <div className="relative">
                   <KeyRound className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 ${
                     isLight ? 'text-slate-500' : 'text-slate-400'
@@ -523,7 +472,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   className="w-full bg-[#009933] hover:bg-[#00802b] text-white font-bold text-xs py-3 rounded-xl shadow-lg shadow-emerald-950/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border border-[#00802b]/50 active:scale-[0.99]"
                 >
                   <ShieldCheck className="w-4 h-4" />
-                  <span>{isLoading ? 'Verifying Credentials...' : 'Authenticate & Enter Map'}</span>
+                  <span>{isLoading ? 'Verifying Credentials...' : 'Continue Sign in'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -588,24 +537,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         />
 
       </div>
-
-      {/* 6-Tier Role Matrix Modal */}
-      <RoleMatrixModal
-        isOpen={isRoleMatrixOpen}
-        onClose={() => setIsRoleMatrixOpen(false)}
-        isLight={isLight}
-      />
-
-      {/* Google Auth Domain Configuration / Instant Sign-In Modal */}
-      <GoogleAuthDomainModal
-        isOpen={isGoogleDomainModalOpen}
-        onClose={() => setIsGoogleDomainModalOpen(false)}
-        onOpenProfileSetup={(data) => {
-          setGoogleSetupData(data);
-          setIsGoogleSetupModalOpen(true);
-        }}
-        isLight={isLight}
-      />
 
       {/* Google Profile Registration & Contact Setup Modal */}
       <GoogleProfileSetupModal
