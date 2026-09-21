@@ -2,13 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   X, 
   User, 
-  Phone,
+  Phone, 
   Building2, 
   ShieldCheck, 
   ArrowRight, 
-  Briefcase,
-  AlertCircle,
-  Clock
+  Briefcase, 
+  AlertCircle 
 } from 'lucide-react';
 import { AccessRequest } from '../types';
 
@@ -53,8 +52,8 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
   // Official NIA Designation / Position
   const [designation, setDesignation] = useState('');
 
-  // Office Selection
-  const [selectedOffice, setSelectedOffice] = useState<string>('Regional Office IV-B');
+  // Office Selection (Requires active selection from user)
+  const [selectedOffice, setSelectedOffice] = useState<string>('');
 
   // Parse initial name from Google displayName
   useEffect(() => {
@@ -92,6 +91,9 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
 
   // Determining which authority reviews this request based on selected office
   const approvingAuthorityLabel = useMemo(() => {
+    if (!selectedOffice) {
+      return 'Respective Office Administrator & Developer';
+    }
     if (selectedOffice === 'Regional Office IV-B' || selectedOffice === 'All IMOs') {
       return 'Developer & Regional Office Admin (RO Admin / RO Evaluator)';
     }
@@ -111,8 +113,33 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
 
     if (!initialData) return;
 
+    if (!firstName.trim()) {
+      alert('Please enter your First Name.');
+      return;
+    }
+
+    if (!middleInitial.trim()) {
+      alert('Please enter your Middle Initial (M.I.).');
+      return;
+    }
+
+    if (!lastName.trim()) {
+      alert('Please enter your Last Name.');
+      return;
+    }
+
     if (contactNumber.length < 11 || !contactNumber.startsWith('09')) {
       alert('Please enter a valid 11-digit mobile number starting with 09 (e.g. 09123456789).');
+      return;
+    }
+
+    if (!designation.trim()) {
+      alert('Please enter your official NIA designation or position.');
+      return;
+    }
+
+    if (!selectedOffice) {
+      alert('Please select your designated office or jurisdiction.');
       return;
     }
 
@@ -126,7 +153,7 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
       extensionName: extensionName.trim(),
       fullName: formattedFullName,
       contactNumber: contactNumber.trim(),
-      designation: designation.trim() || 'Authorized NIA Personnel',
+      designation: designation.trim(),
       requestedOffice: selectedOffice,
       requestedApps: ['Maintenance and Status of Irrigation Facilities'],
       status: 'pending',
@@ -141,53 +168,60 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-md animate-in fade-in overflow-y-auto ${
-      isLight ? 'bg-slate-900/40' : 'bg-slate-950/85'
+      isLight ? 'bg-slate-900/40' : 'bg-black/75'
     }`}>
       <div className={`w-full max-w-2xl rounded-2xl border shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto transition-colors duration-200 ${
-        isLight ? 'bg-white border-slate-300 text-slate-900 shadow-slate-900/15' : 'bg-slate-900 border-slate-800 text-white'
+        isLight 
+          ? 'bg-white border-slate-300 text-slate-900 shadow-slate-900/15' 
+          : 'bg-[#18181b] border-[#3f3f46] text-[#fafafa]'
       }`}>
         
         {/* Header - Government Institutional Header */}
-        <div className={`p-4 sm:p-5 border-b flex items-center justify-between ${
-          isLight ? 'border-slate-200 bg-emerald-50/60' : 'border-slate-800 bg-slate-900/90'
+        <div className={`p-4 sm:p-5 border-b flex items-center justify-between gap-4 ${
+          isLight 
+            ? 'border-slate-200 bg-slate-50/90' 
+            : 'border-[#3f3f46] bg-[#1f1f23]'
         }`}>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3.5 min-w-0">
             {initialData.photoURL ? (
               <img
                 src={initialData.photoURL}
                 alt={initialData.displayName || initialData.email}
-                className="w-10 h-10 rounded-xl object-cover border border-[#009933]/50 shadow-sm shrink-0"
+                className="w-12 h-12 rounded-xl object-cover border-2 border-emerald-500/60 shadow-md shrink-0"
               />
             ) : (
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-700 font-bold font-mono text-xs shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold font-mono text-sm shrink-0">
                 NIA
               </div>
             )}
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#00802b]">
-                  NATIONAL IRRIGATION ADMINISTRATION
-                </span>
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono font-bold flex items-center gap-1">
-                  <Clock className="w-2.5 h-2.5" />
-                  Approval Workflow
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-500">
+                  NATIONAL IRRIGATION ADMINISTRATION • REGION IV-B
                 </span>
               </div>
-              <h2 className="text-base font-bold font-heading text-slate-900 dark:text-white">
-                Personnel Profile &amp; Jurisdiction Details
+              <h2 className={`text-base sm:text-lg font-bold font-heading tracking-tight ${
+                isLight ? 'text-slate-900' : 'text-[#fafafa]'
+              }`}>
+                Personnel Access Registration &amp; Profile Verification
               </h2>
-              <p className="text-[11px] text-slate-500 truncate max-w-[280px] sm:max-w-md">
-                Connected Google ID: <strong className="font-mono text-slate-700 dark:text-slate-300">{initialData.email}</strong>
-              </p>
+              <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                <p className={`text-[11px] truncate ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
+                  Connected Google ID: <strong className={`font-mono font-semibold ${isLight ? 'text-slate-800' : 'text-emerald-300'}`}>{initialData.email}</strong>
+                </p>
+              </div>
             </div>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className={`p-2 rounded-lg border transition cursor-pointer ${
-              isLight ? 'border-slate-300 hover:bg-slate-200 text-slate-600' : 'border-slate-700 hover:bg-slate-800 text-slate-400'
+            className={`p-2 rounded-xl border transition cursor-pointer shrink-0 ${
+              isLight 
+                ? 'border-slate-300 hover:bg-slate-200 text-slate-600' 
+                : 'border-[#3f3f46] bg-[#27272a] hover:bg-[#3f3f46] text-zinc-300 hover:text-white'
             }`}
+            title="Close Registration Window"
           >
             <X className="w-4 h-4" />
           </button>
@@ -197,15 +231,17 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
         <form onSubmit={handleFormSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar text-xs">
           
           {/* Institutional Jurisdiction Notice */}
-          <div className={`p-3 rounded-xl border flex items-start gap-2.5 ${
-            isLight ? 'bg-amber-50/80 border-amber-200 text-amber-900' : 'bg-amber-950/20 border-amber-500/30 text-amber-300'
+          <div className={`p-3.5 rounded-xl border flex items-start gap-2.5 ${
+            isLight 
+              ? 'bg-amber-50/90 border-amber-300 text-amber-950' 
+              : 'bg-amber-950/25 border-amber-500/40 text-amber-200'
           }`}>
-            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <AlertCircle className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />
             <div className="leading-relaxed">
-              <span className="font-bold">Administrative Verification:</span>
-              <p className="text-[11px] opacity-90 mt-0.5">
+              <span className={`font-bold ${isLight ? 'text-amber-900' : 'text-amber-300'}`}>Administrative Verification:</span>
+              <p className={`text-[11px] mt-0.5 ${isLight ? 'text-amber-950/90' : 'text-zinc-300'}`}>
                 Your submitted profile details will be forwarded to{' '}
-                <strong className="underline font-semibold">{approvingAuthorityLabel}</strong> for identity verification and role assignment.
+                <strong className={`underline font-semibold ${isLight ? 'text-amber-950' : 'text-amber-300'}`}>{approvingAuthorityLabel}</strong> for identity verification and role assignment.
               </p>
             </div>
           </div>
@@ -213,15 +249,15 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
           {/* Section 1: Complete Name */}
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5">
-              <User className="w-4 h-4 text-[#009933]" />
-              <label className="font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+              <User className={`w-4 h-4 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+              <label className={`font-bold uppercase tracking-wider text-xs ${isLight ? 'text-slate-900' : 'text-zinc-100'}`}>
                 1. Complete Name <span className="text-rose-500">*</span>
               </label>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
               <div className="sm:col-span-4">
-                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                <label className={`block text-[11px] font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-zinc-300'}`}>
                   First Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -231,16 +267,16 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
                   placeholder="e.g. Juan"
                   className={`w-full rounded-lg px-3 py-2 border transition focus:outline-none ${
                     isLight 
-                      ? 'bg-white border-slate-300 text-slate-900 focus:border-[#009933] focus:ring-1 focus:ring-[#009933]' 
-                      : 'bg-slate-800/80 border-slate-700 text-white focus:border-[#009933]'
+                      ? 'bg-white border-slate-300 text-slate-900 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 placeholder-slate-400' 
+                      : 'bg-[#27272a] border-[#3f3f46] text-[#fafafa] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-zinc-500'
                   }`}
                   required
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  M.I.
+                <label className={`block text-[11px] font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-zinc-300'}`}>
+                  M.I. <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -250,14 +286,15 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
                   placeholder="e.g. D."
                   className={`w-full rounded-lg px-2.5 py-2 text-center border transition focus:outline-none ${
                     isLight 
-                      ? 'bg-white border-slate-300 text-slate-900 focus:border-[#009933]' 
-                      : 'bg-slate-800/80 border-slate-700 text-white focus:border-[#009933]'
+                      ? 'bg-white border-slate-300 text-slate-900 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 placeholder-slate-400' 
+                      : 'bg-[#27272a] border-[#3f3f46] text-[#fafafa] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-zinc-500'
                   }`}
+                  required
                 />
               </div>
 
               <div className="sm:col-span-4">
-                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                <label className={`block text-[11px] font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-zinc-300'}`}>
                   Last Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -267,15 +304,15 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
                   placeholder="e.g. Dela Cruz"
                   className={`w-full rounded-lg px-3 py-2 border transition focus:outline-none ${
                     isLight 
-                      ? 'bg-white border-slate-300 text-slate-900 focus:border-[#009933] focus:ring-1 focus:ring-[#009933]' 
-                      : 'bg-slate-800/80 border-slate-700 text-white focus:border-[#009933]'
+                      ? 'bg-white border-slate-300 text-slate-900 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 placeholder-slate-400' 
+                      : 'bg-[#27272a] border-[#3f3f46] text-[#fafafa] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-zinc-500'
                   }`}
                   required
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                <label className={`block text-[11px] font-semibold mb-1 ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
                   Ext. (Opt.)
                 </label>
                 <input
@@ -285,27 +322,27 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
                   placeholder="Jr., III"
                   className={`w-full rounded-lg px-2 py-2 text-center border transition focus:outline-none ${
                     isLight 
-                      ? 'bg-white border-slate-300 text-slate-900 focus:border-[#009933]' 
-                      : 'bg-slate-800/80 border-slate-700 text-white focus:border-[#009933]'
+                      ? 'bg-white border-slate-300 text-slate-900 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 placeholder-slate-400' 
+                      : 'bg-[#27272a] border-[#3f3f46] text-[#fafafa] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-zinc-500'
                   }`}
                 />
               </div>
             </div>
           </div>
 
-          {/* Section 2: Clean 11-digit Mobile Number (No spaces, hyphens, or dashes) */}
+          {/* Section 2: Clean 11-digit Mobile Number */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <Phone className="w-4 h-4 text-[#009933]" />
-                <label className="font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                <Phone className={`w-4 h-4 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+                <label className={`font-bold uppercase tracking-wider text-xs ${isLight ? 'text-slate-900' : 'text-zinc-100'}`}>
                   2. Official Mobile Number <span className="text-rose-500">*</span>
                 </label>
               </div>
-              <span className={`text-[10.5px] font-mono font-semibold px-2 py-0.5 rounded ${
+              <span className={`text-[10.5px] font-mono font-semibold px-2 py-0.5 rounded border ${
                 contactNumber.length === 11 && contactNumber.startsWith('09')
-                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                  : 'bg-slate-100 text-slate-600 border border-slate-200'
+                  ? (isLight ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-emerald-950/60 text-emerald-300 border-emerald-500/50')
+                  : (isLight ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-[#27272a] text-zinc-400 border-[#3f3f46]')
               }`}>
                 {contactNumber.length}/11 Digits
               </span>
@@ -320,21 +357,21 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
               placeholder="09123456789"
               className={`w-full rounded-lg px-3 py-2.5 border font-mono text-sm tracking-wider transition focus:outline-none ${
                 isLight 
-                  ? 'bg-white border-slate-300 text-slate-900 focus:border-[#009933] focus:ring-1 focus:ring-[#009933]' 
-                  : 'bg-slate-800/80 border-slate-700 text-white focus:border-[#009933]'
+                  ? 'bg-white border-slate-300 text-slate-900 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 placeholder-slate-400' 
+                  : 'bg-[#27272a] border-[#3f3f46] text-[#fafafa] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-zinc-500'
               }`}
               required
             />
-            <p className="text-[10.5px] text-slate-500">
-              Format: Exactly 11 digits starting with 09 (e.g. <strong className="font-mono text-slate-700 dark:text-slate-300">09123456789</strong>). Hyphens and spaces are automatically excluded for automated SMS systems.
+            <p className={`text-[10.5px] leading-relaxed ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
+              Format: Exactly 11 digits starting with 09 (e.g. <strong className={`font-mono ${isLight ? 'text-slate-800' : 'text-emerald-400'}`}>09123456789</strong>). Hyphens and spaces are automatically excluded for automated SMS systems.
             </p>
           </div>
 
-          {/* Section 3: Official NIA Designation / Position (Clean Text Input) */}
+          {/* Section 3: Official NIA Designation / Position */}
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5">
-              <Briefcase className="w-4 h-4 text-[#009933]" />
-              <label className="font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+              <Briefcase className={`w-4 h-4 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+              <label className={`font-bold uppercase tracking-wider text-xs ${isLight ? 'text-slate-900' : 'text-zinc-100'}`}>
                 3. Official NIA Designation / Position <span className="text-rose-500">*</span>
               </label>
             </div>
@@ -346,8 +383,8 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
               placeholder="e.g. Senior Irrigation Engineer, Principal Engineer A, Water Resource Inspector"
               className={`w-full rounded-lg px-3 py-2.5 border transition focus:outline-none ${
                 isLight 
-                  ? 'bg-white border-slate-300 text-slate-900 focus:border-[#009933] focus:ring-1 focus:ring-[#009933]' 
-                  : 'bg-slate-800/80 border-slate-700 text-white focus:border-[#009933]'
+                  ? 'bg-white border-slate-300 text-slate-900 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 placeholder-slate-400' 
+                  : 'bg-[#27272a] border-[#3f3f46] text-[#fafafa] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-zinc-500'
               }`}
               required
             />
@@ -356,23 +393,31 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
           {/* Section 4: Designated Office */}
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5">
-              <Building2 className="w-4 h-4 text-[#009933]" />
-              <label className="font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                4. Designated Office <span className="text-rose-500">*</span>
+              <Building2 className={`w-4 h-4 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+              <label className={`font-bold uppercase tracking-wider text-xs ${isLight ? 'text-slate-900' : 'text-zinc-100'}`}>
+                4. Designated Office / Jurisdiction <span className="text-rose-500">*</span>
               </label>
             </div>
 
             <select
               value={selectedOffice}
               onChange={(e) => setSelectedOffice(e.target.value)}
+              required
               className={`w-full rounded-lg px-3 py-2.5 border transition focus:outline-none font-medium ${
                 isLight 
-                  ? 'bg-white border-slate-300 text-slate-900 focus:border-[#009933]' 
-                  : 'bg-slate-800/80 border-slate-700 text-white focus:border-[#009933]'
+                  ? 'bg-white border-slate-300 text-slate-900 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600' 
+                  : 'bg-[#27272a] border-[#3f3f46] text-[#fafafa] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
               }`}
             >
+              <option value="" disabled className={isLight ? 'bg-white text-slate-500' : 'bg-[#27272a] text-zinc-500'}>
+                -- Select Your Designated Office / Jurisdiction * --
+              </option>
               {ALL_OFFICES.map((off) => (
-                <option key={off.value} value={off.value}>
+                <option 
+                  key={off.value} 
+                  value={off.value}
+                  className={isLight ? 'bg-white text-slate-900' : 'bg-[#27272a] text-[#fafafa]'}
+                >
                   {off.label}
                 </option>
               ))}
@@ -380,12 +425,16 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
           </div>
 
           {/* Action Buttons */}
-          <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+          <div className={`pt-3 border-t flex items-center justify-between gap-3 ${
+            isLight ? 'border-slate-200' : 'border-[#3f3f46]'
+          }`}>
             <button
               type="button"
               onClick={onClose}
               className={`px-4 py-2.5 rounded-xl border font-semibold transition cursor-pointer ${
-                isLight ? 'border-slate-300 text-slate-700 hover:bg-slate-100' : 'border-slate-700 text-slate-300 hover:bg-slate-800'
+                isLight 
+                  ? 'border-slate-300 text-slate-700 hover:bg-slate-100' 
+                  : 'border-[#3f3f46] bg-[#27272a] text-zinc-300 hover:bg-[#3f3f46] hover:text-white'
               }`}
             >
               Cancel
@@ -393,7 +442,7 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
 
             <button
               type="submit"
-              className="flex-1 bg-[#009933] hover:bg-[#00802b] text-white font-bold py-3 px-4 rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer border border-[#00802b]/60"
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer border border-emerald-700/60"
             >
               <ShieldCheck className="w-4 h-4" />
               <span>Submit Profile &amp; Request Access</span>
