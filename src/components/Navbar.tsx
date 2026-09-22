@@ -28,7 +28,7 @@ import {
   Globe
 } from 'lucide-react';
 import { UserRole, GISLayer, FieldReport, AuthUser, AvailableCloudWeek } from '../types';
-import { canUserManageRequests } from '../config/authUsers';
+import { canUserManageRequests, getNisOptionsForImo } from '../config/authUsers';
 
 interface NavbarProps {
   authenticatedUser: AuthUser | null;
@@ -192,45 +192,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const IMO_OPTIONS = [
     'All IMOs',
+    'Mindoro Oriental-Marinduque-Romblon IMO',
     'Occidental Mindoro IMO',
-    'Oriental Mindoro IMO',
     'Palawan IMO',
     'Regional Office IV-B'
   ];
-
-  const NIS_OPTIONS_BY_IMO: Record<string, string[]> = {
-    'Occidental Mindoro IMO': [
-      'All NIS',
-      'Batang-Batang RIS',
-      'Bucayao RIS',
-      'Caguray RIS',
-      'Lumintao RIS',
-      'Mamburao RIS',
-      'Mapang RIS',
-      'Mongpong RIS',
-      'Pagbahan RIS',
-      'Pitogo RIS',
-      'Rizal RIS'
-    ],
-    'Oriental Mindoro IMO': [
-      'All NIS',
-      'Alag RIS',
-      'Baco RIS',
-      'Bansud RIS',
-      'Bongabong RIS',
-      'Calapan RIS',
-      'Mag-asawang Tubig RIS',
-      'Pula RIS',
-      'San Agustin RIS'
-    ],
-    'Palawan IMO': [
-      'All NIS',
-      'Malatgao RIS',
-      'Batang-Batang RIS (Palawan)',
-      'Ibato-Iraan RIS',
-      'Tigman-Inagawan RIS'
-    ]
-  };
 
   const isPrivilegedUser = 
     authenticatedUser?.role === 'Developer' || 
@@ -542,7 +508,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
 
                     {/* NIS Selection */}
-                    {activeImo && activeImo !== 'All IMOs' && NIS_OPTIONS_BY_IMO[activeImo] && (
+                    {activeImo && activeImo !== 'All IMOs' && activeImo !== 'Regional Office IV-B' && (
                       <div>
                         <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 block">
                           Simulate NIS System:
@@ -557,7 +523,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           }}
                           className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-teal-500 font-medium"
                         >
-                          {NIS_OPTIONS_BY_IMO[activeImo].map(nis => (
+                          {getNisOptionsForImo(activeImo).map(nis => (
                             <option key={nis} value={nis}>{nis}</option>
                           ))}
                         </select>

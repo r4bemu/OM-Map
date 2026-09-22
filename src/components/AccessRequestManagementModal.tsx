@@ -501,16 +501,6 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                 All Records
               </button>
             </div>
-
-            {/* Jurisdiction Notice */}
-            <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>
-                {isDev && 'Master Authority: Grants RO and IMO permissions'}
-                {isRO && 'Regional Authority: Reviews RO and all IMO applicants'}
-                {isIMO && `IMO Authority: Reviews applicants for ${currentUser?.imoOffice?.replace(' IMO', '')}`}
-              </span>
-            </div>
           </div>
         </div>
 
@@ -650,18 +640,19 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                           )}
                         </div>
 
-                        {/* Contact & Email Badges with Quick Copy (Comment 6) */}
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 mt-1">
-                          <span className="flex items-center gap-1">
-                            <Mail className="w-3 h-3 text-slate-400 shrink-0" />
-                            <a href={`mailto:${req.email}`} className="hover:underline text-emerald-600 dark:text-emerald-400">
+                        {/* Contact & Professional Details - Clean Vertically Stacked Rows */}
+                        <div className="space-y-1.5 mt-2 text-xs">
+                          {/* Row 1: Email Address with Quick Copy */}
+                          <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 min-w-0">
+                            <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <a href={`mailto:${req.email}`} className="hover:underline text-emerald-600 dark:text-emerald-400 truncate">
                               {req.email}
                             </a>
                             {req.email && (
                               <button
                                 type="button"
                                 onClick={() => handleCopyEmail(req.id, req.email)}
-                                className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition cursor-pointer"
+                                className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition cursor-pointer shrink-0"
                                 title="Copy Email Address"
                               >
                                 {copiedEmailId === req.id ? (
@@ -671,16 +662,19 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                                 )}
                               </button>
                             )}
-                          </span>
+                          </div>
 
-                          <span className="flex items-center gap-1 font-mono">
-                            <Phone className="w-3 h-3 text-[#009933] shrink-0" />
-                            <strong className="text-slate-700 dark:text-slate-300">{req.contactNumber || 'Not provided'}</strong>
+                          {/* Row 2: Contact Number (Relocated onto its own next row below email) */}
+                          <div className="flex items-center gap-1.5 font-mono text-slate-600 dark:text-slate-400 min-w-0">
+                            <Phone className="w-3.5 h-3.5 text-[#009933] shrink-0" />
+                            <strong className="text-slate-700 dark:text-slate-300 truncate">
+                              {req.contactNumber || 'Not provided'}
+                            </strong>
                             {req.contactNumber && (
                               <button
                                 type="button"
                                 onClick={() => handleCopyPhone(req.id, req.contactNumber)}
-                                className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition cursor-pointer"
+                                className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition cursor-pointer shrink-0"
                                 title="Copy Contact Number"
                               >
                                 {copiedPhoneId === req.id ? (
@@ -690,12 +684,9 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                                 )}
                               </button>
                             )}
-                          </span>
-                        </div>
+                          </div>
 
-                        {/* Designation & Office with Inline Editing (Comments 8 & 9) */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 mt-2 text-xs">
-                          {/* Designation Row (Comment 8) */}
+                          {/* Row 3: Designation with Inline Editing */}
                           <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 min-w-0">
                             <Briefcase className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                             {editingTarget?.reqId === req.id && editingTarget.field === 'designation' ? (
@@ -749,7 +740,7 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                             )}
                           </div>
 
-                          {/* Office Row (Comment 9 - Region Level Gatekeepers Only) */}
+                          {/* Row 4: Office Assignment with Inline Editing (Relocated onto its own next row below designation) */}
                           <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 min-w-0">
                             <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                             {editingTarget?.reqId === req.id && editingTarget.field === 'office' ? (

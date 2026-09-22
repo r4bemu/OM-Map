@@ -12,22 +12,22 @@ export const IMO_NIS_MAPPING: Record<string, string[]> = {
     'Baco-Bucayao RIS',
     'Mag-asawang Tubig RIS',
     'Pula RIS',
+    'Bansud RIS',
     'Bongabong RIS',
-    'Pagbahan RIS'
+    'Cantingas RIS'
   ],
   'Occidental Mindoro IMO': [
+    'Pagbahan RIS',
     'Mamburao RIS',
     'Amnay RIS',
     'Patrick RIS',
     'Lumintao RIS',
-    'Monpong RIS'
+    'Mompong RIS',
+    'Caguray RIS'
   ],
   'Palawan IMO': [
     'Malatgao RIS',
-    'Batang-Batang RIS',
-    'Malinao RIS',
-    'Inagawan RIS',
-    'Panitian RIS'
+    'Batang-Batang RIS'
   ]
 };
 
@@ -262,8 +262,8 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
     role: 'IMO Reviewer',
     passcode: 'ENG8105M',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
-    nisBinding: 'Pagbahan RIS',
-    designation: 'Field IMO Reviewer - Pagbahan RIS'
+    nisBinding: 'Cantingas RIS',
+    designation: 'Field IMO Reviewer - Cantingas RIS'
   },
 
   // Occidental Mindoro IMO (5 IMO Reviewers)
@@ -314,8 +314,8 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
     role: 'IMO Reviewer',
     passcode: 'ENG9205O',
     imoOffice: 'Occidental Mindoro IMO',
-    nisBinding: 'Monpong RIS',
-    designation: 'Field IMO Reviewer - Monpong RIS'
+    nisBinding: 'Mompong RIS',
+    designation: 'Field IMO Reviewer - Mompong RIS'
   },
 
   // Palawan IMO (5 IMO Reviewers)
@@ -346,8 +346,8 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
     role: 'IMO Reviewer',
     passcode: 'ENG7303P',
     imoOffice: 'Palawan IMO',
-    nisBinding: 'Malinao RIS',
-    designation: 'Supervising IMO Reviewer - Malinao RIS'
+    nisBinding: 'Malatgao RIS',
+    designation: 'Supervising IMO Reviewer - Malatgao RIS'
   },
   {
     id: 'usr-eng-pal-04',
@@ -356,8 +356,8 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
     role: 'IMO Reviewer',
     passcode: 'ENG7304P',
     imoOffice: 'Palawan IMO',
-    nisBinding: 'Inagawan RIS',
-    designation: 'Lead IMO Reviewer - Inagawan RIS'
+    nisBinding: 'Batang-Batang RIS',
+    designation: 'Lead IMO Reviewer - Batang-Batang RIS'
   },
   {
     id: 'usr-eng-pal-05',
@@ -366,8 +366,8 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
     role: 'IMO Reviewer',
     passcode: 'ENG7305P',
     imoOffice: 'Palawan IMO',
-    nisBinding: 'Panitian RIS',
-    designation: 'Field IMO Reviewer - Panitian RIS'
+    nisBinding: 'All NIS',
+    designation: 'Field IMO Reviewer - Palawan NIS'
   },
 
   // ==========================================
@@ -421,8 +421,8 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
     role: 'IMO Preparer',
     passcode: 'NPR8105M',
     imoOffice: 'Mindoro Oriental-Marinduque-Romblon IMO',
-    nisBinding: 'Pagbahan RIS',
-    designation: 'IMO Report Preparer - Pagbahan RIS'
+    nisBinding: 'Cantingas RIS',
+    designation: 'IMO Report Preparer - Cantingas RIS'
   },
 
   // Occidental Mindoro IMO (5 IMO Preparers)
@@ -473,8 +473,8 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
     role: 'IMO Preparer',
     passcode: 'NPR9205O',
     imoOffice: 'Occidental Mindoro IMO',
-    nisBinding: 'Monpong RIS',
-    designation: 'IMO Report Preparer - Monpong RIS'
+    nisBinding: 'Mompong RIS',
+    designation: 'IMO Report Preparer - Mompong RIS'
   },
 
   // Palawan IMO (5 IMO Preparers)
@@ -505,8 +505,8 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
     role: 'IMO Preparer',
     passcode: 'NPR7303P',
     imoOffice: 'Palawan IMO',
-    nisBinding: 'Malinao RIS',
-    designation: 'IMO Report Preparer - Malinao RIS'
+    nisBinding: 'Malatgao RIS',
+    designation: 'IMO Report Preparer - Malatgao RIS'
   },
   {
     id: 'usr-prep-pal-04',
@@ -515,8 +515,8 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
     role: 'IMO Preparer',
     passcode: 'NPR7304P',
     imoOffice: 'Palawan IMO',
-    nisBinding: 'Inagawan RIS',
-    designation: 'IMO Report Preparer - Inagawan RIS'
+    nisBinding: 'Batang-Batang RIS',
+    designation: 'IMO Report Preparer - Batang-Batang RIS'
   },
   {
     id: 'usr-prep-pal-05',
@@ -525,8 +525,8 @@ export const DEFAULT_AUTH_USERS: AuthUser[] = [
     role: 'IMO Preparer',
     passcode: 'NPR7305P',
     imoOffice: 'Palawan IMO',
-    nisBinding: 'Panitian RIS',
-    designation: 'IMO Report Preparer - Panitian RIS'
+    nisBinding: 'All NIS',
+    designation: 'IMO Report Preparer - Palawan NIS'
   },
 
   // ==========================================
