@@ -838,8 +838,12 @@ export async function createApp() {
         return res.status(404).json({ error: 'Request not found' });
       }
 
-      // Disallow IMO Admin from granting Regional or Developer roles
+      // Disallow IMO Admin from granting Regional or Developer roles, or touching Regional Office / All IMOs requests
       if (normRole === 'IMO Admin') {
+        const targetOffice = (item.requestedOffice || item.assignedOffice || '').toLowerCase();
+        if (targetOffice.includes('regional office') || targetOffice.includes('regional') || targetOffice === 'all imos' || targetOffice === 'all') {
+          return res.status(403).json({ error: 'Access Denied: IMO Administrators cannot grant access to Regional Office IV-B applicants.' });
+        }
         if (assignedRole === 'RO Admin' || assignedRole === 'RO Evaluator' || assignedRole === 'RO Reviewer' || assignedRole === 'RO Preparer' || assignedRole === 'Developer') {
           return res.status(403).json({ error: 'Access Denied: IMO Administrators can only grant roles within their IMO office jurisdiction.' });
         }
@@ -876,6 +880,13 @@ export async function createApp() {
       const item = requests.find((r: any) => r.id === id);
       if (!item) {
         return res.status(404).json({ error: 'Request not found' });
+      }
+
+      if (normRole === 'IMO Admin') {
+        const targetOffice = (item.requestedOffice || item.assignedOffice || '').toLowerCase();
+        if (targetOffice.includes('regional office') || targetOffice.includes('regional') || targetOffice === 'all imos' || targetOffice === 'all') {
+          return res.status(403).json({ error: 'Access Denied: IMO Administrators cannot decline access requests for Regional Office IV-B applicants.' });
+        }
       }
 
       item.status = 'rejected';

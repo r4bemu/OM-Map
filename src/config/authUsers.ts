@@ -1228,17 +1228,43 @@ export function getAdminJurisdictionLabel(user: AuthUser | null): string {
   return 'Unauthorized / Non-Admin Role';
 }
 
+export function isRequestInImoJurisdiction(reqOffice?: string, adminImo?: string): boolean {
+  if (!reqOffice || !adminImo) return false;
+
+  const r = reqOffice.trim().toLowerCase();
+  const a = adminImo.trim().toLowerCase();
+
+  // Explicitly deny regional office or cross-IMO wide scopes to IMO admins
+  if (r === 'regional office iv-b' || r.includes('regional office') || r === 'all imos' || r === 'all') {
+    return false;
+  }
+
+  const isMOMARO = (str: string) => str.includes('momaro') || (str.includes('oriental') && str.includes('mindoro')) || str.includes('marinduque') || str.includes('romblon');
+  const isOccidental = (str: string) => str.includes('occidental') || str.includes('omimo');
+  const isPalawan = (str: string) => str.includes('palawan') || str.includes('pimo');
+
+  if (isMOMARO(a)) return isMOMARO(r);
+  if (isOccidental(a)) return isOccidental(r);
+  if (isPalawan(a)) return isPalawan(r);
+
+  return r === a;
+}
+
+export function isRequestInAdminJurisdiction(user: AuthUser | null, req: AccessRequest): boolean {
+  if (!user || !canUserManageRequests(user)) return false;
+  if (user.role === 'Developer' || user.role === 'RO Admin') {
+    return true; // Master Developer & Regional Office Admin have region-wide authority
+  }
+  if (user.role === 'IMO Admin') {
+    const targetOffice = req.requestedOffice || req.assignedOffice;
+    return isRequestInImoJurisdiction(targetOffice, user.imoOffice);
+  }
+  return false;
+}
+
 export function filterRequestsForAdmin(user: AuthUser | null, requests: AccessRequest[]): AccessRequest[] {
   if (!user || !canUserManageRequests(user)) return [];
-  if (user.role === 'Developer' || user.role === 'RO Admin') {
-    return requests;
-  }
-  // IMO Admin: only requests for their designated IMO
-  const adminImo = (user.imoOffice || '').toLowerCase();
-  return requests.filter(r => {
-    const reqOffice = (r.requestedOffice || '').toLowerCase();
-    return reqOffice.includes(adminImo) || adminImo.includes(reqOffice);
-  });
+  return requests.filter(r => isRequestInAdminJurisdiction(user, r));
 }
 
 // Storage key for client-side offline sync

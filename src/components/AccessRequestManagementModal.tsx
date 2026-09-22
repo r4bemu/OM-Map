@@ -34,6 +34,7 @@ import {
   canUserManageRequests,
   getNisOptionsForImo,
   getAdminJurisdictionLabel,
+  isRequestInAdminJurisdiction,
   approveAccessRequestApi,
   rejectAccessRequestApi,
   revokeAccessRequestApi
@@ -56,7 +57,21 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
   onRefreshRequests,
   isLight,
 }) => {
-  const [selectedOfficeFilter, setSelectedOfficeFilter] = useState<string>('All');
+  const isDev = isMasterAdmin(currentUser);
+  const isRO = isRegionalAdmin(currentUser);
+  const isIMO = isImoAdmin(currentUser);
+  const isAdmin = canUserManageRequests(currentUser);
+
+  const [selectedOfficeFilter, setSelectedOfficeFilter] = useState<string>(
+    isIMO && currentUser?.imoOffice ? currentUser.imoOffice : 'All'
+  );
+
+  React.useEffect(() => {
+    if (isIMO && currentUser?.imoOffice) {
+      setSelectedOfficeFilter(currentUser.imoOffice);
+    }
+  }, [isIMO, currentUser?.imoOffice]);
+
   const [statusTab, setStatusTab] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedPhoneId, setCopiedPhoneId] = useState<string | null>(null);
@@ -68,11 +83,6 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
   const [rejectReason, setRejectReason] = useState('');
   const [isSubmittingAction, setIsSubmittingAction] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
-
-  const isDev = isMasterAdmin(currentUser);
-  const isRO = isRegionalAdmin(currentUser);
-  const isIMO = isImoAdmin(currentUser);
-  const isAdmin = canUserManageRequests(currentUser);
 
   // Available roles based on administrator tier
   const availableRolesForApprover = useMemo(() => {
@@ -131,12 +141,8 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
   const filteredRequests = useMemo(() => {
     return requests.filter(req => {
       // 1. Jurisdiction check
-      if (isIMO && currentUser?.imoOffice) {
-        const reqOffice = (req.requestedOffice || '').toLowerCase();
-        const adminOffice = currentUser.imoOffice.toLowerCase();
-        if (!reqOffice.includes(adminOffice) && !adminOffice.includes(reqOffice)) {
-          return false;
-        }
+      if (!isRequestInAdminJurisdiction(currentUser, req)) {
+        return false;
       }
 
       // 2. Status tab filter
@@ -145,7 +151,8 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
       }
 
       // 3. Office dropdown filter
-      if (selectedOfficeFilter !== 'All' && req.requestedOffice !== selectedOfficeFilter) {
+      const targetOffice = req.requestedOffice || req.assignedOffice;
+      if (selectedOfficeFilter !== 'All' && targetOffice !== selectedOfficeFilter) {
         return false;
       }
 
@@ -156,14 +163,15 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
         const matchEmail = req.email?.toLowerCase().includes(q);
         const matchPhone = req.contactNumber?.toLowerCase().includes(q);
         const matchDesig = req.designation?.toLowerCase().includes(q);
-        if (!matchName && !matchEmail && !matchPhone && !matchDesig) {
+        const matchOffice = targetOffice?.toLowerCase().includes(q);
+        if (!matchName && !matchEmail && !matchPhone && !matchDesig && !matchOffice) {
           return false;
         }
       }
 
       return true;
     });
-  }, [requests, isIMO, currentUser, statusTab, selectedOfficeFilter, searchQuery]);
+  }, [requests, currentUser, statusTab, selectedOfficeFilter, searchQuery]);
 
   if (!isOpen) return null;
 
@@ -188,31 +196,28 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
     );
   }
 
-  // Counts
-  const pendingCount = requests.filter(r => {
-    if (isIMO && currentUser?.imoOffice) {
-      const reqOffice = (r.requestedOffice || '').toLowerCase();
-      const adminOffice = currentUser.imoOffice.toLowerCase();
-      return r.status === 'pending' && (reqOffice.includes(adminOffice) || adminOffice.includes(reqOffice));
-    }
-    return r.status === 'pending';
-  }).length;
+  // Counts strictly scoped to jurisdiction
+  const pendingCount = requests.filter(r => r.status === 'pending' && isRequestInAdminJurisdiction(currentUser, r)).length;
+  const approvedCount = requests.filter(r => r.status === 'approved' && isRequestInAdminJurisdiction(currentUser, r)).length;
 
-  const approvedCount = requests.filter(r => {
-    if (isIMO && currentUser?.imoOffice) {
-      const reqOffice = (r.requestedOffice || '').toLowerCase();
-      const adminOffice = currentUser.imoOffice.toLowerCase();
-      return r.status === 'approved' && (reqOffice.includes(adminOffice) || adminOffice.includes(reqOffice));
+  const formatDateTime = (dateStr?: string) => {
+    if (!dateStr) return 'Not recorded';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return `${d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}, ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+    } catch (_) {
+      return dateStr;
     }
-    return r.status === 'approved';
-  }).length;
+  };
 
   const getUserInitials = (req: AccessRequest) => {
     if (req.firstName && req.lastName) {
       return `${req.firstName.charAt(0)}${req.lastName.charAt(0)}`.toUpperCase();
     }
     if (req.fullName) {
-      const parts = req.fullName.trim().split(/\s+/).filter(Boolean);
+      const cleaned = req.fullName.replace(/\([^)]*\)/g, '').trim();
+      const parts = cleaned.split(/\s+/).filter(p => /^[a-zA-Z]/.test(p));
       if (parts.length >= 2) {
         return `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`.toUpperCase();
       }
@@ -234,14 +239,10 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
 
   const handleApprove = async (req: AccessRequest) => {
     setActionError(null);
-    // Safety check: ensure IMO Admin only approves within their designated IMO Office
-    if (isIMO && currentUser?.imoOffice) {
-      const reqOffice = (req.requestedOffice || '').toLowerCase();
-      const adminOffice = currentUser.imoOffice.toLowerCase();
-      if (!reqOffice.includes(adminOffice) && !adminOffice.includes(reqOffice)) {
-        setActionError(`Access Denied: You are only authorized to grant access within ${currentUser.imoOffice}.`);
-        return;
-      }
+    // Safety check: ensure Admin only approves within their designated jurisdiction
+    if (!isRequestInAdminJurisdiction(currentUser, req)) {
+      setActionError(`Access Denied: You are only authorized to grant access within ${currentUser?.imoOffice || 'your assigned office jurisdiction'}.`);
+      return;
     }
 
     setIsSubmittingAction(true);
@@ -269,13 +270,9 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
   const handleReject = async (reqId: string) => {
     setActionError(null);
     const targetReq = requests.find(r => r.id === reqId);
-    if (isIMO && currentUser?.imoOffice && targetReq) {
-      const reqOffice = (targetReq.requestedOffice || '').toLowerCase();
-      const adminOffice = currentUser.imoOffice.toLowerCase();
-      if (!reqOffice.includes(adminOffice) && !adminOffice.includes(reqOffice)) {
-        setActionError(`Access Denied: You are only authorized to decline requests within ${currentUser.imoOffice}.`);
-        return;
-      }
+    if (!targetReq || !isRequestInAdminJurisdiction(currentUser, targetReq)) {
+      setActionError(`Access Denied: You are only authorized to decline requests within ${currentUser?.imoOffice || 'your assigned office jurisdiction'}.`);
+      return;
     }
 
     setIsSubmittingAction(true);
@@ -298,13 +295,9 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
   const handleRevoke = async (reqId: string) => {
     setActionError(null);
     const targetReq = requests.find(r => r.id === reqId);
-    if (isIMO && currentUser?.imoOffice && targetReq) {
-      const reqOffice = (targetReq.requestedOffice || targetReq.assignedOffice || '').toLowerCase();
-      const adminOffice = currentUser.imoOffice.toLowerCase();
-      if (!reqOffice.includes(adminOffice) && !adminOffice.includes(reqOffice)) {
-        setActionError(`Access Denied: You are only authorized to revoke access within ${currentUser.imoOffice}.`);
-        return;
-      }
+    if (!targetReq || !isRequestInAdminJurisdiction(currentUser, targetReq)) {
+      setActionError(`Access Denied: You are only authorized to revoke access within ${currentUser?.imoOffice || 'your assigned office jurisdiction'}.`);
+      return;
     }
 
     if (window.confirm('Are you sure you want to suspend/revoke access for this user?')) {
@@ -618,15 +611,6 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                           </div>
                         </div>
 
-                        {isApproved && (req.reviewedBy || req.assignedRole) && (
-                          <div className="mt-2 text-[11px] p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300">
-                            Approved by: <strong>{req.reviewedBy || 'Administrator'}</strong> {req.reviewedByRole ? `(${req.reviewedByRole})` : ''} on {req.reviewedAt ? new Date(req.reviewedAt).toLocaleDateString() : 'Active'}
-                            <span className="block font-medium mt-0.5">
-                              Assigned Role: <strong>{req.assignedRole || 'Authorized Personnel'}</strong> • NIS: <strong>{req.assignedNis || 'All NIS'}</strong>
-                            </span>
-                          </div>
-                        )}
-
                         {isRejected && req.rejectionReason && (
                           <div className="mt-2 text-[11px] p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-800 dark:text-rose-300">
                             Declined: {req.rejectionReason} (by {req.reviewedBy})
@@ -725,7 +709,7 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                           )}
                         </>
                       ) : isApproved ? (
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                           <button
                             type="button"
                             onClick={() => handleRevoke(req.id)}
@@ -734,6 +718,28 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                             <Trash2 className="w-3.5 h-3.5" />
                             <span>Revoke Access</span>
                           </button>
+
+                          <div className={`space-y-1 text-[11px] leading-snug pt-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                            <div className="truncate">
+                              <span className="text-slate-500">Approved by:</span>{' '}
+                              <strong className={isLight ? 'text-slate-800' : 'text-slate-200'}>{req.reviewedBy || 'Administrator'}</strong>
+                              {req.reviewedByRole && <span className="text-slate-500 text-[10px] ml-1">({req.reviewedByRole})</span>}
+                            </div>
+                            <div className="truncate">
+                              <span className="text-slate-500">Assigned role:</span>{' '}
+                              <strong className={isLight ? 'text-emerald-700 font-bold' : 'text-emerald-400 font-bold'}>{req.assignedRole || 'Authorized Personnel'}</strong>
+                            </div>
+                            {req.assignedNis && (
+                              <div className="truncate">
+                                <span className="text-slate-500">NIS:</span>{' '}
+                                <strong className={isLight ? 'text-slate-700' : 'text-slate-300'}>{req.assignedNis}</strong>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1.5 text-[10.5px] text-slate-500 pt-0.5">
+                              <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <span>Granted: <strong className={isLight ? 'text-slate-700' : 'text-slate-300'}>{formatDateTime(req.reviewedAt || req.submittedAt)}</strong></span>
+                            </div>
+                          </div>
                         </div>
                       ) : (
                         <button
