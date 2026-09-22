@@ -25,7 +25,7 @@ import {
   DEVELOPER_EMAIL
 } from '../config/authUsers';
 import { triggerGoogleGisSignIn } from '../lib/googleIdentityAuth';
-import { triggerFacebookSignIn } from '../lib/facebookAuth';
+import { triggerFacebookSignIn, initFacebookClient } from '../lib/facebookAuth';
 import { QuickAccountPicker } from './QuickAccountPicker';
 import { GoogleProfileSetupModal, GoogleInitialData } from './GoogleProfileSetupModal';
 import { AccessRequestStatusModal } from './AccessRequestStatusModal';
@@ -158,6 +158,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     if (isOpen) {
       loadUsers();
       loadRequests();
+      initFacebookClient().catch(() => {});
     }
   }, [isOpen, loadUsers, loadRequests]);
 
@@ -301,8 +302,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     setErrorMsg('');
     setIsFacebookLoading(true);
     try {
+      console.log('[Facebook Auth] Initiating Facebook Sign-In...');
       const fbProfile = await triggerFacebookSignIn();
       setIsFacebookLoading(false);
+      console.log('[Facebook Auth] Successfully retrieved Facebook Profile:', fbProfile);
 
       if (fbProfile) {
         const userEmail = (fbProfile.email || '').toLowerCase().trim();
@@ -362,6 +365,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         }
 
         // 3. Brand new Facebook user -> open registration setup modal
+        console.log('[Facebook Auth] Opening Registration Setup Modal with profile details:', {
+          email: userEmail,
+          displayName: fbProfile.name,
+          uid: fbProfile.id,
+          firstName: fbProfile.first_name,
+          lastName: fbProfile.last_name
+        });
         setGoogleSetupData({
           email: userEmail,
           displayName: fbProfile.name,
@@ -374,6 +384,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         setIsGoogleSetupModalOpen(true);
       }
     } catch (err: any) {
+      console.error('[Facebook Auth Error]', err);
       setIsFacebookLoading(false);
       if (err.message?.includes('cancelled') || err.message?.includes('closed') || err.message?.includes('not authorized')) {
         return;
