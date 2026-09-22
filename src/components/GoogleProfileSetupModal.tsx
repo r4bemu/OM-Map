@@ -8,10 +8,13 @@ import {
 import { AccessRequest } from '../types';
 
 export interface GoogleInitialData {
-  email: string;
+  email?: string;
   displayName?: string;
   photoURL?: string;
   uid?: string;
+  provider?: 'google' | 'facebook';
+  firstName?: string;
+  lastName?: string;
 }
 
 interface GoogleProfileSetupModalProps {
@@ -36,6 +39,9 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
   onSubmitRequest,
   isLight,
 }) => {
+  // Email input (editable if provider did not yield email)
+  const [emailInput, setEmailInput] = useState(initialData?.email || '');
+
   // Name parts
   const [firstName, setFirstName] = useState('');
   const [middleInitial, setMiddleInitial] = useState('');
@@ -51,23 +57,34 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
   // Office Selection (Requires active selection from user)
   const [selectedOffice, setSelectedOffice] = useState<string>('');
 
-  // Parse initial name from Google displayName
+  // Parse initial name and email from provider data
   useEffect(() => {
-    if (initialData && initialData.displayName) {
-      const parts = initialData.displayName.trim().split(/\s+/);
-      if (parts.length === 1) {
-        setFirstName(parts[0]);
-      } else if (parts.length === 2) {
-        setFirstName(parts[0]);
-        setLastName(parts[1]);
-      } else if (parts.length >= 3) {
-        setFirstName(parts[0]);
-        if (parts[1].length <= 2) {
-          setMiddleInitial(parts[1].replace('.', ''));
-          setLastName(parts.slice(2).join(' '));
-        } else {
-          setFirstName(parts.slice(0, -1).join(' '));
-          setLastName(parts[parts.length - 1]);
+    if (initialData) {
+      if (initialData.email) {
+        setEmailInput(initialData.email);
+      }
+      if (initialData.firstName) {
+        setFirstName(initialData.firstName);
+      }
+      if (initialData.lastName) {
+        setLastName(initialData.lastName);
+      }
+      if (!initialData.firstName && !initialData.lastName && initialData.displayName) {
+        const parts = initialData.displayName.trim().split(/\s+/);
+        if (parts.length === 1) {
+          setFirstName(parts[0]);
+        } else if (parts.length === 2) {
+          setFirstName(parts[0]);
+          setLastName(parts[1]);
+        } else if (parts.length >= 3) {
+          setFirstName(parts[0]);
+          if (parts[1].length <= 2) {
+            setMiddleInitial(parts[1].replace('.', ''));
+            setLastName(parts.slice(2).join(' '));
+          } else {
+            setFirstName(parts.slice(0, -1).join(' '));
+            setLastName(parts[parts.length - 1]);
+          }
         }
       }
     }
@@ -139,10 +156,14 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
       return;
     }
 
-    const email = initialData.email.toLowerCase().trim();
+    const emailToUse = (emailInput || initialData.email || '').toLowerCase().trim();
+    if (!emailToUse || !emailToUse.includes('@')) {
+      alert('Please enter a valid official email address.');
+      return;
+    }
 
     const requestPayload: Partial<AccessRequest> = {
-      email: email,
+      email: emailToUse,
       firstName: firstName.trim(),
       middleInitial: middleInitial.trim(),
       lastName: lastName.trim(),
@@ -154,7 +175,8 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
       requestedApps: ['Maintenance and Status of Irrigation Facilities'],
       status: 'pending',
       avatar: initialData.photoURL || undefined,
-      uid: initialData.uid
+      uid: initialData.uid,
+      provider: initialData.provider || 'google'
     };
 
     onSubmitRequest(requestPayload);
@@ -297,6 +319,35 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
                 />
               </div>
             </div>
+          </div>
+
+          {/* Official Email Address */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className={`font-bold uppercase tracking-wider text-xs ${isLight ? 'text-slate-900' : 'text-zinc-100'}`}>
+                Official Email Address <span className="text-rose-500">*</span>
+              </label>
+              {initialData?.email && (
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                  isLight ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40'
+                }`}>
+                  Verified via {initialData.provider === 'facebook' ? 'Facebook' : 'Google'}
+                </span>
+              )}
+            </div>
+            <input
+              type="email"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              placeholder="e.g. yourname.nia@gmail.com"
+              disabled={Boolean(initialData?.email)}
+              className={`w-full rounded-lg px-3 py-2.5 border transition focus:outline-none ${
+                initialData?.email
+                  ? (isLight ? 'bg-slate-100 text-slate-600 border-slate-300 cursor-not-allowed font-mono' : 'bg-[#202023] text-zinc-400 border-[#3f3f46] cursor-not-allowed font-mono')
+                  : (isLight ? 'bg-white border-slate-300 text-slate-900 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 placeholder-slate-400' : 'bg-[#27272a] border-[#3f3f46] text-[#fafafa] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-zinc-500')
+              }`}
+              required
+            />
           </div>
 
           {/* Official Mobile Number */}

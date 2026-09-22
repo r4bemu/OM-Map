@@ -67,7 +67,8 @@ export interface AuthUser {
   contactNumber?: string;
   email?: string;
   googleId?: string;
-  provider?: 'google' | 'local';
+  facebookId?: string;
+  provider?: 'google' | 'facebook' | 'local';
   isAdmitted?: boolean;
   createdAt?: string;
 }
@@ -97,6 +98,7 @@ export interface AccessRequest {
   rejectionReason?: string;
   avatar?: string;
   uid?: string;
+  provider?: 'google' | 'facebook' | 'local';
 }
 
 export type BasemapType = 'satellite' | 'dark' | 'streets';

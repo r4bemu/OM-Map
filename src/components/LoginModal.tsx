@@ -25,6 +25,7 @@ import {
   DEVELOPER_EMAIL
 } from '../config/authUsers';
 import { triggerGoogleGisSignIn } from '../lib/googleIdentityAuth';
+import { triggerFacebookSignIn } from '../lib/facebookAuth';
 import { QuickAccountPicker } from './QuickAccountPicker';
 import { GoogleProfileSetupModal, GoogleInitialData } from './GoogleProfileSetupModal';
 import { AccessRequestStatusModal } from './AccessRequestStatusModal';
@@ -49,6 +50,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isFacebookLoading, setIsFacebookLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
 
   const [selectedAccount, setSelectedAccount] = useState<AuthUser | null>(null);
@@ -98,21 +100,22 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   }, []);
 
   // Helper to log in a user whose AccessRequest is approved
-  const loginApprovedUser = useCallback((approvedReq: AccessRequest, googlePicture?: string) => {
+  const loginApprovedUser = useCallback((approvedReq: AccessRequest, userPicture?: string, provider: 'google' | 'facebook' = 'google') => {
     const userEmail = approvedReq.email.toLowerCase().trim();
+    const isFb = provider === 'facebook' || approvedReq.provider === 'facebook';
     const approvedUser: AuthUser = {
-      id: `usr-gauth-${approvedReq.id}`,
+      id: `usr-${isFb ? 'fb' : 'gauth'}-${approvedReq.id}`,
       username: userEmail.split('@')[0].replace(/[^a-z0-9_]/g, '_'),
       name: approvedReq.fullName,
       role: approvedReq.assignedRole || approvedReq.requestedRole || 'Field Personnel',
-      passcode: 'GOOGLE_AUTH_SSO',
+      passcode: isFb ? 'FACEBOOK_AUTH_SSO' : 'GOOGLE_AUTH_SSO',
       imoOffice: approvedReq.assignedOffice || approvedReq.requestedOffice,
       nisBinding: approvedReq.assignedNis || (Array.isArray(approvedReq.requestedNisList) ? approvedReq.requestedNisList.join(', ') : 'All NIS'),
       designation: approvedReq.designation,
       contactNumber: approvedReq.contactNumber,
-      avatar: googlePicture || approvedReq.avatar,
+      avatar: userPicture || approvedReq.avatar,
       email: userEmail,
-      provider: 'google'
+      provider: isFb ? 'facebook' : 'google'
     };
     setIsStatusModalOpen(false);
     onLogin(approvedUser);
@@ -294,6 +297,91 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   };
 
+  const handleFacebookSignInClick = async () => {
+    setErrorMsg('');
+    setIsFacebookLoading(true);
+    try {
+      const fbProfile = await triggerFacebookSignIn();
+      setIsFacebookLoading(false);
+
+      if (fbProfile) {
+        const userEmail = (fbProfile.email || '').toLowerCase().trim();
+
+        // 0. Master Developer Override (if Facebook email matches developer email)
+        if (userEmail && userEmail === DEVELOPER_EMAIL.toLowerCase()) {
+          const devUser: AuthUser = {
+            id: 'usr-dev-01',
+            username: 'dev_master',
+            name: fbProfile.name || 'Lead Systems Architect (Developer)',
+            role: 'Developer',
+            passcode: 'FACEBOOK_AUTH_SSO',
+            imoOffice: 'All IMOs',
+            nisBinding: 'All NIS',
+            designation: 'Master Systems Administrator - Regional Wide',
+            avatar: fbProfile.picture,
+            email: userEmail,
+            facebookId: fbProfile.id,
+            provider: 'facebook'
+          };
+          onLogin(devUser);
+          return;
+        }
+
+        // 1. Check if there is an existing access request for this user (by email or fb id)
+        let userReq: AccessRequest | null = null;
+        if (userEmail) {
+          userReq = await fetchUserAccessRequestApi(userEmail);
+          if (!userReq) {
+            userReq = requests.find(r => r.email?.toLowerCase().trim() === userEmail) || null;
+          }
+        }
+        if (!userReq && fbProfile.id) {
+          userReq = requests.find(r => r.uid === fbProfile.id) || null;
+        }
+
+        if (userReq) {
+          if (userReq.status === 'approved') {
+            // User is approved -> Log in directly!
+            loginApprovedUser(userReq, fbProfile.picture, 'facebook');
+            return;
+          } else {
+            // Request is Pending or Rejected -> show status modal
+            setStatusModalRequest(userReq);
+            setIsStatusModalOpen(true);
+            return;
+          }
+        }
+
+        // 2. Check if email matches one of the pre-configured accounts
+        if (userEmail) {
+          const matchedLocalUser = allUsers.find(u => u.email?.toLowerCase().trim() === userEmail);
+          if (matchedLocalUser) {
+            onLogin({ ...matchedLocalUser, avatar: fbProfile.picture || matchedLocalUser.avatar, provider: 'facebook' });
+            return;
+          }
+        }
+
+        // 3. Brand new Facebook user -> open registration setup modal
+        setGoogleSetupData({
+          email: userEmail,
+          displayName: fbProfile.name,
+          photoURL: fbProfile.picture,
+          uid: fbProfile.id,
+          provider: 'facebook',
+          firstName: fbProfile.first_name,
+          lastName: fbProfile.last_name
+        });
+        setIsGoogleSetupModalOpen(true);
+      }
+    } catch (err: any) {
+      setIsFacebookLoading(false);
+      if (err.message?.includes('cancelled') || err.message?.includes('closed') || err.message?.includes('not authorized')) {
+        return;
+      }
+      setErrorMsg(err.message || 'Unable to connect to Facebook. Please try again.');
+    }
+  };
+
   const handleRequestSubmitted = async (requestPayload: Partial<AccessRequest>) => {
     setIsGoogleSetupModalOpen(false);
     setIsLoading(true);
@@ -384,12 +472,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
             )}
 
-            {/* Google Single Sign-On (SSO) Button */}
-            <div className="mb-4">
+            {/* Social Single Sign-On (SSO) Buttons */}
+            <div className="mb-4 space-y-2">
               <button
                 type="button"
                 onClick={handleGoogleSignInClick}
-                disabled={isGoogleLoading}
+                disabled={isGoogleLoading || isFacebookLoading}
                 className={`w-full py-2.5 px-4 rounded-xl border font-semibold text-xs transition flex items-center justify-center gap-2.5 cursor-pointer shadow-sm disabled:opacity-50 active:scale-[0.99] ${
                   isLight
                     ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-800 shadow-slate-900/5'
@@ -416,6 +504,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   />
                 </svg>
                 <span>{isGoogleLoading ? 'Connecting to Google Account...' : 'Continue with Google Account'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleFacebookSignInClick}
+                disabled={isFacebookLoading || isGoogleLoading}
+                className={`w-full py-2.5 px-4 rounded-xl border font-semibold text-xs transition flex items-center justify-center gap-2.5 cursor-pointer shadow-sm disabled:opacity-50 active:scale-[0.99] ${
+                  isLight
+                    ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-800 shadow-slate-900/5'
+                    : 'bg-slate-800 hover:bg-slate-750 border-slate-700 text-white'
+                }`}
+              >
+                {/* Meta / Facebook SVG Logo */}
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="#1877F2">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                <span>{isFacebookLoading ? 'Connecting to Facebook...' : 'Continue with Facebook / Messenger'}</span>
               </button>
             </div>
 
