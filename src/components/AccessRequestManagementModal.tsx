@@ -67,10 +67,24 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
   );
 
   React.useEffect(() => {
-    if (isIMO && currentUser?.imoOffice) {
-      setSelectedOfficeFilter(currentUser.imoOffice);
+    if (isOpen) {
+      if (isIMO && currentUser?.imoOffice) {
+        setSelectedOfficeFilter(currentUser.imoOffice);
+      } else if (isDev || isRO) {
+        setSelectedOfficeFilter('All');
+      }
     }
-  }, [isIMO, currentUser?.imoOffice]);
+  }, [isOpen, isIMO, isDev, isRO, currentUser?.imoOffice]);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await onRefreshRequests();
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 600);
+    }
+  };
 
   const [statusTab, setStatusTab] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
   const [searchQuery, setSearchQuery] = useState('');
@@ -349,13 +363,14 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={onRefreshRequests}
+              onClick={handleRefresh}
+              disabled={isRefreshing}
               className={`p-2 rounded-xl border transition cursor-pointer ${
                 isLight ? 'border-slate-300 hover:bg-slate-200 text-slate-600' : 'border-slate-700 hover:bg-slate-800 text-slate-400'
               }`}
               title="Refresh Requests"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
             <button
               type="button"
@@ -497,9 +512,22 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
               <h3 className="font-bold text-sm">No Access Requests Found</h3>
               <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
                 {statusTab === 'pending'
-                  ? 'There are currently no pending access requests requiring your jurisdictional review.'
+                  ? selectedOfficeFilter !== 'All'
+                    ? `No pending access requests found for "${selectedOfficeFilter}".`
+                    : 'There are currently no pending access requests requiring your jurisdictional review.'
                   : 'No records matching your search and filter criteria.'}
               </p>
+              {selectedOfficeFilter !== 'All' && (isDev || isRO) && (
+                <div className="mt-3.5">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedOfficeFilter('All')}
+                    className="px-3.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 font-semibold text-xs transition cursor-pointer border border-emerald-500/30 inline-flex items-center gap-1.5"
+                  >
+                    <span>View All Offices ({pendingCount} pending in queue)</span>
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             filteredRequests.map((req) => {

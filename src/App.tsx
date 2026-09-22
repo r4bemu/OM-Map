@@ -256,9 +256,9 @@ export default function App() {
   const [isRoleMatrixModalOpen, setIsRoleMatrixModalOpen] = useState(false);
   const [accessRequests, setAccessRequests] = useState<AccessRequest[]>([]);
 
-  const loadAccessRequests = useCallback(async () => {
+  const loadAccessRequests = useCallback(async (forceFresh = false) => {
     try {
-      const data = await fetchAccessRequestsApi();
+      const data = await fetchAccessRequestsApi(forceFresh);
       setAccessRequests(data);
     } catch (e) {
       console.warn('Could not load access requests:', e);
@@ -267,7 +267,7 @@ export default function App() {
 
   useEffect(() => {
     loadAccessRequests();
-    const interval = setInterval(loadAccessRequests, 30000);
+    const interval = setInterval(() => loadAccessRequests(false), 30000);
     return () => clearInterval(interval);
   }, [loadAccessRequests]);
 
@@ -2523,7 +2523,7 @@ export default function App() {
         }}
         currentUser={authenticatedUser}
         requests={accessRequests}
-        onRefreshRequests={loadAccessRequests}
+        onRefreshRequests={() => loadAccessRequests(true)}
         isLight={theme === 'light'}
       />
 
