@@ -140,7 +140,18 @@ const INITIAL_SEED_REQUESTS = [
   }
 ];
 
-async function getAccessRequests(): Promise<any[]> {
+let accessRequestsCache: { data: any[]; timestamp: number } | null = null;
+const ACCESS_REQUESTS_CACHE_TTL_MS = 5000;
+
+function invalidateAccessRequestsCache(): void {
+  accessRequestsCache = null;
+}
+
+async function getAccessRequests(forceFresh = false): Promise<any[]> {
+  if (!forceFresh && accessRequestsCache && (Date.now() - accessRequestsCache.timestamp < ACCESS_REQUESTS_CACHE_TTL_MS)) {
+    return accessRequestsCache.data;
+  }
+
   try {
     const snap = await adminDb.collection('access_requests').get();
     if (snap.empty) {
@@ -152,6 +163,7 @@ async function getAccessRequests(): Promise<any[]> {
       }
       await batch.commit();
       console.log(`✅ Seeded ${INITIAL_SEED_REQUESTS.length} initial requests to Firestore.`);
+      accessRequestsCache = { data: INITIAL_SEED_REQUESTS, timestamp: Date.now() };
       return INITIAL_SEED_REQUESTS;
     }
 
@@ -169,6 +181,7 @@ async function getAccessRequests(): Promise<any[]> {
     }
 
     items.sort((a, b) => new Date(b.submittedAt || 0).getTime() - new Date(a.submittedAt || 0).getTime());
+    accessRequestsCache = { data: items, timestamp: Date.now() };
     return items;
   } catch (e) {
     console.error('🔥 Firestore getAccessRequests error:', e);
@@ -202,6 +215,7 @@ async function saveAccessRequestItem(item: any): Promise<void> {
   try {
     const cleaned = cleanFirestoreDoc(item);
     await adminDb.collection('access_requests').doc(cleaned.id).set(cleaned, { merge: true });
+    invalidateAccessRequestsCache();
   } catch (e) {
     console.error('🔥 Firestore saveAccessRequestItem error:', e);
     throw e;
@@ -711,7 +725,8 @@ export async function createApp() {
   app.get('/api/access-requests', async (req, res) => {
     try {
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-      const requests = await getAccessRequests();
+      const forceFresh = req.query.fresh === 'true';
+      const requests = await getAccessRequests(forceFresh);
       res.json(requests);
     } catch (err: any) {
       console.error('Failed to fetch access requests from Firestore:', err);
@@ -730,7 +745,8 @@ export async function createApp() {
         return res.json(devItem);
       }
 
-      const requests = await getAccessRequests();
+      const forceFresh = req.query.fresh === 'true';
+      const requests = await getAccessRequests(forceFresh);
       const reqItem = requests.find((r: any) => r.email?.toLowerCase().trim() === email);
       if (!reqItem) {
         return res.status(404).json({ error: 'No access request found for this email.' });

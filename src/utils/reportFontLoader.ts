@@ -1,24 +1,26 @@
 import { jsPDF } from 'jspdf';
-import {
-  CAMBRIA_REGULAR_BASE64,
-  CAMBRIA_BOLD_BASE64,
-  CALIBRI_REGULAR_BASE64,
-  CALIBRI_BOLD_BASE64,
-  TRAJAN_PRO_REGULAR_BASE64
-} from './wmrFontsBase64';
 
 /**
  * Loads and registers official Cambria, Calibri, and Trajan Pro fonts into a jsPDF document instance.
+ * Dynamically loaded on-demand so initial application / login bundle does not include 8MB of font data.
  * - Cambria (normal, bold)
  * - Calibri (normal, bold)
  * - Trajan Pro (normal, bold)
  */
-export function registerWmrCustomFonts(doc: jsPDF): { hasCambria: boolean; hasCalibri: boolean; hasTrajan: boolean } {
+export async function registerWmrCustomFonts(doc: jsPDF): Promise<{ hasCambria: boolean; hasCalibri: boolean; hasTrajan: boolean }> {
   let hasCambria = false;
   let hasCalibri = false;
   let hasTrajan = false;
 
   try {
+    const {
+      CAMBRIA_REGULAR_BASE64,
+      CAMBRIA_BOLD_BASE64,
+      CALIBRI_REGULAR_BASE64,
+      CALIBRI_BOLD_BASE64,
+      TRAJAN_PRO_REGULAR_BASE64
+    } = await import('./wmrFontsBase64');
+
     if (CAMBRIA_REGULAR_BASE64) {
       doc.addFileToVFS('Cambria.ttf', CAMBRIA_REGULAR_BASE64);
       doc.addFont('Cambria.ttf', 'Cambria', 'normal');

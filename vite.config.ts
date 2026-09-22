@@ -11,6 +11,27 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      chunkSizeWarningLimit: 2000,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('wmrFontsBase64')) {
+              return 'wmr-fonts';
+            }
+            if (id.includes('node_modules/jspdf') || id.includes('node_modules/jspdf-autotable') || id.includes('node_modules/html2canvas')) {
+              return 'pdf-engine';
+            }
+            if (id.includes('node_modules/leaflet') || id.includes('node_modules/esri-leaflet')) {
+              return 'leaflet-engine';
+            }
+            if (id.includes('node_modules/lucide-react')) {
+              return 'icons';
+            }
+          }
+        }
+      }
+    },
     server: {
       allowedHosts: true as const,
       // HMR configuration

@@ -88,9 +88,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   };
 
-  const loadRequests = useCallback(async () => {
+  const loadRequests = useCallback(async (forceFresh = false) => {
     try {
-      const reqs = await fetchAccessRequestsApi();
+      const reqs = await fetchAccessRequestsApi(forceFresh);
       setRequests(reqs);
       return reqs;
     } catch (e) {
@@ -126,8 +126,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     if (!statusModalRequest || !statusModalRequest.email) return;
     try {
       const [freshReq, reqs] = await Promise.all([
-        fetchUserAccessRequestApi(statusModalRequest.email),
-        loadRequests()
+        fetchUserAccessRequestApi(statusModalRequest.email, true),
+        loadRequests(true)
       ]);
       const matched = freshReq || reqs.find(r => r.email?.toLowerCase().trim() === statusModalRequest.email.toLowerCase().trim());
       if (matched) {

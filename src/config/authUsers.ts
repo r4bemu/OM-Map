@@ -707,26 +707,12 @@ export function authenticateUser(userIdOrUsername: string, passcode: string): Au
 
 export async function fetchRemoteAuthUsers(): Promise<AuthUser[]> {
   try {
-    const [resUsers, resApproved] = await Promise.all([
-      fetch('/api/users').catch(() => null),
-      fetch('/api/approved-users').catch(() => null)
-    ]);
+    const resUsers = await fetch('/api/users').catch(() => null);
 
     let list: AuthUser[] = [];
     if (resUsers && resUsers.ok) {
       const data = await resUsers.json();
       list = Array.isArray(data) ? data : (data && Array.isArray(data.users) ? data.users : []);
-    }
-
-    if (resApproved && resApproved.ok) {
-      const approvedUsers = await resApproved.json();
-      if (Array.isArray(approvedUsers)) {
-        approvedUsers.forEach((au: AuthUser) => {
-          if (!list.some(u => u.id === au.id || (au.email && u.email?.toLowerCase() === au.email.toLowerCase()))) {
-            list.push(au);
-          }
-        });
-      }
     }
 
     if (Array.isArray(list) && list.length > 0) {
@@ -1258,11 +1244,12 @@ export function filterRequestsForAdmin(user: AuthUser | null, requests: AccessRe
 // Storage key for client-side offline sync
 const STORAGE_REQUESTS_KEY = 'ommap_access_requests_v3';
 
-export async function fetchAccessRequestsApi(): Promise<AccessRequest[]> {
+export async function fetchAccessRequestsApi(forceFresh = false): Promise<AccessRequest[]> {
   try {
-    const res = await fetch(`/api/access-requests?t=${Date.now()}`, {
+    const url = forceFresh ? `/api/access-requests?fresh=true&t=${Date.now()}` : '/api/access-requests';
+    const res = await fetch(url, forceFresh ? {
       headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
-    });
+    } : undefined);
     if (res.ok) {
       const data = await res.json();
       try { localStorage.setItem(STORAGE_REQUESTS_KEY, JSON.stringify(data)); } catch (_) {}
@@ -1280,18 +1267,21 @@ export async function fetchAccessRequestsApi(): Promise<AccessRequest[]> {
   return [];
 }
 
-export async function fetchUserAccessRequestApi(email: string): Promise<AccessRequest | null> {
+export async function fetchUserAccessRequestApi(email: string, forceFresh = false): Promise<AccessRequest | null> {
   if (!email) return null;
   try {
-    const res = await fetch(`/api/access-requests/user/${encodeURIComponent(email.toLowerCase().trim())}?t=${Date.now()}`, {
+    const url = forceFresh 
+      ? `/api/access-requests/user/${encodeURIComponent(email.toLowerCase().trim())}?fresh=true&t=${Date.now()}`
+      : `/api/access-requests/user/${encodeURIComponent(email.toLowerCase().trim())}`;
+    const res = await fetch(url, forceFresh ? {
       headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
-    });
+    } : undefined);
     if (res.ok) {
       return await res.json();
     }
   } catch (_) {}
 
-  const requests = await fetchAccessRequestsApi();
+  const requests = await fetchAccessRequestsApi(forceFresh);
   return requests.find(r => r.email?.toLowerCase().trim() === email.toLowerCase().trim()) || null;
 }
 

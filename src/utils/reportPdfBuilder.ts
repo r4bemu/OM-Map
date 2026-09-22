@@ -169,7 +169,7 @@ export async function generateReportPdf(report: FieldReport): Promise<jsPDF> {
   const margin = 14;
   const contentWidth = pageWidth - margin * 2;
 
-  const { hasCambria, hasCalibri, hasTrajan } = registerWmrCustomFonts(doc);
+  const { hasCambria, hasCalibri, hasTrajan } = await registerWmrCustomFonts(doc);
   const cambriaFont = hasCambria ? 'Cambria' : 'times';
   const calibriFont = hasCalibri ? 'Calibri' : 'helvetica';
   const trajanFont = hasTrajan ? 'TrajanPro' : 'times';
@@ -968,8 +968,8 @@ export async function generateWmrPdf(
   const margin = 10;
   const contentWidth = pageWidth - margin * 2; // 277mm
 
-  // Register and initialize Cambria, Calibri & Trajan Pro fonts synchronously
-  const { hasCambria, hasCalibri, hasTrajan } = registerWmrCustomFonts(doc);
+  // Register and initialize Cambria, Calibri & Trajan Pro fonts asynchronously
+  const { hasCambria, hasCalibri, hasTrajan } = await registerWmrCustomFonts(doc);
   const cambriaFont = hasCambria ? 'Cambria' : 'times';
   const calibriFont = hasCalibri ? 'Calibri' : 'helvetica';
   const trajanFont = hasTrajan ? 'TrajanPro' : 'times';
@@ -1572,8 +1572,8 @@ export async function generatePhotoDocsPdf(
   const margin = 12;
   const contentWidth = pageWidth - margin * 2; // 186mm
 
-  // Register and initialize Cambria, Calibri & Trajan Pro fonts synchronously
-  const { hasCambria, hasCalibri, hasTrajan } = registerWmrCustomFonts(doc);
+  // Register and initialize Cambria, Calibri & Trajan Pro fonts asynchronously
+  const { hasCambria, hasCalibri, hasTrajan } = await registerWmrCustomFonts(doc);
   const cambriaFont = hasCambria ? 'Cambria' : 'times';
   const calibriFont = hasCalibri ? 'Calibri' : 'helvetica';
   const trajanFont = hasTrajan ? 'TrajanPro' : 'times';
