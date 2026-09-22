@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Data Deletion Instructions — NIA Region IV-B Operations &amp; GIS Portal</title>
+  <link rel="icon" type="image/png" href="/nia-logo.png">
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent: #009933;
+      --accent-light: #10b981;
+      --link: #34d399;
+      --warning-bg: rgba(245, 158, 11, 0.1);
+      --warning-border: rgba(245, 158, 11, 0.3);
+      --warning-text: #fbbf24;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f8fafc;
+        --card-bg: #ffffff;
+        --card-border: #e2e8f0;
+        --text-main: #0f172a;
+        --text-muted: #475569;
+        --accent: #009933;
+        --accent-light: #059669;
+        --link: #00802b;
+        --warning-bg: #fffbeb;
+        --warning-border: #fde68a;
+        --warning-text: #b45309;
+      }
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.65;
+      padding: 24px 16px 60px;
+    }
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .logo {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 16px;
+      object-fit: contain;
+    }
+    .agency-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .sub-title {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .meta-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 12px;
+      background: rgba(0, 153, 51, 0.12);
+      border: 1px solid rgba(0, 153, 51, 0.25);
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-light);
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .callout {
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: var(--warning-text);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 13.5px;
+      margin-bottom: 16px;
+    }
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    p {
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    p strong {
+      color: var(--text-main);
+    }
+    ol, ul {
+      margin-left: 22px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    li strong {
+      color: var(--text-main);
+    }
+    code {
+      background: rgba(0, 0, 0, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12.5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    a {
+      color: var(--link);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .footer-nav {
+      text-align: center;
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid var(--card-border);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #ffffff !important;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 12px;
+      transition: opacity 0.2s;
+    }
+    .btn:hover {
+      opacity: 0.9;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <img src="/nia-logo.png" alt="NIA Official Logo" class="logo" onerror="this.style.display='none'">
+      <div class="agency-tag">Republic of the Philippines • National Irrigation Administration</div>
+      <h1>Regional Office IV-B (MIMAROPA)</h1>
+      <div class="sub-title">Operations &amp; GIS Portal (OM-Map) — User Data Deletion Instructions</div>
+      <div class="meta-badge">Meta Platform Compliance • App ID: 2266325060823137</div>
+    </header>
+
+    <div class="callout">
+      <strong>Compliance Notice:</strong> In accordance with Meta Platform Policy and Philippine Data Privacy regulations, users who access the NIA Region IV-B Operations &amp; GIS Portal (OM-Map) using Facebook / Messenger have the right to request the deletion of their personal data and authentication records.
+    </div>
+
+    <div class="card">
+      <h2>1. Immediate Revocation via Facebook Settings</h2>
+      <p>You can instantly disconnect the application from your Meta account at any time by following these steps:</p>
+      <ol>
+        <li>Log in to your Facebook account on the web or mobile app.</li>
+        <li>Go to <strong>Settings &amp; Privacy</strong> &rarr; <strong>Settings</strong>.</li>
+        <li>In the left-hand navigation menu, select <strong>Apps and Websites</strong> (under <em>Your information and permissions</em>).</li>
+        <li>Locate <strong>NIA Region IV-B Operations &amp; GIS Portal</strong> in your active applications list.</li>
+        <li>Click <strong>Remove</strong> to immediately revoke all authentication tokens and access permissions granted to the portal.</li>
+        <li><em>(Optional)</em> In the confirmation prompt, you may also choose to request that Facebook notify our system to purge any previously shared profile information.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>2. Direct Account &amp; Profile Deletion via Administrator</h2>
+      <p>
+        If you wish to completely purge your registered profile record, mobile contact number, avatar thumbnail, and institutional role bindings from our Cloud Firestore database:
+      </p>
+      <ol>
+        <li>Send an email to the System Administrator: <a href="mailto:r4b.emu@gmail.com?subject=Data%20Deletion%20Request%20-%20NIA%20OM-Map">r4b.emu@gmail.com</a></li>
+        <li>Use the Subject Line: <code>Data Deletion Request - NIA OM-Map</code></li>
+        <li>In the body of the email, provide:
+          <ul>
+            <li>Your Full Name</li>
+            <li>Your Registered Email Address (or Facebook account name)</li>
+            <li>Your Assigned Office / Designation</li>
+          </ul>
+        </li>
+        <li><strong>Processing SLA</strong>: Requests are reviewed and executed within <strong>forty-eight (48) hours</strong>. You will receive an email confirmation once your profile record and authentication credentials have been permanently deleted.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>3. Scope of Data Deletion</h2>
+      <p>Upon receipt and verification of a data deletion request, the following records are permanently expunged:</p>
+      <ul>
+        <li><strong>Authentication Bindings</strong>: Your Meta Facebook User ID (UID), OAuth access tokens, and login credentials.</li>
+        <li><strong>User Profile Data</strong>: Full name, profile avatar image, official mobile number, and registered email address.</li>
+        <li><strong>Jurisdictional Queues</strong>: Any pending, approved, or rejected access request entries in the administrative review database.</li>
+      </ul>
+      <p>
+        <em>Note on Civil Infrastructure Audit Records:</em> In compliance with Republic of the Philippines public auditing and civil works guidelines, historical Form 691 canal maintenance and inspection reports that have already been finalized and incorporated into official government archives remain preserved for institutional audit integrity.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>4. Automated Data Deletion Status</h2>
+      <p>
+        If you have previously submitted an automated data deletion request through Facebook, you may query your deletion status by contacting the administrator at <a href="mailto:r4b.emu@gmail.com">r4b.emu@gmail.com</a> with your confirmation identifier.
+      </p>
+    </div>
+
+    <footer class="footer-nav">
+      <p>&copy; 2026 National Irrigation Administration — Region IV-B MIMAROPA. All Rights Reserved.</p>
+      <p><a href="/privacy">Privacy Policy</a> &bull; <a href="/data-deletion">User Data Deletion Instructions</a></p>
+      <a href="/" class="btn">&larr; Return to Application Portal</a>
+    </footer>
+  </div>
+</body>
+</html>

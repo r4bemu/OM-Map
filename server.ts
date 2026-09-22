@@ -953,6 +953,53 @@ export async function createApp() {
     }
   });
 
+  // Meta & Regulatory Compliance: Privacy Policy & User Data Deletion Endpoints
+  const sendComplianceHtml = (res: express.Response, fileName: string) => {
+    const candidates = [
+      path.join(process.cwd(), 'public', fileName),
+      path.join(process.cwd(), 'dist', fileName),
+      path.join(__dirname, 'public', fileName),
+      path.join(__dirname, 'dist', fileName),
+      path.join(__dirname, fileName),
+    ];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) {
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        return res.sendFile(c);
+      }
+    }
+    return res.status(404).send(`Compliance document ${fileName} not found.`);
+  };
+
+  app.get(['/privacy', '/privacy-policy', '/privacy.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    sendComplianceHtml(res, 'privacy.html');
+  });
+
+  app.get(['/data-deletion', '/data-deletion-instructions', '/data-deletion.html', '/deletion'], (req, res) => {
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    sendComplianceHtml(res, 'data-deletion.html');
+  });
+
+  // Meta Automated Data Deletion Callback Endpoint
+  app.post('/api/facebook/data-deletion', express.urlencoded({ extended: true }), async (req, res) => {
+    try {
+      const confirmationCode = `del-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+      const host = req.get('host') || 'nia-om-geopulse-518397636928.asia-southeast1.run.app';
+      const protocol = req.protocol === 'http' && !req.get('x-forwarded-proto') ? 'http' : 'https';
+      const statusUrl = `${protocol}://${host}/data-deletion?code=${confirmationCode}`;
+
+      console.log(`[Meta Data Deletion Callback] Generated deletion confirmation code: ${confirmationCode}`);
+      res.json({
+        url: statusUrl,
+        confirmation_code: confirmationCode
+      });
+    } catch (err: any) {
+      console.error('Error handling Meta data deletion callback:', err);
+      res.status(500).json({ error: 'Failed to process data deletion callback' });
+    }
+  });
+
   // Reset persistent layers on server to default initial state (for cold debugging)
   app.post('/api/layers/reset', (req, res) => {
     try {

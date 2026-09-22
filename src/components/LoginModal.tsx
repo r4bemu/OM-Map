@@ -677,6 +677,27 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <span>6-Tier Institutional RBAC</span>
             </div>
           </div>
+
+          {/* Compliance & Policy Links for Meta & Regulatory Standards */}
+          <div className="mt-2.5 pt-2 flex items-center justify-center gap-3 text-[10px] text-slate-400 dark:text-slate-500">
+            <a 
+              href="/privacy" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:underline hover:text-emerald-600 dark:hover:text-emerald-400 transition"
+            >
+              Privacy Policy
+            </a>
+            <span>•</span>
+            <a 
+              href="/data-deletion" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:underline hover:text-emerald-600 dark:hover:text-emerald-400 transition"
+            >
+              User Data Deletion
+            </a>
+          </div>
         </div>
 
         {/* Right Side: Quick Account Selector with Full Filtering */}
