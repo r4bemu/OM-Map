@@ -1,5 +1,5 @@
 // NIA MIMAROPA O&M GIS Service Worker (Network-First Strategy)
-const CACHE_VERSION = 'nia-gis-v4-prod';
+const CACHE_VERSION = 'nia-gis-v5-prod';
 const STATIC_ASSETS = ['/manifest.json', '/nia-logo.png', '/asd.ico.png'];
 
 self.addEventListener('install', (e) => {
@@ -32,9 +32,11 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
 
-  // Strictly NEVER intercept Vite HMR or dev modules or API calls
+  // Strictly NEVER intercept Vite HMR, dev modules, API calls, or compliance legal documents
   if (
     url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/privacy') ||
+    url.pathname.startsWith('/data-deletion') ||
     url.pathname.startsWith('/@vite') ||
     url.pathname.startsWith('/@fs') ||
     url.pathname.startsWith('/@id') ||
@@ -44,7 +46,7 @@ self.addEventListener('fetch', (e) => {
     url.hostname === 'localhost' ||
     url.hostname === '127.0.0.1'
   ) {
-    return; // Pass directly to network / Vite HMR server
+    return; // Pass directly to network
   }
 
   // Network-First strategy for production assets
