@@ -924,6 +924,55 @@ export async function createApp() {
     }
   });
 
+  app.post('/api/access-requests/:id/update', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { fullName, designation, requestedOffice, reviewerRole, reviewerName } = req.body;
+
+      const normRole = normalizeServerUserRole(reviewerRole);
+      const requests = await getAccessRequests();
+      const item = requests.find((r: any) => r.id === id);
+      if (!item) {
+        return res.status(404).json({ error: 'Request not found' });
+      }
+
+      // Check if office is being modified - strictly only Developer or RO Admin can change office
+      if (requestedOffice !== undefined && requestedOffice !== item.requestedOffice) {
+        if (normRole !== 'Developer' && normRole !== 'RO Admin') {
+          return res.status(403).json({ error: 'Access Denied: Only Regional Administrators and Developer can change an applicant\'s Office assignment.' });
+        }
+        item.requestedOffice = requestedOffice;
+        if (item.assignedOffice) {
+          item.assignedOffice = requestedOffice;
+        }
+      }
+
+      if (fullName !== undefined && fullName.trim()) {
+        item.fullName = fullName.trim();
+        const parts = item.fullName.split(/\s+/);
+        if (parts.length > 0) {
+          item.firstName = parts[0];
+          item.lastName = parts.slice(1).join(' ') || parts[0];
+        }
+      }
+
+      if (designation !== undefined) {
+        item.designation = designation.trim();
+      }
+
+      item.lastModifiedAt = new Date().toISOString();
+      if (reviewerName) {
+        item.lastModifiedBy = reviewerName;
+      }
+
+      await saveAccessRequestItem(item);
+      res.json({ success: true, request: item });
+    } catch (err: any) {
+      console.error('Failed to update request in Firestore:', err);
+      res.status(500).json({ error: err.message || 'Failed to update request' });
+    }
+  });
+
   app.get('/api/approved-users', async (req, res) => {
     try {
       const requests = await getAccessRequests();

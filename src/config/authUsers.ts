@@ -1463,6 +1463,56 @@ export async function revokeAccessRequestApi(id: string): Promise<{ success: boo
   return { success: false };
 }
 
+export async function updateAccessRequestApi(
+  id: string,
+  payload: {
+    fullName?: string;
+    designation?: string;
+    requestedOffice?: string;
+    reviewerRole?: UserRole;
+    reviewerName?: string;
+  }
+): Promise<{ success: boolean; request?: AccessRequest; error?: string }> {
+  try {
+    const res = await fetch(`/api/access-requests/${id}/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      await fetchAccessRequestsApi();
+      return data;
+    } else {
+      const errData = await res.json().catch(() => ({}));
+      return { success: false, error: errData.error || 'Failed to update request' };
+    }
+  } catch (e: any) {
+    console.warn('API error during request update:', e);
+  }
+
+  const requests = await fetchAccessRequestsApi();
+  const index = requests.findIndex(r => r.id === id);
+  if (index !== -1) {
+    if (payload.fullName !== undefined) {
+      requests[index].fullName = payload.fullName;
+    }
+    if (payload.designation !== undefined) {
+      requests[index].designation = payload.designation;
+    }
+    if (payload.requestedOffice !== undefined) {
+      requests[index].requestedOffice = payload.requestedOffice;
+      if (requests[index].assignedOffice) {
+        requests[index].assignedOffice = payload.requestedOffice;
+      }
+    }
+    try { localStorage.setItem(STORAGE_REQUESTS_KEY, JSON.stringify(requests)); } catch (_) {}
+    return { success: true, request: requests[index] };
+  }
+
+  return { success: false, error: 'Request not found' };
+}
+
 export async function fetchApprovedUsersApi(): Promise<AuthUser[]> {
   try {
     const res = await fetch('/api/approved-users');

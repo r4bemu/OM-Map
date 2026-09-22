@@ -6,27 +6,19 @@ import {
   Check, 
   XCircle, 
   Clock, 
-  Search, 
-  Filter, 
   Phone, 
   Mail, 
   Building2, 
-  MapPin, 
   Briefcase, 
   Copy, 
   CheckCircle2, 
   AlertTriangle, 
-  ChevronRight, 
   Edit3, 
   Trash2, 
-  Sparkles,
-  RefreshCw,
-  ExternalLink,
-  Layers
+  RefreshCw
 } from 'lucide-react';
 import { AccessRequest, AuthUser, UserRole } from '../types';
 import { 
-  IMO_NIS_MAPPING, 
   CANONICAL_IMO_OFFICES, 
   isMasterAdmin, 
   isRegionalAdmin, 
@@ -37,7 +29,8 @@ import {
   isRequestInAdminJurisdiction,
   approveAccessRequestApi,
   rejectAccessRequestApi,
-  revokeAccessRequestApi
+  revokeAccessRequestApi,
+  updateAccessRequestApi
 } from '../config/authUsers';
 
 interface AccessRequestManagementModalProps {
@@ -47,6 +40,58 @@ interface AccessRequestManagementModalProps {
   requests: AccessRequest[];
   onRefreshRequests: () => void;
   isLight: boolean;
+}
+
+// Role hierarchy tiers for ceiling checks (higher number = higher authority)
+const ROLE_HIERARCHY: Record<string, number> = {
+  'Developer': 100,
+  'RO Admin': 80,
+  'RO Evaluator': 70,
+  'RO Reviewer': 60,
+  'RO Preparer': 50,
+  'IMO Admin': 40,
+  'IMO Evaluator': 30,
+  'IMO Reviewer': 25,
+  'IMO Preparer': 20,
+  'Field Personnel': 15,
+  'Viewer': 10,
+};
+
+const RO_OFFICIAL_ROLES: { value: UserRole; label: string; minTier: number }[] = [
+  { value: 'Developer', label: 'Developer (Master Architect)', minTier: 100 },
+  { value: 'RO Admin', label: 'RO Admin (Regional Office Gatekeeper)', minTier: 80 },
+  { value: 'RO Evaluator', label: 'RO Evaluator (Division Manager)', minTier: 70 },
+  { value: 'RO Reviewer', label: 'RO Reviewer (Quality Review)', minTier: 60 },
+  { value: 'RO Preparer', label: 'RO Preparer (Regional Preparer)', minTier: 50 },
+  { value: 'Viewer', label: 'Viewer (IA / Public Observer)', minTier: 10 },
+];
+
+const IMO_OFFICIAL_ROLES: { value: UserRole; label: string; minTier: number }[] = [
+  { value: 'IMO Admin', label: 'IMO Admin (Office Gatekeeper)', minTier: 40 },
+  { value: 'IMO Evaluator', label: 'IMO Evaluator (IMO Manager)', minTier: 30 },
+  { value: 'IMO Reviewer', label: 'IMO Reviewer (Supervising Engr)', minTier: 25 },
+  { value: 'IMO Preparer', label: 'IMO Preparer (Report Preparer)', minTier: 20 },
+  { value: 'Field Personnel', label: 'Field Personnel (Inspector)', minTier: 15 },
+  { value: 'Viewer', label: 'Viewer (IA / Public Observer)', minTier: 10 },
+];
+
+/**
+ * Dynamic role choices based on the target Office and Approver's hierarchy tier:
+ * - Regional Office: Developer, RO Roles, Viewer (IMO roles & Field Personnel excluded)
+ * - IMO Offices: IMO Roles, Field Personnel, Viewer (Developer & RO roles excluded)
+ * - Approver cannot assign any role above their own level of access
+ */
+export function getAvailableRolesForRequest(currentUser: AuthUser | null, req: AccessRequest): { value: UserRole; label: string }[] {
+  const approverRole = currentUser?.role || 'Viewer';
+  const approverTier = ROLE_HIERARCHY[approverRole] ?? 10;
+  const targetOffice = req.requestedOffice || req.assignedOffice || 'Regional Office IV-B';
+  const isROOffice = targetOffice.toLowerCase().includes('regional') || targetOffice === 'All IMOs' || targetOffice === 'All';
+
+  if (isROOffice) {
+    return RO_OFFICIAL_ROLES.filter(r => approverTier >= r.minTier).map(r => ({ value: r.value, label: r.label }));
+  } else {
+    return IMO_OFFICIAL_ROLES.filter(r => approverTier >= r.minTier).map(r => ({ value: r.value, label: r.label }));
+  }
 }
 
 export const AccessRequestManagementModal: React.FC<AccessRequestManagementModalProps> = ({
@@ -62,20 +107,6 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
   const isIMO = isImoAdmin(currentUser);
   const isAdmin = canUserManageRequests(currentUser);
 
-  const [selectedOfficeFilter, setSelectedOfficeFilter] = useState<string>(
-    isIMO && currentUser?.imoOffice ? currentUser.imoOffice : 'All'
-  );
-
-  React.useEffect(() => {
-    if (isOpen) {
-      if (isIMO && currentUser?.imoOffice) {
-        setSelectedOfficeFilter(currentUser.imoOffice);
-      } else if (isDev || isRO) {
-        setSelectedOfficeFilter('All');
-      }
-    }
-  }, [isOpen, isIMO, isDev, isRO, currentUser?.imoOffice]);
-
   const [isRefreshing, setIsRefreshing] = useState(false);
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -87,8 +118,8 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
   };
 
   const [statusTab, setStatusTab] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
-  const [searchQuery, setSearchQuery] = useState('');
   const [copiedPhoneId, setCopiedPhoneId] = useState<string | null>(null);
+  const [copiedEmailId, setCopiedEmailId] = useState<string | null>(null);
 
   // Per-request editing state for role and NIS assignment
   const [assignedRoles, setAssignedRoles] = useState<Record<string, UserRole>>({});
@@ -98,60 +129,118 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
   const [isSubmittingAction, setIsSubmittingAction] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  // Available roles based on administrator tier
-  const availableRolesForApprover = useMemo(() => {
-    if (isDev) {
-      return [
-        { value: 'Developer', label: 'Developer (Master Architect)' },
-        { value: 'RO Admin', label: 'RO Admin (Regional Office Gatekeeper)' },
-        { value: 'RO Evaluator', label: 'RO Evaluator (Division Manager)' },
-        { value: 'RO Reviewer', label: 'RO Reviewer (Quality Review)' },
-        { value: 'RO Preparer', label: 'RO Preparer (Regional Preparer)' },
-        { value: 'IMO Admin', label: 'IMO Admin (Office Gatekeeper)' },
-        { value: 'IMO Evaluator', label: 'IMO Evaluator (IMO Manager)' },
-        { value: 'IMO Reviewer', label: 'IMO Reviewer (Supervising Engr)' },
-        { value: 'IMO Preparer', label: 'IMO Preparer (Report Preparer)' },
-        { value: 'Field Personnel', label: 'Field Personnel (Inspector)' },
-        { value: 'Viewer', label: 'Viewer (IA / Public Observer)' },
-      ];
-    }
-    if (isRO) {
-      return [
-        { value: 'RO Admin', label: 'RO Admin (Regional Office Gatekeeper)' },
-        { value: 'RO Evaluator', label: 'RO Evaluator (Division Manager)' },
-        { value: 'RO Reviewer', label: 'RO Reviewer (Quality Review)' },
-        { value: 'RO Preparer', label: 'RO Preparer (Regional Preparer)' },
-        { value: 'IMO Admin', label: 'IMO Admin (Office Gatekeeper)' },
-        { value: 'IMO Evaluator', label: 'IMO Evaluator (IMO Manager)' },
-        { value: 'IMO Reviewer', label: 'IMO Reviewer (Supervising Engr)' },
-        { value: 'IMO Preparer', label: 'IMO Preparer (Report Preparer)' },
-        { value: 'Field Personnel', label: 'Field Personnel (Inspector)' },
-        { value: 'Viewer', label: 'Viewer (IA / Public Observer)' },
-      ];
-    }
-    // IMO Admin (strictly within IMO jurisdiction)
-    return [
-      { value: 'IMO Admin', label: 'IMO Admin (Office Gatekeeper)' },
-      { value: 'IMO Evaluator', label: 'IMO Evaluator (IMO Manager)' },
-      { value: 'IMO Reviewer', label: 'IMO Reviewer (Supervising Engr)' },
-      { value: 'IMO Preparer', label: 'IMO Preparer (Report Preparer)' },
-      { value: 'Field Personnel', label: 'Field Personnel (Inspector)' },
-      { value: 'Viewer', label: 'Viewer (IA / Public Observer)' },
-    ];
-  }, [isDev, isRO]);
+  // Inline editing state for Name, Designation, and Office (Comments 7, 8, 9)
+  const [editingTarget, setEditingTarget] = useState<{
+    reqId: string;
+    field: 'name' | 'designation' | 'office';
+    value: string;
+  } | null>(null);
+  const [isUpdatingField, setIsUpdatingField] = useState(false);
 
-  // Determine allowed office filters based on admin role
-  const availableOffices = useMemo(() => {
-    if (isDev || isRO) {
-      return ['All', 'Regional Office IV-B', 'Mindoro Oriental-Marinduque-Romblon IMO', 'Occidental Mindoro IMO', 'Palawan IMO'];
-    }
-    if (currentUser?.imoOffice) {
-      return [currentUser.imoOffice];
-    }
-    return ['All'];
-  }, [isDev, isRO, currentUser]);
+  const handleCopyPhone = (id: string, phone: string) => {
+    navigator.clipboard.writeText(phone);
+    setCopiedPhoneId(id);
+    setTimeout(() => setCopiedPhoneId(null), 2000);
+  };
 
-  // Filter requests based on admin jurisdiction + user filters
+  const handleCopyEmail = (id: string, email: string) => {
+    navigator.clipboard.writeText(email);
+    setCopiedEmailId(id);
+    setTimeout(() => setCopiedEmailId(null), 2000);
+  };
+
+  const handleStartEdit = (reqId: string, field: 'name' | 'designation' | 'office', currentValue: string) => {
+    setEditingTarget({ reqId, field, value: currentValue });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTarget(null);
+  };
+
+  const handleSaveEdit = async (req: AccessRequest) => {
+    if (!editingTarget || editingTarget.reqId !== req.id) return;
+    const { field, value } = editingTarget;
+    const trimmed = value.trim();
+
+    if (field === 'name') {
+      if (!trimmed || trimmed === req.fullName) {
+        setEditingTarget(null);
+        return;
+      }
+      const confirmed = window.confirm(
+        "Editing the applicant's official name will update their account and notify the applicant upon granting access. Proceed?"
+      );
+      if (!confirmed) return;
+
+      setIsUpdatingField(true);
+      const res = await updateAccessRequestApi(req.id, {
+        fullName: trimmed,
+        reviewerRole: currentUser?.role,
+        reviewerName: currentUser?.name,
+      });
+      setIsUpdatingField(false);
+      setEditingTarget(null);
+      if (res.error) {
+        setActionError(res.error);
+      } else {
+        onRefreshRequests();
+      }
+    } else if (field === 'designation') {
+      if (!trimmed || trimmed === req.designation) {
+        setEditingTarget(null);
+        return;
+      }
+      const confirmed = window.confirm(
+        "Editing the applicant's designation will update their account and notify the applicant upon granting access. Proceed?"
+      );
+      if (!confirmed) return;
+
+      setIsUpdatingField(true);
+      const res = await updateAccessRequestApi(req.id, {
+        designation: trimmed,
+        reviewerRole: currentUser?.role,
+        reviewerName: currentUser?.name,
+      });
+      setIsUpdatingField(false);
+      setEditingTarget(null);
+      if (res.error) {
+        setActionError(res.error);
+      } else {
+        onRefreshRequests();
+      }
+    } else if (field === 'office') {
+      if (!trimmed || trimmed === (req.requestedOffice || req.assignedOffice)) {
+        setEditingTarget(null);
+        return;
+      }
+      const confirmed = window.confirm(
+        "Editing the applicant's office assignment will update their jurisdiction and notify the applicant upon granting access. Proceed?"
+      );
+      if (!confirmed) return;
+
+      setIsUpdatingField(true);
+      const res = await updateAccessRequestApi(req.id, {
+        requestedOffice: trimmed,
+        reviewerRole: currentUser?.role,
+        reviewerName: currentUser?.name,
+      });
+      setIsUpdatingField(false);
+      setEditingTarget(null);
+      if (res.error) {
+        setActionError(res.error);
+      } else {
+        // Reset previously selected role for this request so it re-evaluates under the new office
+        setAssignedRoles(prev => {
+          const next = { ...prev };
+          delete next[req.id];
+          return next;
+        });
+        onRefreshRequests();
+      }
+    }
+  };
+
+  // Filter requests based on admin jurisdiction + status tab (Comments 10 & 11)
   const filteredRequests = useMemo(() => {
     return requests.filter(req => {
       // 1. Jurisdiction check
@@ -164,28 +253,9 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
         return false;
       }
 
-      // 3. Office dropdown filter
-      const targetOffice = req.requestedOffice || req.assignedOffice;
-      if (selectedOfficeFilter !== 'All' && targetOffice !== selectedOfficeFilter) {
-        return false;
-      }
-
-      // 4. Search query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchName = req.fullName?.toLowerCase().includes(q);
-        const matchEmail = req.email?.toLowerCase().includes(q);
-        const matchPhone = req.contactNumber?.toLowerCase().includes(q);
-        const matchDesig = req.designation?.toLowerCase().includes(q);
-        const matchOffice = targetOffice?.toLowerCase().includes(q);
-        if (!matchName && !matchEmail && !matchPhone && !matchDesig && !matchOffice) {
-          return false;
-        }
-      }
-
       return true;
     });
-  }, [requests, currentUser, statusTab, selectedOfficeFilter, searchQuery]);
+  }, [requests, currentUser, statusTab]);
 
   if (!isOpen) return null;
 
@@ -245,12 +315,6 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
     return 'NIA';
   };
 
-  const handleCopyPhone = (id: string, phone: string) => {
-    navigator.clipboard.writeText(phone);
-    setCopiedPhoneId(id);
-    setTimeout(() => setCopiedPhoneId(null), 2000);
-  };
-
   const handleApprove = async (req: AccessRequest) => {
     setActionError(null);
     // Safety check: ensure Admin only approves within their designated jurisdiction
@@ -260,9 +324,14 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
     }
 
     setIsSubmittingAction(true);
-    const defaultRoleForApprover: UserRole = isIMO ? 'IMO Reviewer' : 'RO Reviewer';
-    const assignedRole = assignedRoles[req.id] || req.assignedRole || req.requestedRole || defaultRoleForApprover;
-    const assignedOffice = isIMO && currentUser?.imoOffice ? currentUser.imoOffice : (req.assignedOffice || req.requestedOffice || 'Regional Office IV-B');
+    const availableRoles = getAvailableRolesForRequest(currentUser, req);
+    const defaultRoleForApprover: UserRole = availableRoles[0]?.value || (isIMO ? 'IMO Reviewer' : 'RO Reviewer');
+    const assignedRole = assignedRoles[req.id] || 
+      (availableRoles.some(r => r.value === req.assignedRole) ? req.assignedRole : undefined) ||
+      (availableRoles.some(r => r.value === req.requestedRole) ? req.requestedRole : undefined) ||
+      defaultRoleForApprover;
+
+    const assignedOffice = req.assignedOffice || req.requestedOffice || (isIMO && currentUser?.imoOffice ? currentUser.imoOffice : 'Regional Office IV-B');
     const assignedNis = assignedNisMap[req.id] || req.assignedNis || (Array.isArray(req.requestedNisList) ? req.requestedNisList.join(', ') : 'All NIS');
 
     const res = await approveAccessRequestApi(req.id, {
@@ -343,14 +412,7 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
               <Users className="w-6 h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono font-bold uppercase text-[#009933]">
-                  ADMINISTRATIVE ACCESS CONTROL
-                </span>
-                <span className="text-[9px] px-2 py-0.2 rounded-full font-mono bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30">
-                  {currentUser?.role || 'Administrator'}
-                </span>
-              </div>
+              {/* Removed "Developer" badge & "ADMINISTRATIVE ACCESS CONTROL" heading (Comments 1 & 3) */}
               <h2 className="text-base sm:text-lg font-bold font-heading">
                 Personnel Access Requests &amp; Role Management
               </h2>
@@ -384,7 +446,7 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
           </div>
         </div>
 
-        {/* Toolbar & Filter Bar */}
+        {/* Toolbar Bar */}
         <div className={`p-4 border-b space-y-3 ${
           isLight ? 'border-slate-200 bg-slate-50/50' : 'border-slate-800 bg-slate-850/50'
         }`}>
@@ -450,39 +512,6 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
               </span>
             </div>
           </div>
-
-          {/* Search & Office Filter */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
-            <div className="sm:col-span-7 relative">
-              <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by Name, Email, Contact Number, or Designation..."
-                className={`w-full text-xs rounded-xl pl-9 pr-3 py-2 border transition focus:outline-none ${
-                  isLight ? 'bg-white border-slate-300 focus:border-[#009933]' : 'bg-slate-800 border-slate-700 focus:border-[#009933]'
-                }`}
-              />
-            </div>
-
-            <div className="sm:col-span-5">
-              <select
-                value={selectedOfficeFilter}
-                onChange={(e) => setSelectedOfficeFilter(e.target.value)}
-                disabled={availableOffices.length === 1}
-                className={`w-full text-xs rounded-xl px-3 py-2 border transition focus:outline-none ${
-                  isLight ? 'bg-white border-slate-300 focus:border-[#009933]' : 'bg-slate-800 border-slate-700 focus:border-[#009933]'
-                }`}
-              >
-                {availableOffices.map((off) => (
-                  <option key={off} value={off}>
-                    {off === 'All' ? 'Filter by Office (All Offices)' : off}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
         </div>
 
         {/* Action Error Alert */}
@@ -512,26 +541,19 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
               <h3 className="font-bold text-sm">No Access Requests Found</h3>
               <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
                 {statusTab === 'pending'
-                  ? selectedOfficeFilter !== 'All'
-                    ? `No pending access requests found for "${selectedOfficeFilter}".`
-                    : 'There are currently no pending access requests requiring your jurisdictional review.'
-                  : 'No records matching your search and filter criteria.'}
+                  ? 'There are currently no pending access requests requiring your jurisdictional review.'
+                  : 'No records matching the selected status tab.'}
               </p>
-              {selectedOfficeFilter !== 'All' && (isDev || isRO) && (
-                <div className="mt-3.5">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedOfficeFilter('All')}
-                    className="px-3.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 font-semibold text-xs transition cursor-pointer border border-emerald-500/30 inline-flex items-center gap-1.5"
-                  >
-                    <span>View All Offices ({pendingCount} pending in queue)</span>
-                  </button>
-                </div>
-              )}
             </div>
           ) : (
             filteredRequests.map((req) => {
-              const currentAssignedRole = assignedRoles[req.id] || req.assignedRole || req.requestedRole || 'IMO Reviewer';
+              const availableRoles = getAvailableRolesForRequest(currentUser, req);
+              const currentAssignedRole = assignedRoles[req.id] || 
+                (availableRoles.some(r => r.value === req.assignedRole) ? req.assignedRole : undefined) ||
+                (availableRoles.some(r => r.value === req.requestedRole) ? req.requestedRole : undefined) ||
+                availableRoles[0]?.value || 
+                'Viewer';
+
               const isPending = req.status === 'pending';
               const isApproved = req.status === 'approved';
               const isRejected = req.status === 'rejected';
@@ -550,7 +572,7 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     
                     {/* User Profile Info */}
-                    <div className="flex items-start gap-3 min-w-0">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
                       {req.avatar ? (
                         <img
                           src={req.avatar}
@@ -564,26 +586,91 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                       )}
 
                       <div className="min-w-0 flex-1">
+                        {/* Requestor Name & Edit Trigger (Comment 7) & Removed "Pending" Badge (Comment 2) */}
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-bold text-sm truncate">{req.fullName || req.email || 'Personnel'}</h3>
-                          <span className={`text-[9px] font-mono px-2 py-0.2 rounded-full font-bold uppercase border ${
-                            isPending
-                              ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40'
-                              : isApproved
-                              ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40'
-                              : 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/40'
-                          }`}>
-                            {req.status}
-                          </span>
+                          {editingTarget?.reqId === req.id && editingTarget.field === 'name' ? (
+                            <div className="flex items-center gap-1.5 py-0.5">
+                              <input
+                                type="text"
+                                value={editingTarget.value}
+                                onChange={(e) => setEditingTarget({ ...editingTarget, value: e.target.value })}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleSaveEdit(req);
+                                  if (e.key === 'Escape') handleCancelEdit();
+                                }}
+                                autoFocus
+                                className={`text-xs px-2 py-1 rounded-lg border font-bold ${
+                                  isLight ? 'bg-white border-emerald-500 text-slate-800' : 'bg-slate-800 border-emerald-500 text-white'
+                                } focus:outline-none`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleSaveEdit(req)}
+                                disabled={isUpdatingField}
+                                className="p-1 rounded-md bg-[#009933] text-white hover:bg-[#00802b] transition cursor-pointer"
+                                title="Save Name"
+                              >
+                                <Check className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                disabled={isUpdatingField}
+                                className="p-1 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 transition cursor-pointer"
+                                title="Cancel"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5">
+                              <h3 className="font-bold text-sm truncate">{req.fullName || req.email || 'Personnel'}</h3>
+                              {isPending && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEdit(req.id, 'name', req.fullName || '')}
+                                  className="p-0.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition cursor-pointer rounded"
+                                  title="Edit Requestor Name"
+                                >
+                                  <Edit3 className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Only show badge if NOT pending (Comment 2: Pending badge removed) */}
+                          {!isPending && (
+                            <span className={`text-[9px] font-mono px-2 py-0.2 rounded-full font-bold uppercase border ${
+                              isApproved
+                                ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40'
+                                : 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/40'
+                            }`}>
+                              {req.status}
+                            </span>
+                          )}
                         </div>
 
-                        {/* Contact & Email Badges */}
+                        {/* Contact & Email Badges with Quick Copy (Comment 6) */}
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 mt-1">
                           <span className="flex items-center gap-1">
                             <Mail className="w-3 h-3 text-slate-400 shrink-0" />
                             <a href={`mailto:${req.email}`} className="hover:underline text-emerald-600 dark:text-emerald-400">
                               {req.email}
                             </a>
+                            {req.email && (
+                              <button
+                                type="button"
+                                onClick={() => handleCopyEmail(req.id, req.email)}
+                                className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition cursor-pointer"
+                                title="Copy Email Address"
+                              >
+                                {copiedEmailId === req.id ? (
+                                  <Check className="w-3 h-3 text-emerald-600" />
+                                ) : (
+                                  <Copy className="w-3 h-3 text-slate-400" />
+                                )}
+                              </button>
+                            )}
                           </span>
 
                           <span className="flex items-center gap-1 font-mono">
@@ -606,38 +693,118 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                           </span>
                         </div>
 
-                        {/* Designation & Office */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 mt-2 text-xs">
-                          <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                        {/* Designation & Office with Inline Editing (Comments 8 & 9) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 mt-2 text-xs">
+                          {/* Designation Row (Comment 8) */}
+                          <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 min-w-0">
                             <Briefcase className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span className="truncate">Designation: <strong>{req.designation || 'Personnel'}</strong></span>
+                            {editingTarget?.reqId === req.id && editingTarget.field === 'designation' ? (
+                              <div className="flex items-center gap-1 py-0.5 flex-1 min-w-0">
+                                <input
+                                  type="text"
+                                  value={editingTarget.value}
+                                  onChange={(e) => setEditingTarget({ ...editingTarget, value: e.target.value })}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleSaveEdit(req);
+                                    if (e.key === 'Escape') handleCancelEdit();
+                                  }}
+                                  autoFocus
+                                  className={`text-xs px-2 py-0.5 rounded-lg border flex-1 min-w-0 ${
+                                    isLight ? 'bg-white border-emerald-500 text-slate-800' : 'bg-slate-800 border-emerald-500 text-white'
+                                  } focus:outline-none`}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleSaveEdit(req)}
+                                  disabled={isUpdatingField}
+                                  className="p-1 rounded-md bg-[#009933] text-white hover:bg-[#00802b] transition cursor-pointer shrink-0"
+                                  title="Save Designation"
+                                >
+                                  <Check className="w-3 h-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleCancelEdit}
+                                  disabled={isUpdatingField}
+                                  className="p-1 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 transition cursor-pointer shrink-0"
+                                  title="Cancel"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1 truncate">
+                                <span className="truncate">Designation: <strong>{req.designation || 'Personnel'}</strong></span>
+                                {isPending && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStartEdit(req.id, 'designation', req.designation || '')}
+                                    className="p-0.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition cursor-pointer rounded shrink-0"
+                                    title="Edit Designation"
+                                  >
+                                    <Edit3 className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+
+                          {/* Office Row (Comment 9 - Region Level Gatekeepers Only) */}
+                          <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 min-w-0">
                             <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span className="truncate">Office: <strong>{req.requestedOffice || 'Regional Office IV-B'}</strong></span>
+                            {editingTarget?.reqId === req.id && editingTarget.field === 'office' ? (
+                              <div className="flex items-center gap-1 py-0.5 flex-1 min-w-0">
+                                <select
+                                  value={editingTarget.value}
+                                  onChange={(e) => setEditingTarget({ ...editingTarget, value: e.target.value })}
+                                  autoFocus
+                                  className={`text-xs px-2 py-0.5 rounded-lg border flex-1 min-w-0 ${
+                                    isLight ? 'bg-white border-emerald-500 text-slate-800' : 'bg-slate-800 border-emerald-500 text-white'
+                                  } focus:outline-none`}
+                                >
+                                  <option value="Regional Office IV-B">Regional Office IV-B</option>
+                                  <option value="Mindoro Oriental-Marinduque-Romblon IMO">Mindoro Oriental-Marinduque-Romblon IMO</option>
+                                  <option value="Occidental Mindoro IMO">Occidental Mindoro IMO</option>
+                                  <option value="Palawan IMO">Palawan IMO</option>
+                                </select>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSaveEdit(req)}
+                                  disabled={isUpdatingField}
+                                  className="p-1 rounded-md bg-[#009933] text-white hover:bg-[#00802b] transition cursor-pointer shrink-0"
+                                  title="Save Office"
+                                >
+                                  <Check className="w-3 h-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleCancelEdit}
+                                  disabled={isUpdatingField}
+                                  className="p-1 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 transition cursor-pointer shrink-0"
+                                  title="Cancel"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1 truncate">
+                                <span className="truncate">Office: <strong>{req.requestedOffice || 'Regional Office IV-B'}</strong></span>
+                                {isPending && (isDev || isRO) && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStartEdit(req.id, 'office', req.requestedOffice || 'Regional Office IV-B')}
+                                    className="p-0.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition cursor-pointer rounded shrink-0"
+                                    title="Edit Office Assignment (Regional Authority Only)"
+                                  >
+                                    <Edit3 className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
 
-                        {/* Requested Applications */}
-                        <div className="flex items-start gap-1.5 mt-2 text-xs text-slate-600 dark:text-slate-400">
-                          <Layers className="w-3.5 h-3.5 text-[#009933] shrink-0 mt-0.5" />
-                          <div>
-                            <span className="text-slate-500 font-medium">Requested Apps: </span>
-                            <div className="inline-flex flex-wrap gap-1 mt-0.5">
-                              {Array.isArray(req.requestedApps) && req.requestedApps.length > 0 ? (
-                                req.requestedApps.map(app => (
-                                  <span key={app} className="text-[10.5px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 font-semibold border border-emerald-300 dark:border-emerald-700">
-                                    {app}
-                                  </span>
-                                ))
-                              ) : (
-                                <span className="text-[10.5px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 font-semibold border border-emerald-300 dark:border-emerald-700">
-                                  Maintenance and Status of Irrigation Facilities
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+                        {/* Note: "Requested Apps" row completely removed per Comment 5 */}
 
                         {isRejected && req.rejectionReason && (
                           <div className="mt-2 text-[11px] p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-800 dark:text-rose-300">
@@ -647,7 +814,7 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                       </div>
                     </div>
 
-                    {/* Admin Action Box */}
+                    {/* Admin Action Box (Comment 4: Dynamic Office-Scoped & Hierarchy-Bounded Roles) */}
                     <div className="sm:w-64 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-slate-700 sm:pl-4 space-y-2.5">
                       {isPending ? (
                         <>
@@ -662,7 +829,7 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                                 isLight ? 'bg-white border-slate-300 text-slate-800' : 'bg-slate-800 border-slate-700 text-white'
                               }`}
                             >
-                              {availableRolesForApprover.map(opt => (
+                              {availableRoles.map(opt => (
                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
                               ))}
                             </select>
