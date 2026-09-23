@@ -991,11 +991,6 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 ? 'Farm Ditch'
                 : (isCanal ? 'Main Canal' : 'Structure');
               const categoryLabel = cCategory || 'Uncategorized';
-              const rawDescVal = getAttrVal(['Description', 'description', 'DESCRIPTION', 'desc', 'Desc', 'remarks_1', 'remarks', 'Remarks']);
-              const displayDesc = rawDescVal !== '[blank]'
-                ? rawDescVal
-                : (props.name || props.Name || props.canal || props.canal_name || resolvedName.replace(/\s*\([^)]*\)$/, ''));
-
               const coordsStr = featureCoords
                 ? `${featureCoords[0].toFixed(5)}, ${featureCoords[1].toFixed(5)}`
                 : 'Not available';
@@ -1024,13 +1019,6 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                       <span class="${labelColor} font-medium shrink-0">Category:</span>
                       <span class="font-semibold ${valColor} text-right truncate">${categoryLabel}</span>
                     </div>
-
-                    ${displayDesc ? `
-                      <div class="flex justify-between items-start gap-2">
-                        <span class="${labelColor} font-medium shrink-0">Description:</span>
-                        <span class="font-semibold ${valColor} break-words text-right leading-tight flex-1">${displayDesc}</span>
-                      </div>
-                    ` : ''}
 
                     <div class="flex justify-between items-center gap-2">
                       <span class="${labelColor} font-medium shrink-0">Coordinates:</span>
