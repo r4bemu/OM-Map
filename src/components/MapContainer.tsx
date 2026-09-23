@@ -1003,20 +1003,18 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               const isLight = typeof document !== 'undefined' && document.documentElement.classList.contains('light');
               const headerColor = isLight ? 'text-emerald-700' : 'text-emerald-400';
               const borderClass = isLight ? 'border-slate-200' : 'border-slate-700/80';
-              const boxBorderClass = isLight ? 'border-slate-200 bg-slate-50' : 'border-slate-800 bg-slate-900/90';
               const labelColor = isLight ? 'text-slate-500' : 'text-slate-400';
               const valColor = isLight ? 'text-slate-800' : 'text-slate-200';
-              const rowBorder = isLight ? 'border-slate-200' : 'border-slate-800/80';
 
               return `
-                <div class="p-3 space-y-2.5 min-w-[250px] max-w-sm font-sans text-xs ${isLight ? 'text-slate-800' : 'text-slate-200'}">
+                <div class="p-1.5 space-y-2 min-w-[240px] max-w-sm font-sans text-xs ${isLight ? 'text-slate-800' : 'text-slate-200'}">
                   <div class="border-b ${borderClass} pb-1.5 pr-6">
                     <span class="font-bold text-xs ${headerColor} leading-snug break-words block">
                       ${resolvedName}
                     </span>
                   </div>
 
-                  <div class="space-y-1.5 ${boxBorderClass} p-2.5 rounded-lg border text-[11px]">
+                  <div class="space-y-1.5 py-0.5 text-[11px]">
                     <div class="flex justify-between items-center gap-2">
                       <span class="${labelColor} font-medium shrink-0">Canal Type:</span>
                       <span class="font-semibold ${valColor} text-right truncate">${typeLabel}</span>
@@ -1028,21 +1026,21 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                     </div>
 
                     ${displayDesc ? `
-                      <div class="flex justify-between items-start gap-2 pt-1 border-t ${rowBorder}">
+                      <div class="flex justify-between items-start gap-2">
                         <span class="${labelColor} font-medium shrink-0">Description:</span>
-                        <span class="font-semibold ${isLight ? 'text-slate-900' : 'text-white'} break-words text-right leading-tight flex-1">${displayDesc}</span>
+                        <span class="font-semibold ${valColor} break-words text-right leading-tight flex-1">${displayDesc}</span>
                       </div>
                     ` : ''}
 
-                    <div class="flex justify-between items-center gap-2 pt-1 border-t ${rowBorder}">
+                    <div class="flex justify-between items-center gap-2">
                       <span class="${labelColor} font-medium shrink-0">Coordinates:</span>
-                      <div class="flex items-center gap-1.5 font-mono ${isLight ? 'text-emerald-700' : 'text-emerald-400'} shrink-0 font-medium">
+                      <div class="flex items-center gap-1.5 font-mono font-semibold ${valColor} shrink-0">
                         <span>${coordsStr}</span>
                         ${featureCoords ? `
                           <button
                             id="copy-coords-btn-${inspectId}"
                             type="button"
-                            class="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition cursor-pointer text-slate-400 hover:text-emerald-500 group shrink-0"
+                            class="p-0.5 hover:bg-slate-700/50 rounded transition cursor-pointer text-slate-400 hover:${isLight ? 'text-slate-900' : 'text-white'} shrink-0"
                             title="Copy Coordinates (${coordsStr})"
                           >
                             <span id="copy-coords-icon-${inspectId}">
