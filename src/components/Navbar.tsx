@@ -22,10 +22,7 @@ import {
   Moon,
   MapPin,
   Download,
-  Smartphone,
-  ExternalLink,
-  FileSpreadsheet,
-  Globe
+  Smartphone
 } from 'lucide-react';
 import { UserRole, GISLayer, FieldReport, AuthUser, AvailableCloudWeek } from '../types';
 import { canUserManageRequests, getNisOptionsForImo } from '../config/authUsers';
@@ -351,76 +348,84 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Floating Hamburger Popover Drawer */}
         {isHamburgerOpen && (
           <div className="absolute top-full right-0 mt-2 w-80 max-w-[94vw] bg-slate-900/98 backdrop-blur-2xl border border-slate-700/90 rounded-2xl shadow-2xl p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150 max-h-[85vh] overflow-y-auto custom-scrollbar flex flex-col gap-3">
+            {/* Top Toolbar: Small Network State & Interface Theme Toggle Buttons (Comments 4 & 5) */}
+            <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-700/70">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Menu Controls
+              </span>
+              <div className="flex items-center gap-1.5">
+                {/* Network State Toggle Button (Comment 4) */}
+                <button
+                  type="button"
+                  onClick={onToggleOfflineMode}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition cursor-pointer active:scale-95 ${
+                    isOffline
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
+                      : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
+                  }`}
+                  title={isOffline ? 'Simulated Offline Mode: Click to Go Online' : 'Online Connection Active: Click to Go Offline'}
+                >
+                  {isOffline ? (
+                    <>
+                      <WifiOff className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>Go Online</span>
+                    </>
+                  ) : (
+                    <>
+                      <Wifi className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span>Go Offline</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Theme Mode Toggle Button Adjacent to Network State (Comment 5) */}
+                {onToggleTheme && (
+                  <button
+                    type="button"
+                    onClick={() => onToggleTheme(currentTheme === 'dark' ? 'light' : 'dark')}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer active:scale-95"
+                    title={`Switch to ${currentTheme === 'dark' ? 'Light' : 'Dark'} Interface Theme`}
+                  >
+                    {currentTheme === 'dark' ? (
+                      <>
+                        <Sun className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <span>Light</span>
+                      </>
+                    ) : (
+                      <>
+                        <Moon className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                        <span>Dark</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* 1. User Profile Card */}
             <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-600/15 border border-emerald-600/30 text-[#166534] dark:text-emerald-300 flex items-center justify-center text-xs font-black shrink-0">
+              <div className="flex items-start gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-600/15 border border-emerald-600/30 text-[#166534] dark:text-emerald-300 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
                   {authenticatedUser?.name ? authenticatedUser.name.charAt(0) : 'U'}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-xs font-bold text-slate-100 truncate leading-tight">
                     {authenticatedUser?.name || 'User Profile'}
                   </div>
-                  <div className="text-[10px] text-[#166534] dark:text-emerald-400 font-mono mt-0.5 truncate">
-                    @{authenticatedUser?.username || 'user'}
+                  {/* Email address instead of username (Comment 1) */}
+                  <div className="text-[10.5px] text-slate-400 font-mono mt-0.5 truncate">
+                    {authenticatedUser?.email || authenticatedUser?.username || 'No email provided'}
+                  </div>
+                  {/* Role access label under email (Comment 2 - badge removed) */}
+                  <div className="text-[10px] text-slate-300 mt-1 flex items-center gap-1 truncate">
+                    <span className="text-slate-400">Access / Role:</span>
+                    <strong className="text-emerald-400 font-semibold">{activeRole}</strong>
                   </div>
                 </div>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${currentRoleObj.badgeColor}`}>
-                  {activeRole}
-                </span>
               </div>
               <div className="mt-2 pt-2 border-t border-slate-700/80 text-[10px] text-slate-400 flex items-center gap-1.5">
                 <Building className="w-3 h-3 text-[#166534] dark:text-emerald-400 shrink-0" />
                 <span className="truncate">{authenticatedUser?.nisBinding || authenticatedUser?.imoOffice || 'Regional Office IV-B'}</span>
-              </div>
-            </div>
-
-            {/* 1.5. NIA Unified App Switcher */}
-            <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-2.5 space-y-2">
-              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                <span className="flex items-center gap-1 text-emerald-400">
-                  <Layers className="w-3 h-3" />
-                  <span>NIA R4B App Hub</span>
-                </span>
-                <span className="text-[9px] font-mono text-slate-400">Live Linked</span>
-              </div>
-
-              <div className="space-y-1.5">
-                <a
-                  href="https://nia4b-intervention-137196978824.asia-southeast1.run.app"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-2 rounded-lg bg-slate-900/90 hover:bg-slate-850 border border-slate-700 hover:border-emerald-500/50 transition text-xs group"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                    <div className="min-w-0">
-                      <div className="text-slate-200 font-semibold truncate group-hover:text-emerald-300">
-                        Interventions Report Generator
-                      </div>
-                      <div className="text-[9.5px] text-slate-400 truncate">IDU Matrix &amp; PDF/Excel</div>
-                    </div>
-                  </div>
-                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-emerald-400 shrink-0" />
-                </a>
-
-                <a
-                  href="https://nia4b-oie-login-518397636928.asia-southeast1.run.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-2 rounded-lg bg-slate-900/90 hover:bg-slate-850 border border-slate-700 hover:border-emerald-500/50 transition text-xs group"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Globe className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                    <div className="min-w-0">
-                      <div className="text-slate-200 font-semibold truncate group-hover:text-cyan-300">
-                        Central Login Portal
-                      </div>
-                      <div className="text-[9.5px] text-slate-400 truncate">SSO Gateway &amp; User Directory</div>
-                    </div>
-                  </div>
-                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-cyan-400 shrink-0" />
-                </a>
               </div>
             </div>
 
@@ -549,59 +554,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             )}
 
-            {/* 3. Offline Mode Simulator Toggle */}
-            <div className="flex items-center justify-between bg-slate-800/80 border border-slate-700/80 rounded-xl p-2.5 px-3">
-              <div className="flex items-center gap-2">
-                {isOffline ? (
-                  <WifiOff className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-                ) : (
-                  <Wifi className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                )}
-                <div>
-                  <div className="text-xs font-bold text-slate-100 leading-none">Network State</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5 leading-none">
-                    {isOffline ? 'Simulated Offline Mode' : 'Online Connection Active'}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={onToggleOfflineMode}
-                className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition cursor-pointer ${
-                  isOffline
-                    ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
-                    : 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
-                }`}
-              >
-                {isOffline ? 'Go Online' : 'Go Offline'}
-              </button>
-            </div>
-
-            {/* 4. Theme Mode Switcher */}
-            {onToggleTheme && (
-              <div className="flex items-center justify-between bg-slate-800/80 border border-slate-700/80 rounded-xl p-2.5 px-3">
-                <div className="flex items-center gap-2">
-                  {currentTheme === 'dark' ? (
-                    <Moon className="w-4 h-4 text-indigo-400" />
-                  ) : (
-                    <Sun className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-                  )}
-                  <div>
-                    <div className="text-xs font-bold text-slate-100 leading-none">Interface Theme</div>
-                    <div className="text-[10px] text-slate-400 mt-0.5 leading-none">
-                      {currentTheme === 'dark' ? 'Titanium Charcoal (Dark)' : 'Sandstone & Forest (Light)'}
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => onToggleTheme(currentTheme === 'dark' ? 'light' : 'dark')}
-                  className="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer"
-                >
-                  Switch to {currentTheme === 'dark' ? 'Light' : 'Dark'}
-                </button>
-              </div>
-            )}
-
-            {/* 5. System Configurations & Photo Settings */}
+            {/* 3. System Configurations & Photo Settings */}
             {onOpenConfigurations && (
               <button
                 onClick={() => {
