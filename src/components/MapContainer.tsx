@@ -983,67 +983,86 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               }
 
               const isCanal = !layer.category?.includes('Structure') && layer.geometryType !== 'Point' && !layer.name.toLowerCase().includes('structure');
-              const typeLabel = cType === 'Main' || cType === 'Main Canal' ? 'Main Canal' : cType === 'Lateral' ? 'Lateral' : cType === 'Farm Ditch' ? 'Farm Ditch' : 'Canal';
-              const classificationBadge = isCanal ? `${cCategory} • ${typeLabel}` : 'Structure';
-              const descVal = getAttrVal(['Description', 'description', 'DESCRIPTION', 'desc', 'Desc', 'remarks_1', 'remarks', 'Remarks']);
-              const showDesc = descVal !== '[blank]' && descVal.toLowerCase() !== resolvedName.toLowerCase();
+              const typeLabel = cType === 'Main' || cType === 'Main Canal'
+                ? 'Main Canal'
+                : cType === 'Lateral' || cType === 'Lateral Canal'
+                ? 'Lateral Canal'
+                : cType === 'Farm Ditch'
+                ? 'Farm Ditch'
+                : (isCanal ? 'Main Canal' : 'Structure');
+              const categoryLabel = cCategory || 'Uncategorized';
+              const rawDescVal = getAttrVal(['Description', 'description', 'DESCRIPTION', 'desc', 'Desc', 'remarks_1', 'remarks', 'Remarks']);
+              const displayDesc = rawDescVal !== '[blank]'
+                ? rawDescVal
+                : (props.name || props.Name || props.canal || props.canal_name || resolvedName.replace(/\s*\([^)]*\)$/, ''));
 
-              const isDitch = cType === 'Farm Ditch' || (resolvedName && resolvedName.toLowerCase().startsWith('farm ditch'));
-              const hasStationing = featInfo && featInfo.stationingLabel && !isDitch;
+              const coordsStr = featureCoords
+                ? `${featureCoords[0].toFixed(5)}, ${featureCoords[1].toFixed(5)}`
+                : 'Not available';
+
+              const isLight = typeof document !== 'undefined' && document.documentElement.classList.contains('light');
+              const headerColor = isLight ? 'text-emerald-700' : 'text-emerald-400';
+              const borderClass = isLight ? 'border-slate-200' : 'border-slate-700/80';
+              const boxBorderClass = isLight ? 'border-slate-200 bg-slate-50' : 'border-slate-800 bg-slate-900/90';
+              const labelColor = isLight ? 'text-slate-500' : 'text-slate-400';
+              const valColor = isLight ? 'text-slate-800' : 'text-slate-200';
+              const rowBorder = isLight ? 'border-slate-200' : 'border-slate-800/80';
 
               return `
-                <div class="p-3 space-y-2 min-w-[240px] max-w-sm font-sans text-xs text-slate-200">
-                  <div class="border-b border-slate-700 pb-1.5 flex items-start justify-between gap-2">
-                    <span class="font-bold text-xs text-cyan-400 leading-snug break-words block flex-1">
+                <div class="p-3 space-y-2.5 min-w-[250px] max-w-sm font-sans text-xs ${isLight ? 'text-slate-800' : 'text-slate-200'}">
+                  <div class="border-b ${borderClass} pb-1.5 pr-6">
+                    <span class="font-bold text-xs ${headerColor} leading-snug break-words block">
                       ${resolvedName}
-                    </span>
-                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 shrink-0 font-medium mt-0.5">
-                      ${classificationBadge}
                     </span>
                   </div>
 
-                  ${hasStationing ? `
-                    <div class="bg-cyan-950/40 border border-cyan-800/50 rounded-lg p-2 space-y-1 text-[11px]">
-                      <div class="flex items-center justify-between gap-2">
-                        <span class="text-slate-400 font-medium flex items-center gap-1.5">
-                          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                          <span>Canal Stationing:</span>
-                        </span>
-                        <span class="font-mono font-bold text-cyan-300 bg-cyan-900/70 px-2 py-0.5 rounded text-[10px] border border-cyan-700/60 shadow-sm">
-                          STA. ${featInfo.stationingLabel}
-                        </span>
-                      </div>
-                      ${featInfo.referenceContext ? `
-                        <div class="text-[9.5px] font-mono text-cyan-300/80 bg-slate-900/60 px-1.5 py-0.5 rounded border border-slate-800 break-words leading-tight">
-                          🎯 ${featInfo.referenceContext}
-                        </div>
-                      ` : ''}
+                  <div class="space-y-1.5 ${boxBorderClass} p-2.5 rounded-lg border text-[11px]">
+                    <div class="flex justify-between items-center gap-2">
+                      <span class="${labelColor} font-medium shrink-0">Canal Type:</span>
+                      <span class="font-semibold ${valColor} text-right truncate">${typeLabel}</span>
                     </div>
-                  ` : isDitch ? `
-                    <div class="bg-amber-950/30 border border-amber-800/40 rounded-lg p-2 space-y-0.5 text-[11px]">
-                      <div class="flex items-center justify-between gap-1 text-[10px] text-amber-300 font-semibold">
-                        <span>Farm Ditch (Unstationed)</span>
-                        <span class="text-amber-200 font-mono">Unlined</span>
-                      </div>
-                      <div class="text-[9.5px] text-slate-400 leading-tight">Ditches naturally do not have station names.</div>
-                    </div>
-                  ` : ''}
 
-                  ${showDesc ? `
-                    <div class="space-y-1 bg-slate-950/80 p-2 rounded-lg border border-slate-800 text-[11px]">
-                      <div class="flex justify-between gap-2 items-start">
-                        <span class="text-slate-400 font-medium shrink-0">Description:</span>
-                        <span class="font-semibold text-white break-words text-right leading-tight">${descVal}</span>
+                    <div class="flex justify-between items-center gap-2">
+                      <span class="${labelColor} font-medium shrink-0">Category:</span>
+                      <span class="font-semibold ${valColor} text-right truncate">${categoryLabel}</span>
+                    </div>
+
+                    ${displayDesc ? `
+                      <div class="flex justify-between items-start gap-2 pt-1 border-t ${rowBorder}">
+                        <span class="${labelColor} font-medium shrink-0">Description:</span>
+                        <span class="font-semibold ${isLight ? 'text-slate-900' : 'text-white'} break-words text-right leading-tight flex-1">${displayDesc}</span>
+                      </div>
+                    ` : ''}
+
+                    <div class="flex justify-between items-center gap-2 pt-1 border-t ${rowBorder}">
+                      <span class="${labelColor} font-medium shrink-0">Coordinates:</span>
+                      <div class="flex items-center gap-1.5 font-mono ${isLight ? 'text-emerald-700' : 'text-emerald-400'} shrink-0 font-medium">
+                        <span>${coordsStr}</span>
+                        ${featureCoords ? `
+                          <button
+                            id="copy-coords-btn-${inspectId}"
+                            type="button"
+                            class="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition cursor-pointer text-slate-400 hover:text-emerald-500 group shrink-0"
+                            title="Copy Coordinates (${coordsStr})"
+                          >
+                            <span id="copy-coords-icon-${inspectId}">
+                              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg>
+                            </span>
+                          </button>
+                        ` : ''}
                       </div>
                     </div>
-                  ` : ''}
+                  </div>
 
                   <div class="flex flex-col gap-1.5 mt-2">
-                    <button id="inspect-btn-${inspectId}" class="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-md transition flex items-center justify-center gap-1 cursor-pointer">
+                    <button id="inspect-btn-${inspectId}" class="w-full bg-[#009933] hover:bg-[#00802b] text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-md transition flex items-center justify-center gap-1 cursor-pointer">
                       Inspect Attribute Details
                     </button>
                     ${!isMapPickerActiveRef.current ? `
-                      <button id="create-report-btn-${inspectId}" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-md transition flex items-center justify-center gap-1 cursor-pointer">
+                      <button id="create-report-btn-${inspectId}" class="w-full bg-[#166534] hover:bg-[#15803d] text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-md transition flex items-center justify-center gap-1 cursor-pointer">
                         + Create Report
                       </button>
                     ` : ''}
@@ -1143,6 +1162,49 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               // If Attribute Inspector is ALREADY open, dynamically update it to this newly clicked feature and clicked coordinates!
               if (selectedFeaturePropsRef.current) {
                 onSelectFeatureRef.current?.(props, layer.category, clickCoords);
+              }
+
+              const copyCoordsBtn = document.getElementById(`copy-coords-btn-${inspectId}`);
+              if (copyCoordsBtn) {
+                copyCoordsBtn.onclick = (evt) => {
+                  evt.stopPropagation();
+                  const targetCoords = clickCoords || (leafletLayer as any)._lastClickLatLng;
+                  if (!targetCoords) return;
+                  const strToCopy = `${targetCoords[0].toFixed(5)}, ${targetCoords[1].toFixed(5)}`;
+                  const doCopy = (text: string) => {
+                    if (navigator.clipboard && window.isSecureContext) {
+                      return navigator.clipboard.writeText(text);
+                    } else {
+                      const textArea = document.createElement('textarea');
+                      textArea.value = text;
+                      textArea.style.position = 'fixed';
+                      textArea.style.left = '-999999px';
+                      textArea.style.top = '-999999px';
+                      document.body.appendChild(textArea);
+                      textArea.focus();
+                      textArea.select();
+                      return new Promise<void>((resolve, reject) => {
+                        document.execCommand('copy') ? resolve() : reject();
+                        textArea.remove();
+                      });
+                    }
+                  };
+
+                  doCopy(strToCopy).then(() => {
+                    const iconEl = document.getElementById(`copy-coords-icon-${inspectId}`);
+                    if (iconEl) {
+                      iconEl.innerHTML = `<svg class="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+                      setTimeout(() => {
+                        const resetEl = document.getElementById(`copy-coords-icon-${inspectId}`);
+                        if (resetEl) {
+                          resetEl.innerHTML = `<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+                        }
+                      }, 2000);
+                    }
+                  }).catch(err => {
+                    console.warn('Failed to copy coordinates:', err);
+                  });
+                };
               }
 
               const btn = document.getElementById(`inspect-btn-${inspectId}`);
