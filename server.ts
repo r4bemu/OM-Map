@@ -2,10 +2,8 @@ import express from 'express';
 import compression from 'compression';
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
-
-const __filename = typeof import.meta !== 'undefined' && import.meta.url ? fileURLToPath(import.meta.url) : '';
-const __dirname = __filename ? path.dirname(__filename) : (typeof (globalThis as any).__dirname === 'string' ? (globalThis as any).__dirname : process.cwd());
+declare const __dirname: string;
+const serverDirname = typeof __dirname !== 'undefined' ? __dirname : process.cwd();
 
 // Ensure environment variables are loaded on server startup
 if (typeof (process as any).loadEnvFile === 'function') {
@@ -271,8 +269,8 @@ function savePendingUsersToFile(pendingList: any[]) {
 function seedInitialData() {
   try {
     const seedCandidates = [
-      path.join(__dirname, '../data'),
-      path.join(__dirname, 'data'),
+      path.join(serverDirname, '../data'),
+      path.join(serverDirname, 'data'),
       path.join(process.cwd(), 'data')
     ];
     const targetFiles = [
@@ -1007,9 +1005,9 @@ export async function createApp() {
     const candidates = [
       path.join(process.cwd(), 'public', fileName),
       path.join(process.cwd(), 'dist', fileName),
-      path.join(__dirname, 'public', fileName),
-      path.join(__dirname, 'dist', fileName),
-      path.join(__dirname, fileName),
+      path.join(serverDirname, 'public', fileName),
+      path.join(serverDirname, 'dist', fileName),
+      path.join(serverDirname, fileName),
     ];
     for (const c of candidates) {
       if (fs.existsSync(c)) {
@@ -2407,11 +2405,11 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
     app.use(vite.middlewares);
   } else {
     const candidates = [
-      __dirname,
-      path.join(__dirname, 'dist'),
+      serverDirname,
+      path.join(serverDirname, 'dist'),
       path.join(process.cwd(), 'dist'),
-      path.join(__dirname, '../dist'),
-      path.join(__dirname, '../../dist'),
+      path.join(serverDirname, '../dist'),
+      path.join(serverDirname, '../../dist'),
       process.cwd()
     ];
     let distPath = path.join(process.cwd(), 'dist');

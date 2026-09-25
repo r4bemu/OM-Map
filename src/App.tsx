@@ -1860,8 +1860,7 @@ export default function App() {
       setSyncStatusMessage('Pre-caching inspection photos into offline IndexedDB...');
       try {
         await cacheReportPhotosClient(finalReports, (done, total) => {
-          const pct = total > 0 ? Math.round((done / total) * 100) : 100;
-          setStep('reports', 'active', pct, `Caching photos (${done}/${total})`);
+          setStep('reports', 'active', { current: done, total }, `Caching photos (${done}/${total})`);
         });
       } catch (photoErr) {
         console.warn('Client photo pre-caching notice:', photoErr);

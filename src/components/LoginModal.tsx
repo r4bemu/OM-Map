@@ -27,6 +27,7 @@ import {
 import { triggerGoogleGisSignIn } from '../lib/googleIdentityAuth';
 import { triggerFacebookSignIn, initFacebookClient } from '../lib/facebookAuth';
 import { GoogleProfileSetupModal, GoogleInitialData } from './GoogleProfileSetupModal';
+import { GoogleAuthDomainModal } from './GoogleAuthDomainModal';
 import { AccessRequestStatusModal } from './AccessRequestStatusModal';
 import { AccessRequestManagementModal } from './AccessRequestManagementModal';
 
@@ -56,9 +57,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [usersList, setUsersList] = useState<AuthUser[]>(() => getAuthUsers());
   const [requests, setRequests] = useState<AccessRequest[]>([]);
 
+  const allUsers = useMemo(() => {
+    return usersList.length > 0 ? usersList : getAuthUsers();
+  }, [usersList]);
+
   // Modals state
   const [isGoogleSetupModalOpen, setIsGoogleSetupModalOpen] = useState(false);
   const [googleSetupData, setGoogleSetupData] = useState<GoogleInitialData | null>(null);
+  const [isGoogleDomainModalOpen, setIsGoogleDomainModalOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [statusModalRequest, setStatusModalRequest] = useState<AccessRequest | null>(null);
   const [isAccessRequestsManagerOpen, setIsAccessRequestsManagerOpen] = useState(false);
@@ -186,7 +192,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   if (!isOpen) return null;
 
   const isLight = activeTheme === 'light';
-  const allUsers = usersList.length > 0 ? usersList : getAuthUsers();
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -736,6 +741,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         currentUser={selectedAccount}
         requests={requests}
         onRefreshRequests={loadRequests}
+        isLight={isLight}
+      />
+
+      {/* Google Auth Domain Configuration / Instant Sign-In Modal */}
+      <GoogleAuthDomainModal
+        isOpen={isGoogleDomainModalOpen}
+        onClose={() => setIsGoogleDomainModalOpen(false)}
+        onOpenProfileSetup={(data) => {
+          setGoogleSetupData(data);
+          setIsGoogleSetupModalOpen(true);
+        }}
         isLight={isLight}
       />
 

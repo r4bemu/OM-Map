@@ -329,6 +329,9 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
       label: string;
       reports: FieldReport[];
       totalDistanceMeters: number;
+      totalLinedDist: number;
+      totalUnlinedDist: number;
+      totalUncategorizedDist: number;
       totalDesiltingM3: number;
       totalPaintingSqm: number;
       completedCount: number;

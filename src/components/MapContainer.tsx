@@ -983,9 +983,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               }
 
               const isCanal = !layer.category?.includes('Structure') && layer.geometryType !== 'Point' && !layer.name.toLowerCase().includes('structure');
-              const typeLabel = cType === 'Main' || cType === 'Main Canal'
+              const typeLabel = (cType as string) === 'Main' || (cType as string) === 'Main Canal'
                 ? 'Main Canal'
-                : cType === 'Lateral' || cType === 'Lateral Canal'
+                : (cType as string) === 'Lateral' || (cType as string) === 'Lateral Canal'
                 ? 'Lateral Canal'
                 : cType === 'Farm Ditch'
                 ? 'Farm Ditch'

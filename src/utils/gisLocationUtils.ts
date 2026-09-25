@@ -984,6 +984,8 @@ export function calculateCanalPathBetweenPoints(
   distanceMeters: number;
   totalDistanceMeters?: number;
   referenceContext?: string;
+  canalCategory?: CanalCategory;
+  canalType?: CanalType;
 } {
   const l1Lat = (!isNaN(Number(loc1?.lat)) && isFinite(Number(loc1?.lat))) ? Number(loc1.lat) : 13.1000;
   const l1Lng = (!isNaN(Number(loc1?.lng)) && isFinite(Number(loc1?.lng))) ? Number(loc1.lng) : 121.3000;
@@ -1115,10 +1117,10 @@ export function calculateCanalPathBetweenPoints(
         ? (feat1.referenceContext === feat2.referenceContext ? feat1.referenceContext : `${feat1.referenceContext} | ${feat2.referenceContext}`)
         : (feat1.referenceContext || feat2.referenceContext || undefined));
 
-  const resolvedCategory = isDitchPath
+  const resolvedCategory: CanalCategory = isDitchPath
     ? ((feat1.canalCategory === 'Lined' || feat2.canalCategory === 'Lined') ? 'Lined' : 'Unlined')
-    : (feat1.canalCategory || feat2.canalCategory || 'Uncategorized');
-  const resolvedType = isDitchPath ? 'Farm Ditch' : (feat1.canalType || feat2.canalType || 'Unclassified');
+    : ((feat1.canalCategory || feat2.canalCategory || 'Uncategorized') as CanalCategory);
+  const resolvedType: CanalType = isDitchPath ? 'Farm Ditch' : ((feat1.canalType || feat2.canalType || 'Unclassified') as CanalType);
   const resolvedCanalCode = isDitchPath
     ? ((feat1.canalCode && !feat1.canalCode.startsWith('CNL-MAIN') ? feat1.canalCode : feat2.canalCode) || 'FD')
     : canalCode;
