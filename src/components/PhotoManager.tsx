@@ -67,6 +67,7 @@ interface PhotoManagerProps {
   context?: CaptionContext;
   onOpenPhotographyGuide?: () => void;
   disabled?: boolean;
+  isMissing?: boolean;
 }
 
 export const PhotoManager: React.FC<PhotoManagerProps> = ({
@@ -74,7 +75,8 @@ export const PhotoManager: React.FC<PhotoManagerProps> = ({
   onChangePhotos,
   context,
   onOpenPhotographyGuide,
-  disabled = false
+  disabled = false,
+  isMissing = false
 }) => {
   const [editingPhotoIndex, setEditingPhotoIndex] = useState<number | null>(null);
   const [compressionCapBytes, setCompressionCapBytes] = useState<number>(() => getSavedConfigurations().photoResolutionCapBytes);
@@ -285,15 +287,17 @@ export const PhotoManager: React.FC<PhotoManagerProps> = ({
       {photos.length === 0 && (
         <div
           className={`border-2 border-dashed rounded-2xl p-4 sm:p-5 text-center transition-all ${
-            dragOverZone
+            isMissing
+              ? 'border-rose-500 bg-rose-950/20 ring-2 ring-rose-500/40'
+              : dragOverZone
               ? 'border-emerald-500 bg-emerald-950/20'
               : 'border-slate-800 hover:border-slate-700 bg-slate-950/40'
           }`}
         >
           <div className="flex flex-col items-center justify-center space-y-1.5">
-            <ImageIcon className="w-6 h-6 text-slate-500" />
-            <p className="text-xs font-semibold text-slate-300">
-              {isProcessingUpload ? 'Compressing & Framing to 4:3 Landscape...' : 'Drag & drop inspection photos here, or use the buttons above'}
+            <ImageIcon className={`w-6 h-6 ${isMissing ? 'text-rose-400' : 'text-slate-500'}`} />
+            <p className={`text-xs font-semibold ${isMissing ? 'text-rose-200' : 'text-slate-300'}`}>
+              {isProcessingUpload ? 'Compressing & Framing to 4:3 Landscape...' : isMissing ? 'Inspection photo required — please capture or upload at least 1 photo *' : 'Drag & drop inspection photos here, or use the buttons above'}
             </p>
           </div>
         </div>

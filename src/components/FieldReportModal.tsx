@@ -33,7 +33,9 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  Briefcase,
+  Lock
 } from 'lucide-react';
 import exifr from 'exifr';
 import { 
@@ -227,24 +229,36 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
   const [suspensionReason, setSuspensionReason] = useState<string>(() => editingReport?.suspensionReason || '');
   const [isRemarksUserModified, setIsRemarksUserModified] = useState<boolean>(false);
 
-  // Reporter Name & Designation with persistent device cache & logged-in user prefill
+  // Reporter Name & Designation linked to approved user account
   const [reporterName, setReporterName] = useState<string>(() => {
     if (editingReport?.reporterName) return editingReport.reporterName;
+    if (currentUser?.name) return currentUser.name;
     try {
       const saved = localStorage.getItem('nia_saved_reporter_name');
       if (saved) return saved;
     } catch (_) {}
-    return currentUser?.name || '';
+    return '';
   });
 
   const [reporterDesignation, setReporterDesignation] = useState<string>(() => {
     if (editingReport?.reporterDesignation) return editingReport.reporterDesignation;
+    if (currentUser?.designation) return currentUser.designation;
     try {
       const saved = localStorage.getItem('nia_saved_reporter_designation');
       if (saved) return saved;
     } catch (_) {}
-    return currentUser?.designation || (currentRole === 'Field Personnel' ? 'Water Resource Officer' : 'NIS In-Charge');
+    return 'Personnel';
   });
+
+  // Keep reporter attribution synchronized with approved authenticated user
+  useEffect(() => {
+    if (!editingReport && currentUser?.name) {
+      setReporterName(currentUser.name);
+    }
+    if (!editingReport && currentUser?.designation) {
+      setReporterDesignation(currentUser.designation);
+    }
+  }, [currentUser, editingReport]);
 
   // Immediate Supervisor / Verifier with persistent device cache
   const [verifierName, setVerifierName] = useState<string>(() => {
@@ -265,8 +279,8 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
     }
   });
 
-  // Guided Form Navigation State
-  const [guidedStep, setGuidedStep] = useState<'reporter' | 'activity' | 'photos' | 'location' | 'workforce' | 'remarks'>('reporter');
+  // Guided Form Navigation State (Begins at activity since reporter attribution is automatically populated)
+  const [guidedStep, setGuidedStep] = useState<'reporter' | 'activity' | 'photos' | 'location' | 'workforce' | 'remarks'>('activity');
   const [revisionChangeSummary, setRevisionChangeSummary] = useState<string>('');
 
   const editPermission = useMemo(() => {
@@ -287,22 +301,27 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
   const step4WorkforceRef = useRef<HTMLDivElement>(null);
   const step5RemarksRef = useRef<HTMLDivElement>(null);
 
-  // Auto-focus Reporter Name and initialize guided step on open
+  // Initialize guided step and focus activity selector on open
   useEffect(() => {
     if (isOpen) {
       if (!editingReport) {
+        if (currentUser?.name) {
+          setReporterName(currentUser.name);
+        } else {
+          try {
+            const saved = localStorage.getItem('nia_saved_reporter_name');
+            if (saved) setReporterName(saved);
+          } catch (_) {}
+        }
+        if (currentUser?.designation) {
+          setReporterDesignation(currentUser.designation);
+        } else {
+          try {
+            const savedDesig = localStorage.getItem('nia_saved_reporter_designation');
+            if (savedDesig) setReporterDesignation(savedDesig);
+          } catch (_) {}
+        }
         try {
-          const saved = localStorage.getItem('nia_saved_reporter_name') || currentUser?.name;
-          if (saved && !reporterName) {
-            setReporterName(saved);
-            setGuidedStep('activity');
-          } else if (!reporterName) {
-            setGuidedStep('reporter');
-          }
-          const savedDesig = localStorage.getItem('nia_saved_reporter_designation') || currentUser?.designation;
-          if (savedDesig && !reporterDesignation) {
-            setReporterDesignation(savedDesig);
-          }
           const savedSup = localStorage.getItem('nia_saved_supervisor_name');
           if (savedSup && !verifierName) {
             setVerifierName(savedSup);
@@ -312,9 +331,10 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
             setVerifierDesignation(savedSupDesig);
           }
         } catch (_) {}
+        setGuidedStep('activity');
       }
       setTimeout(() => {
-        reporterNameRef.current?.focus();
+        activitySelectRef.current?.focus();
       }, 150);
     }
   }, [isOpen, editingReport, currentUser]);
@@ -426,11 +446,12 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
     try { sessionStorage.removeItem('om_active_report_draft'); } catch (_) {}
     setMaintenanceActivity('');
     setCustomActivity('');
-    const savedReporter = (() => {
+    const activeName = currentUser?.name || (() => {
       try { return localStorage.getItem('nia_saved_reporter_name') || ''; } catch (_) { return ''; }
     })();
-    setReporterName(savedReporter);
-    setGuidedStep(savedReporter ? 'activity' : 'reporter');
+    setReporterName(activeName);
+    setReporterDesignation(currentUser?.designation || 'Personnel');
+    setGuidedStep('activity');
     setPerformedByList(['IMO']);
     setPerformedByIA('');
     setPerformedByOthers('');
@@ -458,7 +479,6 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
     setDetectedPathCoords(undefined);
     setDetectedReferenceContext(undefined);
     setStatus('');
-    setReporterName('');
     setPhotos([]);
     setRemarks('');
     setTouchedSubmit(false);
@@ -647,13 +667,15 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
 
         setStatus(editingReport.status as any || 'In Progress');
         setSuspensionReason(editingReport.suspensionReason || '');
-        setReporterName(editingReport.reporterName || '');
-        setReporterDesignation(editingReport.reporterDesignation || (() => { try { return localStorage.getItem('nia_saved_reporter_designation') || 'NIS In-Charge'; } catch (_) { return 'NIS In-Charge'; } })());
+        setReporterName(editingReport.reporterName || currentUser?.name || '');
+        setReporterDesignation(editingReport.reporterDesignation || currentUser?.designation || (() => { try { return localStorage.getItem('nia_saved_reporter_designation') || 'Personnel'; } catch (_) { return 'Personnel'; } })());
         setVerifierName(editingReport.verifierName || (() => { try { return localStorage.getItem('nia_saved_supervisor_name') || ''; } catch (_) { return ''; } })());
         setVerifierDesignation(editingReport.verifierDesignation || (() => { try { return localStorage.getItem('nia_saved_supervisor_designation') || ''; } catch (_) { return ''; } })());
         setRemarks(editingReport.remarks || '');
         setPhotos(editingReport.photos || (editingReport.photoUrl ? [{ id: 'p1', url: editingReport.photoUrl, stage: 'During' }] : []));
       } else {
+        if (currentUser?.name) setReporterName(currentUser.name);
+        if (currentUser?.designation) setReporterDesignation(currentUser.designation);
         if (initialReportType) setCategoryMode(initialReportType);
         if (initialLat !== undefined && initialLng !== undefined) {
           setLat1(initialLat);
@@ -1208,8 +1230,9 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
     }
 
     // 4. Reporter Name
-    if (!reporterName.trim()) {
-      errors.push("Reporter's Name");
+    const effectiveName = (currentUser?.name || reporterName).trim();
+    if (!effectiveName) {
+      errors.push("Reporter's Name (User account must be logged in and approved)");
     }
 
     // 5. Photos
@@ -1499,7 +1522,8 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
     onClose();
   };
 
-  const isReporterMissing = touchedSubmit && !reporterName.trim();
+  const effectiveReporterName = (currentUser?.name || reporterName).trim();
+  const isReporterMissing = touchedSubmit && !effectiveReporterName;
   const isPhotosMissing = touchedSubmit && photos.length === 0;
   const isLocationMissing = touchedSubmit && (lat1 === undefined || lng1 === undefined);
   const isStatusMissing = touchedSubmit && !status;
@@ -1513,7 +1537,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
   const isIncidentMissing = touchedSubmit && categoryMode === 'operational' && !operationalIncident.trim();
 
   // 1-Glance Readiness States
-  const isReporterReady = Boolean(reporterName.trim());
+  const isReporterReady = Boolean(effectiveReporterName);
   const isActivityReady = categoryMode === 'maintenance'
     ? Boolean(maintenanceActivity) && (maintenanceActivity !== 'Other Repair / Maintenance' && (maintenanceActivity as string) !== 'Other Repair/Maintenance (specify)' || Boolean(customActivity.trim()))
     : Boolean(operationalState);
@@ -1664,20 +1688,10 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
               STEP 1: ACTIVITY & WORK CLASSIFICATION
               -> Guided Input with auto-focus & persistent cache
              ======================================================== */}
-          <div className={`bg-slate-950/60 border rounded-2xl p-4 sm:p-5 space-y-4 transition-all duration-300 ${
-            (guidedStep === 'reporter' || guidedStep === 'activity')
-              ? 'border-cyan-500/70 shadow-lg shadow-cyan-950/40'
-              : (isReporterMissing || isCustomActivityMissing || isServiceAreaMissing || isIncidentMissing) 
-              ? 'border-rose-500/80 ring-2 ring-rose-500/30' 
-              : 'border-slate-800/90'
-          }`}>
+          <div className="space-y-4 pt-1">
             <div className="flex items-center justify-between gap-2.5 border-b border-slate-800/80 pb-2.5">
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <span className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 transition ${
-                  (guidedStep === 'reporter' || guidedStep === 'activity')
-                    ? 'bg-cyan-500 text-slate-950 ring-2 ring-cyan-400/50 animate-pulse'
-                    : 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
-                }`}>
+                <span className="w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
                   1
                 </span>
                 <div className="min-w-0">
@@ -1693,8 +1707,6 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
               <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${
                 isStep1Ready
                   ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                  : (guidedStep === 'reporter' || guidedStep === 'activity')
-                  ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40 animate-pulse'
                   : 'bg-slate-900 text-slate-400 border-slate-800'
               }`}>
                 {isStep1Ready ? '✓ Complete' : 'Step 1 of 5'}
@@ -1702,59 +1714,44 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
             </div>
 
             {/* Reporter Attribution */}
-            <div className="space-y-2">
-              {/* Reporter Name (Auto-focused on open, cached on device) */}
-              <div className={`space-y-1.5 p-3 rounded-xl transition-all duration-300 ${
-                guidedStep === 'reporter' ? 'bg-cyan-950/25 border border-cyan-500/50 ring-1 ring-cyan-500/30' : 'bg-slate-900/40 border border-slate-800'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Reporter's Name</span>
-                    <span className="text-amber-400 font-bold">*</span>
-                  </label>
-                  <span className="text-[10px] text-slate-400 font-mono">
-                    Access Role: <strong className="text-cyan-300">{currentRole}</strong>
-                  </span>
-                </div>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Reporter's Name</span>
+                  <span className="text-amber-400 font-bold">*</span>
+                </label>
+              </div>
+              <div className="relative">
                 <input
                   ref={reporterNameRef}
                   type="text"
-                  placeholder="e.g. Engr. Juan Dela Cruz"
-                  value={reporterName}
-                  onChange={(e) => {
-                    setReporterName(e.target.value);
-                    try { localStorage.setItem('nia_saved_reporter_name', e.target.value); } catch (_) {}
-                  }}
-                  onBlur={() => {
-                    if (reporterName.trim() && guidedStep === 'reporter') {
-                      setGuidedStep('activity');
-                    }
-                  }}
-                  className={`w-full bg-slate-900 border text-white text-xs p-2.5 rounded-xl focus:outline-none transition ${
+                  readOnly
+                  value={effectiveReporterName}
+                  placeholder="Approved account name"
+                  className={`w-full bg-slate-900/60 border text-slate-200 text-xs p-2.5 pr-8 rounded-xl cursor-not-allowed select-none transition ${
                     isReporterMissing
-                      ? 'border-rose-500 ring-2 ring-rose-500/40 bg-rose-950/20'
-                      : guidedStep === 'reporter'
-                      ? 'border-cyan-400 ring-2 ring-cyan-500/40'
-                      : 'border-slate-700 focus:border-cyan-500'
+                      ? 'border-rose-500 ring-2 ring-rose-500/40 bg-rose-950/20 text-white'
+                      : 'border-slate-800 text-slate-300'
                   }`}
-                  required
+                  title="Linked to approved account name from application request (Read-only)"
                 />
-                <div className="flex items-center gap-1.5 text-[10.5px] text-slate-400 mt-1.5 pt-1 border-t border-slate-800/80">
-                  <Info className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span>Designations and supervisor signatories are managed in <strong>System Configurations &gt; Signatories</strong> for each report type.</span>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500" title="Locked to approved account">
+                  <Lock className="w-3.5 h-3.5" />
                 </div>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 pt-0.5">
+                <Briefcase className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span>Designation: <strong className="text-slate-200 font-semibold">{currentUser?.designation || reporterDesignation || 'Personnel'}</strong></span>
               </div>
             </div>
 
             {/* Activity Selector */}
             <div className="pt-1">
 
-              {/* Maintenance Activity Selector (Highlights next; shows prompt note) */}
+              {/* Maintenance Activity Selector */}
               {categoryMode === 'maintenance' ? (
-                <div className={`space-y-1.5 p-2.5 rounded-xl transition-all duration-300 ${
-                  guidedStep === 'activity' ? 'bg-cyan-950/25 border border-cyan-500/50 ring-1 ring-cyan-500/30' : 'bg-transparent'
-                }`}>
+                <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                     <Wrench className="w-3.5 h-3.5 text-cyan-400" />
                     <span>Maintenance Activity Performed</span>
@@ -1788,9 +1785,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                   </select>
                 </div>
               ) : (
-                <div className={`space-y-1.5 p-2.5 rounded-xl transition-all duration-300 ${
-                  guidedStep === 'activity' ? 'bg-cyan-950/25 border border-cyan-500/50 ring-1 ring-cyan-500/30' : 'bg-transparent'
-                }`}>
+                <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                     <Gauge className="w-3.5 h-3.5 text-cyan-400" />
                     <span>Facility Operational State</span>
@@ -1808,7 +1803,11 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                         }, 150);
                       }
                     }}
-                    className="w-full bg-slate-900 border border-slate-700 text-white text-xs p-2.5 rounded-xl focus:border-cyan-500 focus:outline-none cursor-pointer"
+                    className={`w-full bg-slate-900 border text-white text-xs p-2.5 rounded-xl focus:outline-none cursor-pointer transition ${
+                      guidedStep === 'activity'
+                        ? 'border-cyan-400 ring-2 ring-cyan-500/40'
+                        : 'border-slate-700 focus:border-cyan-500'
+                    }`}
                   >
                     <option value="Fully Operational">Fully Operational</option>
                     <option value="Partially Operational / Restricted Flow">Partially Operational / Restricted Flow</option>
@@ -1925,21 +1924,11 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
              ======================================================== */}
           <div 
             ref={step2PhotosRef}
-            className={`bg-slate-950/60 border rounded-2xl p-4 sm:p-5 space-y-4 transition-all duration-300 ${
-              guidedStep === 'photos'
-                ? 'border-cyan-500/70 shadow-lg shadow-cyan-950/40'
-                : isPhotosMissing 
-                ? 'border-rose-500/80 ring-2 ring-rose-500/30' 
-                : 'border-slate-800/90'
-            }`}
+            className="space-y-4 pt-4 border-t border-slate-800/80"
           >
             <div className="flex items-center justify-between gap-2.5 border-b border-slate-800/80 pb-2.5">
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <span className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 transition ${
-                  guidedStep === 'photos'
-                    ? 'bg-cyan-500 text-slate-950 ring-2 ring-cyan-400/50 animate-pulse'
-                    : 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
-                }`}>
+                <span className="w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
                   2
                 </span>
                 <div className="min-w-0">
@@ -1955,8 +1944,6 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
               <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${
                 isPhotosReady
                   ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                  : guidedStep === 'photos'
-                  ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40 animate-pulse'
                   : 'bg-slate-900 text-slate-400 border-slate-800'
               }`}>
                 {isPhotosReady ? `${photos.length} Photo${photos.length > 1 ? 's' : ''} ✓` : 'Step 2 of 5'}
@@ -1974,6 +1961,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
               }}
               context={photoCaptionContext}
               onOpenPhotographyGuide={() => setShowPhotoGuideModal(true)}
+              isMissing={isPhotosMissing}
             />
           </div>
 
@@ -1983,13 +1971,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
              ======================================================== */}
           <div 
             ref={step3LocationRef}
-            className={`bg-slate-950/60 border rounded-2xl p-4 sm:p-5 space-y-4 transition-all duration-300 ${
-              guidedStep === 'location'
-                ? 'border-cyan-500/70 shadow-lg shadow-cyan-950/40'
-                : isLocationMissing 
-                ? 'border-rose-500/80 ring-2 ring-rose-500/30' 
-                : 'border-slate-800/90'
-            }`}
+            className="space-y-4 pt-4 border-t border-slate-800/80"
           >
             <div className="flex items-center justify-between gap-2.5 border-b border-slate-800/80 pb-2.5">
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -2014,7 +1996,11 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
             </div>
 
             {/* Location Display & Picker Controls */}
-            <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-xl space-y-3">
+            <div className={`p-3.5 rounded-xl space-y-3 transition ${
+              isLocationMissing
+                ? 'bg-rose-950/20 border-2 border-rose-500 ring-2 ring-rose-500/40'
+                : 'bg-slate-900 border border-slate-800'
+            }`}>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="space-y-1 min-w-0 flex-1">
                   {lat1 !== undefined && lng1 !== undefined ? (
@@ -2252,13 +2238,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
              ======================================================== */}
           <div 
             ref={step4WorkforceRef}
-            className={`bg-slate-950/60 border rounded-2xl p-4 sm:p-5 space-y-4 transition-all duration-300 ${
-              guidedStep === 'workforce'
-                ? 'border-cyan-500/70 shadow-lg shadow-cyan-950/40'
-                : (isPerformedByMissing || isStatusMissing) 
-                ? 'border-rose-500/80 ring-2 ring-rose-500/30' 
-                : 'border-slate-800/90'
-            }`}
+            className="space-y-4 pt-4 border-t border-slate-800/80"
           >
             <div className="flex items-center justify-between gap-2.5 border-b border-slate-800/80 pb-2.5">
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -2302,7 +2282,9 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                 </div>
 
                 {/* 3 Selectable Option Cards: 'by IMO', 'by IA', 'by Others' */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className={`grid grid-cols-1 sm:grid-cols-3 gap-2 p-1 rounded-xl transition ${
+                  isPerformedByMissing ? 'bg-rose-950/20 border border-rose-500/80 ring-2 ring-rose-500/30' : ''
+                }`}>
                   {/* 1. by IMO */}
                   <button
                     type="button"
@@ -2712,11 +2694,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
              ======================================================== */}
           <div 
             ref={step5RemarksRef}
-            className={`bg-slate-950/60 border rounded-2xl p-4 sm:p-5 space-y-3 transition-all duration-300 ${
-              guidedStep === 'remarks'
-                ? 'border-cyan-500/70 shadow-lg shadow-cyan-950/40'
-                : 'border-slate-800/90'
-            }`}
+            className="space-y-3 pt-4 border-t border-slate-800/80"
           >
             <div className="flex items-center justify-between gap-2.5 border-b border-slate-800/80 pb-2.5">
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -2752,7 +2730,9 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                 setIsRemarksUserModified(true);
               }}
               placeholder="Enter field notes: equipment on site, crew observations, site conditions, accomplishment details..."
-              className="w-full bg-slate-900 border border-slate-700 text-white text-xs p-3 rounded-xl focus:border-cyan-500 focus:outline-none leading-relaxed"
+              className={`w-full bg-slate-900 border text-white text-xs p-3 rounded-xl focus:border-cyan-500 focus:outline-none leading-relaxed transition ${
+                guidedStep === 'remarks' ? 'border-cyan-400 ring-2 ring-cyan-500/40' : 'border-slate-700'
+              }`}
             />
           </div>
 
