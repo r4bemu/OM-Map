@@ -26,7 +26,6 @@ import {
 } from '../config/authUsers';
 import { triggerGoogleGisSignIn } from '../lib/googleIdentityAuth';
 import { triggerFacebookSignIn, initFacebookClient } from '../lib/facebookAuth';
-import { QuickAccountPicker } from './QuickAccountPicker';
 import { GoogleProfileSetupModal, GoogleInitialData } from './GoogleProfileSetupModal';
 import { AccessRequestStatusModal } from './AccessRequestStatusModal';
 import { AccessRequestManagementModal } from './AccessRequestManagementModal';
@@ -162,21 +161,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   }, [isOpen, loadUsers, loadRequests]);
 
-  // Sync selected account when picked from QuickAccountPicker
-  const handleSelectAccount = (user: AuthUser, autoSubmit = false) => {
-    setSelectedAccount(user);
-    setUsername(user.username);
-    setPasscode(user.passcode);
-    setErrorMsg('');
-
-    if (autoSubmit) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-        onLogin(user);
-      }, 150);
+  // Resolve selected account dynamically when username is typed to support review queue banner
+  useEffect(() => {
+    if (username.trim()) {
+      const match = allUsers.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
+      setSelectedAccount(match || null);
+    } else {
+      setSelectedAccount(null);
     }
-  };
+  }, [username, allUsers]);
 
   const pendingRequestsCount = useMemo(() => {
     if (!selectedAccount || !canUserManageRequests(selectedAccount)) return 0;
@@ -215,7 +208,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       if (user) {
         onLogin(user);
       } else {
-        setErrorMsg('Invalid User ID or Passcode. Please check your credentials or pick from Quick Accounts.');
+        setErrorMsg('Invalid User ID or Passcode. Please check your credentials or sign in with your Google or Facebook account.');
       }
     }, 250);
   };
@@ -411,13 +404,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-xl animate-in fade-in overflow-y-auto transition-colors duration-300 ${
       isLight ? 'bg-slate-900/45' : 'bg-slate-950/90'
     }`}>
-      <div className={`w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row my-auto transition-colors duration-300 border ${
+      <div className={`w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden my-auto transition-colors duration-300 border ${
         isLight ? 'bg-white border-slate-200 text-slate-900 shadow-slate-900/10' : 'bg-slate-900 border-slate-800 text-white'
       }`}>
         
-        {/* Left Side: Brand Hero & Login Form */}
-        <div className={`flex-1 p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r transition-colors duration-300 ${
-          isLight ? 'border-slate-200 bg-slate-50/70' : 'border-slate-800 bg-slate-900/60'
+        {/* Main Content: Brand Hero, Social Sign-In & Login Form */}
+        <div className={`p-6 sm:p-8 flex flex-col justify-between transition-colors duration-300 ${
+          isLight ? 'bg-slate-50/70' : 'bg-slate-900/60'
         }`}>
           <div>
             {/* Top Bar: Header & Theme Switcher */}
@@ -483,20 +476,20 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
             )}
 
-            {/* Social Single Sign-On (SSO) Buttons */}
-            <div className="mb-4 space-y-2">
+            {/* Social Single Sign-On (SSO) Buttons - Primary Focus */}
+            <div className="mb-4 space-y-2.5">
               <button
                 type="button"
                 onClick={handleGoogleSignInClick}
                 disabled={isGoogleLoading || isFacebookLoading}
-                className={`w-full py-2.5 px-4 rounded-xl border font-semibold text-xs transition flex items-center justify-center gap-2.5 cursor-pointer shadow-sm disabled:opacity-50 active:scale-[0.99] ${
+                className={`w-full py-3 px-4 rounded-xl border font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-2.5 cursor-pointer shadow-sm disabled:opacity-50 active:scale-[0.99] ${
                   isLight
                     ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-800 shadow-slate-900/5'
                     : 'bg-slate-800 hover:bg-slate-750 border-slate-700 text-white'
                 }`}
               >
                 {/* Google G Logo SVG */}
-                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <svg className="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
                     d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"
@@ -521,14 +514,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 type="button"
                 onClick={handleFacebookSignInClick}
                 disabled={isFacebookLoading || isGoogleLoading}
-                className={`w-full py-2.5 px-4 rounded-xl border font-semibold text-xs transition flex items-center justify-center gap-2.5 cursor-pointer shadow-sm disabled:opacity-50 active:scale-[0.99] ${
+                className={`w-full py-3 px-4 rounded-xl border font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-2.5 cursor-pointer shadow-sm disabled:opacity-50 active:scale-[0.99] ${
                   isLight
                     ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-800 shadow-slate-900/5'
                     : 'bg-slate-800 hover:bg-slate-750 border-slate-700 text-white'
                 }`}
               >
                 {/* Meta / Facebook SVG Logo */}
-                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="#1877F2">
+                <svg className="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="#1877F2">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
                 <span>{isFacebookLoading ? 'Connecting to Facebook...' : 'Continue with Facebook / Messenger'}</span>
@@ -699,15 +692,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             </a>
           </div>
         </div>
-
-        {/* Right Side: Quick Account Selector with Full Filtering */}
-        <QuickAccountPicker
-          users={allUsers}
-          selectedUser={selectedAccount}
-          onSelectUser={handleSelectAccount}
-          isLight={isLight}
-        />
-
       </div>
 
       {/* Google Profile Registration & Contact Setup Modal */}
