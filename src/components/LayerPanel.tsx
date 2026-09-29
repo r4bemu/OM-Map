@@ -116,9 +116,9 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
   return (
     <>
       <aside
-      className="fixed md:absolute top-16 md:top-20 right-2 md:right-4 z-40 w-auto md:w-80 max-h-[82vh] md:max-h-[600px] bg-slate-900/98 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 pointer-events-auto"
-      onClick={(e) => e.stopPropagation()}
-    >
+        className="fixed md:absolute top-16 md:top-20 right-2 md:right-4 left-auto z-40 w-[calc(100vw-1rem)] sm:w-84 md:w-88 max-h-[82vh] md:max-h-[600px] bg-slate-900/98 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 pointer-events-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
       {/* Drawer Header */}
       <div className="p-2.5 border-b border-slate-700/80 flex items-center justify-between shrink-0 bg-slate-800/80">
         <div className="flex items-center gap-2">

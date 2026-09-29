@@ -288,7 +288,7 @@ export const LocationFilterModal: React.FC<LocationFilterModalProps> = ({
   };
 
   return (
-    <aside className="fixed inset-x-0 bottom-0 md:bottom-auto md:top-20 md:left-4 md:right-auto z-50 md:z-40 w-full md:w-[440px] max-h-[85vh] md:max-h-[580px] bg-slate-900/98 md:bg-slate-900/98 backdrop-blur-xl border-t md:border border-slate-700/80 rounded-t-3xl md:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6 md:slide-in-from-left-4">
+    <aside className="fixed inset-x-0 bottom-0 md:bottom-auto md:top-20 md:right-4 md:left-auto z-50 md:z-40 w-full md:w-[440px] max-h-[85vh] md:max-h-[580px] bg-slate-900/98 md:bg-slate-900/98 backdrop-blur-xl border-t md:border border-slate-700/80 rounded-t-3xl md:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6 md:slide-in-from-right-4">
       {/* Mobile Drag Handle */}
       <div className="w-12 h-1 bg-slate-700/80 rounded-full mx-auto my-1.5 md:hidden shrink-0" />
 
