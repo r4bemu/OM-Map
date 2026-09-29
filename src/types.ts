@@ -192,7 +192,7 @@ export interface GISLayer {
   name: string;
   fileName?: string;
   category: 'Canals' | 'Structures' | 'Maintenance' | 'Operations' | 'Canal Networks' | 'Maintenance Reports' | 'Operational Status Reports';
-  subCategory?: 'Main Canals' | 'Lateral Canals' | 'Other Unclassified Canals' | 'Unclassified Canals' | 'Structures' | 'Canals' | 'Parcels' | 'Maintenance Reports' | 'Operational Status Reports';
+  subCategory?: 'Main Canals' | 'Lateral Canals' | 'Other Unclassified Canals' | 'Unclassified Canals' | 'Structures' | 'Canals' | 'Canal Network' | 'Canal Networks' | 'Parcels' | 'Maintenance Reports' | 'Operational Status Reports';
   visible: boolean;
   color: string;
   opacity: number;

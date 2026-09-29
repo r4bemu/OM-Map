@@ -564,11 +564,11 @@ export function getFeatureName(props: any, defaultFallback = 'Main Canal', coord
  * "Baco-Bucayao RIS Main Canal (Sta. 0+000 to 2+719)" => "Baco-Bucayao RIS Main Canal"
  */
 export function cleanCanalBaseName(raw: string): string {
-  if (!raw || typeof raw !== 'string') return 'Main Canal';
+  if (!raw || typeof raw !== 'string') return 'Unnamed Canal';
   let clean = raw.trim();
   clean = clean.replace(/\s*[\(\[]?\s*(?:Sta\.?\s*)?\d+\+\d+(?:\.\d+)?(?:\s*(?:to|-)\s*(?:Sta\.?\s*)?\d+\+\d+(?:\.\d+)?)?\s*[\)\]]?/gi, '').trim();
   clean = clean.replace(/[-–—]\s*$/, '').trim();
-  return clean || 'Main Canal';
+  return clean || 'Unnamed Canal';
 }
 
 export interface NearestGISFeatureResult {
@@ -846,7 +846,7 @@ export function detectNearestGISFeature(
 
   // If the closest candidate is a canal line, orient downstream & calculate stationing ONCE
   if (isLineWinner && bestLineCandidate) {
-    const rawName = getFeatureName(bestLineCandidate.props, 'Main Canal', [lat, lng]);
+    const rawName = getFeatureName(bestLineCandidate.props, 'Unnamed Canal', [lat, lng]);
     const canalName = cleanCanalBaseName(rawName);
 
     const { orientedCoords, isReversed } = orientLinestringDownstream(bestLineCandidate.lineCoords, canalName, layers);
@@ -875,9 +875,9 @@ export function detectNearestGISFeature(
     const rawCode = bestLineCandidate.props.canal_code || bestLineCandidate.props.canal_id || bestLineCandidate.props.station_code;
     const canalCode = (rawCode && !isSyntheticFeatureId(rawCode))
       ? rawCode
-      : (canalName !== 'Main Canal' && !canalName.startsWith('Unnamed Canal')
+      : (!canalName.startsWith('Unnamed Canal') && canalName !== 'Canal'
           ? canalName
-          : (bestLineCandidate.props.id ? `CNL-${bestLineCandidate.props.id}` : 'CNL-MAIN'));
+          : (bestLineCandidate.props.id ? `CNL-${bestLineCandidate.props.id}` : 'CNL'));
 
     // Check declared line stationing (station__1, station__2, station_1, station_2, STATIONING)
     const rawS1 = bestLineCandidate.props.station__1 || bestLineCandidate.props.station_1;

@@ -160,11 +160,18 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           const safeGeomType: 'LineString' | 'Point' | 'Mixed' = 
             result.geometryType === 'Point' ? 'Point' : 'LineString';
 
+          const isMultiFeature = (result.geoJsonData?.features?.length || 0) > 1;
+          const assignedSubCategory = classification.isStructure
+            ? 'Structures'
+            : isMultiFeature
+            ? 'Canal Network'
+            : classification.hierarchyType;
+
           const newLayer: GISLayer = {
             id: `layer-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 6)}`,
             name: result.fileName.replace(/\.[^/.]+$/, ''),
             category: classification.isStructure ? 'Structures' : 'Canals',
-            subCategory: classification.hierarchyType,
+            subCategory: assignedSubCategory,
             visible: true,
             color: classification.color,
             opacity: classification.opacity ?? 0.85,

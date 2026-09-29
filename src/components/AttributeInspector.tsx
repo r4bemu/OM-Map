@@ -23,7 +23,7 @@ import {
 import { FieldReport, UserRole, ApprovalStatus, AuthUser, GISLayer } from '../types';
 import { downloadReportPdf } from '../utils/reportPdfBuilder';
 import { isSyntheticFeatureId, detectNearestGISFeature, getFeatureName, NearestGISFeatureResult } from '../utils/gisLocationUtils';
-import { detectCanalCategory, detectCanalType } from '../utils/canalLayerClassifier';
+import { detectCanalCategory, detectCanalType, classifyVectorItem, getCanalTypeLabel } from '../utils/canalLayerClassifier';
 import { resolvePhotoAttachmentUrl, handleImageFallback, captureAndCacheImageElement } from '../utils/photoUtils';
 
 interface AttributeInspectorProps {
@@ -681,15 +681,22 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
 
             {/* Canal Category & Type Summary Banner */}
             {(() => {
-              const cat = nearestGIS?.canalCategory || detectCanalCategory(selectedFeatureProps);
-              const typ = nearestGIS?.canalType || detectCanalType(selectedFeatureProps);
-              const isCanal = selectedFeatureType?.includes('Canal') || selectedFeatureProps?.canal || selectedFeatureProps?.canal_type || selectedFeatureProps?.Length || selectedFeatureProps?.LENGTH;
-              if (!isCanal && cat === 'Uncategorized' && typ === 'Unclassified') return null;
+              const itemStyle = classifyVectorItem(
+                undefined,
+                selectedFeatureType,
+                undefined,
+                selectedFeatureProps,
+                selectedFeatureType?.includes('Point') ? 'Point' : 'LineString'
+              );
+              const cat = nearestGIS?.canalCategory || itemStyle.canalCategory || 'Uncategorized';
+              const typLabel = getCanalTypeLabel(itemStyle.hierarchyType, nearestGIS?.canalType || itemStyle.canalType, itemStyle.isStructure);
+              const isCanal = selectedFeatureType?.includes('Canal') || selectedFeatureProps?.canal || selectedFeatureProps?.canal_type || selectedFeatureProps?.Length || selectedFeatureProps?.LENGTH || !itemStyle.isStructure;
+              if (!isCanal && cat === 'Uncategorized' && itemStyle.canalType === 'Unclassified') return null;
               return (
                 <div className="flex items-center justify-between p-2.5 bg-cyan-950/30 border border-cyan-800/40 rounded-xl text-xs">
                   <span className="text-[10px] text-cyan-400 uppercase font-bold">Classification</span>
                   <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-cyan-900/60 text-cyan-200 border border-cyan-700/60">
-                    {cat} • {typ === 'Main' ? 'Main Canal' : typ === 'Lateral' ? 'Lateral Canal' : typ === 'Farm Ditch' ? 'Farm Ditch' : 'Canal'}
+                    {cat} • {typLabel}
                   </span>
                 </div>
               );

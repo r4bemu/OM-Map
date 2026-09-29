@@ -42,6 +42,7 @@ import {
   classifyVectorItem, 
   detectCanalCategory,
   detectCanalType,
+  getCanalTypeLabel,
   BLUE_PALETTE, 
   STROKE_WEIGHTS 
 } from '../utils/canalLayerClassifier';
@@ -980,22 +981,13 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 }
               }
 
-              let resolvedName = featInfo?.locationName || getFeatureName(props, 'Layer Attributes', featureCoords);
-              const cCategory = featInfo?.canalCategory || detectCanalCategory(props);
-              const cType = featInfo?.canalType || detectCanalType(props, layer.name, resolvedName);
-              if (cType === 'Farm Ditch' && featureCoords && (!featInfo || !featInfo.locationName.startsWith('Farm ditch'))) {
+              let resolvedName = featInfo?.locationName || getFeatureName(props, 'Unnamed Canal', featureCoords);
+              if (itemStyle.canalType === 'Farm Ditch' && featureCoords && (!featInfo || !featInfo.locationName.startsWith('Farm ditch'))) {
                 resolvedName = `Farm ditch @${featureCoords[0].toFixed(5)}, ${featureCoords[1].toFixed(5)}`;
               }
 
-              const isCanal = !layer.category?.includes('Structure') && layer.geometryType !== 'Point' && !layer.name.toLowerCase().includes('structure');
-              const typeLabel = (cType as string) === 'Main' || (cType as string) === 'Main Canal'
-                ? 'Main Canal'
-                : (cType as string) === 'Lateral' || (cType as string) === 'Lateral Canal'
-                ? 'Lateral Canal'
-                : cType === 'Farm Ditch'
-                ? 'Farm Ditch'
-                : (isCanal ? 'Main Canal' : 'Structure');
-              const categoryLabel = cCategory || 'Uncategorized';
+              const typeLabel = getCanalTypeLabel(itemStyle.hierarchyType, itemStyle.canalType, itemStyle.isStructure);
+              const categoryLabel = itemStyle.canalCategory || 'Uncategorized';
               const coordsStr = featureCoords
                 ? `${featureCoords[0].toFixed(5)}, ${featureCoords[1].toFixed(5)}`
                 : 'Not available';
