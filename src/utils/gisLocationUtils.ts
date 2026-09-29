@@ -612,6 +612,7 @@ export function detectNearestGISFeature(
 
   let minDistance = Infinity;
   let isLineWinner = false;
+  let hasExactMatchWinner = false;
   let bestResult: NearestGISFeatureResult = {
     locationName: `Site Location (${validLat.toFixed(4)}, ${validLng.toFixed(4)})`,
     stationingLabel: `0+000`,
@@ -665,25 +666,33 @@ export function detectNearestGISFeature(
       const featureMuni = props.Municipality || props.municipality;
       const featureBrgy = props.Barangay || props.barangay;
 
-      const isPreferred = Boolean(
-        preferredProps && (
-          props === preferredProps ||
-          (preferredProps.id !== undefined && props.id !== undefined && String(props.id) === String(preferredProps.id)) ||
-          (preferredProps.canal_id !== undefined && props.canal_id !== undefined && String(props.canal_id) === String(preferredProps.canal_id) && preferredProps.canal_id !== null) ||
+      const isExactMatch = Boolean(preferredProps && props === preferredProps);
+
+      const isValidId = (val: any) => val !== undefined && val !== null && String(val).trim() !== '' && String(val) !== 'null' && String(val) !== 'undefined';
+
+      const isIdMatch = Boolean(
+        preferredProps && !isExactMatch && (
+          (isValidId(preferredProps.id) && isValidId(props.id) && String(props.id) === String(preferredProps.id)) ||
+          (isValidId(preferredProps.canal_id) && isValidId(props.canal_id) && String(props.canal_id) === String(preferredProps.canal_id)) ||
           (preferredProps.station_code && props.station_code === preferredProps.station_code)
         )
       );
 
       if (geom.type === 'Point' && geom.coordinates) {
         const [fLng, fLat] = geom.coordinates;
-        // Bounding box filter: structures must be within ~500m (0.005 deg) to consider
-        if (!isPreferred && (Math.abs(fLat - lat) > 0.005 || Math.abs(fLng - lng) > 0.005)) {
+        const dist = haversineDistanceMeters(lat, lng, fLat, fLng);
+
+        // Bounding box filter: structures must be within ~500m (0.005 deg) unless exact match
+        if (!isExactMatch && (Math.abs(fLat - lat) > 0.005 || Math.abs(fLng - lng) > 0.005)) {
           return;
         }
 
-        const dist = haversineDistanceMeters(lat, lng, fLat, fLng);
-        if (isPreferred || (dist < minDistance && dist < 25)) {
+        // Only consider ID match if structure is within 50m of click
+        const isPreferred = isExactMatch || (isIdMatch && dist < 50);
+
+        if (!hasExactMatchWinner && (isPreferred || (dist < minDistance && dist < 25))) {
           minDistance = isPreferred ? 0 : dist;
+          if (isExactMatch) hasExactMatchWinner = true;
           isLineWinner = false;
 
           const name = getFeatureName(props, props.station_code || 'Structure Gate', [fLat, fLng]);
@@ -788,7 +797,7 @@ export function detectNearestGISFeature(
         polylines.forEach((lineCoords) => {
           if (lineCoords.length < 2) return;
 
-          // Fast bounding box check on linestring: skip lines further than ~2.2km (0.02 deg) from click unless preferred
+          // Fast bounding box check on linestring: skip lines further than ~2.2km (0.02 deg) from click unless exact match
           let lineMinLat = Infinity, lineMaxLat = -Infinity, lineMinLng = Infinity, lineMaxLng = -Infinity;
           for (let i = 0; i < lineCoords.length; i++) {
             const pt = lineCoords[i];
@@ -797,7 +806,7 @@ export function detectNearestGISFeature(
             if (pt[1] < lineMinLng) lineMinLng = pt[1];
             if (pt[1] > lineMaxLng) lineMaxLng = pt[1];
           }
-          if (!isPreferred && (lat < lineMinLat - 0.02 || lat > lineMaxLat + 0.02 || lng < lineMinLng - 0.02 || lng > lineMaxLng + 0.02)) {
+          if (!isExactMatch && (lat < lineMinLat - 0.02 || lat > lineMaxLat + 0.02 || lng < lineMinLng - 0.02 || lng > lineMaxLng + 0.02)) {
             return;
           }
 
@@ -812,8 +821,12 @@ export function detectNearestGISFeature(
             }
           }
 
-          if (isPreferred || lineMinDist < minDistance) {
+          // Only consider ID match if line is within 50m of click
+          const isPreferred = isExactMatch || (isIdMatch && lineMinDist < 50);
+
+          if (!hasExactMatchWinner && (isPreferred || lineMinDist < minDistance)) {
             minDistance = isPreferred ? 0 : lineMinDist;
+            if (isExactMatch) hasExactMatchWinner = true;
             isLineWinner = true;
             bestLineCandidate = {
               minDist: lineMinDist,
