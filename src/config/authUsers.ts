@@ -1523,3 +1523,58 @@ export async function fetchApprovedUsersApi(): Promise<AuthUser[]> {
   return [];
 }
 
+/**
+ * Automatically detects the canonical IMO Office from a file name or descriptive text.
+ */
+export function detectImoFromFileName(fileName?: string): string | null {
+  if (!fileName) return null;
+  const lower = fileName.toLowerCase();
+
+  // 1. MOMARO (Mindoro Oriental, Marinduque, Romblon)
+  if (
+    lower.includes('baco') ||
+    lower.includes('bucayao') ||
+    lower.includes('bansud') ||
+    lower.includes('cantingas') ||
+    lower.includes('mag-asawang') ||
+    lower.includes('mag_asawang') ||
+    lower.includes('pula') ||
+    lower.includes('bongabong') ||
+    lower.includes('momaro') ||
+    lower.includes('oriental') ||
+    lower.includes('marinduque') ||
+    lower.includes('romblon')
+  ) {
+    return 'Mindoro Oriental-Marinduque-Romblon IMO';
+  }
+
+  // 2. OMIMO (Occidental Mindoro)
+  if (
+    lower.includes('amnay') ||
+    lower.includes('caguray') ||
+    lower.includes('lumintao') ||
+    lower.includes('mongpong') ||
+    lower.includes('mompong') ||
+    lower.includes('pagbahan') ||
+    lower.includes('mamburao') ||
+    lower.includes('patrick') ||
+    lower.includes('omimo') ||
+    lower.includes('occidental')
+  ) {
+    return 'Occidental Mindoro IMO';
+  }
+
+  // 3. PALIMO (Palawan)
+  if (
+    lower.includes('batang') ||
+    lower.includes('malatgao') ||
+    lower.includes('palawan') ||
+    lower.includes('palimo') ||
+    lower.includes('pimo')
+  ) {
+    return 'Palawan IMO';
+  }
+
+  return null;
+}
+

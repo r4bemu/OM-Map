@@ -23,6 +23,8 @@ import { GISLayer } from '../types';
 
 import { classifyVectorItem, BLUE_PALETTE } from '../utils/canalLayerClassifier';
 import { DeleteLayerConfirmationModal } from './DeleteLayerConfirmationModal';
+import { detectImoFromFileName } from '../config/authUsers';
+import { uploadGISLayerToDrive } from '../lib/googleDriveService';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -31,6 +33,7 @@ interface UploadModalProps {
   layers?: GISLayer[];
   onToggleVisibility?: (layerId: string) => void;
   onDeleteLayer?: (layerId: string) => void;
+  defaultImo?: string;
 }
 
 const PALETTE_COLORS = [
@@ -78,12 +81,14 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   onAddLayer,
   layers = [],
   onToggleVisibility,
-  onDeleteLayer
+  onDeleteLayer,
+  defaultImo
 }) => {
   const [activeTab, setActiveTab] = useState<'upload' | 'all'>('upload');
 
   // Upload Form State
   const [isParsing, setIsParsing] = useState(false);
+  const [isUploadingDrive, setIsUploadingDrive] = useState(false);
   const [parsingProgressText, setParsingProgressText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -95,6 +100,14 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   const [layerColor, setLayerColor] = useState('#06b6d4');
   const [layerOpacity, setLayerOpacity] = useState(0.8);
 
+  // IMO Office Jurisdiction State
+  const [selectedImo, setSelectedImo] = useState<string>(
+    defaultImo && defaultImo !== 'All IMOs' && defaultImo !== 'Regional Office IV-B'
+      ? defaultImo
+      : 'Mindoro Oriental-Marinduque-Romblon IMO'
+  );
+  const [isImoAutoDetected, setIsImoAutoDetected] = useState(false);
+
   // Search filter for All GIS Data tab
   const [filterQuery, setFilterQuery] = useState('');
 
@@ -105,6 +118,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
   const resetUploadState = () => {
     setIsParsing(false);
+    setIsUploadingDrive(false);
     setParsingProgressText('');
     setError(null);
     setParsedResult(null);
@@ -112,6 +126,12 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     setLayerCategory('Canals');
     setLayerColor(getRandomGISColor());
     setLayerOpacity(0.8);
+    setIsImoAutoDetected(false);
+    setSelectedImo(
+      defaultImo && defaultImo !== 'All IMOs' && defaultImo !== 'Regional Office IV-B'
+        ? defaultImo
+        : 'Mindoro Oriental-Marinduque-Romblon IMO'
+    );
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -171,6 +191,21 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             ? 'Canal Network'
             : classification.hierarchyType;
 
+          const fileImo = detectImoFromFileName(result.fileName) || selectedImo;
+
+          // Attempt Google Drive backup
+          let driveInfo: { fileId?: string; folderId?: string; source: string } = { source: 'Upload' };
+          try {
+            const driveRes = await uploadGISLayerToDrive(fileImo, result.fileName, result.geoJsonData);
+            if (driveRes.success) {
+              driveInfo = {
+                fileId: driveRes.fileId,
+                folderId: driveRes.folderId,
+                source: driveRes.source
+              };
+            }
+          } catch (_) {}
+
           const newLayer: GISLayer = {
             id: `layer-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 6)}`,
             name: result.fileName.replace(/\.[^/.]+$/, ''),
@@ -184,7 +219,12 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             geometryType: safeGeomType,
             uploadedAt: new Date().toISOString(),
             sizeBytes: result.fileSize,
-            isDefault: false
+            isDefault: false,
+            imoOffice: fileImo,
+            driveFileId: driveInfo.fileId,
+            driveFolderId: driveInfo.folderId,
+            source: driveInfo.source as any,
+            fileName: result.fileName
           };
 
           onAddLayer(newLayer);
@@ -199,7 +239,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
       setParsingProgressText('');
 
       if (successCount > 0) {
-        let msg = `Successfully uploaded and added ${successCount} GIS layer(s) to the map with official Blue hierarchy styling!`;
+        let msg = `Successfully uploaded and added ${successCount} GIS layer(s) to the map with assigned IMO offices!`;
         if (failedFiles.length > 0) {
           msg += ` (${failedFiles.length} file(s) failed: ${failedFiles.join(', ')})`;
         }
@@ -232,6 +272,15 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
       setLayerCategory(classification.isStructure ? 'Structures' : 'Canals');
       setLayerColor(classification.color);
+
+      // Auto-detect IMO from filename
+      const detectedImo = detectImoFromFileName(result.fileName);
+      if (detectedImo) {
+        setSelectedImo(detectedImo);
+        setIsImoAutoDetected(true);
+      } else {
+        setIsImoAutoDetected(false);
+      }
     } catch (err: any) {
       console.error('File parsing error:', err);
       setError(err.message || 'Failed to parse GIS file. Ensure it is a valid GeoJSON, KML, or KMZ file.');
@@ -248,16 +297,50 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     }
   };
 
-  const handleSubmitSingle = () => {
+  const handleSubmitSingle = async () => {
     if (!parsedResult) return;
+
+    setIsUploadingDrive(true);
+    setParsingProgressText('Synchronizing layer to Google Drive and local storage...');
 
     const safeGeomType: 'LineString' | 'Point' | 'Mixed' = 
       parsedResult.geometryType === 'Point' ? 'Point' : 'LineString';
+
+    const classification = classifyVectorItem(
+      parsedResult.fileName,
+      layerCategory,
+      undefined,
+      parsedResult.geoJsonData?.features?.[0]?.properties,
+      parsedResult.geometryType
+    );
+
+    const isMultiFeature = (parsedResult.geoJsonData?.features?.length || 0) > 1;
+    const assignedSubCategory = classification.isStructure
+      ? 'Structures'
+      : isMultiFeature
+      ? 'Canal Network'
+      : classification.hierarchyType;
+
+    let driveInfo: { fileId?: string; folderId?: string; source: string; message?: string } = { source: 'Upload' };
+    try {
+      const driveRes = await uploadGISLayerToDrive(selectedImo, layerName || parsedResult.fileName, parsedResult.geoJsonData);
+      if (driveRes.success) {
+        driveInfo = {
+          fileId: driveRes.fileId,
+          folderId: driveRes.folderId,
+          source: driveRes.source,
+          message: driveRes.message
+        };
+      }
+    } catch (dErr) {
+      console.warn('Drive upload error during single submit:', dErr);
+    }
 
     const newLayer: GISLayer = {
       id: `layer-${Date.now()}`,
       name: layerName || parsedResult.fileName,
       category: layerCategory as any,
+      subCategory: assignedSubCategory,
       visible: true,
       color: layerColor,
       opacity: layerOpacity,
@@ -266,12 +349,21 @@ export const UploadModal: React.FC<UploadModalProps> = ({
       geometryType: safeGeomType,
       uploadedAt: new Date().toISOString(),
       sizeBytes: parsedResult.fileSize,
-      isDefault: false
+      isDefault: false,
+      imoOffice: selectedImo,
+      driveFileId: driveInfo.fileId,
+      driveFolderId: driveInfo.folderId,
+      source: driveInfo.source as any,
+      fileName: parsedResult.fileName
     };
 
     onAddLayer(newLayer);
+    setIsUploadingDrive(false);
     
-    setSuccessMessage(`Layer "${newLayer.name}" added to map under "${newLayer.category}"! You can upload more files below.`);
+    const driveStatusText = driveInfo.source === 'Google Drive' 
+      ? 'and backed up to Google Drive' 
+      : 'and stored in persistent database';
+    setSuccessMessage(`Layer "${newLayer.name}" added to map (${selectedImo}) ${driveStatusText}! You can upload more files below.`);
     resetUploadState();
   };
 
@@ -356,6 +448,28 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                 </div>
               )}
 
+              {/* Target IMO Jurisdiction Selector */}
+              {!parsedResult && (
+                <div className="p-3 bg-slate-800/40 border border-slate-700/80 rounded-xl flex items-center justify-between gap-3">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-slate-200">Target IMO Office / Jurisdiction</span>
+                    <span className="text-[10px] text-slate-400">Designated Google Drive cloud folder &amp; map filter scope</span>
+                  </div>
+                  <select
+                    value={selectedImo}
+                    onChange={(e) => {
+                      setSelectedImo(e.target.value);
+                      setIsImoAutoDetected(false);
+                    }}
+                    className="bg-slate-800 border border-slate-700 text-cyan-300 font-bold text-xs px-2.5 py-1.5 rounded-lg focus:border-cyan-500 focus:outline-none cursor-pointer"
+                  >
+                    <option value="Mindoro Oriental-Marinduque-Romblon IMO">MOMARO IMO</option>
+                    <option value="Occidental Mindoro IMO">OMIMO</option>
+                    <option value="Palawan IMO">PALIMO</option>
+                  </select>
+                </div>
+              )}
+
               {/* Default File Dropzone Window (Supports Multiple Files) */}
               {!parsedResult && (
                 <div
@@ -434,6 +548,32 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                         onChange={(e) => setLayerName(e.target.value)}
                         className="w-full bg-slate-800 border border-slate-700 text-white text-xs p-2.5 rounded-xl focus:border-cyan-500 focus:outline-none"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1 flex items-center justify-between">
+                        <span>Assigned IMO Office / Jurisdiction</span>
+                        {isImoAutoDetected && (
+                          <span className="text-[10px] text-emerald-400 font-medium lowercase tracking-normal bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                            auto-detected
+                          </span>
+                        )}
+                      </label>
+                      <select
+                        value={selectedImo}
+                        onChange={(e) => {
+                          setSelectedImo(e.target.value);
+                          setIsImoAutoDetected(false);
+                        }}
+                        className="w-full bg-slate-800 border border-slate-700 text-amber-300 font-bold text-xs p-2.5 rounded-xl focus:border-cyan-500 focus:outline-none cursor-pointer"
+                      >
+                        <option value="Mindoro Oriental-Marinduque-Romblon IMO">Mindoro Oriental-Marinduque-Romblon IMO (MOMARO)</option>
+                        <option value="Occidental Mindoro IMO">Occidental Mindoro IMO (OMIMO)</option>
+                        <option value="Palawan IMO">Palawan IMO (PALIMO)</option>
+                      </select>
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        Determines the designated Google Drive cloud archive folder and role-based IMO map filtering.
+                      </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -524,12 +664,29 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                         />
                         <div className="min-w-0">
                           <h4 className="text-xs font-bold text-white truncate">{layer.name}</h4>
-                          <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                          <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5 flex-wrap">
+                            {layer.imoOffice && (
+                              <span className="bg-amber-500/10 text-amber-300 border border-amber-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">
+                                {layer.imoOffice.includes('MOMARO') || layer.imoOffice.includes('Oriental')
+                                  ? 'MOMARO'
+                                  : layer.imoOffice.includes('Occidental') || layer.imoOffice.includes('OMIMO')
+                                  ? 'OMIMO'
+                                  : 'PALIMO'}
+                              </span>
+                            )}
                             <span className="bg-slate-700/60 px-1.5 py-0.5 rounded text-slate-300 font-medium">{layer.category}</span>
                             <span>•</span>
                             <span className="font-mono">{layer.featureCount} features</span>
                             <span>•</span>
                             <span className="uppercase font-mono text-slate-400">{layer.geometryType}</span>
+                            {Boolean(layer.driveFileId) && (
+                              <>
+                                <span>•</span>
+                                <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.2 rounded text-[9px] font-mono">
+                                  Drive
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -601,9 +758,20 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               {parsedResult && (
                 <button
                   onClick={handleSubmitSingle}
-                  className="px-5 py-2 text-xs font-bold bg-[#009933] hover:bg-[#00802b] text-white rounded-xl shadow-sm border border-[#00802b]/50 transition cursor-pointer active:scale-95"
+                  disabled={isUploadingDrive}
+                  className="px-5 py-2 text-xs font-bold bg-[#009933] hover:bg-[#00802b] disabled:opacity-50 text-white rounded-xl shadow-sm border border-[#00802b]/50 transition cursor-pointer active:scale-95 flex items-center gap-1.5"
                 >
-                  Add Layer to Map
+                  {isUploadingDrive ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Syncing to Drive...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Add Layer to Map</span>
+                    </>
+                  )}
                 </button>
               )}
             </>

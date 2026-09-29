@@ -860,7 +860,13 @@ export default function App() {
           : null;
 
         // Check if GIS layers require download
-        const layersNeedSync = !localLayers || localLayers.length === 0 || !cachedMeta?.layerChecksum || cachedMeta.layerChecksum !== layerManifest?.checksum;
+        const expectedLayerCount = layerManifest?.layerCount || layerManifest?.totalLayers || 0;
+        const layersNeedSync = 
+          !localLayers || 
+          localLayers.length === 0 || 
+          (expectedLayerCount > 0 && localLayers.length < expectedLayerCount) ||
+          !cachedMeta?.layerChecksum || 
+          cachedMeta.layerChecksum !== layerManifest?.checksum;
         if (layersNeedSync) {
           try {
             const res = await fetch(`/api/layers?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`);
@@ -868,8 +874,13 @@ export default function App() {
               const data = await res.json();
               if (Array.isArray(data.layers) && data.layers.length > 0 && !isCancelled) {
                 const clean = data.layers.filter((l: any) => !isMockLayer(l) && l.geometryType !== 'Polygon' && l.category !== 'Parcels');
-                setLayers(clean);
-                await saveCachedLayersDB(clean);
+                setLayers(prev => {
+                  const serverIds = new Set(clean.map((l: any) => l.id));
+                  const customLocal = prev.filter(l => !serverIds.has(l.id) && !l.id.startsWith('drive-local-') && !l.id.startsWith('layer-maintenance-') && !l.id.startsWith('layer-operational-') && !l.id.startsWith('layer-activity-') && !l.id.startsWith('layer-field-reports'));
+                  const merged = [...clean, ...customLocal];
+                  saveCachedLayersDB(merged);
+                  return merged;
+                });
               }
             }
           } catch (lErr) {
@@ -1797,6 +1808,24 @@ export default function App() {
       setSyncStatusMessage('Synchronizing fresh GIS layers from Google Drive (Drive supersedes)...');
       try {
         await syncIMOFolderLayers(activeRole, targetImo, true);
+        const lRes = await fetch(`/api/layers?role=${encodeURIComponent(activeRole)}&imo=${encodeURIComponent(targetImo)}`);
+        if (lRes.ok) {
+          const lData = await lRes.json();
+          if (Array.isArray(lData.layers) && lData.layers.length > 0) {
+            const clean = lData.layers.filter((l: any) => !isMockLayer(l) && l.geometryType !== 'Polygon' && l.category !== 'Parcels');
+            setLayers(prev => {
+              const prevMap = new Map(prev.map(l => [l.id, l]));
+              clean.forEach((cl: any) => {
+                if (!prevMap.has(cl.id)) {
+                  prevMap.set(cl.id, cl);
+                }
+              });
+              const merged = Array.from(prevMap.values());
+              saveCachedLayersDB(merged).catch(() => {});
+              return merged;
+            });
+          }
+        }
       } catch (lErr) {
         console.warn('Overhaul layer sync notice:', lErr);
       }
@@ -2337,6 +2366,7 @@ export default function App() {
           layers={layers}
           onToggleVisibility={handleToggleLayerVisibility}
           onDeleteLayer={handleDeleteLayer}
+          defaultImo={effectiveImo !== 'All IMOs' ? effectiveImo : (userAssignedImo !== 'All IMOs' ? userAssignedImo : undefined)}
         />
       )}
 

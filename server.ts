@@ -1221,23 +1221,108 @@ export async function createApp() {
         return res.json({ success: true, message: 'Mock layer ignored.' });
       }
 
-      const layerWithId = {
+      const getShortImo = (imo?: string) => {
+        if (!imo) return 'MOMARO';
+        const lower = imo.toLowerCase();
+        if (lower.includes('palawan') || lower.includes('pimo') || lower.includes('palimo')) return 'PIMO';
+        if (lower.includes('occidental') || lower.includes('omimo')) return 'OMIMO';
+        return 'MOMARO';
+      };
+
+      const detectImo = (text?: string): string => {
+        if (!text) return 'Mindoro Oriental-Marinduque-Romblon IMO';
+        const lower = text.toLowerCase();
+        if (lower.includes('palawan') || lower.includes('pimo') || lower.includes('palimo') || lower.includes('batang') || lower.includes('malatgao')) {
+          return 'Palawan IMO';
+        }
+        if (lower.includes('occidental') || lower.includes('omimo') || lower.includes('mindoro occ') || lower.includes('amnay') || lower.includes('caguray') || lower.includes('lumintao') || lower.includes('mongpong') || lower.includes('mompong') || lower.includes('pagbahan')) {
+          return 'Occidental Mindoro IMO';
+        }
+        return 'Mindoro Oriental-Marinduque-Romblon IMO';
+      };
+
+      const resolvedImo = newLayer.imoOffice || detectImo(newLayer.name || newLayer.fileName);
+
+      const layerWithId: any = {
         id: newLayer.id || `layer-${Date.now()}`,
         name: newLayer.name,
-        category: newLayer.category || 'Custom Uploads',
+        category: newLayer.category || 'Canals',
+        subCategory: newLayer.subCategory,
         visible: newLayer.visible ?? true,
         color: newLayer.color || '#3b82f6',
-        opacity: newLayer.opacity ?? 0.8,
+        opacity: newLayer.opacity ?? 0.85,
         data: newLayer.data,
         featureCount: newLayer.featureCount || (newLayer.data.features ? newLayer.data.features.length : 0),
         geometryType: newLayer.geometryType || 'Mixed',
         uploadedAt: newLayer.uploadedAt || new Date().toISOString(),
         isDefault: false,
-        sizeBytes: newLayer.sizeBytes || 0
+        sizeBytes: newLayer.sizeBytes || 0,
+        imoOffice: resolvedImo,
+        nis: newLayer.nis,
+        driveFileId: newLayer.driveFileId,
+        driveFolderId: newLayer.driveFolderId,
+        source: newLayer.source || (newLayer.driveFileId ? 'Google Drive' : 'Upload'),
+        fileName: newLayer.fileName || (newLayer.name ? `${newLayer.name}.geojson` : undefined)
       };
 
+      // 1. Save local copy into data/gis_network/{shortImo}/
+      try {
+        const shortImo = getShortImo(layerWithId.imoOffice);
+        const gisSubDir = path.join(process.cwd(), 'data', 'gis_network', shortImo);
+        if (!fs.existsSync(gisSubDir)) {
+          fs.mkdirSync(gisSubDir, { recursive: true });
+        }
+        const safeName = (layerWithId.fileName || layerWithId.name || 'layer')
+          .replace(/[^a-zA-Z0-9_.-]/g, '_')
+          .replace(/\.geojson$/, '') + '.geojson';
+        fs.writeFileSync(path.join(gisSubDir, safeName), JSON.stringify(layerWithId.data, null, 2));
+        console.log(`💾 Saved persistent GeoJSON copy to data/gis_network/${shortImo}/${safeName}`);
+      } catch (fErr) {
+        console.warn('Could not save local GeoJSON copy to gis_network:', fErr);
+      }
+
+      // 2. Persist to Firestore and persistent_layers.json
       await saveFirestoreLayer(layerWithId);
-      saveLayersToFile([layerWithId, ...loadSavedLayers()]);
+      const existingLayers = loadSavedLayers().filter((l: any) => l.id !== layerWithId.id);
+      saveLayersToFile([layerWithId, ...existingLayers]);
+
+      // 3. Asynchronously attempt Drive backup via Apps Script relay if not yet backed up
+      const appsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
+      if (!layerWithId.driveFileId && appsScriptUrl && appsScriptUrl.trim()) {
+        const designatedGisFolder = (imo?: string) => {
+          const lower = (imo || '').toLowerCase();
+          if (lower.includes('palawan') || lower.includes('pimo') || lower.includes('palimo')) return '1xqXBkJAscqqCDgQRFbCAyQh46baehrQ1';
+          if (lower.includes('occidental') || lower.includes('omimo') || lower.includes('mindoro occ')) return '1IBqpIgac41KSVc3UBq-xONJVxyNwjX_0';
+          return '1LdKe-iTgeF_nEy-eRcJwkYAqmj0DwEm0';
+        };
+        const targetFolderId = designatedGisFolder(layerWithId.imoOffice);
+        const safeName = (layerWithId.fileName || layerWithId.name || 'layer')
+          .replace(/[^a-zA-Z0-9_.-]/g, '_')
+          .replace(/\.geojson$/, '') + '.geojson';
+
+        fetch(appsScriptUrl.trim(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'uploadGISLayer',
+            imoOffice: layerWithId.imoOffice,
+            targetFolderId,
+            fileName: safeName,
+            content: JSON.stringify(layerWithId.data)
+          })
+        }).then(r => r.json()).then(gasData => {
+          if (gasData && gasData.success && gasData.fileId) {
+            layerWithId.driveFileId = gasData.fileId;
+            layerWithId.driveFolderId = targetFolderId;
+            layerWithId.source = 'Google Drive';
+            const updated = loadSavedLayers().map((l: any) => l.id === layerWithId.id ? layerWithId : l);
+            saveLayersToFile(updated);
+            console.log(`☁️ Layer ${layerWithId.name} synchronized to Google Drive via Apps Script relay!`);
+          }
+        }).catch(err => {
+          console.warn('Apps Script background GIS sync notice:', err);
+        });
+      }
 
       res.json({ success: true, layer: layerWithId });
     } catch (err: any) {
@@ -1881,24 +1966,12 @@ async function getOrFetchDriveFileBuffer(fileId: string, accessToken?: string): 
         }
       }
 
-      // 2. Remove all Drive layers from persistent_layers.json completely (Google Drive is authoritative for GIS vector layers)
-      if (fs.existsSync(LAYERS_FILE)) {
-        try {
-          const content = fs.readFileSync(LAYERS_FILE, 'utf-8');
-          const layers = JSON.parse(content);
-          if (Array.isArray(layers)) {
-            const nonDriveLayers = layers.filter((l: any) => {
-              const isDrive = l.source === 'Google Drive' || Boolean(l.driveFileId) || (l.id && String(l.id).startsWith('drive-'));
-              return !isDrive;
-            });
-            safeWriteJsonSync(LAYERS_FILE, nonDriveLayers);
-          }
-        } catch (e) {}
-      }
+      // Cache clear only purges downloaded temporary buffers in DRIVE_CACHE_DIR,
+      // strictly PRESERVING persistent_layers.json and user custom uploads.
 
       res.json({ 
         success: true, 
-        message: 'Google Drive vector feature cache evicted! Server Drive layers cleared.' 
+        message: 'Google Drive vector feature cache evicted! Server Drive file buffer cache cleared.' 
       });
     } catch (err: any) {
       res.status(500).json({ error: err.message || 'Failed to clear Drive cache' });

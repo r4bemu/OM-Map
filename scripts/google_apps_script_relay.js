@@ -23,7 +23,7 @@
  * ===================================================================
  */
 
-// Designated Google Drive IMO Folder IDs
+// Designated Google Drive IMO Folder IDs for Reports
 const IMO_FOLDERS = {
   'MOMARO': '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb',
   'Mindoro Oriental-Marinduque-Romblon IMO': '1zZoIVyjo_E-mGOax-_mfTHV8ep3FveSb',
@@ -31,6 +31,16 @@ const IMO_FOLDERS = {
   'Occidental Mindoro IMO': '1EUAFseU-S5laT0oxRIEwBuXRgppqOUUf',
   'Palawan': '1bzraus7QiL8U3ZDSwLfgfLvdc1G5yMKB',
   'Palawan IMO': '1bzraus7QiL8U3ZDSwLfgfLvdc1G5yMKB'
+};
+
+// Designated Google Drive IMO Folder IDs for GIS Layers
+const IMO_GIS_FOLDERS = {
+  'MOMARO': '1LdKe-iTgeF_nEy-eRcJwkYAqmj0DwEm0',
+  'Mindoro Oriental-Marinduque-Romblon IMO': '1LdKe-iTgeF_nEy-eRcJwkYAqmj0DwEm0',
+  'Occidental Mindoro': '1IBqpIgac41KSVc3UBq-xONJVxyNwjX_0',
+  'Occidental Mindoro IMO': '1IBqpIgac41KSVc3UBq-xONJVxyNwjX_0',
+  'Palawan': '1xqXBkJAscqqCDgQRFbCAyQh46baehrQ1',
+  'Palawan IMO': '1xqXBkJAscqqCDgQRFbCAyQh46baehrQ1'
 };
 
 function getDesignatedFolder(imoOffice, targetFolderId) {
@@ -44,10 +54,30 @@ function getDesignatedFolder(imoOffice, targetFolderId) {
 
   var imo = (imoOffice || '').toLowerCase();
   var folderId = IMO_FOLDERS['MOMARO'];
-  if (imo.indexOf('palawan') !== -1 || imo.indexOf('pimo') !== -1) {
+  if (imo.indexOf('palawan') !== -1 || imo.indexOf('pimo') !== -1 || imo.indexOf('palimo') !== -1) {
     folderId = IMO_FOLDERS['Palawan'];
   } else if (imo.indexOf('occidental') !== -1 || imo.indexOf('mindoro occ') !== -1 || imo.indexOf('omimo') !== -1) {
     folderId = IMO_FOLDERS['Occidental Mindoro'];
+  }
+
+  return DriveApp.getFolderById(folderId);
+}
+
+function getDesignatedGISFolder(imoOffice, targetFolderId) {
+  if (targetFolderId) {
+    try {
+      return DriveApp.getFolderById(targetFolderId);
+    } catch (e) {
+      Logger.log('Could not open targetFolderId for GIS, falling back: ' + e);
+    }
+  }
+
+  var imo = (imoOffice || '').toLowerCase();
+  var folderId = IMO_GIS_FOLDERS['MOMARO'];
+  if (imo.indexOf('palawan') !== -1 || imo.indexOf('pimo') !== -1 || imo.indexOf('palimo') !== -1) {
+    folderId = IMO_GIS_FOLDERS['Palawan'];
+  } else if (imo.indexOf('occidental') !== -1 || imo.indexOf('mindoro occ') !== -1 || imo.indexOf('omimo') !== -1) {
+    folderId = IMO_GIS_FOLDERS['Occidental Mindoro'];
   }
 
   return DriveApp.getFolderById(folderId);
@@ -68,6 +98,9 @@ function doPost(e) {
     }
     if (payload.action === 'getDriveFile' || payload.action === 'getGISFile' || payload.action === 'downloadFile') {
       return handleGetDriveFile(payload.fileId || payload.id);
+    }
+    if (payload.action === 'uploadGIS' || payload.action === 'uploadGISLayer') {
+      return handleUploadGISLayer(payload);
     }
     var report = payload.report || payload;
     var imoOffice = report.imoOffice || payload.imoOffice || 'Mindoro Oriental-Marinduque-Romblon IMO';
@@ -622,6 +655,52 @@ function generateSummaryText(report, imoOffice) {
   ].join('\n');
 }
 
+function handleUploadGISLayer(payload) {
+  try {
+    var imoOffice = payload.imoOffice || 'Mindoro Oriental-Marinduque-Romblon IMO';
+    var targetFolder = getDesignatedGISFolder(imoOffice, payload.targetFolderId);
+    var rawName = payload.fileName || payload.name || ('GIS_Layer_' + Utilities.formatDate(new Date(), 'GMT+8', 'yyyyMMdd_HHmmss'));
+    var safeName = rawName.replace(/[^a-zA-Z0-9_.-]/g, '_');
+    if (!safeName.endsWith('.geojson') && !safeName.endsWith('.kml') && !safeName.endsWith('.json')) {
+      safeName += '.geojson';
+    }
+    
+    var content = typeof payload.content === 'object' ? JSON.stringify(payload.content) : String(payload.content || '{}');
+    var mimeType = safeName.endsWith('.kml') ? 'application/vnd.google-earth.kml+xml' : 'application/geo+json';
+
+    var existingFiles = targetFolder.getFilesByName(safeName);
+    var file;
+    if (existingFiles.hasNext()) {
+      var oldFile = existingFiles.next();
+      oldFile.setContent(content);
+      file = oldFile;
+    } else {
+      file = targetFolder.createFile(safeName, content, mimeType);
+    }
+
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch (_) {}
+
+    return createJsonResponse({
+      success: true,
+      fileId: file.getId(),
+      fileName: file.getName(),
+      folderId: targetFolder.getId(),
+      folderName: targetFolder.getName(),
+      url: file.getUrl(),
+      modifiedTime: file.getLastUpdated().toISOString(),
+      message: 'GIS file successfully uploaded to Google Drive folder: ' + targetFolder.getName()
+    });
+  } catch (err) {
+    Logger.log('handleUploadGISLayer error: ' + err);
+    return createJsonResponse({
+      success: false,
+      error: err.toString()
+    });
+  }
+}
+
 function handleGetGISLayers(requestedImo, customFolderId) {
   try {
     var foldersToScan = [];
@@ -637,7 +716,7 @@ function handleGetGISLayers(requestedImo, customFolderId) {
     }
 
     if (requestedImo && requestedImo !== 'All IMOs' && requestedImo !== 'Regional Office IV-B') {
-      var folder = getDesignatedFolder(requestedImo);
+      var folder = getDesignatedGISFolder(requestedImo);
       if (folder) {
         foldersToScan.push({ imo: requestedImo, folder: folder });
       }
@@ -645,7 +724,7 @@ function handleGetGISLayers(requestedImo, customFolderId) {
       var keys = ['MOMARO', 'Occidental Mindoro', 'Palawan'];
       for (var k = 0; k < keys.length; k++) {
         try {
-          var fId = IMO_FOLDERS[keys[k]];
+          var fId = IMO_GIS_FOLDERS[keys[k]];
           var fol = DriveApp.getFolderById(fId);
           if (fol) {
             foldersToScan.push({ imo: keys[k], folder: fol });
@@ -690,9 +769,9 @@ function scanFolderForGISFiles(folder, imoName, results, seenIds, depth) {
       var name = file.getName();
       var lower = name.toLowerCase();
 
-      // Skip report files, index files, or inspection photos
+      // Skip report files, index files, inspection photos, or manifests
       if (lower.indexOf('reports_index') !== -1 || lower.indexOf('data_') === 0 || lower.indexOf('summary_') === 0) continue;
-      if (lower.indexOf('photo_') === 0) continue;
+      if (lower.indexOf('photo_') === 0 || lower.indexOf('manifest') !== -1 || lower.indexOf('nia_') === 0) continue;
 
       var mimeType = file.getMimeType();
       var isGis = lower.endsWith('.geojson') ||

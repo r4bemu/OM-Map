@@ -592,3 +592,101 @@ export const deleteDriveFile = async (accessToken: string, fileId: string): Prom
     throw new Error(`Failed to delete file from Google Drive (${res.status})`);
   }
 };
+
+// Designated Google Drive IMO Folder IDs for GIS Layers
+export const IMO_GIS_FOLDER_IDS: Record<string, string> = {
+  'MOMARO': '1LdKe-iTgeF_nEy-eRcJwkYAqmj0DwEm0',
+  'Mindoro Oriental-Marinduque-Romblon IMO': '1LdKe-iTgeF_nEy-eRcJwkYAqmj0DwEm0',
+  'Occidental Mindoro': '1IBqpIgac41KSVc3UBq-xONJVxyNwjX_0',
+  'Occidental Mindoro IMO': '1IBqpIgac41KSVc3UBq-xONJVxyNwjX_0',
+  'Palawan': '1xqXBkJAscqqCDgQRFbCAyQh46baehrQ1',
+  'Palawan IMO': '1xqXBkJAscqqCDgQRFbCAyQh46baehrQ1'
+};
+
+export const getDesignatedGisFolderForImo = (imoOffice?: string): string => {
+  if (!imoOffice) return '1LdKe-iTgeF_nEy-eRcJwkYAqmj0DwEm0';
+  const lower = imoOffice.toLowerCase();
+  if (lower.includes('palawan') || lower.includes('pimo') || lower.includes('palimo')) {
+    return '1xqXBkJAscqqCDgQRFbCAyQh46baehrQ1';
+  }
+  if (lower.includes('occidental') || lower.includes('omimo') || lower.includes('mindoro occ')) {
+    return '1IBqpIgac41KSVc3UBq-xONJVxyNwjX_0';
+  }
+  return '1LdKe-iTgeF_nEy-eRcJwkYAqmj0DwEm0';
+};
+
+/**
+ * Upload GeoJSON/KML GIS Layer to the designated Google Drive IMO folder.
+ * Uses client OAuth token if available, or falls back to Apps Script Web App relay.
+ */
+export const uploadGISLayerToDrive = async (
+  imoOffice: string,
+  fileName: string,
+  geoJsonContent: any
+): Promise<{ success: boolean; fileId?: string; folderId?: string; source: string; message: string }> => {
+  const targetFolderId = getDesignatedGisFolderForImo(imoOffice);
+  const contentString = typeof geoJsonContent === 'object' ? JSON.stringify(geoJsonContent, null, 2) : String(geoJsonContent || '{}');
+  const safeFileName = fileName.endsWith('.geojson') || fileName.endsWith('.json') || fileName.endsWith('.kml')
+    ? fileName
+    : `${fileName}.geojson`;
+
+  // 1. Try Direct Google Drive REST API with user OAuth access token if available
+  const accessToken = getAccessToken();
+  if (accessToken) {
+    try {
+      const mimeType = safeFileName.endsWith('.kml') ? 'application/vnd.google-earth.kml+xml' : 'application/geo+json';
+      const fileItem = await uploadFileToFolder(accessToken, targetFolderId, safeFileName, contentString, mimeType);
+      return {
+        success: true,
+        fileId: fileItem.id,
+        folderId: targetFolderId,
+        source: 'Google Drive',
+        message: `Successfully uploaded ${safeFileName} to Google Drive (${imoOffice}) via OAuth!`
+      };
+    } catch (oauthErr) {
+      console.warn('OAuth direct Drive GIS upload notice, attempting Apps Script relay:', oauthErr);
+    }
+  }
+
+  // 2. Try Apps Script Web App Relay
+  const appsScriptUrl = getAppsScriptUrl();
+  if (appsScriptUrl && appsScriptUrl.trim()) {
+    try {
+      const payload = {
+        action: 'uploadGISLayer',
+        imoOffice,
+        targetFolderId,
+        fileName: safeFileName,
+        content: contentString
+      };
+
+      const res = await fetch(appsScriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+        redirect: 'follow'
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success) {
+          return {
+            success: true,
+            fileId: data.fileId,
+            folderId: data.folderId || targetFolderId,
+            source: 'Google Drive',
+            message: `Successfully uploaded ${safeFileName} to Google Drive via Apps Script relay!`
+          };
+        }
+      }
+    } catch (gasErr) {
+      console.warn('Apps Script GIS upload notice:', gasErr);
+    }
+  }
+
+  return {
+    success: false,
+    source: 'Local Storage',
+    message: 'Saved to local server and offline cache (Drive sync pending connection).'
+  };
+};

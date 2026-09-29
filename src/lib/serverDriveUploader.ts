@@ -634,7 +634,7 @@ export async function listDriveGISFilesInFolder(
                     item.mimeType === 'application/geo+json' ||
                     item.mimeType === 'application/json';
 
-      if (isGis && !name.includes('reports_index') && !name.startsWith('data_') && !name.startsWith('summary_') && !name.startsWith('photo_')) {
+      if (isGis && !name.includes('reports_index') && !name.startsWith('data_') && !name.startsWith('summary_') && !name.startsWith('photo_') && !name.includes('manifest') && !name.startsWith('nia_')) {
         seenFileIds.add(item.id);
         results.push({
           ...item,
@@ -718,6 +718,17 @@ export async function fetchGISLayersFromDrive(
 
       if (driveLayers.length > 0) {
         console.log(`✅ Retrieved ${driveLayers.length} GIS layer(s) directly from Google Drive v3 API via Service Account!`);
+        // Merge missing canal networks from local gis_network fallback (e.g. Baco-Bucayao RIS if not in Drive)
+        try {
+          const localFallback = loadLocalGISLayersFallback(targetImo);
+          const driveNames = new Set(driveLayers.map(l => (l.name || l.fileName || '').toLowerCase().replace(/[^a-z0-9]/g, '')));
+          for (const fb of localFallback) {
+            const fbKey = (fb.name || fb.fileName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (!driveNames.has(fbKey)) {
+              driveLayers.push(fb);
+            }
+          }
+        } catch (_) {}
         return filterByImo(driveLayers);
       }
     } catch (apiErr) {
@@ -737,6 +748,16 @@ export async function fetchGISLayersFromDrive(
         const data = await res.json();
         if (data && data.success && Array.isArray(data.layers) && data.layers.length > 0) {
           console.log(`✅ Retrieved ${data.layers.length} GIS layer(s) from Google Drive via Apps Script relay!`);
+          try {
+            const localFallback = loadLocalGISLayersFallback(targetImo);
+            const driveNames = new Set(data.layers.map((l: any) => (l.name || l.fileName || '').toLowerCase().replace(/[^a-z0-9]/g, '')));
+            for (const fb of localFallback) {
+              const fbKey = (fb.name || fb.fileName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+              if (!driveNames.has(fbKey)) {
+                data.layers.push(fb);
+              }
+            }
+          } catch (_) {}
           return filterByImo(data.layers);
         }
       }
