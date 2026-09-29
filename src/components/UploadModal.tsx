@@ -167,7 +167,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             subCategory: classification.hierarchyType,
             visible: true,
             color: classification.color,
-            opacity: classification.isStructure ? 1.0 : 0.9,
+            opacity: classification.opacity ?? 0.85,
             data: result.geoJsonData,
             featureCount: result.featureCount,
             geometryType: safeGeomType,

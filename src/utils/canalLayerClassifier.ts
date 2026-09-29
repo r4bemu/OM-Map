@@ -3,10 +3,10 @@ import { GISLayer, CanalCategory, CanalType, FieldReport } from '../types';
 /**
  * Standard O&M Blue Color & Linestring Hierarchy for Vector Layers
  *
- * 1. Main Canals: Light Blue (#38bdf8) on Thick Linestring (4.8px)
- * 2. Lateral Canals: Blue (#2563eb) on Medium-Thick Linestring (3.2px)
- * 3. Unclassified Canals: Dark Blue (#1e3a8a) on Normal Thickness Linestring (2.0px)
- * 4. Structures: Azure / Cerulean Blue (#0284c7) with Crisp Solid White Ring (6px radius, 2px border)
+ * 1. Main Canals: Light Blue (#38bdf8) on Thick Linestring (5px, 0.85 opacity)
+ * 2. Lateral Canals: Blue (#2563eb) on Medium-Thick Linestring (4px, 0.85 opacity)
+ * 3. Unclassified Canals: Dark Blue (#1e3a8a) on Normal Thickness Linestring (3px, 0.85 opacity)
+ * 4. Structures: Azure / Cerulean Blue (#0284c7) strictly on Point geometries (6px radius, 2px border)
  */
 export const BLUE_PALETTE = {
   MAIN_CANAL: '#38bdf8',       // Light Sky Blue
@@ -16,11 +16,11 @@ export const BLUE_PALETTE = {
 } as const;
 
 export const STROKE_WEIGHTS = {
-  MAIN_CANAL: 4.8,
-  LATERAL_CANAL: 3.2,
-  UNCLASSIFIED_CANAL: 2.0,
+  MAIN_CANAL: 5.0,
+  LATERAL_CANAL: 4.0,
+  UNCLASSIFIED_CANAL: 3.0,
   STRUCTURE_BORDER: 2.0,
-  DEFAULT_LINE: 2.0
+  DEFAULT_LINE: 3.0
 } as const;
 
 export type CanalHierarchyType = 'Main Canals' | 'Lateral Canals' | 'Other Unclassified Canals' | 'Structures';
@@ -241,28 +241,22 @@ export function classifyVectorItem(
     featureProps?.type
   ].filter(Boolean).map(v => String(v).toLowerCase()).join(' ');
 
-  // 1. Check if Structure (Point or named structure / gate / dam / intake)
-  const isStructure =
-    geomStr.includes('point') ||
+  const isLineGeom = geomStr.includes('line');
+  const isPointGeom = geomStr.includes('point');
+
+  // 1. Check if Structure: strictly restricted to Point geometries (or explicit non-line structure layers)
+  const isStructure = isPointGeom || (!isLineGeom && (
     catStr.includes('structure') ||
     subCatStr.includes('structure') ||
-    nameStr.includes('structure') ||
-    nameStr.includes('gate') ||
-    nameStr.includes('dam') ||
-    featText.includes('dam') ||
-    featText.includes('intake') ||
-    featText.includes('gate') ||
-    featText.includes('turnout') ||
-    featText.includes('flume') ||
-    featText.includes('culvert') ||
-    featText.includes('siphon');
+    nameStr.includes('structure')
+  ));
 
   if (isStructure) {
     return {
       hierarchyType: 'Structures',
       color: BLUE_PALETTE.STRUCTURE,
       weight: STROKE_WEIGHTS.STRUCTURE_BORDER,
-      opacity: 1.0,
+      opacity: 0.85,
       isStructure: true,
       canalCategory: cCategory,
       canalType: cType
@@ -285,7 +279,7 @@ export function classifyVectorItem(
       hierarchyType: 'Main Canals',
       color: BLUE_PALETTE.MAIN_CANAL,
       weight: STROKE_WEIGHTS.MAIN_CANAL,
-      opacity: 0.95,
+      opacity: 0.85,
       isStructure: false,
       canalCategory: cCategory,
       canalType: 'Main'
@@ -310,7 +304,7 @@ export function classifyVectorItem(
       hierarchyType: 'Lateral Canals',
       color: BLUE_PALETTE.LATERAL_CANAL,
       weight: STROKE_WEIGHTS.LATERAL_CANAL,
-      opacity: 0.90,
+      opacity: 0.85,
       isStructure: false,
       canalCategory: cCategory,
       canalType: 'Lateral'
@@ -352,6 +346,6 @@ export function sanitizeLayerToBlueHierarchy(layer: GISLayer): GISLayer {
     category: cleanCategory,
     subCategory: cleanSubCategory,
     color: cleanColor,
-    opacity: layer.opacity ?? (classification.isStructure ? 1.0 : 0.9)
+    opacity: layer.opacity ?? 0.85
   };
 }

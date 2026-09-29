@@ -148,6 +148,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const hasFittedInitialBoundsRef = useRef<boolean>(false);
   const featureMapRef = useRef<Array<{ properties: any; layer: any; defaultStyle: any }>>([]);
   const highlightedLayerRef = useRef<{ layer: any; defaultStyle: any } | null>(null);
+  const selectionHighlightLayerGroupRef = useRef<L.LayerGroup | null>(null);
 
   // Active measurement tool state
   const [isBasemapExpanded, setIsBasemapExpanded] = useState<boolean>(false);
@@ -541,6 +542,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     map.on('zoomend', updateZoomAndLocation);
 
     // Layer Groups
+    selectionHighlightLayerGroupRef.current = L.layerGroup().addTo(map);
     layerGroupRef.current = L.layerGroup().addTo(map);
     pointsLayerGroupRef.current = L.layerGroup().addTo(map);
     reportsLayerGroupRef.current = L.layerGroup().addTo(map);
@@ -742,6 +744,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       pointsLayerGroupRef.current.clearLayers();
     }
     featureMapRef.current = [];
+    if (selectionHighlightLayerGroupRef.current) {
+      selectionHighlightLayerGroupRef.current.clearLayers();
+    }
     if (highlightedLayerRef.current) {
       highlightedLayerRef.current = null;
     }
@@ -827,10 +832,10 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               layer.category,
               layer.subCategory,
               feature?.properties,
-              layer.geometryType
+              feature?.geometry?.type || layer.geometryType
             );
 
-            const opacity = layer.opacity ?? (itemStyle.isStructure ? 1.0 : itemStyle.opacity);
+            const opacity = 0.85;
             const color = itemStyle.color;
             const weight = itemStyle.weight;
 
@@ -859,8 +864,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               fillColor: markerColor,
               color: '#ffffff', // Crisp solid white border ring
               weight: 2.0,
-              fillOpacity: 1.0,
-              opacity: 1.0,
+              fillOpacity: 0.85,
+              opacity: 0.85,
               interactive: true
             });
             circleMarker.bindTooltip(stationCode, { direction: 'top', opacity: 0.9, className: 'custom-map-tooltip' });
@@ -874,7 +879,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               layer.category,
               layer.subCategory,
               props,
-              layer.geometryType
+              feature?.geometry?.type || layer.geometryType
             );
 
             const defaultColor = props?.status === 'Completed' ? '#10b981'
@@ -883,7 +888,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               : itemStyle.color;
 
             const defaultWeight = itemStyle.weight;
-            const defaultOpacity = layer.opacity ?? (itemStyle.isStructure ? 1.0 : itemStyle.opacity);
+            const defaultOpacity = 0.85;
 
             const defaultStyle = {
               color: defaultColor,
@@ -1457,6 +1462,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
     // If no targetProps active, revert highlighted layer if any
     if (!targetProps) {
+      if (selectionHighlightLayerGroupRef.current) {
+        selectionHighlightLayerGroupRef.current.clearLayers();
+      }
       if (highlightedLayerRef.current) {
         try {
           const { layer, defaultStyle } = highlightedLayerRef.current;
@@ -1496,6 +1504,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     });
 
     if (match && match.layer) {
+      if (selectionHighlightLayerGroupRef.current) {
+        selectionHighlightLayerGroupRef.current.clearLayers();
+      }
       if (highlightedLayerRef.current && highlightedLayerRef.current.layer !== match.layer) {
         try {
           const { layer, defaultStyle } = highlightedLayerRef.current;
@@ -1506,11 +1517,43 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       }
 
       try {
-        if (typeof match.layer.setStyle === 'function') {
+        const geomType = (match.layer as any).feature?.geometry?.type ||
+          (typeof (match.layer as any).toGeoJSON === 'function' ? (match.layer as any).toGeoJSON()?.geometry?.type : '');
+        const isPolyline = geomType.includes('LineString') || (typeof (match.layer as any).getLatLngs === 'function' && !(match.layer instanceof L.Polygon));
+
+        if (isPolyline) {
+          const latLngs = (match.layer as any).getLatLngs();
+          const baseWeight = match.defaultStyle?.weight || 4.0;
+          // Border casing width: base weight + 4px (provides a 2px light sky blue border on each side)
+          const casingWeight = baseWeight + 4.0;
+
+          // Underlay casing polyline in light sky blue (#38bdf8)
+          const casing = L.polyline(latLngs, {
+            color: '#38bdf8',
+            weight: casingWeight,
+            opacity: 0.85,
+            interactive: false
+          });
+
+          selectionHighlightLayerGroupRef.current?.addLayer(casing);
+
+          // Keep canal at its defined color & stroke, brought to front over the casing
+          if (typeof match.layer.setStyle === 'function') {
+            match.layer.setStyle({
+              color: match.defaultStyle.color,
+              weight: match.defaultStyle.weight,
+              opacity: 0.85
+            });
+          }
+          if (typeof match.layer.bringToFront === 'function') {
+            match.layer.bringToFront();
+          }
+        } else if (typeof match.layer.setStyle === 'function') {
+          // Polygon or Point feature
           match.layer.setStyle({
             color: '#38bdf8',
-            weight: 4.5,
-            opacity: 1.0
+            weight: (match.defaultStyle?.weight || 2.0) + 3.0,
+            opacity: 0.85
           });
           if (typeof match.layer.bringToFront === 'function') {
             match.layer.bringToFront();
