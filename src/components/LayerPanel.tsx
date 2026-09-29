@@ -6,10 +6,12 @@ import {
   Download, 
   X, 
   Plus, 
-  RotateCcw
+  RotateCcw,
+  Trash2
 } from 'lucide-react';
 import { GISLayer, UserRole, FieldReport } from '../types';
 import { exportLayerToGeoJson } from '../utils/geoJsonExport';
+import { DeleteLayerConfirmationModal } from './DeleteLayerConfirmationModal';
 
 interface LayerPanelProps {
   isOpen: boolean;
@@ -34,11 +36,13 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
   onToggleVisibility,
   onChangeOpacity,
   onChangeColor,
+  onDeleteLayer,
   onOpenUpload,
   currentRole,
   onSyncDriveLayers,
 }) => {
   const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [layerPendingDelete, setLayerPendingDelete] = useState<GISLayer | null>(null);
 
   if (!isOpen) return null;
 
@@ -110,7 +114,8 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
   };
 
   return (
-    <aside
+    <>
+      <aside
       className="fixed md:absolute top-16 md:top-20 right-2 md:right-4 z-40 w-auto md:w-80 max-h-[82vh] md:max-h-[600px] bg-slate-900/98 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 pointer-events-auto"
       onClick={(e) => e.stopPropagation()}
     >
@@ -249,6 +254,16 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
                     >
                       <Download className="w-3.5 h-3.5" />
                     </button>
+
+                    {(currentRole === 'Developer' || currentRole === 'RO Admin' || currentRole === 'IMO Admin') && onDeleteLayer && (
+                      <button
+                        onClick={() => setLayerPendingDelete(layer)}
+                        className="p-1 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition cursor-pointer"
+                        title="Delete layer dataset"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -304,5 +319,19 @@ export const LayerPanel: React.FC<LayerPanelProps> = ({
         )}
       </div>
     </aside>
+
+    {/* Delete Layer Confirmation Modal */}
+    <DeleteLayerConfirmationModal
+      isOpen={Boolean(layerPendingDelete)}
+      layer={layerPendingDelete}
+      onClose={() => setLayerPendingDelete(null)}
+      onConfirm={() => {
+        if (layerPendingDelete && onDeleteLayer) {
+          onDeleteLayer(layerPendingDelete.id);
+          setLayerPendingDelete(null);
+        }
+      }}
+    />
+  </>
   );
 };

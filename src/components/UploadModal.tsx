@@ -22,6 +22,7 @@ import { parseGISFile, ParsedGISResult } from '../utils/kmzParser';
 import { GISLayer } from '../types';
 
 import { classifyVectorItem, BLUE_PALETTE } from '../utils/canalLayerClassifier';
+import { DeleteLayerConfirmationModal } from './DeleteLayerConfirmationModal';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -96,6 +97,9 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
   // Search filter for All GIS Data tab
   const [filterQuery, setFilterQuery] = useState('');
+
+  // Delete Confirmation Modal State
+  const [layerPendingDelete, setLayerPendingDelete] = useState<GISLayer | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -568,8 +572,8 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                         {/* Delete dataset */}
                         {onDeleteLayer && !layer.isDefault && (
                           <button
-                            onClick={() => onDeleteLayer(layer.id)}
-                            className="p-1.5 text-slate-400 hover:text-rose-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition"
+                            onClick={() => setLayerPendingDelete(layer)}
+                            className="p-1.5 text-slate-400 hover:text-rose-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition cursor-pointer"
                             title="Delete dataset"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -622,6 +626,19 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* Delete Layer Confirmation Modal */}
+      <DeleteLayerConfirmationModal
+        isOpen={Boolean(layerPendingDelete)}
+        layer={layerPendingDelete}
+        onClose={() => setLayerPendingDelete(null)}
+        onConfirm={() => {
+          if (layerPendingDelete && onDeleteLayer) {
+            onDeleteLayer(layerPendingDelete.id);
+            setLayerPendingDelete(null);
+          }
+        }}
+      />
     </div>
   );
 };
