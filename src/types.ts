@@ -76,6 +76,9 @@ export interface AuthUser {
 export interface AccessRequest {
   id: string;
   email: string;
+  username?: string;
+  passcode?: string;
+  password?: string;
   firstName?: string;
   middleInitial?: string;
   lastName?: string;

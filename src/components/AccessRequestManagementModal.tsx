@@ -613,8 +613,13 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
                               </button>
                             </div>
                           ) : (
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap">
                               <h3 className="font-bold text-sm truncate">{req.fullName || req.email || 'Personnel'}</h3>
+                              {req.username && (
+                                <span className="text-[10.5px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/30">
+                                  @{req.username}
+                                </span>
+                              )}
                               {isPending && (
                                 <button
                                   type="button"

@@ -11,7 +11,8 @@ import {
   Sun, 
   Moon, 
   ArrowRight, 
-  Users
+  Users,
+  UserPlus
 } from 'lucide-react';
 import { AuthUser, UserRole, AccessRequest } from '../types';
 import { 
@@ -25,7 +26,7 @@ import {
   DEVELOPER_EMAIL
 } from '../config/authUsers';
 import { triggerGoogleGisSignIn } from '../lib/googleIdentityAuth';
-import { triggerFacebookSignIn, initFacebookClient } from '../lib/facebookAuth';
+import { SignUpModal } from './SignUpModal';
 import { GoogleProfileSetupModal, GoogleInitialData } from './GoogleProfileSetupModal';
 import { GoogleAuthDomainModal } from './GoogleAuthDomainModal';
 import { AccessRequestStatusModal } from './AccessRequestStatusModal';
@@ -50,7 +51,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isFacebookLoading, setIsFacebookLoading] = useState(false);
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
 
   const [selectedAccount, setSelectedAccount] = useState<AuthUser | null>(null);
@@ -105,22 +106,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   }, []);
 
   // Helper to log in a user whose AccessRequest is approved
-  const loginApprovedUser = useCallback((approvedReq: AccessRequest, userPicture?: string, provider: 'google' | 'facebook' = 'google') => {
-    const userEmail = approvedReq.email.toLowerCase().trim();
-    const isFb = provider === 'facebook' || approvedReq.provider === 'facebook';
+  const loginApprovedUser = useCallback((approvedReq: AccessRequest, userPicture?: string, provider?: 'google' | 'facebook' | 'local') => {
+    const userEmail = (approvedReq.email || '').toLowerCase().trim();
+    const effectiveProvider = provider || approvedReq.provider || (approvedReq.username ? 'local' : 'google');
+    const uname = approvedReq.username ? approvedReq.username.trim() : (userEmail ? userEmail.split('@')[0].replace(/[^a-z0-9_]/g, '_') : `user_${approvedReq.id}`);
     const approvedUser: AuthUser = {
-      id: `usr-${isFb ? 'fb' : 'gauth'}-${approvedReq.id}`,
-      username: userEmail.split('@')[0].replace(/[^a-z0-9_]/g, '_'),
+      id: approvedReq.uid || `usr-${effectiveProvider}-${approvedReq.id}`,
+      username: uname,
       name: approvedReq.fullName,
       role: approvedReq.assignedRole || approvedReq.requestedRole || 'Field Personnel',
-      passcode: isFb ? 'FACEBOOK_AUTH_SSO' : 'GOOGLE_AUTH_SSO',
+      passcode: approvedReq.passcode || approvedReq.password || (effectiveProvider === 'google' ? 'GOOGLE_AUTH_SSO' : 'LOCAL_AUTH'),
       imoOffice: approvedReq.assignedOffice || approvedReq.requestedOffice,
       nisBinding: approvedReq.assignedNis || (Array.isArray(approvedReq.requestedNisList) ? approvedReq.requestedNisList.join(', ') : 'All NIS'),
       designation: approvedReq.designation,
       contactNumber: approvedReq.contactNumber,
       avatar: userPicture || approvedReq.avatar,
       email: userEmail,
-      provider: isFb ? 'facebook' : 'google'
+      provider: effectiveProvider
     };
     setIsStatusModalOpen(false);
     onLogin(approvedUser);
@@ -163,7 +165,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     if (isOpen) {
       loadUsers();
       loadRequests();
-      initFacebookClient().catch(() => {});
     }
   }, [isOpen, loadUsers, loadRequests]);
 
@@ -193,7 +194,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   const isLight = activeTheme === 'light';
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
 
@@ -202,20 +203,70 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       return;
     }
     if (!passcode.trim()) {
-      setErrorMsg('Please enter your account passcode.');
+      setErrorMsg('Please enter your account passcode or password.');
       return;
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      const user = authenticateUser(username, passcode);
+
+    // 1. Check against active in-memory and local accounts
+    const user = authenticateUser(username, passcode);
+    if (user) {
       setIsLoading(false);
-      if (user) {
-        onLogin(user);
-      } else {
-        setErrorMsg('Invalid User ID or Passcode. Please check your credentials or sign in with your Google or Facebook account.');
+      onLogin(user);
+      return;
+    }
+
+    // 2. Check fresh access requests for newly approved or pending accounts
+    try {
+      const freshReqs = await fetchAccessRequestsApi(true);
+      const cleanUname = username.trim().toLowerCase().replace(/^@/, '');
+      const cleanPass = passcode.trim();
+
+      // Check approved access request
+      const approvedReq = freshReqs.find(r => 
+        r.status === 'approved' &&
+        (r.username?.toLowerCase() === cleanUname || r.email?.toLowerCase() === cleanUname) &&
+        (r.passcode === cleanPass || r.password === cleanPass || r.passcode?.toUpperCase() === cleanPass.toUpperCase())
+      );
+
+      if (approvedReq) {
+        setIsLoading(false);
+        loginApprovedUser(approvedReq, undefined, 'local');
+        return;
       }
-    }, 250);
+
+      // Check pending access request
+      const pendingReq = freshReqs.find(r => 
+        (r.username?.toLowerCase() === cleanUname || r.email?.toLowerCase() === cleanUname) &&
+        r.status === 'pending'
+      );
+
+      if (pendingReq) {
+        setIsLoading(false);
+        setStatusModalRequest(pendingReq);
+        setIsStatusModalOpen(true);
+        setErrorMsg(`Account request for @${pendingReq.username || cleanUname} is pending review by your Office Administrator.`);
+        return;
+      }
+
+      // Check rejected request
+      const rejectedReq = freshReqs.find(r => 
+        (r.username?.toLowerCase() === cleanUname || r.email?.toLowerCase() === cleanUname) &&
+        r.status === 'rejected'
+      );
+
+      if (rejectedReq) {
+        setIsLoading(false);
+        setStatusModalRequest(rejectedReq);
+        setIsStatusModalOpen(true);
+        setErrorMsg(`Account request was declined: ${rejectedReq.rejectionReason || 'Contact your administrator.'}`);
+        return;
+      }
+    } catch (_) {}
+
+    setIsLoading(false);
+    setErrorMsg('Invalid User ID or Password. If you do not have an account yet, please click "Create Account / Sign Up" below.');
   };
 
   const handleGoogleSignInClick = async () => {
@@ -296,98 +347,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   };
 
-  const handleFacebookSignInClick = async () => {
-    setErrorMsg('');
-    setIsFacebookLoading(true);
-    try {
-      console.log('[Facebook Auth] Initiating Facebook Sign-In...');
-      const fbProfile = await triggerFacebookSignIn();
-      setIsFacebookLoading(false);
-      console.log('[Facebook Auth] Successfully retrieved Facebook Profile:', fbProfile);
-
-      if (fbProfile) {
-        const userEmail = (fbProfile.email || '').toLowerCase().trim();
-
-        // 0. Master Developer Override (if Facebook email matches developer email)
-        if (userEmail && userEmail === DEVELOPER_EMAIL.toLowerCase()) {
-          const devUser: AuthUser = {
-            id: 'usr-dev-01',
-            username: 'dev_master',
-            name: fbProfile.name || 'Lead Systems Architect (Developer)',
-            role: 'Developer',
-            passcode: 'FACEBOOK_AUTH_SSO',
-            imoOffice: 'All IMOs',
-            nisBinding: 'All NIS',
-            designation: 'Master Systems Administrator - Regional Wide',
-            avatar: fbProfile.picture,
-            email: userEmail,
-            facebookId: fbProfile.id,
-            provider: 'facebook'
-          };
-          onLogin(devUser);
-          return;
-        }
-
-        // 1. Check if there is an existing access request for this user (by email or fb id)
-        let userReq: AccessRequest | null = null;
-        if (userEmail) {
-          userReq = await fetchUserAccessRequestApi(userEmail);
-          if (!userReq) {
-            userReq = requests.find(r => r.email?.toLowerCase().trim() === userEmail) || null;
-          }
-        }
-        if (!userReq && fbProfile.id) {
-          userReq = requests.find(r => r.uid === fbProfile.id) || null;
-        }
-
-        if (userReq) {
-          if (userReq.status === 'approved') {
-            // User is approved -> Log in directly!
-            loginApprovedUser(userReq, fbProfile.picture, 'facebook');
-            return;
-          } else {
-            // Request is Pending or Rejected -> show status modal
-            setStatusModalRequest(userReq);
-            setIsStatusModalOpen(true);
-            return;
-          }
-        }
-
-        // 2. Check if email matches one of the pre-configured accounts
-        if (userEmail) {
-          const matchedLocalUser = allUsers.find(u => u.email?.toLowerCase().trim() === userEmail);
-          if (matchedLocalUser) {
-            onLogin({ ...matchedLocalUser, avatar: fbProfile.picture || matchedLocalUser.avatar, provider: 'facebook' });
-            return;
-          }
-        }
-
-        // 3. Brand new Facebook user -> open registration setup modal
-        console.log('[Facebook Auth] Opening Registration Setup Modal with profile details:', {
-          email: userEmail,
-          displayName: fbProfile.name,
-          uid: fbProfile.id,
-          firstName: fbProfile.first_name,
-          lastName: fbProfile.last_name
-        });
-        setGoogleSetupData({
-          email: userEmail,
-          displayName: fbProfile.name,
-          photoURL: fbProfile.picture,
-          uid: fbProfile.id,
-          provider: 'facebook',
-          firstName: fbProfile.first_name,
-          lastName: fbProfile.last_name
-        });
-        setIsGoogleSetupModalOpen(true);
-      }
-    } catch (err: any) {
-      console.error('[Facebook Auth Error]', err);
-      setIsFacebookLoading(false);
-      if (err.message?.includes('cancelled') || err.message?.includes('closed') || err.message?.includes('not authorized')) {
-        return;
-      }
-      setErrorMsg(err.message || 'Unable to connect to Facebook. Please try again.');
+  const handleSignUpSubmitted = async (requestPayload: Partial<AccessRequest>) => {
+    setIsSignUpModalOpen(false);
+    setIsLoading(true);
+    const res = await submitAccessRequestApi(requestPayload);
+    setIsLoading(false);
+    if (res.success && res.request) {
+      setStatusModalRequest(res.request);
+      setIsStatusModalOpen(true);
+      loadRequests(true);
+    } else {
+      setErrorMsg(res.error || 'Failed to submit registration request.');
     }
   };
 
@@ -481,12 +451,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
             )}
 
-            {/* Social Single Sign-On (SSO) Buttons - Primary Focus */}
+            {/* Single Sign-On (SSO) & Registration Actions */}
             <div className="mb-4 space-y-2.5">
               <button
                 type="button"
                 onClick={handleGoogleSignInClick}
-                disabled={isGoogleLoading || isFacebookLoading}
+                disabled={isGoogleLoading}
                 className={`w-full py-3 px-4 rounded-xl border font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-2.5 cursor-pointer shadow-sm disabled:opacity-50 active:scale-[0.99] ${
                   isLight
                     ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-800 shadow-slate-900/5'
@@ -515,21 +485,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 <span>{isGoogleLoading ? 'Connecting to Google Account...' : 'Continue with Google Account'}</span>
               </button>
 
+              {/* Native Account Sign-Up & Access Request Button */}
               <button
                 type="button"
-                onClick={handleFacebookSignInClick}
-                disabled={isFacebookLoading || isGoogleLoading}
-                className={`w-full py-3 px-4 rounded-xl border font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-2.5 cursor-pointer shadow-sm disabled:opacity-50 active:scale-[0.99] ${
+                onClick={() => setIsSignUpModalOpen(true)}
+                className={`w-full py-3 px-4 rounded-xl border font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2.5 cursor-pointer shadow-sm active:scale-[0.99] ${
                   isLight
-                    ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-800 shadow-slate-900/5'
-                    : 'bg-slate-800 hover:bg-slate-750 border-slate-700 text-white'
+                    ? 'bg-emerald-50 hover:bg-emerald-100/90 border-emerald-300 text-emerald-800 shadow-slate-900/5'
+                    : 'bg-emerald-950/40 hover:bg-emerald-900/50 border-emerald-600/50 text-emerald-300'
                 }`}
               >
-                {/* Meta / Facebook SVG Logo */}
-                <svg className="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="#1877F2">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-                <span>{isFacebookLoading ? 'Connecting to Facebook...' : 'Continue with Facebook / Messenger'}</span>
+                <UserPlus className="w-4.5 h-4.5 text-[#009933] shrink-0" />
+                <span>Create Account / Sign Up</span>
               </button>
             </div>
 
@@ -624,6 +591,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   <span>{isLoading ? 'Verifying Credentials...' : 'Continue Sign in'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
+
+                {/* Additional Sign Up Link */}
+                <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
+                  <span>New personnel without an account? </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsSignUpModalOpen(true)}
+                    className="font-bold text-[#009933] hover:text-[#00802b] hover:underline cursor-pointer"
+                  >
+                    Sign Up &amp; Request Access
+                  </button>
+                </div>
               </div>
             </form>
 
@@ -698,6 +677,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Personnel Account Sign-Up & Access Request Modal */}
+      <SignUpModal
+        isOpen={isSignUpModalOpen}
+        onClose={() => setIsSignUpModalOpen(false)}
+        onSubmitRequest={handleSignUpSubmitted}
+        isLight={isLight}
+        existingUsers={allUsers}
+        existingRequests={requests}
+      />
 
       {/* Google Profile Registration & Contact Setup Modal */}
       <GoogleProfileSetupModal

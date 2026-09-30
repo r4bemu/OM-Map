@@ -668,13 +668,48 @@ export function getAuthUsers(): AuthUser[] {
               email: u.email || def.email,
               googleId: u.googleId || def.googleId
             });
-          } else if (u.id.startsWith('usr-custom-') || u.id.startsWith('usr-google-')) {
+          } else {
             result.push({
               ...u,
               role: normalizeUserRole(u.role)
             });
           }
         });
+
+        // Also incorporate any approved access requests from offline cache
+        try {
+          const rawReqs = localStorage.getItem('ommap_access_requests_v3');
+          if (rawReqs) {
+            const reqList = JSON.parse(rawReqs);
+            if (Array.isArray(reqList)) {
+              reqList.filter((r: any) => r.status === 'approved').forEach((r: any) => {
+                const email = (r.email || '').toLowerCase().trim();
+                const uname = r.username ? r.username.trim() : (email ? email.split('@')[0].replace(/[^a-z0-9_]/g, '_') : `user_${r.id}`);
+                const userId = r.uid || `usr-approved-${r.id}`;
+                if (!seenIds.has(userId) && !seenIds.has(uname.toLowerCase())) {
+                  seenIds.add(userId);
+                  seenIds.add(uname.toLowerCase());
+                  result.push({
+                    id: userId,
+                    username: uname,
+                    name: r.fullName,
+                    role: normalizeUserRole(r.assignedRole || r.requestedRole || 'Field Personnel'),
+                    passcode: r.passcode || r.password || 'LOCAL_AUTH',
+                    imoOffice: r.assignedOffice || r.requestedOffice || 'Regional Office IV-B',
+                    nisBinding: r.assignedNis || (Array.isArray(r.requestedNisList) ? r.requestedNisList.join(', ') : 'All NIS'),
+                    designation: r.designation,
+                    contactNumber: r.contactNumber,
+                    avatar: r.avatar,
+                    email: email,
+                    provider: r.provider || 'local',
+                    isAdmitted: true,
+                    createdAt: r.reviewedAt || r.submittedAt
+                  });
+                }
+              });
+            }
+          }
+        } catch (_) {}
 
         // Add any missing default users
         DEFAULT_AUTH_USERS.forEach(u => {
@@ -696,11 +731,11 @@ export function getAuthUsers(): AuthUser[] {
 export function authenticateUser(userIdOrUsername: string, passcode: string): AuthUser | null {
   if (!userIdOrUsername || !passcode) return null;
   const cleanId = userIdOrUsername.trim().toLowerCase().replace(/^@/, '');
-  const cleanCode = passcode.trim().toUpperCase();
+  const cleanCode = passcode.trim();
   const users = getAuthUsers();
   const user = users.find(u => 
-    (u.username.toLowerCase() === cleanId || u.id.toLowerCase() === cleanId) &&
-    u.passcode.toUpperCase() === cleanCode
+    (u.username.toLowerCase() === cleanId || u.id.toLowerCase() === cleanId || (u.email && u.email.toLowerCase() === cleanId)) &&
+    (u.passcode === cleanCode || u.passcode.toUpperCase() === cleanCode.toUpperCase())
   );
   return user || null;
 }
@@ -1332,6 +1367,9 @@ export async function submitAccessRequestApi(payload: Partial<AccessRequest>): P
     const newReq: AccessRequest = {
       id: `req-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       email: payload.email || '',
+      username: payload.username,
+      passcode: payload.passcode || payload.password,
+      password: payload.password || payload.passcode,
       firstName: payload.firstName || '',
       middleInitial: payload.middleInitial || '',
       lastName: payload.lastName || '',
@@ -1347,6 +1385,7 @@ export async function submitAccessRequestApi(payload: Partial<AccessRequest>): P
       submittedAt: new Date().toISOString(),
       avatar: payload.avatar,
       uid: payload.uid,
+      provider: payload.provider || 'local'
     };
     requests.unshift(newReq);
     try { localStorage.setItem(STORAGE_REQUESTS_KEY, JSON.stringify(requests)); } catch (_) {}
@@ -1384,9 +1423,9 @@ export async function approveAccessRequestApi(
   const requests = await fetchAccessRequestsApi();
   const index = requests.findIndex(r => r.id === id);
   if (index !== -1) {
-    requests[index] = {
+    const approved = {
       ...requests[index],
-      status: 'approved',
+      status: 'approved' as const,
       assignedRole: payload.assignedRole,
       assignedOffice: payload.assignedOffice,
       assignedNis: payload.assignedNis,
@@ -1394,7 +1433,39 @@ export async function approveAccessRequestApi(
       reviewedBy: payload.reviewerName,
       reviewedByRole: payload.reviewerRole,
     };
+    requests[index] = approved;
     try { localStorage.setItem(STORAGE_REQUESTS_KEY, JSON.stringify(requests)); } catch (_) {}
+
+    // Also sync user directly into auth users
+    try {
+      const email = (approved.email || '').toLowerCase().trim();
+      const uname = approved.username ? approved.username.trim() : (email ? email.split('@')[0].replace(/[^a-z0-9_]/g, '_') : `user_${approved.id}`);
+      const currentUsers = getAuthUsers();
+      const userObj: AuthUser = {
+        id: approved.uid || `usr-approved-${approved.id}`,
+        username: uname,
+        name: approved.fullName,
+        role: normalizeUserRole(approved.assignedRole || approved.requestedRole || 'Field Personnel'),
+        passcode: approved.passcode || approved.password || 'LOCAL_AUTH',
+        imoOffice: approved.assignedOffice || approved.requestedOffice || 'Regional Office IV-B',
+        nisBinding: approved.assignedNis || (Array.isArray(approved.requestedNisList) ? approved.requestedNisList.join(', ') : 'All NIS'),
+        designation: approved.designation,
+        contactNumber: approved.contactNumber,
+        avatar: approved.avatar,
+        email: email,
+        provider: approved.provider || 'local',
+        isAdmitted: true,
+        createdAt: approved.reviewedAt
+      };
+      const exIdx = currentUsers.findIndex(u => u.id === userObj.id || u.username.toLowerCase() === uname.toLowerCase());
+      if (exIdx !== -1) {
+        currentUsers[exIdx] = { ...currentUsers[exIdx], ...userObj };
+      } else {
+        currentUsers.push(userObj);
+      }
+      saveAuthUsers(currentUsers);
+    } catch (_) {}
+
     return { success: true, request: requests[index] };
   }
 

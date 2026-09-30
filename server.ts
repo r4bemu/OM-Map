@@ -793,6 +793,15 @@ export async function createApp() {
         submittedAt: existing?.submittedAt || new Date().toISOString()
       };
 
+      if (data.username) {
+        newRequest.username = data.username.trim().toLowerCase().replace(/^@/, '');
+      }
+      if (data.passcode || data.password) {
+        newRequest.passcode = (data.passcode || data.password).trim();
+        newRequest.password = (data.password || data.passcode).trim();
+      }
+      if (data.provider) newRequest.provider = data.provider;
+
       if (isDev) {
         newRequest.assignedRole = 'Developer';
         newRequest.assignedOffice = 'All IMOs';
@@ -807,6 +816,8 @@ export async function createApp() {
         if (existing.reviewedAt) newRequest.reviewedAt = existing.reviewedAt;
         if (existing.reviewedBy) newRequest.reviewedBy = existing.reviewedBy;
         if (existing.reviewedByRole) newRequest.reviewedByRole = existing.reviewedByRole;
+        if (!newRequest.username && existing.username) newRequest.username = existing.username;
+        if (!newRequest.passcode && existing.passcode) newRequest.passcode = existing.passcode;
       }
 
       if (data.avatar) newRequest.avatar = data.avatar;
@@ -857,6 +868,39 @@ export async function createApp() {
       delete item.rejectionReason;
 
       await saveAccessRequestItem(item);
+
+      // Sync into server persistent users file
+      try {
+        const currentUsers = loadSavedUsers();
+        const email = (item.email || '').toLowerCase().trim();
+        const username = item.username ? item.username.trim() : (email ? email.split('@')[0].replace(/[^a-z0-9_]/g, '_') : `user_${item.id}`);
+        const userObj = {
+          id: item.uid || `usr-approved-${item.id}`,
+          username: username,
+          name: item.fullName,
+          role: item.assignedRole,
+          passcode: item.passcode || item.password || 'LOCAL_AUTH',
+          imoOffice: item.assignedOffice,
+          nisBinding: item.assignedNis,
+          designation: item.designation,
+          contactNumber: item.contactNumber,
+          avatar: item.avatar,
+          email: email,
+          provider: item.provider || (item.username ? 'local' : 'google'),
+          isAdmitted: true,
+          createdAt: item.reviewedAt
+        };
+        const existingIdx = currentUsers.findIndex((u: any) => u.id === userObj.id || u.username.toLowerCase() === username.toLowerCase());
+        if (existingIdx !== -1) {
+          currentUsers[existingIdx] = { ...currentUsers[existingIdx], ...userObj };
+        } else {
+          currentUsers.push(userObj);
+        }
+        saveUsersToFile(currentUsers);
+      } catch (uErr) {
+        console.warn('Notice: Failed to sync approved user to users file:', uErr);
+      }
+
       res.json({ success: true, request: item });
     } catch (err: any) {
       console.error('Failed to approve request in Firestore:', err);
@@ -976,21 +1020,21 @@ export async function createApp() {
       const requests = await getAccessRequests();
       const approved = requests.filter((r: any) => r.status === 'approved');
       const users = approved.map((r: any) => {
-        const email = r.email.toLowerCase().trim();
-        const username = email.split('@')[0].replace(/[^a-z0-9_]/g, '_');
+        const email = (r.email || '').toLowerCase().trim();
+        const username = r.username ? r.username.trim() : (email ? email.split('@')[0].replace(/[^a-z0-9_]/g, '_') : `user_${r.id}`);
         return {
-          id: `usr-gauth-${r.id}`,
+          id: r.uid || `usr-${r.provider || (r.username ? 'local' : 'gauth')}-${r.id}`,
           username: username,
           name: r.fullName,
           role: r.assignedRole || r.requestedRole || 'Field Personnel',
-          passcode: 'GOOGLE_AUTH_SSO',
+          passcode: r.passcode || r.password || (r.provider === 'google' ? 'GOOGLE_AUTH_SSO' : 'LOCAL_AUTH'),
           imoOffice: r.assignedOffice || r.requestedOffice,
           nisBinding: r.assignedNis || (r.requestedNisList?.join(', ') || 'All NIS'),
           designation: r.designation,
           contactNumber: r.contactNumber,
           avatar: r.avatar,
           email: email,
-          provider: 'google',
+          provider: r.provider || (r.username ? 'local' : 'google'),
           createdAt: r.reviewedAt || r.submittedAt
         };
       });
