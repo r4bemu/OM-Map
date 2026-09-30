@@ -76,7 +76,9 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const stopCameraStream = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => {
-        track.stop();
+        try {
+          track.stop();
+        } catch (_) {}
       });
       streamRef.current = null;
     }
@@ -86,14 +88,27 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     setIsCameraActive(false);
   }, []);
 
-  // Start front camera (or specified facing mode)
+  // Start front camera (or specified facing mode) with robust tiered fallbacks
   const startCamera = useCallback(async (mode: 'user' | 'environment' = facingMode) => {
     setCameraError(null);
     stopCameraStream();
 
+    // Check secure context
+    if (typeof window !== 'undefined' && !window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      setCameraError('Live browser webcam requires a secure connection (HTTPS or localhost). Tap "Snap with Phone Camera / Upload" below to take your photo.');
+      setIsCameraActive(false);
+      return;
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraError('Camera API is not supported on this browser. Tap "Snap with Phone Camera / Upload" below to take your portrait.');
+      setIsCameraActive(false);
+      return;
+    }
+
     try {
       // Check for available video devices to see if switching is supported
-      if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+      if (navigator.mediaDevices.enumerateDevices) {
         try {
           const devices = await navigator.mediaDevices.enumerateDevices();
           const videoInputs = devices.filter(d => d.kind === 'videoinput');
@@ -101,36 +116,84 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
         } catch (_) {}
       }
 
-      const constraints: MediaStreamConstraints = {
-        video: {
-          facingMode: { ideal: mode },
-          width: { ideal: 720 },
-          height: { ideal: 720 }
-        },
-        audio: false
-      };
+      let mediaStream: MediaStream | null = null;
 
-      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      // Tier 1: Try requested facing mode with ideal resolution
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: mode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+      } catch (err1) {
+        console.warn('Tier 1 camera constraints failed, trying Tier 2 (basic facingMode)...', err1);
+      }
+
+      // Tier 2: Try basic facing mode without dimension constraints
+      if (!mediaStream) {
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: mode },
+            audio: false
+          });
+        } catch (err2) {
+          console.warn('Tier 2 camera constraints failed, trying Tier 3 (any video)...', err2);
+        }
+      }
+
+      // Tier 3: Try any available video track
+      if (!mediaStream) {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+      }
+
       streamRef.current = mediaStream;
 
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
-        await videoRef.current.play().catch(() => {});
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.setAttribute('webkit-playsinline', 'true');
+        videoRef.current.muted = true;
+        try {
+          await videoRef.current.play();
+        } catch (playErr) {
+          console.warn('Camera video play error:', playErr);
+        }
       }
+
       setIsCameraActive(true);
       setFacingMode(mode);
     } catch (err: any) {
       console.warn('Camera initialization error:', err);
-      let msg = 'Could not access front camera. You can upload an image file instead.';
+      let msg = 'Could not access front camera. Tap "Snap with Phone Camera / Upload" below to take your portrait.';
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        msg = 'Camera permission denied. Please allow camera permissions in your browser or upload a portrait file.';
+        msg = 'Camera permission denied. Please allow camera permissions in your browser or tap "Snap with Phone Camera / Upload".';
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        msg = 'No camera found on this device. Please upload your portrait photo using the file picker below.';
+        msg = 'No camera found on this device. Tap "Snap with Phone Camera / Upload" below.';
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        msg = 'Camera is currently in use by another application. Please close other camera apps and retry.';
       }
       setCameraError(msg);
       setIsCameraActive(false);
     }
   }, [facingMode, stopCameraStream]);
+
+  // Keep stream bound to video element whenever isCameraActive is toggled
+  useEffect(() => {
+    if (isCameraActive && videoRef.current && streamRef.current) {
+      if (videoRef.current.srcObject !== streamRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+      }
+      videoRef.current.play().catch(err => {
+        console.warn('Video auto-play sync warning:', err);
+      });
+    }
+  }, [isCameraActive]);
 
   // Toggle between front and back camera (especially on mobile)
   const handleToggleCamera = () => {
@@ -142,19 +205,27 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   // Capture frame from video with front camera mirroring
   const handleCapturePhoto = () => {
     if (!videoRef.current) return;
+    const video = videoRef.current;
+
+    const vWidth = video.videoWidth;
+    const vHeight = video.videoHeight;
+    if (!vWidth || !vHeight) {
+      setCameraError('Camera stream is still starting up. Please wait 1 second and click Capture again.');
+      return;
+    }
+
     setIsCapturing(true);
 
     try {
-      const video = videoRef.current;
+      const size = Math.min(vWidth, vHeight);
       const canvas = document.createElement('canvas');
-      const size = Math.min(video.videoWidth || 480, video.videoHeight || 480);
       canvas.width = 480;
       canvas.height = 480;
       const ctx = canvas.getContext('2d');
 
       if (ctx) {
-        const startX = ((video.videoWidth || 480) - size) / 2;
-        const startY = ((video.videoHeight || 480) - size) / 2;
+        const startX = (vWidth - size) / 2;
+        const startY = (vHeight - size) / 2;
 
         // Mirror horizontal if using front camera (facingMode === 'user')
         if (facingMode === 'user') {
@@ -176,7 +247,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     }
   };
 
-  // Fallback: Handle file upload
+  // Fallback: Handle file upload / native mobile camera capture
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -211,6 +282,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
       }
     };
     reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   // Retake photo
@@ -463,19 +535,30 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
             {/* Viewfinder or Captured Preview */}
             <div className="relative w-full max-w-[320px] aspect-square mx-auto rounded-2xl overflow-hidden bg-black border-2 border-emerald-500/40 shadow-inner flex items-center justify-center">
               
-              {/* Case 1: Photo already captured */}
+              {/* Permanent Live Video Element - Kept in DOM so ref and stream binding never detach */}
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className={`absolute inset-0 w-full h-full object-cover ${
+                  facingMode === 'user' ? 'scale-x-[-1]' : ''
+                } ${isCameraActive && !photoData ? 'block z-0' : 'hidden'}`}
+              />
+
+              {/* Viewfinder State 1: Photo already captured */}
               {photoData ? (
-                <div className="relative w-full h-full">
+                <div className="relative w-full h-full z-10 animate-in fade-in">
                   <img
                     src={photoData}
                     alt="Captured portrait"
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-center justify-center gap-2">
+                  <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/85 via-black/50 to-transparent flex items-center justify-center gap-2">
                     <button
                       type="button"
                       onClick={handleRetakePhoto}
-                      className="px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white text-slate-900 font-bold text-xs flex items-center gap-1.5 shadow transition cursor-pointer active:scale-95"
+                      className="px-3.5 py-1.5 rounded-xl bg-white/95 hover:bg-white text-slate-900 font-bold text-xs flex items-center gap-1.5 shadow-md transition cursor-pointer active:scale-95"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
                       <span>Retake Photo</span>
@@ -486,24 +569,16 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       className="px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white font-medium text-xs flex items-center gap-1.5 border border-white/20 transition cursor-pointer active:scale-95"
                     >
                       <Upload className="w-3.5 h-3.5" />
-                      <span>Upload File</span>
+                      <span>Snap / Upload Other</span>
                     </button>
                   </div>
                 </div>
               ) : isCameraActive ? (
-                /* Case 2: Live Video Stream with Human Head-Shaped Silhouette Overlay */
-                <div className="relative w-full h-full">
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    className={`w-full h-full object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
-                  />
-
+                /* Viewfinder State 2: Live Video Stream with Human Head-Shaped Silhouette Overlay */
+                <div className="absolute inset-0 w-full h-full z-10 pointer-events-none">
                   {/* HUMAN HEAD-SHAPED SILHOUETTE OVERLAY */}
                   <svg 
-                    className="absolute inset-0 w-full h-full pointer-events-none select-none" 
+                    className="absolute inset-0 w-full h-full select-none" 
                     viewBox="0 0 400 400" 
                     preserveAspectRatio="xMidYMid slice"
                   >
@@ -540,26 +615,26 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   </svg>
 
                   {/* Positioning instruction banner */}
-                  <div className="absolute top-2 inset-x-0 flex justify-center pointer-events-none">
-                    <span className="bg-black/70 backdrop-blur-sm text-white text-[10px] font-semibold px-2.5 py-1 rounded-full border border-white/20">
+                  <div className="absolute top-2.5 inset-x-0 flex justify-center">
+                    <span className="bg-black/75 backdrop-blur-sm text-white text-[10px] font-semibold px-2.5 py-1 rounded-full border border-white/20 shadow">
                       Align face &amp; shoulders in silhouette
                     </span>
                   </div>
 
                   {/* Camera Control Bar */}
-                  <div className="absolute inset-x-0 bottom-2.5 px-3 flex items-center justify-between gap-2">
+                  <div className="absolute inset-x-0 bottom-2.5 px-3 flex items-center justify-between gap-2 pointer-events-auto">
                     {/* Switch Camera Button (Mobile front/back) */}
-                    {hasMultipleCameras ? (
+                    {hasMultipleCameras || (typeof navigator !== 'undefined' && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) ? (
                       <button
                         type="button"
                         onClick={handleToggleCamera}
-                        className="p-2 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 shadow transition cursor-pointer active:scale-95"
-                        title="Switch camera"
+                        className="p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 shadow-md transition cursor-pointer active:scale-95"
+                        title="Switch between front and back camera"
                       >
                         <SwitchCamera className="w-4 h-4" />
                       </button>
                     ) : (
-                      <div className="w-8" />
+                      <div className="w-9" />
                     )}
 
                     {/* Capture Shutter Button */}
@@ -567,53 +642,55 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       type="button"
                       onClick={handleCapturePhoto}
                       disabled={isCapturing}
-                      className="px-4 py-2 rounded-full bg-[#009933] hover:bg-[#00802b] text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/40 border border-emerald-400/50 transition cursor-pointer active:scale-95 disabled:opacity-50"
+                      className="px-4 py-2 rounded-full bg-[#009933] hover:bg-[#00802b] text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/50 border border-emerald-400/50 transition cursor-pointer active:scale-95 disabled:opacity-50"
                     >
                       <Camera className="w-4 h-4" />
                       <span>{isCapturing ? 'Snapping...' : 'Capture Photo'}</span>
                     </button>
 
-                    {/* File upload alternative */}
+                    {/* Native Camera / File upload fallback */}
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="p-2 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 shadow transition cursor-pointer active:scale-95"
-                      title="Upload photo from file"
+                      className="p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 shadow-md transition cursor-pointer active:scale-95"
+                      title="Take photo with phone camera or upload file"
                     >
                       <Upload className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               ) : (
-                /* Case 3: Camera inactive or error state */
-                <div className="p-4 text-center space-y-3">
-                  <Camera className="w-10 h-10 mx-auto text-zinc-400 opacity-60" />
-                  <p className="text-[11px] text-zinc-300 leading-tight">
-                    {cameraError || 'Camera is turned off or not accessible.'}
+                /* Viewfinder State 3: Camera inactive, blocked, or error state */
+                <div className="p-4 text-center space-y-3.5 z-10 w-full">
+                  <div className="w-12 h-12 rounded-full bg-zinc-800/80 border border-zinc-700 mx-auto flex items-center justify-center text-zinc-400">
+                    <Camera className="w-6 h-6" />
+                  </div>
+                  <p className="text-[11px] text-zinc-300 leading-relaxed max-w-[260px] mx-auto">
+                    {cameraError || 'Allow camera access to align your face inside the silhouette guide, or snap a photo directly using your phone.'}
                   </p>
-                  <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
                     <button
                       type="button"
                       onClick={() => startCamera('user')}
-                      className="px-3 py-1.5 rounded-xl bg-[#009933] hover:bg-[#00802b] text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+                      className="w-full sm:w-auto px-4 py-2 rounded-xl bg-[#009933] hover:bg-[#00802b] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/30 transition cursor-pointer active:scale-95"
                     >
                       <Camera className="w-3.5 h-3.5" />
-                      <span>Turn On Camera</span>
+                      <span>Start Front Camera</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-3 py-1.5 rounded-xl bg-zinc-700 hover:bg-zinc-600 text-white font-medium text-xs flex items-center gap-1.5 transition cursor-pointer"
+                      className="w-full sm:w-auto px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium text-xs flex items-center justify-center gap-1.5 border border-zinc-700 transition cursor-pointer active:scale-95"
                     >
                       <Upload className="w-3.5 h-3.5" />
-                      <span>Upload Photo</span>
+                      <span>Phone Camera / Upload</span>
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Hidden File Input for fallback upload */}
+            {/* Hidden File Input for native mobile camera selfie or upload */}
             <input
               ref={fileInputRef}
               type="file"
