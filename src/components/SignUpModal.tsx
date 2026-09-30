@@ -578,7 +578,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 <div className="absolute inset-0 w-full h-full z-10 pointer-events-none">
                   {/* HUMAN HEAD-SHAPED SILHOUETTE OVERLAY */}
                   <svg 
-                    className="absolute inset-0 w-full h-full select-none" 
+                    className="absolute inset-0 w-full h-full select-none pointer-events-none" 
                     viewBox="0 0 400 400" 
                     preserveAspectRatio="xMidYMid slice"
                   >
@@ -586,9 +586,22 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       <mask id="head-silhouette-mask">
                         {/* Base white fills full frame */}
                         <rect width="400" height="400" fill="white" />
-                        {/* Head & shoulders cutout in black */}
+                        {/* Anatomically proportional Head, Neck & Shoulders cutout in black */}
                         <path
-                          d="M 200,45 C 255,45 272,90 272,145 C 272,195 242,230 220,242 L 220,265 C 258,275 315,305 345,365 L 55,365 C 85,305 142,275 180,265 L 180,242 C 158,230 128,195 128,145 C 128,90 145,45 200,45 Z"
+                          d="
+                            M 200,45
+                            C 248,45 272,78 272,126
+                            C 272,165 254,196 236,214
+                            L 236,244
+                            C 262,250 302,272 338,300
+                            C 366,322 384,356 394,400
+                            L 6,400
+                            C 16,356 34,322 62,300
+                            C 98,272 138,250 164,244
+                            L 164,214
+                            C 146,196 128,165 128,126
+                            C 128,78 152,45 200,45 Z
+                          "
                           fill="black"
                         />
                       </mask>
@@ -597,14 +610,80 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     {/* Dark translucent outer mask */}
                     <rect width="400" height="400" fill="rgba(0, 0, 0, 0.42)" mask="url(#head-silhouette-mask)" />
 
-                    {/* Dashed Head and Shoulders Contour Line */}
+                    {/* Complete Anatomical Head Contour with Defined Chin */}
                     <path
-                      d="M 200,45 C 255,45 272,90 272,145 C 272,195 242,230 220,242 L 220,265 C 258,275 315,305 345,365 L 55,365 C 85,305 142,275 180,265 L 180,242 C 158,230 128,195 128,145 C 128,90 145,45 200,45 Z"
+                      d="
+                        M 200,45
+                        C 248,45 272,78 272,126
+                        C 272,168 254,198 234,214
+                        C 220,224 210,227 200,227
+                        C 190,227 180,224 166,214
+                        C 146,198 128,168 128,126
+                        C 128,78 152,45 200,45 Z
+                      "
                       fill="none"
                       stroke="#009933"
                       strokeWidth="2.5"
                       strokeDasharray="6 4"
                       className="drop-shadow-md"
+                    />
+
+                    {/* Natural Neck Contours (under jaw to clavicle) */}
+                    <path
+                      d="M 164,218 L 164,244"
+                      fill="none"
+                      stroke="#009933"
+                      strokeWidth="2"
+                      strokeDasharray="4 3"
+                      className="drop-shadow-sm opacity-90"
+                    />
+                    <path
+                      d="M 236,218 L 236,244"
+                      fill="none"
+                      stroke="#009933"
+                      strokeWidth="2"
+                      strokeDasharray="4 3"
+                      className="drop-shadow-sm opacity-90"
+                    />
+
+                    {/* Relaxed Trapezius and Natural Shoulder Arcs to Base */}
+                    <path
+                      d="
+                        M 6,400
+                        C 16,356 34,322 62,300
+                        C 98,272 138,250 164,244
+                        M 236,244
+                        C 262,250 302,272 338,300
+                        C 366,322 384,356 394,400
+                      "
+                      fill="none"
+                      stroke="#009933"
+                      strokeWidth="2.5"
+                      strokeDasharray="6 4"
+                      className="drop-shadow-md"
+                    />
+
+                    {/* Subtle Eye-Level Alignment Guide (Passport / Biometric Standard) */}
+                    <line
+                      x1="160"
+                      y1="130"
+                      x2="240"
+                      y2="130"
+                      stroke="#009933"
+                      strokeWidth="1.5"
+                      strokeDasharray="3 3"
+                      strokeOpacity="0.7"
+                    />
+                    <circle cx="200" cy="130" r="2" fill="#009933" fillOpacity="0.8" />
+                    {/* Head Center Alignment Tick */}
+                    <line
+                      x1="200"
+                      y1="36"
+                      x2="200"
+                      y2="50"
+                      stroke="#009933"
+                      strokeWidth="2"
+                      strokeLinecap="round"
                     />
 
                     {/* Biometric Framing Reticles (Corners) */}
