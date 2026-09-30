@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { 
   Lock, 
   User, 
@@ -7,6 +7,7 @@ import {
   Eye, 
   EyeOff, 
   AlertCircle, 
+  AlertTriangle,
   CheckCircle2, 
   Sun, 
   Moon, 
@@ -44,14 +45,46 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   theme: parentTheme,
   onToggleTheme: parentToggleTheme 
 }) => {
-  const [username, setUsername] = useState('');
+  const usernameInputRef = useRef<HTMLInputElement>(null);
+  const passcodeInputRef = useRef<HTMLInputElement>(null);
+
+  const [username, setUsername] = useState(() => {
+    try {
+      return localStorage.getItem('nia_remembered_username') || '';
+    } catch (_) {
+      return '';
+    }
+  });
   const [passcode, setPasscode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isCapsLockOn, setIsCapsLockOn] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nia_remember_me_preference');
+      return saved !== null ? saved === 'true' : true;
+    } catch (_) {
+      return true;
+    }
+  });
+
+  // Autofocus the first empty field when modal opens, without interfering with auto-proceed
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const timer = setTimeout(() => {
+      if (username.trim()) {
+        passcodeInputRef.current?.focus();
+      } else {
+        usernameInputRef.current?.focus();
+      }
+    }, 120);
+
+    return () => clearTimeout(timer);
+  }, [isOpen]);
 
   const [usersList, setUsersList] = useState<AuthUser[]>(() => getAuthUsers());
   const [requests, setRequests] = useState<AccessRequest[]>([]);
@@ -176,6 +209,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
+
+    if (rememberMe) {
+      try {
+        localStorage.setItem('nia_remembered_username', username.trim());
+        localStorage.setItem('nia_remember_me_preference', 'true');
+      } catch (_) {}
+    } else {
+      try {
+        localStorage.removeItem('nia_remembered_username');
+        localStorage.setItem('nia_remember_me_preference', 'false');
+      } catch (_) {}
+    }
 
     if (!username.trim()) {
       setErrorMsg('Please enter your User ID or Username.');
@@ -508,7 +553,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     isLight ? 'text-slate-500' : 'text-slate-400'
                   }`} />
                   <input
+                    ref={usernameInputRef}
                     type="text"
+                    autoComplete="username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="e.g. dev_master, ro_evaluator, reviewer_momaro_1"
@@ -532,9 +579,22 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     isLight ? 'text-slate-500' : 'text-slate-400'
                   }`} />
                   <input
+                    ref={passcodeInputRef}
                     type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
                     value={passcode}
                     onChange={(e) => setPasscode(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.getModifierState) {
+                        setIsCapsLockOn(e.getModifierState('CapsLock'));
+                      }
+                    }}
+                    onKeyUp={(e) => {
+                      if (e.getModifierState) {
+                        setIsCapsLockOn(e.getModifierState('CapsLock'));
+                      }
+                    }}
+                    onBlur={() => setIsCapsLockOn(false)}
                     placeholder="Enter alphanumeric passcode"
                     className={`w-full text-xs rounded-xl pl-9 pr-10 py-2.5 focus:outline-none transition font-mono border ${
                       isLight 
@@ -552,6 +612,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+
+                {/* Caps Lock Detection Warning Indicator */}
+                {isCapsLockOn && (
+                  <div className="flex items-center gap-1.5 mt-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[11px] font-semibold animate-in fade-in">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Caps Lock is ON — passcode is case-sensitive</span>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-between text-xs pt-0.5">
