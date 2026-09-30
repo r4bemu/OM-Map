@@ -10,9 +10,7 @@ import {
   CheckCircle2, 
   Sun, 
   Moon, 
-  ArrowRight, 
-  Users,
-  UserPlus
+  ArrowRight
 } from 'lucide-react';
 import { AuthUser, UserRole, AccessRequest } from '../types';
 import { 
@@ -22,7 +20,6 @@ import {
   fetchAccessRequestsApi,
   fetchUserAccessRequestApi,
   submitAccessRequestApi,
-  canUserManageRequests,
   verifyAndConsumeTempPinApi,
   DEVELOPER_EMAIL
 } from '../config/authUsers';
@@ -33,7 +30,6 @@ import { ForcePasswordChangeModal } from './ForcePasswordChangeModal';
 import { GoogleProfileSetupModal, GoogleInitialData } from './GoogleProfileSetupModal';
 import { GoogleAuthDomainModal } from './GoogleAuthDomainModal';
 import { AccessRequestStatusModal } from './AccessRequestStatusModal';
-import { AccessRequestManagementModal } from './AccessRequestManagementModal';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -57,7 +53,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
 
-  const [selectedAccount, setSelectedAccount] = useState<AuthUser | null>(null);
   const [usersList, setUsersList] = useState<AuthUser[]>(() => getAuthUsers());
   const [requests, setRequests] = useState<AccessRequest[]>([]);
 
@@ -71,7 +66,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [isGoogleDomainModalOpen, setIsGoogleDomainModalOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [statusModalRequest, setStatusModalRequest] = useState<AccessRequest | null>(null);
-  const [isAccessRequestsManagerOpen, setIsAccessRequestsManagerOpen] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [forcePasswordUser, setForcePasswordUser] = useState<AuthUser | null>(null);
   const [isForcePasswordModalOpen, setIsForcePasswordModalOpen] = useState(false);
@@ -174,27 +168,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   }, [isOpen, loadUsers, loadRequests]);
 
-  // Resolve selected account dynamically when username is typed to support review queue banner
-  useEffect(() => {
-    if (username.trim()) {
-      const match = allUsers.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
-      setSelectedAccount(match || null);
-    } else {
-      setSelectedAccount(null);
-    }
-  }, [username, allUsers]);
-
-  const pendingRequestsCount = useMemo(() => {
-    if (!selectedAccount || !canUserManageRequests(selectedAccount)) return 0;
-    if (selectedAccount.role === 'Developer' || selectedAccount.role === 'RO Admin') {
-      return requests.filter(r => r.status === 'pending').length;
-    }
-    const adminOffice = (selectedAccount.imoOffice || '').toLowerCase();
-    return requests.filter(r => {
-      const reqOffice = (r.requestedOffice || '').toLowerCase();
-      return r.status === 'pending' && (reqOffice.includes(adminOffice) || adminOffice.includes(reqOffice));
-    }).length;
-  }, [requests, selectedAccount]);
 
   if (!isOpen) return null;
 
@@ -407,67 +380,66 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-xl animate-in fade-in overflow-y-auto transition-colors duration-300 ${
       isLight ? 'bg-slate-900/45' : 'bg-slate-950/90'
     }`}>
-      <div className={`w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden my-auto transition-colors duration-300 border ${
+      <div className={`w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden my-auto transition-colors duration-300 border relative ${
         isLight ? 'bg-white border-slate-200 text-slate-900 shadow-slate-900/10' : 'bg-slate-900 border-slate-800 text-white'
       }`}>
         
+        {/* Top-Right Theme Toggle Switcher */}
+        <div className="absolute top-4 right-4 sm:top-5 sm:right-6 z-20">
+          <div className={`flex items-center p-0.5 rounded-xl border transition-colors shadow-sm ${
+            isLight ? 'bg-slate-100/90 border-slate-200' : 'bg-slate-800/90 border-slate-700/80 backdrop-blur-md'
+          }`}>
+            <button
+              type="button"
+              onClick={() => toggleTheme('light')}
+              title="Switch to Light Theme"
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                isLight
+                  ? 'bg-[#009933] text-white shadow-sm font-bold'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Sun className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline text-[10px]">Light</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleTheme('dark')}
+              title="Switch to Dark Theme"
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                !isLight
+                  ? 'bg-[#009933] text-white shadow-sm border border-[#00802b] font-bold'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Moon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline text-[10px]">Dark</span>
+            </button>
+          </div>
+        </div>
+
         {/* Main Content: Brand Hero, Social Sign-In & Login Form */}
         <div className={`p-6 sm:p-8 flex flex-col justify-between transition-colors duration-300 ${
           isLight ? 'bg-slate-50/70' : 'bg-slate-900/60'
         }`}>
           <div>
-            {/* Top Bar: Header & Theme Switcher */}
-            <div className="flex items-start justify-between gap-3 mb-5">
-              <div className="flex items-center gap-3.5">
-                <img
-                  src="/nia-logo.svg"
-                  alt="National Irrigation Administration Logo"
-                  className="w-13 h-13 object-contain drop-shadow-md"
-                />
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono font-bold tracking-widest uppercase text-[#009933]">
-                      REGION IV-B MIMAROPA
-                    </span>
-                  </div>
-                  <h1 className={`text-xl sm:text-2xl font-bold font-heading ${
-                    isLight ? 'text-slate-900' : 'text-white'
-                  }`}>
-                    Maintenance and Status of Irrigation Facilities
-                  </h1>
-                </div>
-              </div>
-
-              {/* Dark / Light Theme Toggle Switcher */}
-              <div className={`flex items-center p-1 rounded-xl border transition-colors ${
-                isLight ? 'bg-slate-200/80 border-slate-300' : 'bg-slate-800/90 border-slate-700'
-              }`}>
-                <button
-                  type="button"
-                  onClick={() => toggleTheme('light')}
-                  title="Switch to Light Theme"
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
-                    isLight
-                      ? 'bg-[#009933] text-white shadow-sm font-bold'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <Sun className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline text-[10px]">Light</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => toggleTheme('dark')}
-                  title="Switch to Dark Theme"
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
-                    !isLight
-                      ? 'bg-[#009933] text-white shadow-sm border border-[#00802b] font-bold'
-                      : 'text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  <Moon className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline text-[10px]">Dark</span>
-                </button>
+            {/* Brand Header */}
+            <div className="flex items-center gap-3.5 pr-20 sm:pr-24 mb-7 sm:mb-8">
+              <img
+                src="/nia-logo.svg"
+                alt="National Irrigation Administration Logo"
+                className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-md shrink-0"
+              />
+              <div className="min-w-0">
+                <span className="block text-[10px] font-mono font-bold tracking-widest uppercase text-[#009933] mb-0.5">
+                  REGION IV-B MIMAROPA
+                </span>
+                <h1 className={`text-base sm:text-lg font-bold font-heading leading-tight tracking-tight ${
+                  isLight ? 'text-slate-900' : 'text-white'
+                }`}>
+                  Maintenance and Status of<br />
+                  Irrigation Facilities
+                </h1>
               </div>
             </div>
 
@@ -479,8 +451,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
             )}
 
-            {/* Single Sign-On (SSO) & Registration Actions */}
-            <div className="mb-4 space-y-2.5">
+            {/* Single Sign-On (SSO) Google Account Button */}
+            <div className="mb-5">
               <button
                 type="button"
                 onClick={handleGoogleSignInClick}
@@ -511,20 +483,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   />
                 </svg>
                 <span>{isGoogleLoading ? 'Connecting to Google Account...' : 'Continue with Google Account'}</span>
-              </button>
-
-              {/* Native Account Sign-Up & Access Request Button */}
-              <button
-                type="button"
-                onClick={() => setIsSignUpModalOpen(true)}
-                className={`w-full py-3 px-4 rounded-xl border font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2.5 cursor-pointer shadow-sm active:scale-[0.99] ${
-                  isLight
-                    ? 'bg-emerald-50 hover:bg-emerald-100/90 border-emerald-300 text-emerald-800 shadow-slate-900/5'
-                    : 'bg-emerald-950/40 hover:bg-emerald-900/50 border-emerald-600/50 text-emerald-300'
-                }`}
-              >
-                <UserPlus className="w-4.5 h-4.5 text-[#009933] shrink-0" />
-                <span>Create Account / Sign Up</span>
               </button>
             </div>
 
@@ -628,22 +586,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
 
-                {/* Forgot Password / Need Temporary PIN Action Button */}
-                <div className="pt-1 flex items-center justify-center">
-                  <button
-                    type="button"
-                    onClick={() => setIsForgotPasswordOpen(true)}
-                    className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition flex items-center gap-1.5 cursor-pointer ${
-                      isLight 
-                        ? 'border-rose-200 hover:bg-rose-50 text-rose-700 bg-rose-50/50' 
-                        : 'border-rose-500/30 hover:bg-rose-950/30 text-rose-400 bg-rose-950/20'
-                    }`}
-                  >
-                    <KeyRound className="w-3.5 h-3.5 text-rose-500" />
-                    <span>Forgot Password? Request Temporary PIN</span>
-                  </button>
-                </div>
-
                 {/* Additional Sign Up Link */}
                 <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
                   <span>New personnel without an account? </span>
@@ -657,58 +599,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 </div>
               </div>
             </form>
-
-            {/* Administrative Access Request Queue Quick Access Banner - Only visible when an Admin or Developer is selected */}
-            {canUserManageRequests(selectedAccount) && (
-              <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 animate-in fade-in">
-                <button
-                  type="button"
-                  onClick={() => setIsAccessRequestsManagerOpen(true)}
-                  className={`w-full p-2.5 rounded-2xl border text-xs transition flex items-center justify-between cursor-pointer ${
-                    isLight
-                      ? 'bg-emerald-50 hover:bg-emerald-100/80 border-emerald-300 text-emerald-950'
-                      : 'bg-emerald-950/30 hover:bg-emerald-900/40 border-emerald-500/40 text-emerald-200'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-[#009933]" />
-                    <span className="font-semibold text-[11.5px]">Access Requests Review Queue</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    {pendingRequestsCount > 0 ? (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-amber-950 font-bold font-mono animate-pulse">
-                        {pendingRequestsCount} Pending
-                      </span>
-                    ) : (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-mono font-bold">
-                        All Reviewed
-                      </span>
-                    )}
-                    <ArrowRight className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                </button>
-              </div>
-            )}
-
           </div>
 
-          {/* Footer System Badges */}
-          <div className={`mt-6 pt-4 border-t flex flex-wrap items-center justify-between gap-2 text-[10.5px] ${
-            isLight ? 'border-slate-200 text-slate-500' : 'border-slate-800/80 text-slate-500'
-          }`}>
-            <div className="flex items-center gap-2">
-              <span>NIA Regional Office IV-B (MIMAROPA)</span>
-              <span>•</span>
-              <span>ISO 9001:2015</span>
-            </div>
-            <div className="flex items-center gap-1 text-[#009933] font-semibold">
-              <ShieldCheck className="w-3 h-3" />
-              <span>6-Tier Institutional RBAC</span>
-            </div>
-          </div>
-
-          {/* Compliance & Policy Links for Meta & Regulatory Standards */}
-          <div className="mt-2.5 pt-2 flex items-center justify-center gap-3 text-[10px] text-slate-400 dark:text-slate-500">
+          {/* Compliance & Policy Links */}
+          <div className="mt-8 pt-5 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-center gap-3 text-[11px] text-slate-400 dark:text-slate-500">
             <a 
               href="/privacy" 
               target="_blank" 
@@ -772,16 +666,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             setIsGoogleSetupModalOpen(true);
           }
         }}
-        isLight={isLight}
-      />
-
-      {/* Access Request Management Queue Modal */}
-      <AccessRequestManagementModal
-        isOpen={isAccessRequestsManagerOpen}
-        onClose={() => setIsAccessRequestsManagerOpen(false)}
-        currentUser={selectedAccount}
-        requests={requests}
-        onRefreshRequests={loadRequests}
         isLight={isLight}
       />
 
