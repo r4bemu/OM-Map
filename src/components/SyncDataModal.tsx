@@ -69,7 +69,7 @@ export const SyncDataModal: React.FC<SyncDataModalProps> = ({
   return (
     <>
       <aside 
-        className="fixed md:absolute top-16 md:top-20 right-2 md:right-4 left-auto z-40 w-[calc(100vw-1rem)] sm:w-[420px] md:w-[440px] max-h-[82vh] md:max-h-[580px] bg-slate-900/98 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 text-left pointer-events-auto"
+        className="fixed md:absolute top-16 md:top-20 left-2 md:left-4 right-auto z-40 w-[calc(100vw-1rem)] sm:w-[420px] md:w-[440px] max-h-[82vh] md:max-h-[580px] bg-slate-900/98 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-left-4 text-left pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
