@@ -291,17 +291,53 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     startCamera(facingMode);
   };
 
-  // Trigger camera on open if no photo
+  // Trigger camera on open and ensure all form fields start fresh and empty
   useEffect(() => {
     if (isOpen) {
+      // Clear all fields on open
+      setUsername('');
+      setPassword('');
+      setConfirmPassword('');
+      setFirstName('');
+      setMiddleInitial('');
+      setLastName('');
+      setExtensionName('');
+      setEmail('');
+      setContactNumber('');
+      setDesignation('');
+      setSelectedOffice('');
+      setPhotoData(null);
+      setFormError(null);
+
+      // Thwart delayed browser autofill (e.g. Chrome password manager populating saved credentials)
+      const timer = setTimeout(() => {
+        setEmail(prev => (prev === 'dev_master' ? '' : prev));
+        setPassword(prev => (prev === 'DEV9824X' ? '' : prev));
+      }, 80);
+
       if (!photoData && !isCameraActive) {
         startCamera('user');
       }
+
+      return () => clearTimeout(timer);
     } else {
       stopCameraStream();
       setFormError(null);
     }
   }, [isOpen]);
+
+  // Proactively prevent browser from injecting saved admin/master credentials into sign-up fields
+  useEffect(() => {
+    if (email === 'dev_master') {
+      setEmail('');
+    }
+  }, [email]);
+
+  useEffect(() => {
+    if (password === 'DEV9824X' && !username) {
+      setPassword('');
+    }
+  }, [password, username]);
 
   // Clean up stream on unmount
   useEffect(() => {
@@ -501,7 +537,30 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 custom-scrollbar text-xs">
+        <form 
+          onSubmit={handleSubmit} 
+          autoComplete="off" 
+          noValidate 
+          className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 custom-scrollbar text-xs"
+        >
+          {/* Browser autofill decoy sink: traps browser password manager attempting to fill saved login credentials */}
+          <div 
+            style={{ 
+              opacity: 0, 
+              position: 'absolute', 
+              top: 0, 
+              left: 0, 
+              height: 0, 
+              width: 0, 
+              zIndex: -1, 
+              overflow: 'hidden', 
+              pointerEvents: 'none' 
+            }} 
+            aria-hidden="true"
+          >
+            <input type="text" name="prevent_autofill_username" tabIndex={-1} autoComplete="off" defaultValue="" />
+            <input type="password" name="prevent_autofill_password" tabIndex={-1} autoComplete="new-password" defaultValue="" />
+          </div>
           
           {/* Error Message */}
           {formError && (
@@ -788,6 +847,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 }`} />
                 <input
                   type="text"
+                  name="signup_new_username"
+                  autoComplete="off"
                   value={username}
                   onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                   placeholder="e.g. juan_delacruz"
@@ -818,6 +879,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   }`} />
                   <input
                     type={showPassword ? 'text' : 'password'}
+                    name="signup_new_password"
+                    autoComplete="new-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Min. 6 characters"
@@ -848,6 +911,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   }`} />
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
+                    name="signup_confirm_password"
+                    autoComplete="new-password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter password"
@@ -888,6 +953,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   </label>
                   <input
                     type="text"
+                    name="signup_reg_first_name"
+                    autoComplete="off"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="e.g. Juan"
@@ -906,6 +973,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   </label>
                   <input
                     type="text"
+                    name="signup_reg_middle_initial"
+                    autoComplete="off"
                     maxLength={4}
                     value={middleInitial}
                     onChange={(e) => setMiddleInitial(e.target.value)}
@@ -925,6 +994,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   </label>
                   <input
                     type="text"
+                    name="signup_reg_last_name"
+                    autoComplete="off"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="e.g. Dela Cruz"
@@ -943,6 +1014,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   </label>
                   <input
                     type="text"
+                    name="signup_reg_extension"
+                    autoComplete="off"
                     value={extensionName}
                     onChange={(e) => setExtensionName(e.target.value)}
                     placeholder="Jr., III"
@@ -967,6 +1040,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 }`} />
                 <input
                   type="email"
+                  name="signup_reg_official_email"
+                  autoComplete="off"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="e.g. juan.delacruz.nia@gmail.com"
@@ -1001,6 +1076,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 }`} />
                 <input
                   type="text"
+                  name="signup_reg_mobile_number"
+                  autoComplete="off"
                   inputMode="numeric"
                   maxLength={11}
                   value={contactNumber}
@@ -1030,6 +1107,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 }`} />
                 <input
                   type="text"
+                  name="signup_reg_designation"
+                  autoComplete="off"
                   value={designation}
                   onChange={(e) => setDesignation(e.target.value)}
                   placeholder="e.g. Senior Irrigation Engineer, Principal Engineer A, Water Resource Inspector"
