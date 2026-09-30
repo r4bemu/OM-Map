@@ -25,7 +25,7 @@ import {
   Smartphone
 } from 'lucide-react';
 import { UserRole, GISLayer, FieldReport, AuthUser, AvailableCloudWeek } from '../types';
-import { canUserManageRequests, getNisOptionsForImo } from '../config/authUsers';
+import { canUserManageRequests, canUserManagePasswordResets, getNisOptionsForImo } from '../config/authUsers';
 
 interface NavbarProps {
   authenticatedUser: AuthUser | null;
@@ -63,6 +63,7 @@ interface NavbarProps {
   onOpenDevPanel?: () => void;
   onOpenAccessRequests?: () => void;
   pendingRequestsCount?: number;
+  pendingResetRequestsCount?: number;
   onOpenRoleMatrix?: () => void;
   onLogout?: () => void;
   isMapPickerActive?: boolean;
@@ -100,6 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenDevPanel,
   onOpenAccessRequests,
   pendingRequestsCount = 0,
+  pendingResetRequestsCount = 0,
   onOpenRoleMatrix,
   onLogout,
   isMapPickerActive = false,
@@ -342,6 +344,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="hidden sm:inline">Menu</span>
           {isSimulating && (
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+          )}
+          {pendingResetRequestsCount > 0 && canUserManagePasswordResets(authenticatedUser) && (
+            <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 z-20 pointer-events-none">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-80"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-600 ring-2 ring-slate-900"></span>
+            </span>
           )}
         </button>
 
@@ -600,28 +608,41 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* 6.5 Access Requests Review Queue - Only for Developer, RO Admin, IMO Admin */}
-            {canUserManageRequests(authenticatedUser) && onOpenAccessRequests && (
+            {/* 6.5 Access Requests & Temporary PINs Review Queue - For Developer, RO Admin, RO Evaluator, IMO Admin */}
+            {(canUserManageRequests(authenticatedUser) || canUserManagePasswordResets(authenticatedUser)) && onOpenAccessRequests && (
               <button
                 onClick={() => {
                   closeHamburger();
                   onOpenAccessRequests();
                 }}
-                className="w-full flex items-center justify-between px-3 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/80 rounded-xl transition cursor-pointer text-xs font-semibold"
+                className={`w-full flex items-center justify-between px-3 py-2 border rounded-xl transition cursor-pointer text-xs font-semibold ${
+                  pendingResetRequestsCount > 0
+                    ? 'bg-rose-950/40 hover:bg-rose-900/50 text-rose-200 border-rose-500/60 ring-1 ring-rose-500/40 shadow-sm'
+                    : 'bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border-slate-700/80'
+                }`}
               >
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#009933] shrink-0" />
-                  <span>Access Requests Review Queue</span>
+                  <ShieldCheck className={`w-4 h-4 shrink-0 ${pendingResetRequestsCount > 0 ? 'text-rose-400' : 'text-[#009933]'}`} />
+                  <span>Access &amp; Reset PINs Queue</span>
                 </div>
-                {pendingRequestsCount && pendingRequestsCount > 0 ? (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-amber-950 font-bold font-mono animate-pulse">
-                    {pendingRequestsCount} Pending
-                  </span>
-                ) : (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-[9px]">
-                    All Done
-                  </span>
-                )}
+                <div className="flex items-center gap-1.5">
+                  {pendingResetRequestsCount > 0 && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-600 text-white font-bold font-mono animate-pulse flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                      {pendingResetRequestsCount} PIN Req
+                    </span>
+                  )}
+                  {pendingRequestsCount > 0 && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-amber-950 font-bold font-mono animate-pulse">
+                      {pendingRequestsCount} Pending
+                    </span>
+                  )}
+                  {!pendingResetRequestsCount && !pendingRequestsCount && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-[9px]">
+                      All Done
+                    </span>
+                  )}
+                </div>
               </button>
             )}
 

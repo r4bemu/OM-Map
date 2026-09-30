@@ -104,6 +104,28 @@ export interface AccessRequest {
   provider?: 'google' | 'facebook' | 'local';
 }
 
+export interface PasswordResetRequest {
+  id: string;
+  userId?: string;
+  username: string;
+  fullName: string;
+  firstName: string;
+  middleInitial?: string;
+  lastName: string;
+  extensionName?: string;
+  contactNumber: string;
+  office: string;
+  designation?: string;
+  avatar?: string;
+  tempPin: string; // Random single-use PIN (e.g. 6-digit numeric)
+  status: 'pending' | 'dispatched' | 'used' | 'cancelled';
+  submittedAt: string;
+  dispatchedAt?: string;
+  dispatchedBy?: string;
+  dispatchedByRole?: string;
+  usedAt?: string;
+}
+
 export type BasemapType = 'satellite' | 'dark' | 'streets';
 
 export type ReportTimeScope = 'current_and_prev_week' | 'past_4_weeks' | 'past_3_months' | 'all';

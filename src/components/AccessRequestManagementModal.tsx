@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { 
   X, 
   Users, 
@@ -15,15 +15,25 @@ import {
   AlertTriangle, 
   Edit3, 
   Trash2, 
-  RefreshCw
+  RefreshCw,
+  KeyRound,
+  ShieldAlert,
+  Send,
+  MessageSquare
 } from 'lucide-react';
-import { AccessRequest, AuthUser, UserRole } from '../types';
+import { AccessRequest, AuthUser, UserRole, PasswordResetRequest } from '../types';
 import { 
   CANONICAL_IMO_OFFICES, 
   isMasterAdmin, 
   isRegionalAdmin, 
   isImoAdmin,
   canUserManageRequests,
+  canUserManagePasswordResets,
+  isResetRequestInAdminJurisdiction,
+  fetchPasswordResetRequestsApi,
+  dispatchPasswordResetRequestApi,
+  cancelPasswordResetRequestApi,
+  maskMobileNumber,
   getNisOptionsForImo,
   getAdminJurisdictionLabel,
   isRequestInAdminJurisdiction,
@@ -106,20 +116,83 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
   const isRO = isRegionalAdmin(currentUser);
   const isIMO = isImoAdmin(currentUser);
   const isAdmin = canUserManageRequests(currentUser);
+  const canManage = canUserManageRequests(currentUser) || canUserManagePasswordResets(currentUser);
+
+  // Temporary PIN state
+  const [resetRequests, setResetRequests] = useState<PasswordResetRequest[]>([]);
+  const [copiedPinId, setCopiedPinId] = useState<string | null>(null);
+  const [copiedSmsId, setCopiedSmsId] = useState<string | null>(null);
+  const [isDispatchingPinId, setIsDispatchingPinId] = useState<string | null>(null);
+
+  const loadResetRequests = useCallback(async () => {
+    try {
+      const list = await fetchPasswordResetRequestsApi();
+      setResetRequests(list);
+    } catch (_) {}
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadResetRequests();
+    }
+  }, [isOpen, loadResetRequests]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      await onRefreshRequests();
+      await Promise.all([onRefreshRequests(), loadResetRequests()]);
     } finally {
       setTimeout(() => setIsRefreshing(false), 600);
     }
   };
 
-  const [statusTab, setStatusTab] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
+  const [statusTab, setStatusTab] = useState<'pending' | 'approved' | 'rejected' | 'all' | 'temp_pins'>('pending');
   const [copiedPhoneId, setCopiedPhoneId] = useState<string | null>(null);
   const [copiedEmailId, setCopiedEmailId] = useState<string | null>(null);
+
+  const pendingResetRequests = useMemo(() => {
+    return resetRequests.filter(r => isResetRequestInAdminJurisdiction(currentUser, r));
+  }, [resetRequests, currentUser]);
+
+  const activePendingResetCount = useMemo(() => {
+    return resetRequests.filter(r => r.status === 'pending' && isResetRequestInAdminJurisdiction(currentUser, r)).length;
+  }, [resetRequests, currentUser]);
+
+  const handleCopyPin = (id: string, pin: string) => {
+    navigator.clipboard.writeText(pin);
+    setCopiedPinId(id);
+    setTimeout(() => setCopiedPinId(null), 2000);
+  };
+
+  const handleCopySms = (req: PasswordResetRequest) => {
+    const text = `Good day ${req.firstName}, your temporary one-time PIN for NIA OM-Map is ${req.tempPin}. This PIN is single-use only. Please log in with this PIN to set your new permanent password.`;
+    navigator.clipboard.writeText(text);
+    setCopiedSmsId(req.id);
+    setTimeout(() => setCopiedSmsId(null), 2500);
+  };
+
+  const handleDispatchPin = async (reqId: string) => {
+    setIsDispatchingPinId(reqId);
+    try {
+      await dispatchPasswordResetRequestApi(reqId, currentUser);
+      await loadResetRequests();
+    } catch (err: any) {
+      console.error('Failed to dispatch PIN:', err);
+    } finally {
+      setIsDispatchingPinId(null);
+    }
+  };
+
+  const handleCancelPinRequest = async (reqId: string) => {
+    if (!window.confirm('Are you sure you want to cancel this temporary PIN request?')) return;
+    try {
+      await cancelPasswordResetRequestApi(reqId);
+      await loadResetRequests();
+    } catch (err: any) {
+      console.error('Failed to cancel request:', err);
+    }
+  };
 
   // Per-request editing state for role and NIS assignment
   const [assignedRoles, setAssignedRoles] = useState<Record<string, UserRole>>({});
@@ -259,7 +332,7 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
 
   if (!isOpen) return null;
 
-  if (!isAdmin) {
+  if (!canManage) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xl bg-slate-950/80">
         <div className="bg-slate-900 border border-rose-500/40 rounded-3xl p-6 text-center max-w-md text-white shadow-2xl animate-in fade-in">
@@ -500,6 +573,35 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
               >
                 All Records
               </button>
+
+              {/* Temporary PINs Tab with Emergency Bright Red Pulsing Alarm */}
+              <button
+                type="button"
+                onClick={() => setStatusTab('temp_pins')}
+                className={`px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer relative ${
+                  statusTab === 'temp_pins'
+                    ? 'bg-rose-600 text-white shadow-md'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+                <span>Temporary PINs</span>
+                {activePendingResetCount > 0 && (
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+                  </span>
+                )}
+                {activePendingResetCount > 0 ? (
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-500 text-white font-mono font-bold animate-pulse">
+                    {activePendingResetCount} Emergency
+                  </span>
+                ) : pendingResetRequests.length > 0 ? (
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono font-bold">
+                    {pendingResetRequests.length}
+                  </span>
+                ) : null}
+              </button>
             </div>
           </div>
         </div>
@@ -523,7 +625,220 @@ export const AccessRequestManagementModal: React.FC<AccessRequestManagementModal
 
         {/* Requests List */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 custom-scrollbar">
-          {filteredRequests.length === 0 ? (
+          {statusTab === 'temp_pins' ? (
+            <div className="space-y-4">
+              {/* Emergency Banner */}
+              <div className={`p-4 rounded-2xl border flex items-start gap-3 ${
+                isLight ? 'bg-rose-50/70 border-rose-200 text-rose-950' : 'bg-rose-950/20 border-rose-500/30 text-rose-200'
+              }`}>
+                <ShieldAlert className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="font-bold text-xs uppercase tracking-wider flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                    <span>Emergency Temporary PIN Dispatch</span>
+                    {activePendingResetCount > 0 && (
+                      <span className="animate-pulse bg-rose-600 text-white text-[10px] px-2 py-0.2 rounded-full font-mono">
+                        {activePendingResetCount} Action Required
+                      </span>
+                    )}
+                  </h4>
+                  <p className="text-[11px] leading-relaxed">
+                    Personnel who forgot their passwords have completed the identity challenge (Username, Mobile, First Name, Last Name). 
+                    Provide their single-use Temporary PIN via <strong>SMS text message</strong> or <strong>verbal communication</strong>.
+                    Once used, the PIN will be permanently deactivated.
+                  </p>
+                </div>
+              </div>
+
+              {pendingResetRequests.length === 0 ? (
+                <div className={`p-10 rounded-2xl border text-center ${
+                  isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-800/30 border-slate-800'
+                }`}>
+                  <KeyRound className="w-10 h-10 mx-auto text-slate-400 mb-2 opacity-60" />
+                  <h3 className="font-bold text-sm">No Temporary PIN Requests</h3>
+                  <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                    There are currently no active temporary PIN requests requiring your jurisdictional attention.
+                  </p>
+                </div>
+              ) : (
+                pendingResetRequests.map((req) => {
+                  const isPending = req.status === 'pending';
+                  const isDispatched = req.status === 'dispatched';
+                  const isUsed = req.status === 'used';
+                  const isCancelled = req.status === 'cancelled';
+
+                  return (
+                    <div
+                      key={req.id}
+                      className={`p-4 rounded-2xl border transition shadow-sm ${
+                        isPending
+                          ? isLight 
+                            ? 'bg-rose-50/40 border-rose-300 ring-2 ring-rose-500/20' 
+                            : 'bg-rose-950/20 border-rose-500/50 ring-2 ring-rose-500/30'
+                          : isLight
+                          ? 'bg-white border-slate-200'
+                          : 'bg-slate-900 border-slate-800'
+                      }`}
+                    >
+                      {/* Header info */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {req.avatar ? (
+                            <img src={req.avatar} alt={req.fullName} className="w-11 h-11 rounded-xl object-cover border border-slate-300 dark:border-slate-700 shrink-0" />
+                          ) : (
+                            <div className="w-11 h-11 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 flex items-center justify-center shrink-0 font-bold">
+                              <Users className="w-5 h-5" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="font-bold text-sm truncate">{req.fullName}</h3>
+                              <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 font-bold">
+                                @{req.username}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500 truncate mt-0.5">
+                              {req.designation || 'Personnel'} • {req.office}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Status Badge with Bright Red Alarm */}
+                        <div className="flex items-center gap-2">
+                          {isPending && (
+                            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500 text-white font-mono text-[10px] font-bold shadow-sm shadow-rose-900/30 animate-pulse">
+                              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                              <span>ACTION REQUIRED</span>
+                            </span>
+                          )}
+                          {isDispatched && (
+                            <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30 font-mono text-[10px] font-bold">
+                              <Clock className="w-3 h-3" />
+                              <span>Dispatched (Awaiting Login)</span>
+                            </span>
+                          )}
+                          {isUsed && (
+                            <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 font-mono text-[10px] font-bold">
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>Consumed &amp; Inactive</span>
+                            </span>
+                          )}
+                          {isCancelled && (
+                            <span className="px-2.5 py-1 rounded-full bg-slate-500/20 text-slate-400 font-mono text-[10px]">
+                              Cancelled
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Personnel Mobile & Details Bar */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mb-3">
+                        <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                          isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-850 border-slate-800'
+                        }`}>
+                          <div className="flex items-center gap-2 truncate">
+                            <Phone className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                            <span className="font-mono font-bold text-xs">{req.contactNumber}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyPhone(req.id, req.contactNumber)}
+                            className="p-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer"
+                            title="Copy mobile number"
+                          >
+                            {copiedPhoneId === req.id ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+
+                        <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                          isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-850 border-slate-800'
+                        }`}>
+                          <div className="flex items-center gap-2 text-slate-500">
+                            <Clock className="w-3.5 h-3.5 shrink-0" />
+                            <span>Requested: {new Date(req.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}, {new Date(req.submittedAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* TEMPORARY PIN CALLOUT CARD */}
+                      {!isUsed && !isCancelled && req.tempPin && (
+                        <div className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                          isLight 
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-950 shadow-inner' 
+                            : 'bg-emerald-950/20 border-emerald-500/40 text-emerald-200 shadow-inner'
+                        }`}>
+                          <div className="space-y-0.5">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                              Single-Use Temporary PIN
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-xl sm:text-2xl font-black tracking-widest text-[#009933] dark:text-emerald-400">
+                                {req.tempPin}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyPin(req.id, req.tempPin)}
+                                className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] flex items-center gap-1 shadow cursor-pointer active:scale-95"
+                              >
+                                {copiedPinId === req.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                <span>{copiedPinId === req.id ? 'Copied PIN' : 'Copy PIN'}</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleCopySms(req)}
+                              className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95 ${
+                                copiedSmsId === req.id 
+                                  ? 'bg-emerald-600 text-white border-emerald-500' 
+                                  : isLight 
+                                  ? 'bg-white border-slate-300 hover:bg-slate-100 text-slate-800' 
+                                  : 'bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-200'
+                              }`}
+                            >
+                              <MessageSquare className="w-3.5 h-3.5 text-emerald-500" />
+                              <span>{copiedSmsId === req.id ? 'SMS Template Copied!' : 'Copy SMS Text'}</span>
+                            </button>
+
+                            {isPending && (
+                              <button
+                                type="button"
+                                onClick={() => handleDispatchPin(req.id)}
+                                disabled={isDispatchingPinId === req.id}
+                                className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow transition cursor-pointer active:scale-95"
+                              >
+                                <Send className="w-3.5 h-3.5" />
+                                <span>{isDispatchingPinId === req.id ? 'Saving...' : 'Mark Dispatched'}</span>
+                              </button>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => handleCancelPinRequest(req.id)}
+                              className="p-1.5 rounded-xl text-rose-500 hover:bg-rose-500/10 cursor-pointer"
+                              title="Cancel PIN request"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {isUsed && (
+                        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 shrink-0" />
+                          <span>
+                            This Temporary PIN was used on {req.usedAt ? new Date(req.usedAt).toLocaleString() : 'earlier'} and is permanently deactivated.
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          ) : filteredRequests.length === 0 ? (
             <div className={`p-10 rounded-2xl border text-center ${
               isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-800/30 border-slate-800'
             }`}>

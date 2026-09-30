@@ -8,7 +8,8 @@ import {
   AuthUser,
   ReportTimeScope,
   AvailableCloudWeek,
-  AccessRequest
+  AccessRequest,
+  PasswordResetRequest
 } from './types';
 import { INITIAL_GIS_LAYERS, INITIAL_FIELD_REPORTS } from './data/sampleLayers';
 import { 
@@ -39,7 +40,23 @@ import {
 import { getIsoWeekInfo, getAvailableWeeksFromReports, isReportInWeek } from './utils/weekUtils';
 import { parseGISFile } from './utils/kmzParser';
 import { getAccessToken, uploadMaintenanceReportToDrive, uploadReportViaAppsScriptClient } from './lib/googleDriveService';
-import { getSavedAuthSession, saveAuthSession, clearAuthSession, fetchRemoteAuthUsers, getAuthUsers, fetchAccessRequestsApi, fetchUserAccessRequestApi, canUserManageRequests, isImoScopedRole, matchesImoOffice, isRequestInAdminJurisdiction, DEVELOPER_EMAIL } from './config/authUsers';
+import { 
+  getSavedAuthSession, 
+  saveAuthSession, 
+  clearAuthSession, 
+  fetchRemoteAuthUsers, 
+  getAuthUsers, 
+  fetchAccessRequestsApi, 
+  fetchUserAccessRequestApi, 
+  canUserManageRequests, 
+  isImoScopedRole, 
+  matchesImoOffice, 
+  isRequestInAdminJurisdiction, 
+  DEVELOPER_EMAIL,
+  fetchPasswordResetRequestsApi,
+  canUserManagePasswordResets,
+  isResetRequestInAdminJurisdiction
+} from './config/authUsers';
 
 import { 
   MAINTENANCE_ACTIVITY_CONFIG, 
@@ -275,6 +292,29 @@ export default function App() {
     if (!authenticatedUser || !canUserManageRequests(authenticatedUser)) return 0;
     return accessRequests.filter(r => r.status === 'pending' && isRequestInAdminJurisdiction(authenticatedUser, r)).length;
   }, [accessRequests, authenticatedUser]);
+
+  // Temporary PIN & Password Reset Requests State
+  const [passwordResetRequests, setPasswordResetRequests] = useState<PasswordResetRequest[]>([]);
+
+  const loadPasswordResetRequests = useCallback(async (forceFresh = false) => {
+    try {
+      const data = await fetchPasswordResetRequestsApi(forceFresh);
+      setPasswordResetRequests(data);
+    } catch (e) {
+      console.warn('Could not load password reset requests:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPasswordResetRequests();
+    const interval = setInterval(() => loadPasswordResetRequests(false), 30000);
+    return () => clearInterval(interval);
+  }, [loadPasswordResetRequests]);
+
+  const pendingResetRequestsCount = useMemo(() => {
+    if (!authenticatedUser || !canUserManagePasswordResets(authenticatedUser)) return 0;
+    return passwordResetRequests.filter(r => r.status === 'pending' && isResetRequestInAdminJurisdiction(authenticatedUser, r)).length;
+  }, [passwordResetRequests, authenticatedUser]);
 
   // Option 3: Android Native Double-Back-to-Exit Toast State
   const [showExitToast, setShowExitToast] = useState(false);
@@ -2261,6 +2301,7 @@ export default function App() {
           setIsAccessRequestsModalOpen(true);
         }}
         pendingRequestsCount={pendingAccessRequestsCount}
+        pendingResetRequestsCount={pendingResetRequestsCount}
         onOpenRoleMatrix={() => {
           closeAllModals();
           setIsRoleMatrixModalOpen(true);
@@ -2549,10 +2590,14 @@ export default function App() {
         onClose={() => {
           setIsAccessRequestsModalOpen(false);
           loadAccessRequests();
+          loadPasswordResetRequests();
         }}
         currentUser={authenticatedUser}
         requests={accessRequests}
-        onRefreshRequests={() => loadAccessRequests(true)}
+        onRefreshRequests={() => {
+          loadAccessRequests(true);
+          loadPasswordResetRequests(true);
+        }}
         isLight={theme === 'light'}
       />
 

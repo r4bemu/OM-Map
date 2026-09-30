@@ -1,4 +1,4 @@
-import { AuthUser, UserRole, AccessRequest } from '../types';
+import { AuthUser, UserRole, AccessRequest, PasswordResetRequest } from '../types';
 import { normalizeUserRole } from '../utils/approvalHierarchyEngine';
 
 export const IMO_LIST = [
@@ -1649,3 +1649,209 @@ export function detectImoFromFileName(fileName?: string): string | null {
   return null;
 }
 
+// ==========================================
+// PASSWORD RESET & TEMPORARY PIN UTILITIES
+// ==========================================
+
+const STORAGE_PASSWORD_RESETS_KEY = 'ommap_password_resets_v1';
+
+/**
+ * Mask mobile phone showing 09 prefix, x's for middle digits, and last 2 digits.
+ * E.g. "09171234523" -> "(09xxxxxxx23)"
+ */
+export function maskMobileNumber(phone: string): string {
+  const digits = (phone || '').replace(/\D/g, '');
+  if (digits.length < 4) return '(09xxxxxxxxx)';
+  const prefix = digits.slice(0, 2);
+  const suffix = digits.slice(-2);
+  const middleLen = Math.max(1, digits.length - 4);
+  return `(${prefix}${'x'.repeat(middleLen)}${suffix})`;
+}
+
+/**
+ * Mask name showing initial letter and x's for remaining characters.
+ * E.g. "Juan" -> "(Jxxx)", "Dela Cruz" -> "(Dxxx Cxxx)"
+ */
+export function maskName(name: string): string {
+  if (!name || !name.trim()) return '(xxxx)';
+  const parts = name.trim().split(/\s+/);
+  return '(' + parts.map(part => {
+    if (part.length <= 1) return part;
+    return part[0] + 'x'.repeat(part.length - 1);
+  }).join(' ') + ')';
+}
+
+/**
+ * Mask username showing first character, x's, and last character.
+ * E.g. "juan_delacruz" -> "(jxxxxxxxxxxz)"
+ */
+export function maskUsername(username: string): string {
+  const clean = (username || '').trim().replace(/^@/, '');
+  if (clean.length <= 2) return `(${clean[0] || 'x'}x)`;
+  return `(${clean[0]}${'x'.repeat(clean.length - 2)}${clean[clean.length - 1]})`;
+}
+
+/**
+ * Check if the user is authorized to receive alarms and view/issue Temporary PINs:
+ * Explicitly: Developer, RO Admin, RO Evaluator, and IMO Admins
+ */
+export function canUserManagePasswordResets(user?: AuthUser | null): boolean {
+  if (!user) return false;
+  if (user.email && user.email.toLowerCase().trim() === DEVELOPER_EMAIL.toLowerCase()) return true;
+  return (
+    user.role === 'Developer' ||
+    user.role === 'RO Admin' ||
+    user.role === 'RO Evaluator' ||
+    user.role === 'IMO Admin'
+  );
+}
+
+/**
+ * Check if a password reset request is within the administrator's jurisdiction:
+ * - Developer, RO Admin, RO Evaluator: Regional & All IMOs
+ * - IMO Admin: Only requests from their designated IMO office
+ */
+export function isResetRequestInAdminJurisdiction(user: AuthUser | null, req: PasswordResetRequest): boolean {
+  if (!user || !canUserManagePasswordResets(user)) return false;
+  if (user.role === 'Developer' || user.role === 'RO Admin' || user.role === 'RO Evaluator') {
+    return true;
+  }
+  if (user.role === 'IMO Admin') {
+    return matchesImoOffice(req.office, user.imoOffice);
+  }
+  return false;
+}
+
+/**
+ * Fetch password reset requests with local storage fallback
+ */
+export async function fetchPasswordResetRequestsApi(): Promise<PasswordResetRequest[]> {
+  try {
+    const res = await fetch('/api/password-reset-requests').catch(() => null);
+    if (res && res.ok) {
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : (data && Array.isArray(data.requests) ? data.requests : []);
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(STORAGE_PASSWORD_RESETS_KEY, JSON.stringify(list));
+      }
+      return list;
+    }
+  } catch (e) {
+    console.warn('Network fetch failed for password reset requests, loading local cache:', e);
+  }
+
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const raw = localStorage.getItem(STORAGE_PASSWORD_RESETS_KEY);
+    if (raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (_) {}
+    }
+  }
+
+  return [];
+}
+
+/**
+ * Submit a request for a temporary PIN (verifies username, mobile, first name, last name)
+ */
+export async function submitPasswordResetRequestApi(payload: {
+  username: string;
+  mobileNumber: string;
+  firstName: string;
+  lastName: string;
+}): Promise<{ success: boolean; message: string; request?: PasswordResetRequest }> {
+  try {
+    const res = await fetch('/api/password-reset-requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to submit password reset request');
+    }
+
+    // Refresh local cache
+    fetchPasswordResetRequestsApi().catch(() => {});
+    return data;
+  } catch (err: any) {
+    throw err;
+  }
+}
+
+/**
+ * Mark a temporary PIN as dispatched / sent to the user via SMS/call
+ */
+export async function dispatchPasswordResetRequestApi(
+  id: string,
+  adminUser: AuthUser | null
+): Promise<{ success: boolean; request?: PasswordResetRequest }> {
+  try {
+    const res = await fetch(`/api/password-reset-requests/${id}/dispatch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        adminName: adminUser?.name || 'Administrator',
+        adminRole: adminUser?.role || 'RO Admin'
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to dispatch temporary PIN');
+    }
+
+    fetchPasswordResetRequestsApi().catch(() => {});
+    return data;
+  } catch (err: any) {
+    throw err;
+  }
+}
+
+/**
+ * Verify and consume a temporary PIN on login (single-use deactivation)
+ */
+export async function verifyAndConsumeTempPinApi(
+  username: string,
+  pin: string
+): Promise<{ success: boolean; message: string; user?: AuthUser; resetRequest?: PasswordResetRequest }> {
+  try {
+    const res = await fetch('/api/password-reset-requests/verify-pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, pin })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Invalid temporary PIN');
+    }
+
+    fetchPasswordResetRequestsApi().catch(() => {});
+    return data;
+  } catch (err: any) {
+    throw err;
+  }
+}
+
+/**
+ * Cancel a temporary PIN request
+ */
+export async function cancelPasswordResetRequestApi(id: string): Promise<{ success: boolean }> {
+  try {
+    const res = await fetch(`/api/password-reset-requests/${id}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to cancel request');
+    }
+    fetchPasswordResetRequestsApi().catch(() => {});
+    return data;
+  } catch (err: any) {
+    throw err;
+  }
+}

@@ -54,6 +54,7 @@ const REPORTS_FILE = path.join(DATA_DIR, 'persistent_reports.json');
 const USERS_FILE = path.join(DATA_DIR, 'persistent_users.json');
 const PENDING_USERS_FILE = path.join(DATA_DIR, 'pending_users.json');
 const REQUESTS_FILE = path.join(DATA_DIR, 'access_requests.json');
+const PASSWORD_RESETS_FILE = path.join(DATA_DIR, 'password_reset_requests.json');
 
 const INITIAL_SEED_REQUESTS = [
   {
@@ -517,6 +518,29 @@ function saveUsersToFile(usersList: any[]) {
     safeWriteJsonSync(USERS_FILE, usersList);
   } catch (err) {
     console.error('Failed to save persistent users to file:', err);
+  }
+}
+
+function loadSavedResetRequests(): any[] {
+  ensureDataDir();
+  if (fs.existsSync(PASSWORD_RESETS_FILE)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(PASSWORD_RESETS_FILE, 'utf-8'));
+      if (Array.isArray(data)) {
+        return data;
+      }
+    } catch (err) {
+      console.warn('Failed to parse password_reset_requests.json:', err);
+    }
+  }
+  return [];
+}
+
+function saveResetRequestsToFile(list: any[]) {
+  try {
+    safeWriteJsonSync(PASSWORD_RESETS_FILE, list);
+  } catch (err) {
+    console.error('Failed to save password reset requests to file:', err);
   }
 }
 
@@ -1041,6 +1065,225 @@ export async function createApp() {
       res.json(users);
     } catch (err: any) {
       res.status(500).json({ error: err.message || 'Failed to get approved users' });
+    }
+  });
+
+  // ==========================================
+  // PASSWORD RESET & TEMPORARY PIN REQUESTS
+  // ==========================================
+
+  // 1. Get all password reset requests
+  app.get('/api/password-reset-requests', (req, res) => {
+    try {
+      const requests = loadSavedResetRequests();
+      res.json({ requests });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to load password reset requests' });
+    }
+  });
+
+  // 2. Submit a password reset / temporary PIN request (verifies all 4 required details)
+  app.post('/api/password-reset-requests', async (req, res) => {
+    try {
+      const { username, mobileNumber, firstName, lastName } = req.body;
+      if (!username || !mobileNumber || !firstName || !lastName) {
+        return res.status(400).json({ error: 'Username, mobile phone, first name, and last name are all required.' });
+      }
+
+      const cleanUsername = username.trim().toLowerCase().replace(/^@/, '');
+      const cleanDigits = mobileNumber.replace(/\D/g, '');
+      const cleanFirst = firstName.trim().toLowerCase();
+      const cleanLast = lastName.trim().toLowerCase();
+
+      // Find user from saved users & approved access requests
+      const savedUsers = loadSavedUsers();
+      let matchedUser = savedUsers.find((u: any) => {
+        const uName = (u.username || '').toLowerCase().replace(/^@/, '');
+        return uName === cleanUsername;
+      });
+
+      let matchedRequest: any = null;
+      if (!matchedUser) {
+        try {
+          const reqs = await getAccessRequests();
+          matchedRequest = reqs.find((r: any) => {
+            const rUname = (r.username || (r.email ? r.email.split('@')[0] : '')).toLowerCase().replace(/^@/, '');
+            return rUname === cleanUsername && r.status === 'approved';
+          });
+        } catch (_) {}
+      }
+
+      const candidate = matchedUser || matchedRequest;
+      if (!candidate) {
+        return res.status(404).json({ error: `Account '@${cleanUsername}' was not found. Please verify your username.` });
+      }
+
+      // Verify mobile phone
+      const recordMobileDigits = (candidate.contactNumber || '').replace(/\D/g, '');
+      if (recordMobileDigits && cleanDigits !== recordMobileDigits) {
+        return res.status(400).json({ error: 'The provided mobile phone number does not match our records.' });
+      }
+
+      // Verify First Name
+      const candFirst = (candidate.firstName || (candidate.name || candidate.fullName || '').split(' ')[0] || '').trim().toLowerCase();
+      if (candFirst && candFirst !== cleanFirst) {
+        return res.status(400).json({ error: 'The provided First Name does not match our records.' });
+      }
+
+      // Verify Last Name
+      const candLast = (candidate.lastName || (candidate.name || candidate.fullName || '').split(' ').slice(-1)[0] || '').trim().toLowerCase();
+      if (candLast && candLast !== cleanLast) {
+        return res.status(400).json({ error: 'The provided Last Name does not match our records.' });
+      }
+
+      // Generate a secure random 6-digit numeric Temporary PIN
+      const tempPin = Math.floor(100000 + Math.random() * 900000).toString();
+
+      const currentRequests = loadSavedResetRequests();
+
+      // Deactivate any existing pending/dispatched requests for this user so only 1 fresh random PIN is active
+      const updatedRequests = currentRequests.map((r: any) => {
+        if (r.username?.toLowerCase() === cleanUsername && (r.status === 'pending' || r.status === 'dispatched')) {
+          return { ...r, status: 'cancelled', cancelledAt: new Date().toISOString() };
+        }
+        return r;
+      });
+
+      const newResetRequest = {
+        id: `reset-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        userId: candidate.id || candidate.uid,
+        username: candidate.username || cleanUsername,
+        fullName: candidate.fullName || candidate.name,
+        firstName: candidate.firstName || firstName.trim(),
+        middleInitial: candidate.middleInitial || '',
+        lastName: candidate.lastName || lastName.trim(),
+        extensionName: candidate.extensionName || '',
+        contactNumber: candidate.contactNumber || mobileNumber.trim(),
+        office: candidate.imoOffice || candidate.requestedOffice || candidate.assignedOffice || 'Regional Office IV-B',
+        designation: candidate.designation || 'Personnel',
+        avatar: candidate.avatar,
+        tempPin,
+        status: 'pending',
+        submittedAt: new Date().toISOString()
+      };
+
+      updatedRequests.unshift(newResetRequest);
+      saveResetRequestsToFile(updatedRequests);
+
+      res.json({
+        success: true,
+        message: 'Your request for a temporary PIN has been submitted. Your Office Administrator has been alerted with an alarm.',
+        request: newResetRequest
+      });
+    } catch (err: any) {
+      console.error('Failed to submit password reset request:', err);
+      res.status(500).json({ error: err.message || 'Failed to submit password reset request' });
+    }
+  });
+
+  // 3. Mark temporary PIN as dispatched / sent to user via SMS/call
+  app.post('/api/password-reset-requests/:id/dispatch', (req, res) => {
+    try {
+      const { id } = req.params;
+      const { adminName, adminRole } = req.body;
+      const currentRequests = loadSavedResetRequests();
+      const item = currentRequests.find((r: any) => r.id === id);
+
+      if (!item) {
+        return res.status(404).json({ error: 'Password reset request not found' });
+      }
+
+      item.status = 'dispatched';
+      item.dispatchedAt = new Date().toISOString();
+      item.dispatchedBy = adminName || 'Administrator';
+      item.dispatchedByRole = adminRole || 'RO Admin';
+
+      saveResetRequestsToFile(currentRequests);
+      res.json({ success: true, request: item });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to dispatch temporary PIN' });
+    }
+  });
+
+  // 4. Verify & Consume Temporary PIN during login (Strict single-use invalidation)
+  app.post('/api/password-reset-requests/verify-pin', (req, res) => {
+    try {
+      const { username, pin } = req.body;
+      if (!username || !pin) {
+        return res.status(400).json({ error: 'Username and temporary PIN are required.' });
+      }
+
+      const cleanUsername = username.trim().toLowerCase().replace(/^@/, '');
+      const cleanPin = pin.trim();
+
+      const currentRequests = loadSavedResetRequests();
+
+      // Check if this PIN was already used
+      const previouslyUsed = currentRequests.find((r: any) => 
+        r.username?.toLowerCase() === cleanUsername &&
+        r.status === 'used' &&
+        (r.tempPinBackup === cleanPin || r.usedPinBackup === cleanPin)
+      );
+
+      if (previouslyUsed) {
+        return res.status(400).json({ 
+          error: 'This temporary PIN has already been used and is permanently inactive. Please request a new temporary PIN.' 
+        });
+      }
+
+      // Check active request (pending or dispatched)
+      const activeRequest = currentRequests.find((r: any) => 
+        r.username?.toLowerCase() === cleanUsername &&
+        (r.status === 'pending' || r.status === 'dispatched') &&
+        r.tempPin === cleanPin
+      );
+
+      if (!activeRequest) {
+        return res.status(400).json({ error: 'Invalid temporary PIN or username.' });
+      }
+
+      // Invalidate the PIN immediately: single-use enforcement
+      activeRequest.status = 'used';
+      activeRequest.usedAt = new Date().toISOString();
+      activeRequest.usedPinBackup = activeRequest.tempPin;
+      activeRequest.tempPin = ''; // Erase active PIN
+
+      saveResetRequestsToFile(currentRequests);
+
+      // Find user record to return for authentication
+      const savedUsers = loadSavedUsers();
+      const user = savedUsers.find((u: any) => (u.username || '').toLowerCase().replace(/^@/, '') === cleanUsername);
+
+      res.json({
+        success: true,
+        message: 'Temporary PIN verified successfully and is now permanently deactivated.',
+        user: user || null,
+        resetRequest: activeRequest
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to verify temporary PIN' });
+    }
+  });
+
+  // 5. Cancel a temporary PIN request
+  app.post('/api/password-reset-requests/:id/cancel', (req, res) => {
+    try {
+      const { id } = req.params;
+      const currentRequests = loadSavedResetRequests();
+      const item = currentRequests.find((r: any) => r.id === id);
+
+      if (!item) {
+        return res.status(404).json({ error: 'Request not found' });
+      }
+
+      item.status = 'cancelled';
+      item.tempPin = '';
+      item.cancelledAt = new Date().toISOString();
+
+      saveResetRequestsToFile(currentRequests);
+      res.json({ success: true, request: item });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Failed to cancel request' });
     }
   });
 

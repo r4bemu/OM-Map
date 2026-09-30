@@ -23,10 +23,13 @@ import {
   fetchUserAccessRequestApi,
   submitAccessRequestApi,
   canUserManageRequests,
+  verifyAndConsumeTempPinApi,
   DEVELOPER_EMAIL
 } from '../config/authUsers';
 import { triggerGoogleGisSignIn } from '../lib/googleIdentityAuth';
 import { SignUpModal } from './SignUpModal';
+import { ForgotPasswordModal } from './ForgotPasswordModal';
+import { ForcePasswordChangeModal } from './ForcePasswordChangeModal';
 import { GoogleProfileSetupModal, GoogleInitialData } from './GoogleProfileSetupModal';
 import { GoogleAuthDomainModal } from './GoogleAuthDomainModal';
 import { AccessRequestStatusModal } from './AccessRequestStatusModal';
@@ -69,6 +72,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [statusModalRequest, setStatusModalRequest] = useState<AccessRequest | null>(null);
   const [isAccessRequestsManagerOpen, setIsAccessRequestsManagerOpen] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [forcePasswordUser, setForcePasswordUser] = useState<AuthUser | null>(null);
+  const [isForcePasswordModalOpen, setIsForcePasswordModalOpen] = useState(false);
 
   // Dark / Light Theme State with persistent device memory
   const [localTheme, setLocalTheme] = useState<'dark' | 'light'>(() => {
@@ -265,8 +271,30 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       }
     } catch (_) {}
 
+    // 3. Check if authenticating via Single-Use Temporary PIN
+    try {
+      const cleanUname = username.trim().toLowerCase().replace(/^@/, '');
+      const cleanPass = passcode.trim();
+      const pinResult = await verifyAndConsumeTempPinApi(cleanUname, cleanPass);
+      if (pinResult && pinResult.success) {
+        setIsLoading(false);
+        const targetUser = pinResult.user || allUsers.find(u => (u.username || '').toLowerCase().replace(/^@/, '') === cleanUname);
+        if (targetUser) {
+          setForcePasswordUser(targetUser);
+          setIsForcePasswordModalOpen(true);
+          return;
+        }
+      }
+    } catch (pinErr: any) {
+      if (pinErr.message && (pinErr.message.includes('already been used') || pinErr.message.includes('inactive'))) {
+        setIsLoading(false);
+        setErrorMsg(pinErr.message);
+        return;
+      }
+    }
+
     setIsLoading(false);
-    setErrorMsg('Invalid User ID or Password. If you do not have an account yet, please click "Create Account / Sign Up" below.');
+    setErrorMsg('Invalid User ID or Password. If you forgot your password, click "Forgot Password" below.');
   };
 
   const handleGoogleSignInClick = async () => {
@@ -576,8 +604,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-3.5 h-3.5 rounded text-[#009933] focus:ring-[#009933] cursor-pointer"
                   />
-                  <span className="text-[11px]">Save session on this device</span>
+                  <span className="text-[11px]">Save session</span>
                 </label>
+
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPasswordOpen(true)}
+                  className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-semibold cursor-pointer"
+                >
+                  Forgot Password?
+                </button>
               </div>
 
               {/* Submit Button */}
@@ -591,6 +627,22 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   <span>{isLoading ? 'Verifying Credentials...' : 'Continue Sign in'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
+
+                {/* Forgot Password / Need Temporary PIN Action Button */}
+                <div className="pt-1 flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPasswordOpen(true)}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition flex items-center gap-1.5 cursor-pointer ${
+                      isLight 
+                        ? 'border-rose-200 hover:bg-rose-50 text-rose-700 bg-rose-50/50' 
+                        : 'border-rose-500/30 hover:bg-rose-950/30 text-rose-400 bg-rose-950/20'
+                    }`}
+                  >
+                    <KeyRound className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Forgot Password? Request Temporary PIN</span>
+                  </button>
+                </div>
 
                 {/* Additional Sign Up Link */}
                 <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
@@ -740,6 +792,29 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         onOpenProfileSetup={(data) => {
           setGoogleSetupData(data);
           setIsGoogleSetupModalOpen(true);
+        }}
+        isLight={isLight}
+      />
+
+      {/* Account Recovery & Temporary PIN Request Modal */}
+      <ForgotPasswordModal
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+        onOpenLogin={() => setIsForgotPasswordOpen(false)}
+        isLight={isLight}
+        existingRequests={requests}
+      />
+
+      {/* Force New Permanent Password on Temp PIN Login Modal */}
+      <ForcePasswordChangeModal
+        isOpen={isForcePasswordModalOpen}
+        user={forcePasswordUser}
+        onSuccess={(newPass) => {
+          setIsForcePasswordModalOpen(false);
+          if (forcePasswordUser) {
+            const updated = { ...forcePasswordUser, passcode: newPass };
+            onLogin(updated);
+          }
         }}
         isLight={isLight}
       />
