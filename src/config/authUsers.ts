@@ -761,7 +761,8 @@ export async function fetchRemoteAuthUsers(): Promise<AuthUser[]> {
             ...def,
             passcode: u.passcode || def.passcode,
             imoOffice: u.imoOffice || def.imoOffice,
-            nisBinding: u.nisBinding || def.nisBinding
+            nisBinding: u.nisBinding || def.nisBinding,
+            avatar: u.avatar || def.avatar
           };
         }
         return {
@@ -1014,8 +1015,30 @@ export function getSavedAuthSession(): AuthUser | null {
           name: def?.name || user.name,
           username: def?.username || user.username,
           designation: def?.designation || user.designation,
+          avatar: user.avatar || def?.avatar,
           role: normalizeUserRole(user.role)
         };
+
+        if (!updated.avatar) {
+          try {
+            const rawReqs = localStorage.getItem('ommap_access_requests_v3');
+            if (rawReqs) {
+              const reqs = JSON.parse(rawReqs);
+              const uEmail = (updated.email || user.email || '').toLowerCase().trim();
+              const uUname = (updated.username || user.username || '').toLowerCase().trim();
+              const matched = reqs.find((r: any) => 
+                (r.uid && (r.uid === updated.id || r.uid === user.id)) ||
+                (uEmail && r.email && r.email.toLowerCase().trim() === uEmail) ||
+                (uUname && r.username && r.username.toLowerCase().trim() === uUname) ||
+                (updated.name && r.fullName && r.fullName.toLowerCase().trim() === updated.name.toLowerCase().trim())
+              );
+              if (matched?.avatar) {
+                updated.avatar = matched.avatar;
+              }
+            }
+          } catch (_) {}
+        }
+
         return updated;
       }
     }
@@ -1031,6 +1054,7 @@ export function saveAuthSession(user: AuthUser): void {
       name: def?.name || user.name,
       username: def?.username || user.username,
       designation: def?.designation || user.designation,
+      avatar: user.avatar || def?.avatar,
       role: normalizeUserRole(user.role) 
     };
     localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(norm));

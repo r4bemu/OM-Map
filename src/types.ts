@@ -298,6 +298,7 @@ export interface FieldReport {
   reporterName: string;
   reporterRole: UserRole;
   reporterDesignation?: string;
+  reporterAvatar?: string;
   verifierName?: string;
   verifierDesignation?: string;
   revisionNumber?: number;

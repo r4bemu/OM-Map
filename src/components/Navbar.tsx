@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { 
   Layers, 
   FileText, 
@@ -22,7 +22,8 @@ import {
   Moon,
   MapPin,
   Download,
-  Smartphone
+  Smartphone,
+  FileSignature
 } from 'lucide-react';
 import { UserRole, GISLayer, FieldReport, AuthUser, AvailableCloudWeek } from '../types';
 import { canUserManageRequests, canUserManagePasswordResets, getNisOptionsForImo } from '../config/authUsers';
@@ -220,6 +221,28 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const currentRoleObj = allRoles.find(r => r.role === activeRole) || allRoles[0];
   const isSimulating = Boolean(simulatedRole || (simulatedImo && simulatedImo !== authenticatedUser?.imoOffice) || (simulatedNis && simulatedNis !== authenticatedUser?.nisBinding));
+  const isDeveloper = authenticatedUser?.role === 'Developer' || activeRole === 'Developer';
+
+  const userAvatar = useMemo(() => {
+    if (authenticatedUser?.avatar) return authenticatedUser.avatar;
+    try {
+      const rawReqs = localStorage.getItem('ommap_access_requests_v3');
+      if (rawReqs) {
+        const reqs = JSON.parse(rawReqs);
+        const email = (authenticatedUser?.email || '').toLowerCase().trim();
+        const uname = (authenticatedUser?.username || '').toLowerCase().trim();
+        const name = (authenticatedUser?.name || '').toLowerCase().trim();
+        const matched = reqs.find((r: any) =>
+          (r.uid && r.uid === authenticatedUser?.id) ||
+          (email && r.email && r.email.toLowerCase().trim() === email) ||
+          (uname && r.username && r.username.toLowerCase().trim() === uname) ||
+          (name && r.fullName && r.fullName.toLowerCase().trim() === name)
+        );
+        if (matched?.avatar) return matched.avatar;
+      }
+    } catch (_) {}
+    return null;
+  }, [authenticatedUser]);
 
   if (isMapPickerActive) return null;
 
@@ -412,9 +435,22 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* 1. User Profile Card */}
             <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3">
-              <div className="flex items-start gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-600/15 border border-emerald-600/30 text-[#166534] dark:text-emerald-300 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
-                  {authenticatedUser?.name ? authenticatedUser.name.charAt(0) : 'U'}
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 border-emerald-500/50 shadow-md bg-slate-900 flex items-center justify-center">
+                  {userAvatar ? (
+                    <img
+                      src={userAvatar}
+                      alt={authenticatedUser?.name || 'User Profile'}
+                      className="w-full h-full object-cover rounded-full"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-emerald-600/20 text-[#166534] dark:text-emerald-300 flex items-center justify-center text-sm font-black rounded-full">
+                      {authenticatedUser?.name ? authenticatedUser.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-xs font-bold text-slate-100 truncate leading-tight">
@@ -431,7 +467,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 </div>
               </div>
-              <div className="mt-2 pt-2 border-t border-slate-700/80 text-[10px] text-slate-400 flex items-center gap-1.5">
+              <div className="mt-2.5 pt-2 border-t border-slate-700/80 text-[10px] text-slate-400 flex items-center gap-1.5">
                 <Building className="w-3 h-3 text-[#166534] dark:text-emerald-400 shrink-0" />
                 <span className="truncate">{authenticatedUser?.nisBinding || authenticatedUser?.imoOffice || 'Regional Office IV-B'}</span>
               </div>
@@ -562,7 +598,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             )}
 
-            {/* 3. System Configurations & Photo Settings */}
+            {/* 3. System Configurations & Photo Settings (Developer) / Report Signatories Settings (Non-Developer) */}
             {onOpenConfigurations && (
               <button
                 onClick={() => {
@@ -570,9 +606,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onOpenConfigurations();
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/80 rounded-xl transition cursor-pointer text-xs font-semibold"
+                title={
+                  isDeveloper
+                    ? 'Configure system photo compression, GIS layers, and per-user report signatories'
+                    : 'Configure your personalized report signatories for WMR Form 691, Photo Docs, and Field Inspection reports'
+                }
               >
-                <Sliders className="w-4 h-4 text-[#166534] dark:text-emerald-400 shrink-0" />
-                <span>Configurations &amp; Photo Settings</span>
+                {isDeveloper ? (
+                  <>
+                    <Sliders className="w-4 h-4 text-[#166534] dark:text-emerald-400 shrink-0" />
+                    <span>Configurations &amp; Photo Settings</span>
+                  </>
+                ) : (
+                  <>
+                    <FileSignature className="w-4 h-4 text-cyan-400 shrink-0" />
+                    <span>Report Signatories Settings</span>
+                  </>
+                )}
               </button>
             )}
 

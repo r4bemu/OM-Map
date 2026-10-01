@@ -1436,6 +1436,25 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
         reporterName: reporterName.trim(),
         reporterRole: editingReport ? editingReport.reporterRole : currentRole,
         reporterDesignation: resolvedReporterDesignation,
+        reporterAvatar: editingReport?.reporterAvatar || currentUser?.avatar || (() => {
+          try {
+            const rawReqs = localStorage.getItem('ommap_access_requests_v3');
+            if (rawReqs) {
+              const reqs = JSON.parse(rawReqs);
+              const email = (currentUser?.email || '').toLowerCase().trim();
+              const uname = (currentUser?.username || '').toLowerCase().trim();
+              const name = (currentUser?.name || reporterName || '').toLowerCase().trim();
+              const matched = reqs.find((r: any) =>
+                (currentUser?.id && r.uid === currentUser.id) ||
+                (email && r.email && r.email.toLowerCase().trim() === email) ||
+                (uname && r.username && r.username.toLowerCase().trim() === uname) ||
+                (name && r.fullName && r.fullName.toLowerCase().trim() === name)
+              );
+              if (matched?.avatar) return matched.avatar;
+            }
+          } catch (_) {}
+          return undefined;
+        })(),
         verifierName: resolvedVerifierName,
         verifierDesignation: resolvedVerifierDesignation,
       revisionNumber: nextRev,

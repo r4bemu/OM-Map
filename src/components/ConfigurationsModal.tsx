@@ -52,6 +52,8 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
   currentUser,
   currentRole
 }) => {
+  const isDeveloper = currentUser?.role === 'Developer' || currentRole === 'Developer';
+
   const [activeMainTab, setActiveMainTab] = useState<'signatories' | 'system'>('signatories');
   const [activeReportTab, setActiveReportTab] = useState<'wmr' | 'photoDoc' | 'inspectionReport'>('wmr');
 
@@ -67,22 +69,31 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
       setConfig(getSavedConfigurations());
       setSignatories(getUserSignatories(currentUser?.id, currentUser));
       setSavedSuccessNotice(null);
+      if (!isDeveloper) {
+        setActiveMainTab('signatories');
+      }
     }
-  }, [isOpen, currentUser]);
+  }, [isOpen, currentUser, isDeveloper]);
 
   if (!isOpen) return null;
 
   const handleSave = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
-    // 1. Save App System Configurations
-    saveConfigurations(config);
+    // 1. Save App System Configurations (Developer only)
+    if (isDeveloper) {
+      saveConfigurations(config);
+    }
 
     // 2. Save User-Specific Signatories Profile
     const userId = currentUser?.id || 'default_user';
     saveUserSignatories(userId, signatories);
 
-    setSavedSuccessNotice('All configurations and report signatories saved successfully!');
+    setSavedSuccessNotice(
+      isDeveloper 
+        ? 'All configurations and report signatories saved successfully!' 
+        : 'Report signatories saved successfully!'
+    );
     setTimeout(() => {
       setSavedSuccessNotice(null);
       onClose();
@@ -90,7 +101,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
   };
 
   const handleResetCurrentTab = () => {
-    if (activeMainTab === 'system') {
+    if (activeMainTab === 'system' && isDeveloper) {
       setConfig(DEFAULT_CONFIGURATIONS);
       saveConfigurations(DEFAULT_CONFIGURATIONS);
       setSavedSuccessNotice('System photo & map configurations reset to defaults.');
@@ -141,7 +152,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-bold text-slate-100 font-heading flex items-center gap-2">
-                <span>System Configurations &amp; Signatories</span>
+                <span>{isDeveloper ? 'System Configurations & Signatories' : 'Report Signatories Configuration'}</span>
               </h2>
               <p className="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
                 <span>Active Profile:</span>
@@ -179,18 +190,23 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
             </span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveMainTab('system')}
-            className={`flex items-center gap-2 px-3.5 py-2.5 font-bold text-xs rounded-t-xl transition border-b-2 cursor-pointer ${
-              activeMainTab === 'system'
-                ? 'border-[#166534] text-[#166534] dark:text-emerald-300 bg-slate-900/80 shadow-sm'
-                : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
-            }`}
-          >
-            <Camera className="w-4 h-4 text-emerald-400" />
-            <span>Photo &amp; Map Settings</span>
-          </button>
+          {isDeveloper && (
+            <button
+              type="button"
+              onClick={() => setActiveMainTab('system')}
+              className={`flex items-center gap-2 px-3.5 py-2.5 font-bold text-xs rounded-t-xl transition border-b-2 cursor-pointer ${
+                activeMainTab === 'system'
+                  ? 'border-[#166534] text-[#166534] dark:text-emerald-300 bg-slate-900/80 shadow-sm'
+                  : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
+              }`}
+            >
+              <Camera className="w-4 h-4 text-emerald-400" />
+              <span>Photo &amp; Map Settings</span>
+              <span className="text-[9.5px] px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300 font-mono border border-rose-500/30">
+                Developer Only
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Body Container */}
@@ -662,9 +678,9 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
           )}
 
           {/* =========================================================================
-              TAB 2: SYSTEM PHOTO & MAP SETTINGS
+              TAB 2: SYSTEM PHOTO & MAP SETTINGS (Developer Only)
              ========================================================================= */}
-          {activeMainTab === 'system' && (
+          {activeMainTab === 'system' && isDeveloper && (
             <div className="space-y-4 animate-in fade-in duration-150">
               {/* Photo Resolution Cap & Compression */}
               <div className="bg-slate-800/60 border border-slate-700/80 rounded-xl p-3.5 space-y-3">
@@ -797,7 +813,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
             title="Reset active tab configurations to official standards"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset {activeMainTab === 'signatories' ? 'Signatories' : 'Settings'}</span>
+            <span>Reset {activeMainTab === 'signatories' || !isDeveloper ? 'Signatories' : 'Settings'}</span>
           </button>
 
           <div className="flex items-center gap-2">
@@ -814,7 +830,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
               className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs shadow-md border border-cyan-400/50 flex items-center gap-1.5 transition cursor-pointer active:scale-95"
             >
               <Check className="w-3.5 h-3.5" />
-              <span>Save Configurations</span>
+              <span>{isDeveloper ? 'Save Configurations' : 'Save Signatories'}</span>
             </button>
           </div>
         </div>

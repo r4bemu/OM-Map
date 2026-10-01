@@ -170,8 +170,12 @@ export default function App() {
       if (current) {
         const live = users.find(u => u.id === current.id || u.username.toLowerCase() === current.username.toLowerCase());
         if (live) {
-          setAuthenticatedUser(live);
-          saveAuthSession(live);
+          const merged: AuthUser = {
+            ...live,
+            avatar: live.avatar || current.avatar
+          };
+          setAuthenticatedUser(merged);
+          saveAuthSession(merged);
         }
       }
     });
@@ -2561,8 +2565,12 @@ export default function App() {
               const users = getAuthUsers();
               const live = users.find(u => u.id === current.id || u.username.toLowerCase() === current.username.toLowerCase());
               if (live) {
-                setAuthenticatedUser(live);
-                saveAuthSession(live);
+                const merged: AuthUser = {
+                  ...live,
+                  avatar: live.avatar || current.avatar
+                };
+                setAuthenticatedUser(merged);
+                saveAuthSession(merged);
               }
             }
           }}

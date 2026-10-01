@@ -223,14 +223,53 @@ export const ReportReviewCard: React.FC<ReportReviewCardProps> = ({
     return getReportCanalCategoryAndType(report).classification;
   }, [report]);
 
+  const reporterAvatar = useMemo(() => {
+    if (report.reporterAvatar) return report.reporterAvatar;
+    if (currentUser && (
+      (report.submittedByUserId && report.submittedByUserId === currentUser.id) ||
+      (report.reporterName && report.reporterName.toLowerCase().trim() === currentUser.name.toLowerCase().trim())
+    )) {
+      if (currentUser.avatar) return currentUser.avatar;
+    }
+    try {
+      const rawReqs = localStorage.getItem('ommap_access_requests_v3');
+      if (rawReqs) {
+        const reqs = JSON.parse(rawReqs);
+        const name = (report.reporterName || '').toLowerCase().trim();
+        const uname = (report.submittedByUsername || '').toLowerCase().trim();
+        const uid = report.submittedByUserId;
+        const matched = reqs.find((r: any) =>
+          (uid && r.uid === uid) ||
+          (uname && r.username && r.username.toLowerCase().trim() === uname) ||
+          (name && r.fullName && r.fullName.toLowerCase().trim() === name)
+        );
+        if (matched?.avatar) return matched.avatar;
+      }
+    } catch (_) {}
+    return null;
+  }, [report.reporterAvatar, report.submittedByUserId, report.submittedByUsername, report.reporterName, currentUser]);
+
   return (
     <div className="p-4 sm:p-5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800/90 rounded-2xl transition shadow-sm space-y-3.5">
       {/* 1. Header Row: Customer/Reporter Profile + Rating Category & Work Status */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {/* Avatar */}
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border border-slate-600 flex items-center justify-center font-bold text-slate-200 text-xs shrink-0 shadow-inner">
-            {getInitials(report.reporterName || 'FP')}
+          <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-600 bg-slate-800 shadow-inner flex items-center justify-center">
+            {reporterAvatar ? (
+              <img
+                src={reporterAvatar}
+                alt={report.reporterName || 'Reporter'}
+                className="w-full h-full object-cover rounded-full"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center font-bold text-slate-200 text-xs rounded-full">
+                {getInitials(report.reporterName || 'FP')}
+              </div>
+            )}
           </div>
 
           {/* Reporter Details & Category */}
