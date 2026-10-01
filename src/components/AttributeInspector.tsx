@@ -10,6 +10,7 @@ import {
   Plus, 
   ShieldCheck, 
   Check, 
+  Copy,
   Ban, 
   FileCheck2,
   Sparkles,
@@ -114,6 +115,28 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
   const [rejectReasonPrompt, setRejectReasonPrompt] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [copiedCoords, setCopiedCoords] = useState(false);
+
+  const handleCopyCoords = (text: string) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text);
+    } else {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+      } catch (_) {}
+      textArea.remove();
+    }
+    setCopiedCoords(true);
+    setTimeout(() => setCopiedCoords(false), 2000);
+  };
 
   useEffect(() => {
     if (!selectedFeatureProps && !selectedReport) return;
@@ -665,21 +688,11 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                   <div className="text-sm font-bold text-white font-heading break-words leading-tight">
                     {nearestGIS?.locationName || getFeatureName(selectedFeatureProps, 'Spatial Feature', coords)}
                   </div>
-                  {nearestGIS?.referenceContext && (
-                    <div className="inline-flex items-center gap-1 text-[9.5px] font-mono text-cyan-300/90 bg-cyan-950/90 px-2 py-0.5 rounded border border-cyan-800/60">
-                      <span>🎯 {nearestGIS.referenceContext}</span>
-                    </div>
-                  )}
-                  {coords && (
-                    <div className="text-[10px] font-mono text-slate-400 pt-0.5">
-                      Coordinates: {coords[0].toFixed(5)}, {coords[1].toFixed(5)}
-                    </div>
-                  )}
                 </div>
               </div>
             )}
 
-            {/* Canal Category & Type Summary Banner */}
+            {/* Canal Particulars (Canal Type, Category, Coordinates) resting directly on window per Notes 6 & 7 */}
             {(() => {
               const itemStyle = classifyVectorItem(
                 undefined,
@@ -690,14 +703,42 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
               );
               const cat = nearestGIS?.canalCategory || itemStyle.canalCategory || 'Uncategorized';
               const typLabel = getCanalTypeLabel(itemStyle.hierarchyType, nearestGIS?.canalType || itemStyle.canalType, itemStyle.isStructure);
-              const isCanal = selectedFeatureType?.includes('Canal') || selectedFeatureProps?.canal || selectedFeatureProps?.canal_type || selectedFeatureProps?.Length || selectedFeatureProps?.LENGTH || !itemStyle.isStructure;
-              if (!isCanal && cat === 'Uncategorized' && itemStyle.canalType === 'Unclassified') return null;
+              const coordsStr = coords
+                ? `${coords[0].toFixed(5)}, ${coords[1].toFixed(5)}`
+                : 'Not available';
+
               return (
-                <div className="flex items-center justify-between p-2.5 bg-cyan-950/30 border border-cyan-800/40 rounded-xl text-xs">
-                  <span className="text-[10px] text-cyan-400 uppercase font-bold">Classification</span>
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-cyan-900/60 text-cyan-200 border border-cyan-700/60">
-                    {cat} • {typLabel}
-                  </span>
+                <div className="space-y-1.5 py-1 text-xs">
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-slate-400 font-medium shrink-0">Canal Type:</span>
+                    <span className="font-semibold text-slate-200 text-right truncate">{typLabel}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-slate-400 font-medium shrink-0">Category:</span>
+                    <span className="font-semibold text-slate-200 text-right truncate">{cat}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-slate-400 font-medium shrink-0">Coordinates:</span>
+                    <div className="flex items-center gap-1.5 font-mono font-semibold text-slate-200 shrink-0">
+                      <span>{coordsStr}</span>
+                      {coords && (
+                        <button
+                          type="button"
+                          onClick={() => handleCopyCoords(coordsStr)}
+                          className="p-1 hover:bg-slate-800 rounded transition cursor-pointer text-slate-400 hover:text-white shrink-0"
+                          title={`Copy Coordinates (${coordsStr})`}
+                        >
+                          {copiedCoords ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               );
             })()}
@@ -722,19 +763,15 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
               </div>
             )}
 
-            {/* Attributes List Table */}
-            <div className="space-y-1.5">
+            {/* Feature Attributes List Table resting directly on window per Note 5 */}
+            <div className="space-y-1.5 pt-1">
               <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
                 Feature Attributes
               </span>
-              <div className="bg-slate-800/40 rounded-xl border border-slate-800 divide-y divide-slate-800 text-xs">
+              <div className="divide-y divide-slate-800/40 text-xs">
                 {Object.entries(selectedFeatureProps).map(([key, val]) => {
                   if (val === undefined || val === null || typeof val === 'object' || key === 'geometry') return null;
                   const keyLower = key.toLowerCase();
-
-                  if (['name', 'canal_name', 'station_name', 'title', 'parcel_name', 'label'].includes(keyLower)) {
-                    return null;
-                  }
 
                   let displayKey = key;
                   let displayVal = String(val).trim();
@@ -754,9 +791,9 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                   }
 
                   return (
-                    <div key={key} className="flex justify-between items-start p-2.5 hover:bg-slate-800/60 transition gap-2">
+                    <div key={key} className="flex justify-between items-start py-2 px-1 hover:bg-slate-800/30 transition gap-2">
                       <span className="text-slate-400 font-mono text-[11px] shrink-0">{displayKey}</span>
-                      <span className="text-slate-200 font-medium text-right break-words max-w-[200px]">
+                      <span className="text-slate-200 font-medium text-right break-words max-w-[220px]">
                         {displayVal}
                       </span>
                     </div>

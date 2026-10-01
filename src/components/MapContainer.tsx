@@ -930,9 +930,10 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                   return;
                 }
               } else {
-                // Outside location selector mode: immediately select feature and open Attribute Inspector with clicked coordinates!
-                if (curLatlng && isValidCoord(curLatlng.lat, curLatlng.lng)) {
-                  onSelectFeatureRef.current?.(props, layer.category, [curLatlng.lat, curLatlng.lng]);
+                // Outside location selector mode: feature click only opens the map popup.
+                // The Attribute Inspector will appear ONLY when 'Inspect Attribute Details' is clicked.
+                if (selectedFeaturePropsRef.current) {
+                  onDeselectFeatureRef.current?.();
                 }
               }
             });
@@ -993,7 +994,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 : 'Not available';
 
               const isLight = typeof document !== 'undefined' && document.documentElement.classList.contains('light');
-              const headerColor = isLight ? 'text-emerald-700' : 'text-emerald-400';
+              const headerColor = isLight ? 'text-slate-900' : 'text-white';
               const borderClass = isLight ? 'border-slate-200' : 'border-slate-700/80';
               const labelColor = isLight ? 'text-slate-500' : 'text-slate-400';
               const valColor = isLight ? 'text-slate-800' : 'text-slate-200';
@@ -1142,11 +1143,6 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 setActivePopupProps(props);
               }
 
-              // If Attribute Inspector is ALREADY open, dynamically update it to this newly clicked feature and clicked coordinates!
-              if (selectedFeaturePropsRef.current) {
-                onSelectFeatureRef.current?.(props, layer.category, clickCoords);
-              }
-
               const copyCoordsBtn = document.getElementById(`copy-coords-btn-${inspectId}`);
               if (copyCoordsBtn) {
                 copyCoordsBtn.onclick = (evt) => {
@@ -1194,7 +1190,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               if (btn) {
                 btn.onclick = (evt) => {
                   evt.stopPropagation();
-                  onSelectFeatureRef.current?.(props, layer.category, clickCoords);
+                  const targetCoords = clickCoords || (leafletLayer as any)._lastClickLatLng;
+                  onSelectFeatureRef.current?.(props, layer.category, targetCoords);
                 };
               }
               const createReportBtn = document.getElementById(`create-report-btn-${inspectId}`);
