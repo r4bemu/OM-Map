@@ -1019,25 +1019,24 @@ export function getSavedAuthSession(): AuthUser | null {
           role: normalizeUserRole(user.role)
         };
 
-        if (!updated.avatar) {
-          try {
-            const rawReqs = localStorage.getItem('ommap_access_requests_v3');
-            if (rawReqs) {
-              const reqs = JSON.parse(rawReqs);
-              const uEmail = (updated.email || user.email || '').toLowerCase().trim();
-              const uUname = (updated.username || user.username || '').toLowerCase().trim();
-              const matched = reqs.find((r: any) => 
-                (r.uid && (r.uid === updated.id || r.uid === user.id)) ||
-                (uEmail && r.email && r.email.toLowerCase().trim() === uEmail) ||
-                (uUname && r.username && r.username.toLowerCase().trim() === uUname) ||
-                (updated.name && r.fullName && r.fullName.toLowerCase().trim() === updated.name.toLowerCase().trim())
-              );
-              if (matched?.avatar) {
-                updated.avatar = matched.avatar;
-              }
+        // Prioritize official application portrait over generic external/Google avatars
+        try {
+          const rawReqs = localStorage.getItem('ommap_access_requests_v3');
+          if (rawReqs) {
+            const reqs = JSON.parse(rawReqs);
+            const uEmail = (updated.email || user.email || '').toLowerCase().trim();
+            const uUname = (updated.username || user.username || '').toLowerCase().trim();
+            const matched = reqs.find((r: any) => 
+              (r.uid && (r.uid === updated.id || r.uid === user.id)) ||
+              (uEmail && r.email && r.email.toLowerCase().trim() === uEmail) ||
+              (uUname && r.username && r.username.toLowerCase().trim() === uUname) ||
+              (updated.name && r.fullName && r.fullName.toLowerCase().trim() === updated.name.toLowerCase().trim())
+            );
+            if (matched?.avatar) {
+              updated.avatar = matched.avatar;
             }
-          } catch (_) {}
-        }
+          }
+        } catch (_) {}
 
         return updated;
       }
@@ -1049,12 +1048,30 @@ export function getSavedAuthSession(): AuthUser | null {
 export function saveAuthSession(user: AuthUser): void {
   try {
     const def = DEFAULT_AUTH_USERS.find(d => d.id === user.id);
+    let avatarToSave = user.avatar || def?.avatar;
+    try {
+      const rawReqs = localStorage.getItem('ommap_access_requests_v3');
+      if (rawReqs) {
+        const reqs = JSON.parse(rawReqs);
+        const uEmail = (user.email || '').toLowerCase().trim();
+        const uUname = (user.username || '').toLowerCase().trim();
+        const matched = reqs.find((r: any) => 
+          (r.uid && r.uid === user.id) ||
+          (uEmail && r.email && r.email.toLowerCase().trim() === uEmail) ||
+          (uUname && r.username && r.username.toLowerCase().trim() === uUname) ||
+          (user.name && r.fullName && r.fullName.toLowerCase().trim() === user.name.toLowerCase().trim())
+        );
+        if (matched?.avatar) {
+          avatarToSave = matched.avatar;
+        }
+      }
+    } catch (_) {}
     const norm = { 
       ...user, 
       name: def?.name || user.name,
       username: def?.username || user.username,
       designation: def?.designation || user.designation,
-      avatar: user.avatar || def?.avatar,
+      avatar: avatarToSave,
       role: normalizeUserRole(user.role) 
     };
     localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(norm));
@@ -1388,6 +1405,23 @@ export async function submitAccessRequestApi(payload: Partial<AccessRequest>): P
   } catch (e: any) {
     // Fallback: client-side mock save if offline
     const requests = await fetchAccessRequestsApi();
+    const cleanEmail = (payload.email || '').toLowerCase().trim();
+    if (cleanEmail && cleanEmail !== 'r4b.emu@gmail.com') {
+      const users = getAuthUsers();
+      if (users.some(u => u.email?.toLowerCase().trim() === cleanEmail)) {
+        return { success: false, error: `An account with email '${cleanEmail}' is already registered. Please log in directly.` };
+      }
+      const existing = requests.find(r => r.email?.toLowerCase().trim() === cleanEmail);
+      if (existing && existing.status !== 'rejected') {
+        return { 
+          success: false, 
+          error: existing.status === 'approved'
+            ? `An account for '${cleanEmail}' has already been approved and registered. Please log in directly.`
+            : `An access application for '${cleanEmail}' is already pending administrator review.`
+        };
+      }
+    }
+
     const newReq: AccessRequest = {
       id: `req-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       email: payload.email || '',

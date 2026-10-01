@@ -379,6 +379,15 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     return inUsers || inRequests;
   }, [username, existingUsers, existingRequests]);
 
+  // Check email uniqueness
+  const isEmailTaken = useMemo(() => {
+    if (!email.trim() || !email.includes('@')) return false;
+    const clean = email.trim().toLowerCase();
+    const inUsers = existingUsers.some(u => u.email?.toLowerCase().trim() === clean);
+    const inRequests = existingRequests.some(r => r.email?.toLowerCase().trim() === clean && r.status !== 'rejected');
+    return inUsers || inRequests;
+  }, [email, existingUsers, existingRequests]);
+
   // Contact number handler
   const handleContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
@@ -440,6 +449,10 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
       setFormError('Please enter a valid official email address.');
+      return;
+    }
+    if (isEmailTaken) {
+      setFormError(`An account or active access request with email '${cleanEmail}' already exists. Each account must have a unique email address. Please log in or use a different email.`);
       return;
     }
 
@@ -1071,13 +1084,20 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="e.g. juan.delacruz.nia@gmail.com"
                   className={`w-full rounded-lg pl-9 pr-3 py-2 border transition focus:outline-none ${
-                    isLight 
+                    isEmailTaken
+                      ? 'border-rose-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-rose-500'
+                      : isLight 
                       ? 'bg-white border-slate-300 text-slate-900 focus:border-[#009933] focus:ring-1 focus:ring-[#009933] placeholder-slate-400' 
                       : 'bg-[#27272a] border-[#3f3f46] text-[#fafafa] focus:border-[#009933] focus:ring-1 focus:ring-[#009933] placeholder-zinc-500'
                   }`}
                   required
                 />
               </div>
+              {isEmailTaken && (
+                <p className="text-[11px] font-semibold text-rose-500 mt-1 flex items-center gap-1 animate-in fade-in">
+                  <span>⚠️ This email is already registered to an account or active access application.</span>
+                </p>
+              )}
             </div>
 
             {/* Official Mobile Number */}

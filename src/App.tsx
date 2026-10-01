@@ -1365,8 +1365,28 @@ export default function App() {
 
   // Auth Handlers
   const handleLogin = (user: AuthUser) => {
-    saveAuthSession(user);
-    setAuthenticatedUser(user);
+    let effectiveUser = user;
+    if (!effectiveUser.avatar || effectiveUser.avatar.includes('googleusercontent.com')) {
+      try {
+        const rawReqs = localStorage.getItem('ommap_access_requests_v3');
+        if (rawReqs) {
+          const reqs = JSON.parse(rawReqs);
+          const uEmail = (user.email || '').toLowerCase().trim();
+          const uUname = (user.username || '').toLowerCase().trim();
+          const matched = reqs.find((r: any) =>
+            (r.uid && r.uid === user.id) ||
+            (uEmail && r.email && r.email.toLowerCase().trim() === uEmail) ||
+            (uUname && r.username && r.username.toLowerCase().trim() === uUname) ||
+            (user.name && r.fullName && r.fullName.toLowerCase().trim() === user.name.toLowerCase().trim())
+          );
+          if (matched?.avatar) {
+            effectiveUser = { ...effectiveUser, avatar: matched.avatar };
+          }
+        }
+      } catch (_) {}
+    }
+    saveAuthSession(effectiveUser);
+    setAuthenticatedUser(effectiveUser);
     setSimulatedRole(null);
     setSimulatedImo(null);
     setSimulatedNis(null);

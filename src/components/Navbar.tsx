@@ -224,7 +224,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const isDeveloper = authenticatedUser?.role === 'Developer' || activeRole === 'Developer';
 
   const userAvatar = useMemo(() => {
-    if (authenticatedUser?.avatar) return authenticatedUser.avatar;
+    // 1. Prioritize official application portrait over external/Google avatars
     try {
       const rawReqs = localStorage.getItem('ommap_access_requests_v3');
       if (rawReqs) {
@@ -241,6 +241,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         if (matched?.avatar) return matched.avatar;
       }
     } catch (_) {}
+
+    // 2. Fall back to session avatar (e.g. Google profile picture or default)
+    if (authenticatedUser?.avatar) return authenticatedUser.avatar;
+
     return null;
   }, [authenticatedUser]);
 

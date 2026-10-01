@@ -162,6 +162,18 @@ export const GoogleProfileSetupModal: React.FC<GoogleProfileSetupModalProps> = (
       return;
     }
 
+    try {
+      const rawReqs = localStorage.getItem('ommap_access_requests_v3');
+      if (rawReqs) {
+        const reqs = JSON.parse(rawReqs);
+        const dup = reqs.find((r: any) => r.email?.toLowerCase().trim() === emailToUse);
+        if (dup && dup.status !== 'rejected') {
+          alert(`An account or active access application for '${emailToUse}' already exists. Please log in directly.`);
+          return;
+        }
+      }
+    } catch (_) {}
+
     const requestPayload: Partial<AccessRequest> = {
       email: emailToUse,
       firstName: firstName.trim(),

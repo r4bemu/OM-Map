@@ -143,6 +143,24 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     const userEmail = (approvedReq.email || '').toLowerCase().trim();
     const effectiveProvider = provider || approvedReq.provider || (approvedReq.username ? 'local' : 'google');
     const uname = approvedReq.username ? approvedReq.username.trim() : (userEmail ? userEmail.split('@')[0].replace(/[^a-z0-9_]/g, '_') : `user_${approvedReq.id}`);
+    
+    // Always prioritize the official uploaded application portrait photo over Google's generic OAuth picture
+    const officialAvatar = approvedReq.avatar || (() => {
+      try {
+        const rawReqs = localStorage.getItem('ommap_access_requests_v3');
+        if (rawReqs) {
+          const reqs = JSON.parse(rawReqs);
+          const matched = reqs.find((r: any) =>
+            (r.id === approvedReq.id) ||
+            (r.email && r.email.toLowerCase().trim() === userEmail) ||
+            (r.username && uname && r.username.toLowerCase().trim() === uname.toLowerCase())
+          );
+          if (matched?.avatar) return matched.avatar;
+        }
+      } catch (_) {}
+      return undefined;
+    })();
+
     const approvedUser: AuthUser = {
       id: approvedReq.uid || `usr-${effectiveProvider}-${approvedReq.id}`,
       username: uname,
@@ -153,7 +171,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       nisBinding: approvedReq.assignedNis || (Array.isArray(approvedReq.requestedNisList) ? approvedReq.requestedNisList.join(', ') : 'All NIS'),
       designation: approvedReq.designation,
       contactNumber: approvedReq.contactNumber,
-      avatar: userPicture || approvedReq.avatar,
+      avatar: officialAvatar || userPicture,
       email: userEmail,
       provider: effectiveProvider
     };
@@ -337,7 +355,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             imoOffice: 'All IMOs',
             nisBinding: 'All NIS',
             designation: 'Master Systems Administrator - Regional Wide',
-            avatar: googleProfile.picture,
+            avatar: userReq?.avatar || allUsers.find(u => u.id === 'usr-dev-01')?.avatar || googleProfile.picture,
             email: userEmail,
             provider: 'google'
           };
@@ -354,7 +372,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         if (userReq) {
           if (userReq.status === 'approved') {
             // User is approved -> Log in directly!
-            loginApprovedUser(userReq, googleProfile.picture);
+            loginApprovedUser(userReq, googleProfile.picture, 'google');
             return;
           } else {
             // Request is Pending or Rejected -> show status modal
@@ -367,7 +385,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         // 2. Check if email matches one of the pre-configured accounts
         const matchedLocalUser = allUsers.find(u => u.email?.toLowerCase().trim() === userEmail);
         if (matchedLocalUser) {
-          onLogin({ ...matchedLocalUser, avatar: googleProfile.picture || matchedLocalUser.avatar, provider: 'google' });
+          const resolvedAvatar = matchedLocalUser.avatar || userReq?.avatar || googleProfile.picture;
+          onLogin({ ...matchedLocalUser, avatar: resolvedAvatar, provider: 'google' });
           return;
         }
 

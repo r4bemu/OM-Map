@@ -790,8 +790,38 @@ export async function createApp() {
       const email = data.email.toLowerCase().trim();
       const isDev = email === 'r4b.emu@gmail.com';
 
+      // 1. Verify email uniqueness against existing registered accounts
+      const currentUsers = loadSavedUsers();
+      const userExists = currentUsers.some((u: any) => u.email?.toLowerCase().trim() === email);
+      if (userExists && !isDev) {
+        return res.status(409).json({ error: `An account with email '${email}' is already registered. Please log in directly.` });
+      }
+
+      // 2. Verify email uniqueness against existing access requests
       const requests = await getAccessRequests();
       const existing = requests.find((r: any) => r.email?.toLowerCase().trim() === email);
+      if (existing && !isDev) {
+        if (existing.status === 'approved') {
+          return res.status(409).json({ error: `An account for '${email}' has already been approved and registered. Please log in directly with your credentials or via Google Sign-In.` });
+        }
+        if (existing.status === 'pending') {
+          return res.status(409).json({ error: `An access application for '${email}' is already pending administrator review. Please wait for approval or contact your office administrator.` });
+        }
+      }
+
+      // 3. Verify username uniqueness if provided
+      if (data.username && !isDev) {
+        const cleanUsername = data.username.trim().toLowerCase().replace(/^@/, '');
+        const usernameInUsers = currentUsers.some((u: any) => u.username?.toLowerCase() === cleanUsername);
+        const usernameInReqs = requests.some((r: any) => 
+          r.username?.toLowerCase() === cleanUsername && 
+          r.id !== existing?.id && 
+          r.status !== 'rejected'
+        );
+        if (usernameInUsers || usernameInReqs) {
+          return res.status(409).json({ error: `The username '@${cleanUsername}' is already taken. Please choose another username.` });
+        }
+      }
 
       const fn = data.firstName.trim();
       const mi = data.middleInitial ? `${data.middleInitial.trim().replace('.', '')}.` : '';
@@ -844,7 +874,7 @@ export async function createApp() {
         if (!newRequest.passcode && existing.passcode) newRequest.passcode = existing.passcode;
       }
 
-      if (data.avatar) newRequest.avatar = data.avatar;
+      newRequest.avatar = data.avatar || existing?.avatar;
       if (data.uid) newRequest.uid = data.uid;
 
       await saveAccessRequestItem(newRequest);
