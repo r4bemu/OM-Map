@@ -31,6 +31,13 @@ export type CanalHierarchyType = 'Main Canals' | 'Lateral Canals' | 'Other Uncla
 export function detectCanalCategory(props: any): CanalCategory {
   if (!props || typeof props !== 'object') return 'Uncategorized';
 
+  // Fast direct contract lookup from standardized dataset
+  if (props.canal_lining) {
+    const lining = String(props.canal_lining).trim().toLowerCase();
+    if (lining === 'lined') return 'Lined';
+    if (lining === 'unlined') return 'Unlined';
+  }
+
   const text = [
     props.canal_type,
     props.Canal_Type,
@@ -62,6 +69,14 @@ export function detectCanalCategory(props: any): CanalCategory {
  * Detects canal type: Main, Lateral, Farm Ditch, or Unclassified
  */
 export function detectCanalType(props: any, layerName?: string, name?: string): CanalType {
+  // Fast direct contract lookup from standardized dataset: 'Main', 'Lateral', 'Ditch', 'Drainage'
+  if (props && typeof props === 'object') {
+    const directType = String(props.canal_type || props.canaltype || '').trim().toLowerCase();
+    if (directType === 'main' || directType === 'main canal') return 'Main';
+    if (directType === 'lateral' || directType === 'sub-lateral' || directType === 'sub lateral') return 'Lateral';
+    if (directType === 'ditch' || directType === 'farm ditch') return 'Farm Ditch';
+  }
+
   const isGenericOrBlank = (v: any) => {
     if (v === undefined || v === null) return true;
     const s = String(v).trim().toLowerCase();
@@ -366,7 +381,13 @@ export function classifyVectorItem(
 export function sanitizeLayerToBlueHierarchy(layer: GISLayer): GISLayer {
   if (!layer) return layer;
 
-  const isPointLayer = layer.geometryType === 'Point';
+  const isPointLayer =
+    layer.geometryType === 'Point' ||
+    layer.category === 'Structures' ||
+    layer.subCategory === 'Structures' ||
+    (layer.fileName && layer.fileName.toLowerCase().includes('structure')) ||
+    (layer.name && layer.name.toLowerCase().includes('structure')) ||
+    layer.data?.features?.[0]?.geometry?.type === 'Point';
   const isMultiFeature = (layer.data?.features?.length || 0) > 1;
 
   if (isPointLayer) {
@@ -374,6 +395,7 @@ export function sanitizeLayerToBlueHierarchy(layer: GISLayer): GISLayer {
       ...layer,
       category: 'Structures',
       subCategory: 'Structures',
+      geometryType: 'Point',
       color: BLUE_PALETTE.STRUCTURE,
       opacity: layer.opacity ?? 0.85
     };

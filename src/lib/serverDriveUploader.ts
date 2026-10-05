@@ -536,17 +536,33 @@ export function loadLocalGISLayersFallback(targetImo?: string): any[] {
           const stats = fs.statSync(filePath);
           const fileId = `local-${item.dirName.toLowerCase()}-${f.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
           seenNames.add(f);
+
+          const isStructure = f.toLowerCase().includes('structure');
+          let parsedData: any = undefined;
+          let featCount = 0;
+          try {
+            parsedData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+            featCount = parsedData.features ? parsedData.features.length : 0;
+          } catch (_) {}
+
           results.push({
             id: `drive-${fileId}`,
             driveFileId: fileId,
-            name: f.replace(/\.[^/.]+$/, '').replace(/_/g, ' '),
+            name: `${item.dirName === 'PIMO' ? 'Palawan IMO' : item.dirName === 'OMIMO' ? 'OMIMO' : 'MOMARO IMO'} - ${f.replace(/\.[^/.]+$/, '').replace(/_/g, ' ')}`,
             fileName: f,
+            category: isStructure ? 'Structures' : 'Canals',
+            subCategory: isStructure ? 'Structures' : 'Canal Network',
+            geometryType: isStructure ? 'Point' : 'LineString',
+            color: isStructure ? '#0284c7' : '#38bdf8',
+            opacity: 0.85,
             mimeType: 'application/geo+json',
             sizeBytes: stats.size,
             driveModifiedTime: stats.mtime.toISOString(),
             uploadedAt: stats.mtime.toISOString(),
             imoOffice: item.imo,
             localFilePath: filePath,
+            featureCount: featCount,
+            data: parsedData,
             source: 'Google Drive'
           });
         }
@@ -571,18 +587,34 @@ export function loadLocalGISLayersFallback(targetImo?: string): any[] {
           detectedImo = 'Palawan IMO';
         }
 
+        const isStructure = fLow.includes('structure');
+        let parsedData: any = undefined;
+        let featCount = 0;
+        try {
+          parsedData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+          featCount = parsedData.features ? parsedData.features.length : 0;
+        } catch (_) {}
+
+        const prefix = detectedImo.includes('Palawan') ? 'Palawan IMO' : detectedImo.includes('Occidental') ? 'OMIMO' : 'MOMARO IMO';
         const fileId = `local-${detectedImo.substring(0, 3).toLowerCase()}-${f.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
         results.push({
           id: `drive-${fileId}`,
           driveFileId: fileId,
-          name: f.replace(/\.[^/.]+$/, '').replace(/_/g, ' '),
+          name: `${prefix} - ${f.replace(/\.[^/.]+$/, '').replace(/_/g, ' ')}`,
           fileName: f,
+          category: isStructure ? 'Structures' : 'Canals',
+          subCategory: isStructure ? 'Structures' : 'Canal Network',
+          geometryType: isStructure ? 'Point' : 'LineString',
+          color: isStructure ? '#0284c7' : '#38bdf8',
+          opacity: 0.85,
           mimeType: 'application/geo+json',
           sizeBytes: stats.size,
           driveModifiedTime: stats.mtime.toISOString(),
           uploadedAt: stats.mtime.toISOString(),
           imoOffice: detectedImo,
           localFilePath: filePath,
+          featureCount: featCount,
+          data: parsedData,
           source: 'Google Drive'
         });
       }

@@ -671,22 +671,22 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
         {selectedFeatureProps && !selectedReport && (
           <div className="space-y-3">
             {/* Canal Stationing & Calibration Banner */}
-            {(nearestGIS || coords) && (
+            {(nearestGIS || coords || selectedFeatureProps?.station) && (
               <div className="flex items-start gap-2.5 p-3 bg-gradient-to-r from-cyan-950/60 to-slate-800/80 rounded-xl border border-cyan-500/40 text-xs shadow-sm">
                 <MapPin className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex items-center justify-between gap-1">
                     <span className="text-[10px] text-cyan-400 uppercase font-bold tracking-wider">
-                      {nearestGIS?.canalType === 'Farm Ditch' ? 'Location (Farm Ditch)' : 'Canal & Survey Stationing'}
+                      {selectedFeatureProps?.Structure_Category ? `Structure (${selectedFeatureProps.Structure_Category})` : nearestGIS?.canalType === 'Farm Ditch' ? 'Location (Farm Ditch)' : 'Canal & Survey Stationing'}
                     </span>
-                    {nearestGIS?.stationingLabel && (
+                    {(selectedFeatureProps?.station || nearestGIS?.stationingLabel) && (
                       <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-900/90 text-cyan-200 border border-cyan-500/50 shadow-sm">
-                        STA. {nearestGIS.stationingLabel}
+                        {selectedFeatureProps?.station ? String(selectedFeatureProps.station).toUpperCase() : `STA. ${nearestGIS?.stationingLabel}`}
                       </span>
                     )}
                   </div>
                   <div className="text-sm font-bold text-white font-heading break-words leading-tight">
-                    {nearestGIS?.locationName || getFeatureName(selectedFeatureProps, 'Spatial Feature', coords)}
+                    {selectedFeatureProps?.name || nearestGIS?.locationName || getFeatureName(selectedFeatureProps, 'Spatial Feature', coords)}
                   </div>
                 </div>
               </div>
@@ -701,8 +701,8 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                 selectedFeatureProps,
                 selectedFeatureType?.includes('Point') ? 'Point' : 'LineString'
               );
-              const cat = nearestGIS?.canalCategory || itemStyle.canalCategory || 'Uncategorized';
-              const typLabel = getCanalTypeLabel(itemStyle.hierarchyType, nearestGIS?.canalType || itemStyle.canalType, itemStyle.isStructure);
+              const cat = selectedFeatureProps?.canal_lining || nearestGIS?.canalCategory || itemStyle.canalCategory || 'Uncategorized';
+              const typLabel = selectedFeatureProps?.Structure_Category || getCanalTypeLabel(itemStyle.hierarchyType, selectedFeatureProps?.canal_type || nearestGIS?.canalType || itemStyle.canalType, itemStyle.isStructure);
               const coordsStr = coords
                 ? `${coords[0].toFixed(5)}, ${coords[1].toFixed(5)}`
                 : 'Not available';
@@ -710,14 +710,25 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
               return (
                 <div className="space-y-1.5 py-1 text-xs">
                   <div className="flex justify-between items-center gap-2">
-                    <span className="text-slate-400 font-medium shrink-0">Canal Type:</span>
+                    <span className="text-slate-400 font-medium shrink-0">
+                      {selectedFeatureProps?.Structure_Category ? 'Structure Type:' : 'Canal Type:'}
+                    </span>
                     <span className="font-semibold text-slate-200 text-right truncate">{typLabel}</span>
                   </div>
 
                   <div className="flex justify-between items-center gap-2">
-                    <span className="text-slate-400 font-medium shrink-0">Category:</span>
+                    <span className="text-slate-400 font-medium shrink-0">
+                      {selectedFeatureProps?.canal_lining ? 'Lining Status:' : 'Category:'}
+                    </span>
                     <span className="font-semibold text-slate-200 text-right truncate">{cat}</span>
                   </div>
+
+                  {selectedFeatureProps?.canal_name && (
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="text-slate-400 font-medium shrink-0">Host Canal:</span>
+                      <span className="font-semibold text-cyan-300 text-right truncate">{selectedFeatureProps.canal_name}</span>
+                    </div>
+                  )}
 
                   <div className="flex justify-between items-center gap-2">
                     <span className="text-slate-400 font-medium shrink-0">Coordinates:</span>
@@ -788,6 +799,49 @@ export const AttributeInspector: React.FC<AttributeInspectorProps> = ({
                     } else if (!displayVal.toLowerCase().includes('ha') && !displayVal.toLowerCase().includes('sqm')) {
                       return null;
                     }
+                  } else if (keyLower === 'structure_category') {
+                    displayKey = 'Structure Category';
+                  } else if (keyLower === 'canal_name') {
+                    displayKey = 'Host Canal';
+                  } else if (keyLower === 'canal') {
+                    displayKey = 'Canal Name';
+                  } else if (keyLower === 'canal_type') {
+                    displayKey = 'Canal Macro Classification';
+                  } else if (keyLower === 'canaltype') {
+                    displayKey = 'Engineering Type';
+                  } else if (keyLower === 'canal_lining') {
+                    displayKey = 'Lining Status';
+                  } else if (keyLower === 'station') {
+                    displayKey = 'Station / Chainage';
+                  } else if (keyLower === 'station_m') {
+                    displayKey = 'Station Distance';
+                    const numM = parseFloat(displayVal);
+                    if (!isNaN(numM)) displayVal = `${numM.toFixed(1)} m`;
+                  } else if (keyLower === 'canal_leng') {
+                    displayKey = 'Centerline Length';
+                    const numL = parseFloat(displayVal);
+                    if (!isNaN(numL)) displayVal = `${numL.toFixed(1)} m`;
+                  } else if (keyLower === 'elevation_m') {
+                    displayKey = 'Survey Elevation';
+                    const numE = parseFloat(displayVal);
+                    if (!isNaN(numE)) displayVal = `${numE.toFixed(3)} m`;
+                  } else if (keyLower === 'offset_m') {
+                    displayKey = 'Centerline Offset';
+                    const numO = parseFloat(displayVal);
+                    if (!isNaN(numO)) displayVal = `${numO.toFixed(2)} m`;
+                  } else if (keyLower === 'parent_takeoff_station') {
+                    displayKey = 'Parent Takeoff Station';
+                  } else if (keyLower === 'drainage_interface') {
+                    displayKey = 'Drainage Interface';
+                  } else if (keyLower === 'station_source') {
+                    displayKey = 'Station Source';
+                  } else if (keyLower === 'reversal_applied') {
+                    displayKey = 'Downstream Vector Verified';
+                    displayVal = displayVal === 'true' ? 'Yes (Enforced)' : 'Yes';
+                  } else if (keyLower === 'station_no') {
+                    displayKey = 'Intake Origin';
+                  } else if (keyLower === 'station__1') {
+                    displayKey = 'Tail Terminus';
                   }
 
                   return (

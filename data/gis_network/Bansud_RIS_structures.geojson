@@ -1,0 +1,3319 @@
+{
+  "type": "FeatureCollection",
+  "name": "Bansud_structures",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 60,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, CHECKGATE STRUCTURE (STA. 1+346.47-1+348.47)",
+        "type": "Check Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 1+346.5",
+        "station_m": 1346.47,
+        "offset_m": 0.2,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 34.81,
+        "photo_filename": "DSC00177.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00177.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 1+346.47"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.436209,
+          12.85535
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 61,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, TURN OUT #3 COMB. ROAD CROSSING (STA. 1+591)",
+        "type": "Turnout",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 1+591.0",
+        "station_m": 1591,
+        "offset_m": 5.51,
+        "desc": "",
+        "comment": "Combination with road crossing",
+        "elevation_m": 33.43,
+        "photo_filename": "DSC00178.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00178.jpg",
+        "surveyor_comment": "Combination with road crossing",
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 1+591)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.436877,
+          12.857445
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 62,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, DROP STRUCTURE (STA. 1+960-1+980.16)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 1+960.0",
+        "station_m": 1960,
+        "offset_m": 2.21,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 31,
+        "photo_filename": "DSC00179.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00179.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 1+960"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.438048,
+          12.86026
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 67,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, ROAD CROSSING (STA. 3+043.75-3+050.20)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 3+043.8",
+        "station_m": 3043.75,
+        "offset_m": 5.84,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 23.72,
+        "photo_filename": "DSC00184.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00184.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 3+043.75"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.446146,
+          12.860697
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 66,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, TURN OUT #7&8 (LEFT&RIGHT) (STA.3+020.93)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 3+020.9",
+        "station_m": 3020.93,
+        "offset_m": 12.65,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 24.88,
+        "photo_filename": "DSC00183.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00183.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.3+020.93)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.445895,
+          12.860863
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 68,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, CHECKGATE STRUCTURE (STA.3+319-3+321.50)",
+        "type": "Check Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 3+319.0",
+        "station_m": 3319,
+        "offset_m": 7.62,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 21.04,
+        "photo_filename": "DSC00185.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00185.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.3+319"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.448508,
+          12.860844
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 82,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH MAIN CANAL, EXIST THRESHER CROSSING (STA.0+502-0+515.18)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "SOUTH MAIN CANAL",
+        "station": "STA 0+502.0",
+        "station_m": 502,
+        "offset_m": 3.55,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -70.48,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+502"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.431255,
+          12.847505
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 83,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH MAIN CANAL, THRESHER CROSSING (STA.1+018.88-1+032.50)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "SOUTH MAIN CANAL",
+        "station": "STA 1+018.9",
+        "station_m": 1018.88,
+        "offset_m": 7.08,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -51.74,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+018.88"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.433586,
+          12.843406
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 84,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH MAIN CANAL, TURN OUT #1 (RIGHT) (STA.1+254.19)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "SOUTH MAIN CANAL",
+        "station": "STA 1+254.2",
+        "station_m": 1254.19,
+        "offset_m": 1.53,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -41.97,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+254.19)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.434294,
+          12.841594
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 86,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH MAIN CANAL, ROAD CROSSING (STA.1+603.17-1+608)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "SOUTH MAIN CANAL",
+        "station": "STA 1+603.2",
+        "station_m": 1603.17,
+        "offset_m": 5.28,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -27.82,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+603.17"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.434953,
+          12.83913
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 87,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH MAIN CANAL, HEADGATE OF SOUTH LAT A COMB DROP STRUCTURE (STA.2+010.60)",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "SOUTH MAIN CANAL",
+        "station": "STA 2+010.6",
+        "station_m": 2010.6,
+        "offset_m": 2.05,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -22.04,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.2+010.60)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.438228,
+          12.840248
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 90,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, TURN OUT #1 (RIGHT) (STA.0+642.33)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 0+642.3",
+        "station_m": 642.33,
+        "offset_m": 1.25,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 34.99,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+642.33)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.442538,
+          12.843768
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 89,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, DROP STRUCTURE (STA.0+251.71-0+257.06)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 0+251.7",
+        "station_m": 251.71,
+        "offset_m": 0.25,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 30.31,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+251.71"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.439741,
+          12.841651
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 81,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH MAIN CANAL, PARSHALL FLUME (STA.0+133.04-0+139.15)",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "SOUTH MAIN CANAL",
+        "station": "STA 0+133.0",
+        "station_m": 133.04,
+        "offset_m": 2.85,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -96.84,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+133.04"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.428547,
+          12.848456
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 92,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, DROP STRUCTURE (STA.0+883.69-0+891.89)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 0+883.7",
+        "station_m": 883.69,
+        "offset_m": 6.95,
+        "desc": "",
+        "comment": "With Turnout Right",
+        "elevation_m": 32.94,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": "With Turnout Right",
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+883.69"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.444496,
+          12.844905
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 93,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, DROP STRUCTURE (STA.1+215.55-1+223.67)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 1+215.6",
+        "station_m": 1215.55,
+        "offset_m": 3.48,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 31.89,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+215.55"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.447287,
+          12.845156
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 97,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, DROP STRUCTURE (STA.2+653.50-2+660.36)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 2+653.5",
+        "station_m": 2653.5,
+        "offset_m": 4.95,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 24.01,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.2+653.50"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.457879,
+          12.840152
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 95,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, TURN OUT #3&4 L&R COMB W/ DROP STRUCTURE (STA.2+189.79-2+190.10-2+197)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 2+189.8",
+        "station_m": 2189.79,
+        "offset_m": 3.27,
+        "desc": "",
+        "comment": "Combination with drop str",
+        "elevation_m": 25.07,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": "Combination with drop str",
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.2+189.79"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.455439,
+          12.843136
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 99,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, DROP STRUCTURE (STA.3+054.73-3+064.80)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 3+054.7",
+        "station_m": 3054.73,
+        "offset_m": 0.61,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -51.94,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.3+054.73"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461038,
+          12.839073
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 100,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, TURN OUT #7 (RIGHT) (STA.3+104.84)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 3+104.8",
+        "station_m": 3104.84,
+        "offset_m": 1.97,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 18.04,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.3+104.84)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461497,
+          12.839089
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 101,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, ROAD CROSSING (STA.3+419.80-3+424)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 3+419.8",
+        "station_m": 3419.8,
+        "offset_m": 3.92,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 18.92,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.3+419.80"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.464186,
+          12.838256
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 104,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, DROP STRUCTURE (STA.4+007.85-4+015.06)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 4+007.8",
+        "station_m": 4007.85,
+        "offset_m": 1.13,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 18.59,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.4+007.85"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.46628,
+          12.837363
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 103,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, TURN OUT #8 (RIGHT) (STA.3+971.30)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 3+971.3",
+        "station_m": 3971.3,
+        "offset_m": 2.25,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 17.17,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.3+971.30)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.466269,
+          12.83788
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 105,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, TURN OUT #9 (RIGHT) (STA. 4+428.87)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 4+428.9",
+        "station_m": 4428.87,
+        "offset_m": 3.51,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 19.66,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 4+428.87)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.46698,
+          12.835324
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 106,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, DROP STUCTURE (STA.4+589.82-4-595.75)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 4+589.8",
+        "station_m": 4589.82,
+        "offset_m": 2.31,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 17.3,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.4+589.82"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.467192,
+          12.835105
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 52,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL A, CHECKGATE STRUCTURE (STA.0+595-0+598)",
+        "type": "Check Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "NORTH LATERAL A",
+        "station": "STA 0+595.0",
+        "station_m": 595,
+        "offset_m": 4.98,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 3.32,
+        "photo_filename": "DSC00169.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00169.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+595"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.442927,
+          12.868447
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 53,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL A, DROP STRUCTURE (STA.0+794-0+799.25)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "NORTH LATERAL A",
+        "station": "STA 0+794.0",
+        "station_m": 794,
+        "offset_m": 2.93,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 16.9,
+        "photo_filename": "DSC00170.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00170.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+794"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.444011,
+          12.869896
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 56,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL A, TURN OUT COMB W/ ROAD CROSSING (STA.1+798)",
+        "type": "Turnout",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "NORTH LATERAL A",
+        "station": "STA 1+798.0",
+        "station_m": 1798,
+        "offset_m": 23.81,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 13.27,
+        "photo_filename": "DSC00173.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00173.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+798)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.451251,
+          12.874598
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 54,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL A, TURN OUT #3 (LEFT) (STA.0+801)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "NORTH LATERAL A",
+        "station": "STA 0+801.0",
+        "station_m": 801,
+        "offset_m": 8.43,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 14.51,
+        "photo_filename": "DSC00171.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00171.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+801)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.446204,
+          12.872976
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 43,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL C, THRESHER CROSSING (STA. 0+882.50-0+829)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "NORTH LATERAL C",
+        "station": "STA 0+882.5",
+        "station_m": 882.5,
+        "offset_m": 8.27,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -75.51,
+        "photo_filename": "DSC00163.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00163.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 0+882.50"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461057,
+          12.859494
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 44,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL C, TURN OUT #3 (LEFT) (STA.1+134.50)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "NORTH LATERAL C",
+        "station": "STA 1+134.5",
+        "station_m": 1134.5,
+        "offset_m": 5.37,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -60.08,
+        "photo_filename": "DSC00164.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00164.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+134.50)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.463914,
+          12.859533
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 42,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL C, TURN OUT# 2 (LEFT) (STA.0+654.88)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "NORTH LATERAL C",
+        "station": "STA 0+654.9",
+        "station_m": 654.88,
+        "offset_m": 7.75,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -86.95,
+        "photo_filename": "DSC00162.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00162.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+654.88)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.45968,
+          12.859987
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 40,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL C, THRESHER CROSSING (STA.0+411.44-0+415)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "NORTH LATERAL C",
+        "station": "STA 0+411.4",
+        "station_m": 411.44,
+        "offset_m": 3.27,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -114.32,
+        "photo_filename": "DSC00160.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00160.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+411.44"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.457455,
+          12.862833
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 39,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL C, PARSHALL FLUME (STA.0+040-0+045.37)",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "NORTH LATERAL C",
+        "station": "STA 0+040.0",
+        "station_m": 40,
+        "offset_m": 5.24,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -131.57,
+        "photo_filename": "DSC00159.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00159.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+040"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.457401,
+          12.864556
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 119,
+        "name": "BANSUDRIS BANSUD DAM (STA. 0+000)",
+        "type": "Dam",
+        "Structure_Category": "Diversion Dam / Weir",
+        "canal_name": "SOUTH MAIN CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 29.24,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-7-10",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 0+000)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4278137,
+          12.8495298
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 129,
+        "name": "FAMPULME IA LEFT MAIN CANAL PARSHALL FLUME (STA.0+050.60-0+053.00)",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+050.6",
+        "station_m": 50.6,
+        "offset_m": 0.37,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+050.60"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4602376,
+          12.8742065
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 130,
+        "name": "FAMPULME IA LEFT MAIN CANAL TURN OUT #1 (L) (STA.0+087.50)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+087.5",
+        "station_m": 87.5,
+        "offset_m": 0.23,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+087.50)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4602545,
+          12.8745079
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 120,
+        "name": "BANSUDRIS BADJANG DAM (STA. 0+000)",
+        "type": "Dam",
+        "Structure_Category": "Diversion Dam / Weir",
+        "canal_name": "BADJANG INTAKE CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 23.42,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-7-10",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 0+000)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4430796,
+          12.8454434
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 121,
+        "name": "Inlet",
+        "type": "",
+        "Structure_Category": "Inlet",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 3.54,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": null,
+        "station_source": "Geometric Projection",
+        "native_station": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4602582,
+          12.8737075
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 122,
+        "name": "Inlet",
+        "type": "",
+        "Structure_Category": "Inlet",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 4.4,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": null,
+        "station_source": "Geometric Projection",
+        "native_station": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4602654,
+          12.8737035
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 123,
+        "name": "Inlet",
+        "type": "",
+        "Structure_Category": "Inlet",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+000.4",
+        "station_m": 0.41,
+        "offset_m": 5.3,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-4",
+        "station_source": "Geometric Projection",
+        "native_station": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4602846,
+          12.873727
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 124,
+        "name": "Inlet",
+        "type": "",
+        "Structure_Category": "Inlet",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 4.42,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-4",
+        "station_source": "Geometric Projection",
+        "native_station": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4602624,
+          12.8737005
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 125,
+        "name": "Inlet",
+        "type": "",
+        "Structure_Category": "Inlet",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 5.52,
+        "desc": "0",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": null,
+        "station_source": "Geometric Projection",
+        "native_station": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4602818,
+          12.8737094
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 126,
+        "name": "",
+        "type": "",
+        "Structure_Category": "Other Structures",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 6.04,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": null,
+        "station_source": "Geometric Projection",
+        "native_station": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4602877,
+          12.8737109
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 127,
+        "name": "FAMPULME IA LEFT MAIN CANAL INLET (STA.0+000.00)",
+        "type": "Inlet",
+        "Structure_Category": "Inlet",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 5.35,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+000.00)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4602851,
+          12.8737273
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 133,
+        "name": "FAMPULME IA LEFT MAIN CANAL THRESHER CROSSING (STA.0+142.20-0+144.00)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+142.2",
+        "station_m": 142.2,
+        "offset_m": 0.07,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+142.20"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4610119,
+          12.8746158
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 128,
+        "name": "FAMPULME IA LEFT MAIN CANAL ROAD CROSSING (STA.0+035.40-0+042.60)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+035.4",
+        "station_m": 35.4,
+        "offset_m": 1.02,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+035.40"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4602379,
+          12.8740558
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 132,
+        "name": "FAMPULME IA LEFT MAIN CANAL END OF CUT AND COVER (STA.0+135.90)",
+        "type": "Cut and Cover",
+        "Structure_Category": "Other Structures",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+135.9",
+        "station_m": 135.9,
+        "offset_m": 0.19,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+135.90)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4609863,
+          12.8746106
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 131,
+        "name": "FAMPULME IA LEFT MAIN CANAL CUT AND COVER (STA.0+088.60-0+135.90)",
+        "type": "Cut and Cover",
+        "Structure_Category": "Other Structures",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+088.6",
+        "station_m": 88.6,
+        "offset_m": 0.05,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+088.60"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4602615,
+          12.8745073
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 137,
+        "name": "FAMPULME IA LEFT MAIN CANAL HEAD GATE OF LEFT LATERAL A (STA.0+323.50)",
+        "type": "Check Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 0.3,
+        "desc": "",
+        "comment": "Manual Revision (2026-10-04): Set to STA 0+000.0 as Head Gate origin for FAMPULME LEFT LATERAL A. Original parent takeoff station: STA 0+323.50 on FAMPULME LEFT MAIN CANAL.",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Manual Revision (Headgate STA 0+000 Origin)",
+        "native_station": "STA.0+323.50)",
+        "parent_takeoff_station": "STA 0+323.50 on FAMPULME LEFT MAIN CANAL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4624877,
+          12.8748351
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 71,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, DROP STRUCTURE (STA.3+501.29-3+608.78)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 3+501.3",
+        "station_m": 3501.29,
+        "offset_m": 12.39,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 19.07,
+        "photo_filename": "DSC00188.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00188.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.3+501.29"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.45078,
+          12.86209
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 139,
+        "name": "FAMPULME IA LEFT MAIN CANAL THRESHER CROSSING (STA.0+640-0+643)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+640.0",
+        "station_m": 640,
+        "offset_m": 0.51,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+640"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4653322,
+          12.8753729
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 150,
+        "name": "FAMPULME IA RIGHT MAIN CANAL TURN OUT #3 (R) (STA.0+167.40)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "FAMPULME RIGHT MAIN CANAL",
+        "station": "STA 0+167.4",
+        "station_m": 167.4,
+        "offset_m": 0.61,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+167.40)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4626628,
+          12.8734434
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 146,
+        "name": "FAMPULME IA RIGHT LATERAL A TURN OUT #3 (L) (STA.0+211.20)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "FAMPULME RIGHT LATERAL A",
+        "station": "STA 0+211.2",
+        "station_m": 211.2,
+        "offset_m": 1.18,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+211.20)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4618521,
+          12.8711301
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 138,
+        "name": "FAMPULME IA LEFT MAIN CANAL TURN OUT #6&7 (L&R) W/ END OF CANAL (STA.0+708.20-0+709.00)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+708.2",
+        "station_m": 708.2,
+        "offset_m": 0.47,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+708.20"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4659566,
+          12.8754966
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 149,
+        "name": "FAMPULME IA RIGHT MAIN CANAL TURN OUT #1&2 (L&R) (STA.0+102.50)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "FAMPULME RIGHT MAIN CANAL",
+        "station": "STA 0+102.5",
+        "station_m": 102.5,
+        "offset_m": 0.78,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+102.50)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4621039,
+          12.8731603
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 151,
+        "name": "FAMPULME IA RIGHT MAIN CANAL THRESHER CROSSING (STA.0+172.40- 0+176.00)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "FAMPULME RIGHT MAIN CANAL",
+        "station": "STA 0+172.4",
+        "station_m": 172.4,
+        "offset_m": 0.43,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+172.40"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4626754,
+          12.8734529
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 135,
+        "name": "FAMPULME IA LEFT MAIN CANAL TURN OUT #3&4 (L&R) (STA.0+212.70)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+212.7",
+        "station_m": 212.7,
+        "offset_m": 0.39,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+212.70)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4614848,
+          12.8746912
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 143,
+        "name": "FAMPULME IA RIGHT MAIN CANAL HEAD GATE OF RIGHT LATERAL A (STA.0+053.70)",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "FAMPULME RIGHT MAIN CANAL",
+        "station": "STA 0+053.7",
+        "station_m": 53.7,
+        "offset_m": 0,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+053.70)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4617388,
+          12.872992
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 153,
+        "name": "FAMPULME IA RIGHT MAIN CANAL END OF CANAL (STA.1+217.40)",
+        "type": "Drainage",
+        "Structure_Category": "Drainage",
+        "canal_name": "FAMPULME RIGHT MAIN CANAL",
+        "station": "STA 1+217.4",
+        "station_m": 1217.4,
+        "offset_m": 0,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+217.40)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.470979,
+          12.8759052
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 147,
+        "name": "FAMPULME IA RIGHT LATERAL A END OF CONCRETE CANAL (STA.0+239.60)",
+        "type": "Drainage",
+        "Structure_Category": "Drainage",
+        "canal_name": "FAMPULME RIGHT LATERAL A",
+        "station": "STA 0+239.6",
+        "station_m": 239.6,
+        "offset_m": 0.01,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+239.60)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4618774,
+          12.8708989
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 145,
+        "name": "FAMPULME IA RIGHT LATERAL A TURN OUT #1&2 (L&R) (STA.0+059.00)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "FAMPULME RIGHT LATERAL A",
+        "station": "STA 0+059.0",
+        "station_m": 59,
+        "offset_m": 0.38,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+059.00)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4617786,
+          12.8724993
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 72,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, CHECKGATE STRUCTURE (STA.3+831.72-3+834)",
+        "type": "Check Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 3+831.7",
+        "station_m": 3831.72,
+        "offset_m": 9.76,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 17.81,
+        "photo_filename": "DSC00189.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00189.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.3+831.72"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.452714,
+          12.862948
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 73,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, ROAD CROSSING (STA.4+117.50-4+414.77)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 4+117.5",
+        "station_m": 4117.5,
+        "offset_m": 7.05,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 17.84,
+        "photo_filename": "DSC00190.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00190.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.4+117.50"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.454666,
+          12.864631
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 75,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, ROAD CROSSING (STA.4+253.79-4+266.33)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 4+253.8",
+        "station_m": 4253.79,
+        "offset_m": 10.43,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 24.93,
+        "photo_filename": "DSC00192.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00192.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.4+253.79"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.455844,
+          12.865104
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 77,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, TURN OUT #12 (LEFT) (STA.4+705.55)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 4+705.5",
+        "station_m": 4705.55,
+        "offset_m": 9.35,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 20.8,
+        "photo_filename": "DSC00194.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00194.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.4+705.55)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.459904,
+          12.865139
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 78,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, THRESHER CROSSING (STA.4+862.80-4+870.08)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 4+862.8",
+        "station_m": 4862.8,
+        "offset_m": 9.34,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 19.93,
+        "photo_filename": "DSC00195.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00195.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.4+862.80"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461312,
+          12.865261
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 79,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, TURN OUT # 13 COMB. W/CHECKGATE (STA.5+560.82-5+562.82)",
+        "type": "Turnout",
+        "Structure_Category": "Head Gate",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 5+560.8",
+        "station_m": 5560.82,
+        "offset_m": 7.95,
+        "desc": "",
+        "comment": "Combination with check gate",
+        "elevation_m": 19.32,
+        "photo_filename": "DSC00196.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00196.jpg",
+        "surveyor_comment": "Combination with check gate",
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.5+560.82"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.467698,
+          12.86445
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 134,
+        "name": "FAMPULME IA LEFT MAIN CANAL TURN OUT #2 (L) (STA.0+196.00)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+196.0",
+        "station_m": 196,
+        "offset_m": 0.4,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+196.00)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4613328,
+          12.8746659
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 80,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, CHECKGATE (ABANDONED) (STA.6+286.18)",
+        "type": "Check Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 6+286.2",
+        "station_m": 6286.18,
+        "offset_m": 8.64,
+        "desc": "",
+        "comment": "Abandoned",
+        "elevation_m": 17.2,
+        "photo_filename": "DSC00197.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00197.jpg",
+        "surveyor_comment": "Abandoned",
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.6+286.18)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.47063,
+          12.865885
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 110,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH SUB-LATERAL A-1, TURN OUT #1&2 (L&R) (STA.0+144.55)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "SOUTH SUB-LATERAL A-1",
+        "station": "STA 0+144.6",
+        "station_m": 144.55,
+        "offset_m": 2.13,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 25.45,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+144.55)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.451351,
+          12.845691
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 111,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH SUB-LATERAL A-1, ROAD CROSSING (STA.0+328.59-0+339.14)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "SOUTH SUB-LATERAL A-1",
+        "station": "STA 0+328.6",
+        "station_m": 328.59,
+        "offset_m": 2.87,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 23.07,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+328.59"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.453064,
+          12.845995
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 113,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH SUB-LATERAL A-1, CHECKGATE STRUCTURE (STA.0+835.36-0+838.47)",
+        "type": "Check Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "SOUTH SUB-LATERAL A-1",
+        "station": "STA 0+835.4",
+        "station_m": 835.36,
+        "offset_m": 1.14,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 22,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+835.36"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.457681,
+          12.846529
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 115,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH SUB-LATERAL A-1,  CHECKGATE (STA.1+257.12-1+278.26)",
+        "type": "Check Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "SOUTH SUB-LATERAL A-1",
+        "station": "STA 1+257.1",
+        "station_m": 1257.12,
+        "offset_m": 0.44,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 19.45,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+257.12"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461491,
+          12.84703
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 116,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH SUB-LATERAL A-1, THRESHER CROSSING (STA.1+570.89-1+578.26)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "SOUTH SUB-LATERAL A-1",
+        "station": "STA 1+570.9",
+        "station_m": 1570.89,
+        "offset_m": 1.33,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 17.46,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+570.89"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.46404,
+          12.848229
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 117,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH SUB-LATERAL A-1, ROAD CROSSING (STA.1+674.13-1+686.93)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "SOUTH SUB-LATERAL A-1",
+        "station": "STA 1+674.1",
+        "station_m": 1674.13,
+        "offset_m": 7.49,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 16.54,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+674.13"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.466558,
+          12.848387
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 118,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH SUB-LATERAL A-1, THRESHER CROSSING (STA.2+181.14-2+188.50)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "SOUTH SUB-LATERAL A-1",
+        "station": "STA 2+181.1",
+        "station_m": 2181.14,
+        "offset_m": 8.27,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 15.46,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.2+181.14"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.468632,
+          12.847505
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 107,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, ROAD CROSSING (STA.4+858.45-4+868.12)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 4+858.5",
+        "station_m": 4858.45,
+        "offset_m": 0.56,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 17.15,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.4+858.45"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.473482,
+          12.838145
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 136,
+        "name": "FAMPULME IA LEFT MAIN CANAL TURN OUT #5 (R) (STA.0+291.20)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+291.2",
+        "station_m": 291.2,
+        "offset_m": 0.4,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+291.20)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4621777,
+          12.8747952
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140,
+        "name": "FAMPULME IA LEFT MAIN CANAL THRESHER CROSSING (STA.0+465-0+468)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "FAMPULME LEFT MAIN CANAL",
+        "station": "STA 0+465.0",
+        "station_m": 465,
+        "offset_m": 0.08,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+465"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4637471,
+          12.8750558
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 142,
+        "name": "FAMPULME IA RIGHT MAIN CANAL INLET (STA.0+000.00)",
+        "type": "Inlet",
+        "Structure_Category": "Inlet",
+        "canal_name": "FAMPULME RIGHT MAIN CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 0,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-11",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+000.00)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4612756,
+          12.8731229
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 141,
+        "name": "FAMPULME IA LEFT LATERAL A END OF CANAL (STA.0+308.20)",
+        "type": "Drainage",
+        "Structure_Category": "Drainage",
+        "canal_name": "FAMPULME LEFT LATERAL A",
+        "station": "STA 0+308.2",
+        "station_m": 308.2,
+        "offset_m": 0.39,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+308.20)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4636206,
+          12.8764884
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 152,
+        "name": "FAMPULME IA RIGHT MAIN CANAL TURN OUT #4 (R) (STA.0+284.40)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "FAMPULME RIGHT MAIN CANAL",
+        "station": "STA 0+284.4",
+        "station_m": 284.4,
+        "offset_m": 1.57,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+284.40)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4635154,
+          12.8739912
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 154,
+        "name": "FAMPULME IA RIGHT MAIN CANAL THRESHER CROSSING (STA.0+880.00-0+883.00)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "FAMPULME RIGHT MAIN CANAL",
+        "station": "STA 0+880.0",
+        "station_m": 880,
+        "offset_m": 0.04,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-11",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+880.00"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4685071,
+          12.8752009
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 144,
+        "name": "FAMPULME IA RIGHT LATERAL A THRESHER CROSSING (STA.0+017.60-0+21.03)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "FAMPULME RIGHT LATERAL A",
+        "station": "STA 0+017.6",
+        "station_m": 17.6,
+        "offset_m": 0.51,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+017.60"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4617523,
+          12.8728727
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 88,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, PARSHALL FLUME (STA.0+040-0+045.90)",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 0+040.0",
+        "station_m": 40,
+        "offset_m": 0.67,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 33.08,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+040"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.438571,
+          12.840221
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 57,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, PARSHALL FLUME (STA. 0+050.30-0+058.72)",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 0+050.3",
+        "station_m": 50.3,
+        "offset_m": 6.76,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 42.12,
+        "photo_filename": "DSC00174.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00174.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 0+050.30"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.428239,
+          12.850211
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 58,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, TURN OUT #1 (LEFT) COMB. THRESHER CROSSING (STA. 0+498-0+506.35)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 0+498.0",
+        "station_m": 498,
+        "offset_m": 4.3,
+        "desc": "",
+        "comment": "Combination with turn out left",
+        "elevation_m": 38.1,
+        "photo_filename": "DSC00175.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00175.jpg",
+        "surveyor_comment": "Combination with turn out left",
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 0+498"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.432093,
+          12.849217
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 59,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, TURN OUT#2 (RIGHT) COMB.THRESHER CROSSING (STA. 1+040-1+049.23)",
+        "type": "Turnout",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 1+040.0",
+        "station_m": 1040,
+        "offset_m": 5.9,
+        "desc": "",
+        "comment": "Combination with drop structure",
+        "elevation_m": 35.67,
+        "photo_filename": "DSC00176.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00176.jpg",
+        "surveyor_comment": "Combination with drop structure",
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 1+040"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.434847,
+          12.852976
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 63,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, CHECKGATE STRUCTURE (STA. 2+230.70-2+232.88)",
+        "type": "Check Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 2+230.7",
+        "station_m": 2230.7,
+        "offset_m": 0.54,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 28.55,
+        "photo_filename": "DSC00180.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00180.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 2+230.70"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4399,
+          12.861842
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 64,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, TURN OUT #4 (LEFT) (STA.2+443.50)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 2+443.5",
+        "station_m": 2443.5,
+        "offset_m": 7.2,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 27.35,
+        "photo_filename": "DSC00181.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00181.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.2+443.50)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.441357,
+          12.863212
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 65,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, HEADGATE NORTH LATERAL A COMB. W/ THRESHER CROSSING/TURN OUT #5&6 (LEFT&RIGHT) (STA. 2+487.97-2+500.16)",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 2+488.0",
+        "station_m": 2487.97,
+        "offset_m": 3.49,
+        "desc": "",
+        "comment": "Combination L&R thresher crossing and drop str.",
+        "elevation_m": 27.14,
+        "photo_filename": "DSC00182.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00182.jpg",
+        "surveyor_comment": "Combination L&R thresher crossing and drop str.",
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 2+487.97"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.441775,
+          12.863249
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 69,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, ROAD CROSSING (STA.3+449.64-3+453.34)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 3+449.6",
+        "station_m": 3449.64,
+        "offset_m": 10.14,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 19.87,
+        "photo_filename": "DSC00186.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00186.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.3+449.64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.449524,
+          12.861482
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 70,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, TURN OUT #9 (LEFT) (STA.3+468.88)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 3+468.9",
+        "station_m": 3468.88,
+        "offset_m": 8.18,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 19.96,
+        "photo_filename": "DSC00187.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00187.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.3+468.88)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.449728,
+          12.861565
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 74,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, TURN OUT #10 (LEFT) COMB. W/ THRESHER CROSSING (STA.4+172.40-4+184.75)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 4+172.4",
+        "station_m": 4172.4,
+        "offset_m": 12.15,
+        "desc": "",
+        "comment": "Combination with turn out (left)",
+        "elevation_m": 18.19,
+        "photo_filename": "DSC00191.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00191.jpg",
+        "surveyor_comment": "Combination with turn out (left)",
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.4+172.40"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.455112,
+          12.864842
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 91,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, DROP STRUCTURE (STA.0+737.81+0+742.75)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 0+737.8",
+        "station_m": 737.81,
+        "offset_m": 1.09,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 34.87,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+737.81"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.443289,
+          12.844186
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 76,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH MAIN CANAL, HEADGATE LAT C COMB. W/ TURN OUT #11 & THRESHER CROSSING (STA.4+427.00)",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "NORTH MAIN CANAL",
+        "station": "STA 4+427.0",
+        "station_m": 4427,
+        "offset_m": 11.72,
+        "desc": "",
+        "comment": "Combination with turn out and thresher crossing",
+        "elevation_m": 22.45,
+        "photo_filename": "DSC00193.jpg",
+        "photo_path": "../03_29_2023/Pictures/DSC00193.jpg",
+        "surveyor_comment": "Combination with turn out and thresher crossing",
+        "survey_date": "2023-3-29",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.4+427.00)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.457346,
+          12.864967
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 85,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH MAIN CANAL, SIPHON (STA.1+289.92-1+410.62)",
+        "type": "Siphon",
+        "Structure_Category": "Siphon",
+        "canal_name": "SOUTH MAIN CANAL",
+        "station": "STA 1+289.9",
+        "station_m": 1289.92,
+        "offset_m": 0.35,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -36.82,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+289.92"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.434272,
+          12.841246
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 94,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, HEADGATE OF SOUTH LAT. A-1 COMB W/ TURN OUT #2 (LEFT) (STA.1+608.93-1+618.61)",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 1+608.9",
+        "station_m": 1608.93,
+        "offset_m": 4.72,
+        "desc": "",
+        "comment": "Combination with turn out (left) with drop str",
+        "elevation_m": 29.97,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": "Combination with turn out (left) with drop str",
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+608.93"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.450765,
+          12.84483
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 96,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, TURN OUT #5 (LEFT) (STA.2+382)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 2+382.0",
+        "station_m": 2382,
+        "offset_m": 2.56,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 24.11,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.2+382)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.456945,
+          12.842197
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 98,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, TURN OUT #6 (RIGHT) COMB W/ ROAD CROSSING (STA.2+947.22-2+972.20)",
+        "type": "Drop",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 2+947.2",
+        "station_m": 2947.22,
+        "offset_m": 4.07,
+        "desc": "",
+        "comment": "With turn out and road crossing",
+        "elevation_m": 24.08,
+        "photo_filename": "",
+        "photo_path": "../03_22_2023/Pictures/",
+        "surveyor_comment": "With turn out and road crossing",
+        "survey_date": "2023-3-22",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.2+947.22"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.460004,
+          12.839082
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 102,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, DROP STRUCTURE (STA.3+480)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 3+480.0",
+        "station_m": 3480,
+        "offset_m": 4.29,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 16.9,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.3+480)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.464708,
+          12.838225
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 108,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH LATERAL A, THRESHER CROSSING (STA.5+333.66-5+340.83)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "SOUTH LATERAL A (MAIN)",
+        "station": "STA 5+333.7",
+        "station_m": 5333.66,
+        "offset_m": 4.11,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 15.29,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.5+333.66"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.476511,
+          12.835637
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 109,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH SUB-LATERAL A-1, PARSHALL FLUME (STA.0+033.74-0+040)",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "SOUTH SUB-LATERAL A-1",
+        "station": "STA 0+033.7",
+        "station_m": 33.74,
+        "offset_m": 3.93,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 25.07,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+033.74"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.45077,
+          12.845106
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 112,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH SUB-LATERAL A-1, HEADGATE OF SOUTH LAT A-2 COMB W/ ROAD CROSSING (STA.0+738.95-0+749.84)",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "SOUTH SUB-LATERAL A-1",
+        "station": "STA 0+739.0",
+        "station_m": 738.95,
+        "offset_m": 0.28,
+        "desc": "",
+        "comment": "With combination of road crossing",
+        "elevation_m": 22.27,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": "With combination of road crossing",
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+738.95"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.456798,
+          12.846309
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 114,
+        "name": "ALCADESMA-TIGUISAN IA, SOUTH SUB-LATERAL A-1, TURN OUT #3 R COMB W/ ROAD CROSSING (STA.1+034.80-1+058.83)",
+        "type": "Turnout",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "SOUTH SUB-LATERAL A-1",
+        "station": "STA 1+034.8",
+        "station_m": 1034.8,
+        "offset_m": 0.56,
+        "desc": "",
+        "comment": "With combination of road crossing",
+        "elevation_m": 20.83,
+        "photo_filename": "",
+        "photo_path": "../03_23_2023/Pictures/",
+        "surveyor_comment": "With combination of road crossing",
+        "survey_date": "2023-3-23",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+034.80"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.459449,
+          12.846894
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 50,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL A, PARSHALL FLUME (STA.0+039-0+043)",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "NORTH LATERAL A",
+        "station": "STA 0+039.0",
+        "station_m": 39,
+        "offset_m": 2.55,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -1.15,
+        "photo_filename": "DSC00167.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00167.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+039"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.441759,
+          12.863671
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 51,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL A, TURN OUT# 1&2 (L&R) (STA.0+382)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "NORTH LATERAL A",
+        "station": "STA 0+382.0",
+        "station_m": 382,
+        "offset_m": 2.35,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 1.59,
+        "photo_filename": "DSC00168.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00168.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+382)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.442038,
+          12.866748
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 55,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL A, DROP STRUCTURE  (STA.1+271-1+279)",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "NORTH LATERAL A",
+        "station": "STA 1+271.0",
+        "station_m": 1271,
+        "offset_m": 6.76,
+        "desc": "",
+        "comment": "",
+        "elevation_m": 15.98,
+        "photo_filename": "DSC00172.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00172.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+271"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.446624,
+          12.873102
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 41,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL C, TURN OUT #1 (LEFT) (STA.0+494.73)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "NORTH LATERAL C",
+        "station": "STA 0+494.7",
+        "station_m": 494.73,
+        "offset_m": 5.48,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -99.56,
+        "photo_filename": "DSC00161.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00161.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+494.73)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.458412,
+          12.860701
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 45,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL C, THRESHER CROSSING (STA.1+365.64+1+371.86)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "NORTH LATERAL C",
+        "station": "STA 1+365.6",
+        "station_m": 1365.64,
+        "offset_m": 11.61,
+        "desc": "",
+        "comment": "",
+        "elevation_m": -36.42,
+        "photo_filename": "DSC00165.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00165.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+365.64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.468789,
+          12.857864
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 46,
+        "name": "PATUBIGANG-ILAYA NG BANSUD, NORTH LATERAL C, END OF LAT.C (STA.1+705.40)",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "NORTH LATERAL C",
+        "station": "STA 1+705.4",
+        "station_m": 1705.4,
+        "offset_m": 8.47,
+        "desc": "",
+        "comment": "End of Lat C (Patubigan-Ilaya ng bansud RIS)",
+        "elevation_m": -27.94,
+        "photo_filename": "DSC00166.jpg",
+        "photo_path": "../03_28_2023/Pictures/DSC00166.jpg",
+        "surveyor_comment": "End of Lat C (Patubigan-Ilaya ng bansud RIS)",
+        "survey_date": "2023-3-28",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.1+705.40)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.470523,
+          12.86081
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 155,
+        "name": "PATUBIGANG-ILAYA NG BANSUD MANATO SUPPLY CANAL END STRUCTURE (STA. 1+050.00)",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "MANATO SUPPLY CANAL",
+        "station": "STA 1+050.0",
+        "station_m": 1050,
+        "offset_m": 0.07,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-11-6",
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA. 1+050.00)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4793483,
+          12.8604662
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 156,
+        "name": "PATUBIGANG-ILAYA NG BANSUD MANATO SUPPLY CANAL CHECK GATE (STA.0+000.00)",
+        "type": "Check Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "MANATO SUPPLY CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 7.87,
+        "desc": "",
+        "comment": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": null,
+        "station_source": "Native (Survey / POW)",
+        "native_station": "STA.0+000.00)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4725116,
+          12.8647628
+        ]
+      }
+    }
+  ]
+}

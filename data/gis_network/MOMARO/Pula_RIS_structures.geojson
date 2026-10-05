@@ -1,0 +1,6370 @@
+{
+  "type": "FeatureCollection",
+  "name": "Pula_RIS_structures",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.41668,
+          13.022835
+        ]
+      },
+      "properties": {
+        "id": 27,
+        "name": "STA MARIA PAGALAGALA MAIN CANAL #1 TURN OUT #8 (R) COMB. W/ DROP & THRESHER X-ING (STA. 3+545 - 3 + 557.37)",
+        "type": "Other Structures",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 3+541.9",
+        "station_m": 3541.94,
+        "offset_m": 7.34,
+        "ele": 31.22,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00227.jpg",
+        "elevation_m": 31.22,
+        "photo_filename": "DSC00227.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00227.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461721,
+          13.023948
+        ]
+      },
+      "properties": {
+        "id": 15,
+        "name": "MANINGCOL LATERAL C",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL C",
+        "station": "STA 2+885.4",
+        "station_m": 2885.39,
+        "offset_m": 4.34,
+        "ele": 20.27,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00169.jpg",
+        "elevation_m": 20.27,
+        "photo_filename": "DSC00169.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00169.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.409604,
+          13.008687
+        ]
+      },
+      "properties": {
+        "id": 42,
+        "name": "PAMBISAN CALINGAG IA MAIN CANAL #1 TURN OUT #3 (R) STA. 1+588.92",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 1+581.8",
+        "station_m": 1581.76,
+        "offset_m": 0.18,
+        "ele": 28.47,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00184.jpg",
+        "elevation_m": 28.47,
+        "photo_filename": "DSC00184.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00184.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4052,
+          13.005193
+        ]
+      },
+      "properties": {
+        "id": 39,
+        "name": "PAMBISAN CALINGAG IA MAIN CANAL #1 TURN OUT #1 (R) STA. 0+971.50",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 0+966.6",
+        "station_m": 966.61,
+        "offset_m": 7.51,
+        "ele": 27.64,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00179.jpg",
+        "elevation_m": 27.64,
+        "photo_filename": "DSC00179.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00179.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.398567,
+          13.002133
+        ]
+      },
+      "properties": {
+        "id": 36,
+        "name": "PAMBISAN CALINGAG IA MAIN CANAL #1 PARSHALL FLUME (STA. 0+049.67 - 0+080)",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 0+056.9",
+        "station_m": 56.88,
+        "offset_m": 1.02,
+        "ele": 26.11,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00108.jpg",
+        "elevation_m": 26.11,
+        "photo_filename": "DSC00108.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00108.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-7-3"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.407713,
+          13.0071
+        ]
+      },
+      "properties": {
+        "id": 40,
+        "name": "PAMBISAN CALINGAG IA MAIN CANAL #1 THRESHER X-ING STA. 1+310.50 - 1+320.50",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 1+311.0",
+        "station_m": 1311.01,
+        "offset_m": 7,
+        "ele": 26.02,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00182.jpg",
+        "elevation_m": 26.02,
+        "photo_filename": "DSC00182.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00182.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.411292,
+          13.011343
+        ]
+      },
+      "properties": {
+        "id": 43,
+        "name": "PAMBISAN CALINGAG IA MIAN CANAL #1 TURN OUT #4 (R) STA. 1+939 -1+943.18",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 1+930.9",
+        "station_m": 1930.92,
+        "offset_m": 0.43,
+        "ele": 29.63,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00185.jpg",
+        "elevation_m": 29.63,
+        "photo_filename": "DSC00185.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00185.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.414521,
+          13.018364
+        ]
+      },
+      "properties": {
+        "id": 26,
+        "name": "STA. MARIA PAGALAGALA IA MAIN CANAL #1 TURN OUT #6&7 (L&R) COMB. W/ ROAD X-ING STA. 2+949.78 - 2+977",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 2+951.3",
+        "station_m": 2951.27,
+        "offset_m": 1.62,
+        "ele": 34.2,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00226.jpg",
+        "elevation_m": 34.2,
+        "photo_filename": "DSC00226.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00226.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.42304,
+          13.031817
+        ]
+      },
+      "properties": {
+        "id": 30,
+        "name": "STA MARIA PAGALAGALA IA MAIN CANAL #1 TURN OUT #11 & 12(L&R) COMB. THRESHER X-ING (STA. 4+804.86 – 4+821.10)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 4+799.0",
+        "station_m": 4799.02,
+        "offset_m": 3.63,
+        "ele": 26.99,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00233.jpg",
+        "elevation_m": 26.99,
+        "photo_filename": "DSC00233.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00233.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.425969,
+          13.035554
+        ]
+      },
+      "properties": {
+        "id": 31,
+        "name": "BANG BANG IA MAIN CANAL #1 SIPHON #1 (STA. 5+410.24 – 5+481)",
+        "type": "Siphon",
+        "Structure_Category": "Siphon",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 5+404.8",
+        "station_m": 5404.84,
+        "offset_m": 1.27,
+        "ele": 24.94,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00235.jpg",
+        "elevation_m": 24.94,
+        "photo_filename": "DSC00235.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00235.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.398887,
+          13.001669
+        ]
+      },
+      "properties": {
+        "id": 37,
+        "name": "PAMBISAN CALINGAG IA MAIN CANAL #1 ROAD X-ING (STA. 0+110.42 - 0+144.14)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 0+118.8",
+        "station_m": 118.81,
+        "offset_m": 3.02,
+        "ele": 26.39,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00159.jpg",
+        "elevation_m": 26.39,
+        "photo_filename": "DSC00159.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00159.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.452181,
+          13.038361
+        ]
+      },
+      "properties": {
+        "id": 3,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #1 (L) STA.0+800",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL C",
+        "station": "STA 0+802.3",
+        "station_m": 802.31,
+        "offset_m": 6.7,
+        "ele": 14.64,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00156.jpg",
+        "elevation_m": 14.64,
+        "photo_filename": "DSC00156.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00156.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.452641,
+          13.03771
+        ]
+      },
+      "properties": {
+        "id": 4,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #2 (R) STA.0+891",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL C",
+        "station": "STA 0+888.2",
+        "station_m": 888.2,
+        "offset_m": 7.03,
+        "ele": 16.6,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00157.jpg",
+        "elevation_m": 16.6,
+        "photo_filename": "DSC00157.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00157.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.45288,
+          13.037228
+        ]
+      },
+      "properties": {
+        "id": 5,
+        "name": "MANINGCOL IA LATERAL C DROP STR.\tSTA.0+943.24 – 0+953.43",
+        "type": "Drop",
+        "Structure_Category": "Drop",
+        "canal_name": "LATERAL C",
+        "station": "STA 0+946.7",
+        "station_m": 946.67,
+        "offset_m": 11.17,
+        "ele": 20.68,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00158.jpg",
+        "elevation_m": 20.68,
+        "photo_filename": "DSC00158.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00158.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461091,
+          13.025133
+        ]
+      },
+      "properties": {
+        "id": 13,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #12 (L) STA.2+743",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL C",
+        "station": "STA 2+737.7",
+        "station_m": 2737.68,
+        "offset_m": 3.79,
+        "ele": 25.14,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00167.jpg",
+        "elevation_m": 25.14,
+        "photo_filename": "DSC00167.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00167.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4577,
+          13.031187
+        ]
+      },
+      "properties": {
+        "id": 9,
+        "name": "MANINGCOL IA LATERAL C ROAD X-ING \tSTA.1+831 – 1+836.13",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL C",
+        "station": "STA 1+842.2",
+        "station_m": 1842.25,
+        "offset_m": 4.23,
+        "ele": 22.01,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00163.jpg",
+        "elevation_m": 22.01,
+        "photo_filename": "DSC00163.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00163.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.456911,
+          13.031373
+        ]
+      },
+      "properties": {
+        "id": 8,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #6 (L) COMB W/ CHECKGATE STA.1+746.79 – 1+747.38 – 1+748.89",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL C",
+        "station": "STA 1+754.5",
+        "station_m": 1754.53,
+        "offset_m": 3.03,
+        "ele": 15.45,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00162.jpg",
+        "elevation_m": 15.45,
+        "photo_filename": "DSC00162.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00162.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.453982,
+          13.034493
+        ]
+      },
+      "properties": {
+        "id": 6,
+        "name": "MANINGCOL IA LATERAL C DROP STR. STA.0+943.24 – 0+953.43",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL C",
+        "station": "STA 1+272.1",
+        "station_m": 1272.08,
+        "offset_m": 5.33,
+        "ele": 15.71,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00160.jpg",
+        "elevation_m": 15.71,
+        "photo_filename": "DSC00160.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00160.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.459274,
+          13.030658
+        ]
+      },
+      "properties": {
+        "id": 11,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #9 (R) STA.2+016.20",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL C",
+        "station": "STA 2+022.8",
+        "station_m": 2022.79,
+        "offset_m": 0.02,
+        "ele": 30.32,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00165.jpg",
+        "elevation_m": 30.32,
+        "photo_filename": "DSC00165.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00165.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.46082,
+          13.028745
+        ]
+      },
+      "properties": {
+        "id": 12,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #10&11 (L&R) COMB W/ THRESHER X-ING  STA.2+333.70 – 2+336.66 – 2+342.58",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL C",
+        "station": "STA 2+331.4",
+        "station_m": 2331.37,
+        "offset_m": 3.56,
+        "ele": 27.52,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00166.jpg",
+        "elevation_m": 27.52,
+        "photo_filename": "DSC00166.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00166.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461261,
+          13.024769
+        ]
+      },
+      "properties": {
+        "id": 14,
+        "name": "MANINGCOL IA LATERAL C SIPHON #1 STA.2+749.80 – 2+782.57",
+        "type": "Siphon",
+        "Structure_Category": "Siphon",
+        "canal_name": "LATERAL C",
+        "station": "STA 2+781.8",
+        "station_m": 2781.84,
+        "offset_m": 1.77,
+        "ele": 21.28,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00168.jpg",
+        "elevation_m": 21.28,
+        "photo_filename": "DSC00168.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00168.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.471271,
+          13.015737
+        ]
+      },
+      "properties": {
+        "id": 22,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #22&23 (L&R) COMB W/THRESHER X-ING STA.4+570.86 – 4+572.44 – 4+580.84",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL C",
+        "station": "STA 4+574.6",
+        "station_m": 4574.58,
+        "offset_m": 0.17,
+        "ele": 22.14,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00176.jpg",
+        "elevation_m": 22.14,
+        "photo_filename": "DSC00176.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00176.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461805,
+          13.020989
+        ]
+      },
+      "properties": {
+        "id": 17,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #16&17 (L&R) COMB W/DROP STR. STA.3+224.73 – 3+226.29 – 3+236.63",
+        "type": "Drop",
+        "Structure_Category": "Drop",
+        "canal_name": "LATERAL C",
+        "station": "STA 3+229.7",
+        "station_m": 3229.66,
+        "offset_m": 4.48,
+        "ele": 17.67,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00171.jpg",
+        "elevation_m": 17.67,
+        "photo_filename": "DSC00171.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00171.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.464448,
+          13.019202
+        ]
+      },
+      "properties": {
+        "id": 18,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #18 (L) STA.3+599.62",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL C",
+        "station": "STA 3+597.1",
+        "station_m": 3597.11,
+        "offset_m": 0.78,
+        "ele": 16.09,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00172.jpg",
+        "elevation_m": 16.09,
+        "photo_filename": "DSC00172.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00172.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.465855,
+          13.016107
+        ]
+      },
+      "properties": {
+        "id": 20,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #20 (R)COMB W/ CHECKGATE STR. STA.3+964.09 – 3+965.05",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL C",
+        "station": "STA 3+968.8",
+        "station_m": 3968.82,
+        "offset_m": 10.16,
+        "ele": 16.39,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00174.jpg",
+        "elevation_m": 16.39,
+        "photo_filename": "DSC00174.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00174.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.475788,
+          13.013538
+        ]
+      },
+      "properties": {
+        "id": 23,
+        "name": "MANINGCOL IA LATERAL C END OF CANAL (STA.5+128.86 – 5+134.33)",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "LAT-C MFD (CANAL 706)",
+        "station": "STA 0+000.5",
+        "station_m": 0.53,
+        "offset_m": 0.28,
+        "ele": 19.27,
+        "desc": "",
+        "comment": "Drainage Interface: Acts as physical Terminus of Lateral C and serves as inflow origin (STA 0+000) for DRAINAGE CANAL (LAT-C MFD 706) flowing downhill to natural outfall.",
+        "images": "../IMAGE/LATERAL C/DSC00177.jpg",
+        "elevation_m": 19.27,
+        "photo_filename": "DSC00177.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00177.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "drainage_interface": "DRAINAGE CANAL (LAT-C MFD 706)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.430492,
+          13.055697
+        ]
+      },
+      "properties": {
+        "id": 85,
+        "name": "BACUNGAN IA LATERAL B TURN OUT #6 (R) COMB W/ THRESHER X-ING  STA.2+350.76 – 2+358.73",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 2+358.0",
+        "station_m": 2358.03,
+        "offset_m": 7.97,
+        "ele": 21.49,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00111.jpg",
+        "elevation_m": 21.49,
+        "photo_filename": "DSC00111.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00111.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-27"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.43574,
+          13.060541
+        ]
+      },
+      "properties": {
+        "id": 87,
+        "name": "BACUNGAN IA LATERAL B TURN OUT #9&10 (L&R) COMB W/ THRESHER X-ING\tSTA.3+148.57  – 3+157.37",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 3+159.9",
+        "station_m": 3159.86,
+        "offset_m": 10.05,
+        "ele": 24.84,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00113.jpg",
+        "elevation_m": 24.84,
+        "photo_filename": "DSC00113.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00113.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-27"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.394266,
+          13.038464
+        ]
+      },
+      "properties": {
+        "id": 71,
+        "name": "CALOCMUY BAYUIN IA LATERAL BX  TURN OUT #2 (R)   STA.0+761.49",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL BX",
+        "station": "STA 0+758.6",
+        "station_m": 758.61,
+        "offset_m": 5.22,
+        "ele": 24.55,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00202.jpg",
+        "elevation_m": 24.55,
+        "photo_filename": "DSC00202.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00202.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-8-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.456703,
+          13.073172
+        ]
+      },
+      "properties": {
+        "id": 202,
+        "name": "ANOLING IA LATERAL B HD. GATE LAT. B-1 COMB W/T.O. #23 (R) & ROAD X-ING  STA.6+008.55– 6+021.49",
+        "type": "Head Gate",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B1",
+        "station": "STA 0+004.4",
+        "station_m": 4.43,
+        "offset_m": 0.33,
+        "ele": 14.76,
+        "desc": "fa",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00131.jpg",
+        "elevation_m": 14.76,
+        "photo_filename": "DSC00131.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00131.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.396517,
+          13.037202
+        ]
+      },
+      "properties": {
+        "id": 70,
+        "name": "CALOCMUY BAYUIN IA LATERAL BX TURN OUT #1 (L) COMB W/ THRESHER X-ING  STA.0+478.10– 0+486.29",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL BX",
+        "station": "STA 0+477.2",
+        "station_m": 477.24,
+        "offset_m": 7.22,
+        "ele": 24.88,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00201.jpg",
+        "elevation_m": 24.88,
+        "photo_filename": "DSC00201.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00201.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.39364,
+          13.038793
+        ]
+      },
+      "properties": {
+        "id": 72,
+        "name": "CALOCMUY BAYUIN IA LATERAL BX THRESHER X-ING  STA.0+831.71– 0+843.05",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL BX",
+        "station": "STA 0+835.6",
+        "station_m": 835.56,
+        "offset_m": 1.42,
+        "ele": 24.25,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00203.jpg",
+        "elevation_m": 24.25,
+        "photo_filename": "DSC00203.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00203.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.392569,
+          13.03937
+        ]
+      },
+      "properties": {
+        "id": 73,
+        "name": "CALOCMUY BAYUIN IA LATERAL BX TURN OUT #3 (R) COMB. W/ THRESHER X-ING   STA.0+967.14– 0+975.26",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL BX",
+        "station": "STA 0+968.1",
+        "station_m": 968.07,
+        "offset_m": 1.5,
+        "ele": 23.93,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00204.jpg",
+        "elevation_m": 23.93,
+        "photo_filename": "DSC00204.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00204.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.387595,
+          13.042004
+        ]
+      },
+      "properties": {
+        "id": 75,
+        "name": "CALOCMUY BAYUIN IA LATERAL BX TURN OUT #5 (L) COMB. W/ THRESHER X-ING   STA.1+693.46– 1+703.58",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL BX",
+        "station": "STA 1+690.2",
+        "station_m": 1690.16,
+        "offset_m": 0.88,
+        "ele": 28.08,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00207.jpg",
+        "elevation_m": 28.08,
+        "photo_filename": "DSC00207.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00207.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.385918,
+          13.042237
+        ]
+      },
+      "properties": {
+        "id": 76,
+        "name": "CALOCMUY BAYUIN IA LATERAL BX THRESHER X-ING  STA.1+874.48– 1+881.82",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL BX",
+        "station": "STA 1+875.9",
+        "station_m": 1875.93,
+        "offset_m": 8.83,
+        "ele": 27.3,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00208.jpg",
+        "elevation_m": 27.3,
+        "photo_filename": "DSC00208.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00208.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.432009,
+          13.038128
+        ]
+      },
+      "properties": {
+        "id": 101,
+        "name": "NABUSLOT IA MAIN CANAL #1 TURN OUT #14 (R) STA. 6+223",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 6+212.5",
+        "station_m": 6212.52,
+        "offset_m": 6.97,
+        "ele": 29.08,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00134.jpg",
+        "elevation_m": 29.08,
+        "photo_filename": "DSC00134.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00134.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.433064,
+          13.039825
+        ]
+      },
+      "properties": {
+        "id": 102,
+        "name": "NABUSLOT IA MAIN CANAL #1 TURN OUT #15 (L) (STA. 6+455.39)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 6+442.3",
+        "station_m": 6442.28,
+        "offset_m": 8.09,
+        "ele": 27.65,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00135.jpg",
+        "elevation_m": 27.65,
+        "photo_filename": "DSC00135.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00135.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.433245,
+          13.039865
+        ]
+      },
+      "properties": {
+        "id": 103,
+        "name": "NABUSLOT IA MAIN CANAL #1 TURN OUT #16 (L) (STA. 6+477.50)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 6+462.4",
+        "station_m": 6462.39,
+        "offset_m": 7.24,
+        "ele": 29.12,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00137.jpg",
+        "elevation_m": 29.12,
+        "photo_filename": "DSC00137.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00137.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.436503,
+          13.042285
+        ]
+      },
+      "properties": {
+        "id": 105,
+        "name": "NABUSLOT IA MAIN CANAL #1 TURN OUT #17 (L) COMB. W/ THRESHER X-ING (STA. 6+971.80 – 6+972.51-6+986)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 6+949.6",
+        "station_m": 6949.55,
+        "offset_m": 0.87,
+        "ele": 28.32,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00140.jpg",
+        "elevation_m": 28.32,
+        "photo_filename": "DSC00140.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00140.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.437721,
+          13.0441
+        ]
+      },
+      "properties": {
+        "id": 107,
+        "name": "NABUSLOT IA MAIN CANAL #1 TURN OUT #19 (L) (STA. 7+226.40)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 7+206.2",
+        "station_m": 7206.25,
+        "offset_m": 4.62,
+        "ele": 27.23,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00145.jpg",
+        "elevation_m": 27.23,
+        "photo_filename": "DSC00145.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00145.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4372,
+          13.043663
+        ]
+      },
+      "properties": {
+        "id": 106,
+        "name": "NABUSLOT IA MAIN CANAL #1 TURN OUT #18 (R) (STA. 7+149.83)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 7+129.4",
+        "station_m": 7129.44,
+        "offset_m": 0.38,
+        "ele": 26.59,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00143.jpg",
+        "elevation_m": 26.59,
+        "photo_filename": "DSC00143.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00143.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.440647,
+          13.044018
+        ]
+      },
+      "properties": {
+        "id": 109,
+        "name": "NABUSLOT IA MAIN CANAL #1 TURN OUT #21 (L) (STA. 7+552.50)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 7+532.0",
+        "station_m": 7531.97,
+        "offset_m": 1.56,
+        "ele": 23.61,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00147.jpg",
+        "elevation_m": 23.61,
+        "photo_filename": "DSC00147.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00147.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.442272,
+          13.043658
+        ]
+      },
+      "properties": {
+        "id": 110,
+        "name": "NABUSLOT IA MAIN CANAL #1 TURN OUT #22 (L) (STA. 7+761)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 7+719.5",
+        "station_m": 7719.48,
+        "offset_m": 0.06,
+        "ele": 24.19,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00148.jpg",
+        "elevation_m": 24.19,
+        "photo_filename": "DSC00148.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00148.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.442564,
+          13.043535
+        ]
+      },
+      "properties": {
+        "id": 111,
+        "name": "NABUSLOT IA MAIN CANAL #1 THRESHER X-ING (STA. 7+768.58 - 8+785)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 7+754.8",
+        "station_m": 7754.83,
+        "offset_m": 1.51,
+        "ele": 25.92,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00149.jpg",
+        "elevation_m": 25.92,
+        "photo_filename": "DSC00149.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00149.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.445362,
+          13.042017
+        ]
+      },
+      "properties": {
+        "id": 112,
+        "name": "NABUSLOT IA MAIN CANAL #1 TURN OUT #23 (R) (STA. 8+121.50)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 8+101.5",
+        "station_m": 8101.47,
+        "offset_m": 2.36,
+        "ele": 22.05,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00151.jpg",
+        "elevation_m": 22.05,
+        "photo_filename": "DSC00151.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00151.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.462286,
+          13.042061
+        ]
+      },
+      "properties": {
+        "id": 120,
+        "name": "STA, RITA IA LATERAL D TURN OUT #5(R) COMB W/ THRESHER X-ING & SUPPLY CANAL STA. 1+785.49- 1+690.05- 1+810.14",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL D",
+        "station": "STA 1+805.5",
+        "station_m": 1805.54,
+        "offset_m": 1.11,
+        "ele": 16.09,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00251.jpg",
+        "elevation_m": 16.09,
+        "photo_filename": "DSC00251.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00251.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.454136,
+          13.043144
+        ]
+      },
+      "properties": {
+        "id": 116,
+        "name": "STA, RITA IA LATERAL D TURN OUT #2(R) COMB W/ THRESHER X-ING\tSTA.0+890.52 -0+904.18",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL D",
+        "station": "STA 0+891.4",
+        "station_m": 891.38,
+        "offset_m": 0.16,
+        "ele": 19.78,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00246.jpg",
+        "elevation_m": 19.78,
+        "photo_filename": "DSC00246.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00246.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.458371,
+          13.042645
+        ]
+      },
+      "properties": {
+        "id": 117,
+        "name": "STA, RITA IA LATERAL D TURN OUT #3(R) COMB W/ THRESHER X-ING\tSTA. 1+356.89 -1+363",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL D",
+        "station": "STA 1+367.8",
+        "station_m": 1367.85,
+        "offset_m": 1.54,
+        "ele": 17.34,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00247.jpg",
+        "elevation_m": 17.34,
+        "photo_filename": "DSC00247.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00247.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.46041,
+          13.042019
+        ]
+      },
+      "properties": {
+        "id": 118,
+        "name": "STA, RITA IA LATERAL D TURN OUT #4(R) STA. 1+584.50",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL D",
+        "station": "STA 1+599.9",
+        "station_m": 1599.88,
+        "offset_m": 2.55,
+        "ele": 19.04,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00249.jpg",
+        "elevation_m": 19.04,
+        "photo_filename": "DSC00249.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00249.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.463936,
+          13.042448
+        ]
+      },
+      "properties": {
+        "id": 121,
+        "name": "STA, RITA IA LATERAL D TURN OUT #6(R)  STA. 1+993.40",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL D",
+        "station": "STA 1+991.9",
+        "station_m": 1991.9,
+        "offset_m": 2.46,
+        "ele": 13.66,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00252.jpg",
+        "elevation_m": 13.66,
+        "photo_filename": "DSC00252.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00252.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.46771,
+          13.039118
+        ]
+      },
+      "properties": {
+        "id": 123,
+        "name": "STA, RITA IA LATERAL D ROAD X-ING\tSTA. 2+545.44- 2+554.11",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL D",
+        "station": "STA 2+550.2",
+        "station_m": 2550.25,
+        "offset_m": 0.85,
+        "ele": 14.34,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00254.jpg",
+        "elevation_m": 14.34,
+        "photo_filename": "DSC00254.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00254.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.472372,
+          13.030416
+        ]
+      },
+      "properties": {
+        "id": 127,
+        "name": "STA, RITA IA LATERAL D THRESHER X-ING   STA. 3+644.58- 3+651.75",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL D",
+        "station": "STA 3+643.8",
+        "station_m": 3643.8,
+        "offset_m": 3.06,
+        "ele": 10.9,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00258.jpg",
+        "elevation_m": 10.9,
+        "photo_filename": "DSC00258.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00258.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.467902,
+          13.038913
+        ]
+      },
+      "properties": {
+        "id": 124,
+        "name": "STA, RITA IA LATERAL D TURN OUT #8&9(L&R) COMB W/ DROP STR\tSTA. 2+581- 2+589.18",
+        "type": "Drop",
+        "Structure_Category": "Drop",
+        "canal_name": "LATERAL D",
+        "station": "STA 2+581.0",
+        "station_m": 2581.02,
+        "offset_m": 1.94,
+        "ele": 14.67,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00255.jpg",
+        "elevation_m": 14.67,
+        "photo_filename": "DSC00255.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00255.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.470583,
+          13.034088
+        ]
+      },
+      "properties": {
+        "id": 125,
+        "name": "STA, RITA IA LATERAL D THRESHER X-ING  STA. 3+190.36- 3+199.34",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL D",
+        "station": "STA 3+193.1",
+        "station_m": 3193.06,
+        "offset_m": 1.17,
+        "ele": 12.27,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00256.jpg",
+        "elevation_m": 12.27,
+        "photo_filename": "DSC00256.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00256.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.473156,
+          13.028757
+        ]
+      },
+      "properties": {
+        "id": 128,
+        "name": "STA, RITA IA LATERAL D THRESHER X-ING   STA. 3+838.86- 3+848.84",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL D",
+        "station": "STA 3+846.0",
+        "station_m": 3846,
+        "offset_m": 1.48,
+        "ele": 13.57,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00259.jpg",
+        "elevation_m": 13.57,
+        "photo_filename": "DSC00259.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00259.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.428579,
+          13.048449
+        ]
+      },
+      "properties": {
+        "id": 83,
+        "name": "BANG BANG IA LATERAL B ROAD X-ING  STA.1+545.61 – 1+566.51",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 1+519.5",
+        "station_m": 1519.52,
+        "offset_m": 0.92,
+        "ele": 33.41,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00107.jpg",
+        "elevation_m": 33.41,
+        "photo_filename": "DSC00107.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00107.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-27"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.474193,
+          13.026514
+        ]
+      },
+      "properties": {
+        "id": 129,
+        "name": "STA, RITA IA LATERAL D END OF EXISTING CANAL   STA. 4+121.96",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "LATERAL D",
+        "station": "STA 4+118.4",
+        "station_m": 4118.44,
+        "offset_m": 0.29,
+        "ele": 13.33,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00260.jpg",
+        "elevation_m": 13.33,
+        "photo_filename": "DSC00260.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00260.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.42667,
+          13.045007
+        ]
+      },
+      "properties": {
+        "id": 81,
+        "name": "BANG BANG IALATERAL B TURN OUT #1&2 (L&R) COMB W/ THRESHER X-ING  STA.1+073.82 – 1+079.73 – 1+087.67",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 1+079.3",
+        "station_m": 1079.35,
+        "offset_m": 1.94,
+        "ele": 36.21,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00104.jpg",
+        "elevation_m": 36.21,
+        "photo_filename": "DSC00104.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00104.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-27"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.427493,
+          13.046353
+        ]
+      },
+      "properties": {
+        "id": 82,
+        "name": "BANG BANG IA LATERAL B TURN OUT #3 (R) W/ THRESHER X-ING   STA.1+261.67 – 1+273.00",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 1+254.1",
+        "station_m": 1254.06,
+        "offset_m": 2.81,
+        "ele": 36,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00106.jpg",
+        "elevation_m": 36,
+        "photo_filename": "DSC00106.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00106.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-27"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.403094,
+          13.034127
+        ]
+      },
+      "properties": {
+        "id": 58,
+        "name": "CALOCMUY BAYUIN IA MAIN CANAL #2 TURN OUT #5(L)  (STA. 2+244.50)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 2+254.1",
+        "station_m": 2254.14,
+        "offset_m": 3.72,
+        "ele": 143.34,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00188.jpg",
+        "elevation_m": 143.34,
+        "photo_filename": "DSC00188.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00188.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.437939,
+          13.06101
+        ]
+      },
+      "properties": {
+        "id": 88,
+        "name": "BACUNGAN IA LATERAL B TURN OUT #11 (R)  STA.3+396.67",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B",
+        "station": "STA 3+403.4",
+        "station_m": 3403.41,
+        "offset_m": 2.16,
+        "ele": 27.41,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00114.jpg",
+        "elevation_m": 27.41,
+        "photo_filename": "DSC00114.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00114.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-27"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.440252,
+          13.062515
+        ]
+      },
+      "properties": {
+        "id": 89,
+        "name": "BACUNGAN IA LATERAL B TURN OUT #12 (L) COMB W/ THRESHER X-ING  STA.3+690.19 –3+707.88",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 3+709.6",
+        "station_m": 3709.6,
+        "offset_m": 0.67,
+        "ele": 24.08,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00119.jpg",
+        "elevation_m": 24.08,
+        "photo_filename": "DSC00119.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00119.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-27"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.399539,
+          13.041203
+        ]
+      },
+      "properties": {
+        "id": 62,
+        "name": "CALOCMUY BAYUIN MAIN CANAL #2 TURN OUT #11 (L)  (STA. 3+420.80)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 3+177.2",
+        "station_m": 3177.15,
+        "offset_m": 1.27,
+        "ele": 81.96,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00193.jpg",
+        "elevation_m": 81.96,
+        "photo_filename": "DSC00193.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00193.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.401066,
+          13.042965
+        ]
+      },
+      "properties": {
+        "id": 63,
+        "name": "CALOCMUY BAYUIN MAIN IA CANAL #2 TURN OUT #12 (R)  STA. 3+512.66",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 3+432.9",
+        "station_m": 3432.92,
+        "offset_m": 1.04,
+        "ele": 73.72,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00194.jpg",
+        "elevation_m": 73.72,
+        "photo_filename": "DSC00194.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00194.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.40529,
+          13.047798
+        ]
+      },
+      "properties": {
+        "id": 66,
+        "name": "CALOCMUY BAYUIN IA MAIN CANAL #2 TURN OUT #14 (L)\tSTA. 4+114.44",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC2 MFD (CANAL 732)",
+        "station": "STA 0+001.7",
+        "station_m": 1.67,
+        "offset_m": 0.33,
+        "ele": 24.06,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00197.jpg",
+        "elevation_m": 24.06,
+        "photo_filename": "DSC00197.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00197.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.40194,
+          13.043955
+        ]
+      },
+      "properties": {
+        "id": 64,
+        "name": "CALOCMUY BAYUIN IA MAIN CANAL #2 TURN OUT #13 (L) COMB. W/ THRESHER X-ING  STA. 3+563.39 – 3+579",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 3+577.8",
+        "station_m": 3577.75,
+        "offset_m": 3.16,
+        "ele": 68.01,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00195.jpg",
+        "elevation_m": 68.01,
+        "photo_filename": "DSC00195.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00195.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.403421,
+          13.045653
+        ]
+      },
+      "properties": {
+        "id": 65,
+        "name": "CALOCMUY BAYUIN IA MAIN CANAL #2 SIPHON #2  STA. 3+810.80 – 3+870.88",
+        "type": "Siphon",
+        "Structure_Category": "Siphon",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 3+824.9",
+        "station_m": 3824.86,
+        "offset_m": 8.25,
+        "ele": 22.56,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00196.jpg",
+        "elevation_m": 22.56,
+        "photo_filename": "DSC00196.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00196.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.405335,
+          13.047768
+        ]
+      },
+      "properties": {
+        "id": 67,
+        "name": "CALOCMUY BAYUIN IA MAIN CANAL #2 ROAD X-ING   STA. 4+128.38 – 4+135.10",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 4+137.8",
+        "station_m": 4137.76,
+        "offset_m": 4.18,
+        "ele": 23.55,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00198.jpg",
+        "elevation_m": 23.55,
+        "photo_filename": "DSC00198.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00198.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.415726,
+          13.053368
+        ]
+      },
+      "properties": {
+        "id": 79,
+        "name": "CALOCMOY BAYUIN IA MAIN CANAL #2 ROAD X-ING  STA. 5+488.22 – 5+509",
+        "type": "Other Structures",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 5+496.4",
+        "station_m": 5496.37,
+        "offset_m": 2.97,
+        "ele": 25.13,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00211.jpg",
+        "elevation_m": 25.13,
+        "photo_filename": "DSC00211.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00211.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.400075,
+          13.036932
+        ]
+      },
+      "properties": {
+        "id": 68,
+        "name": "CALOCMUY BAYUIN IA LATERAL BX PARSHAL FLUME  STA.0+046.16– 0+051.21",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "LATERAL BX",
+        "station": "STA 0+038.9",
+        "station_m": 38.86,
+        "offset_m": 2.46,
+        "ele": 24.96,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00199.jpg",
+        "elevation_m": 24.96,
+        "photo_filename": "DSC00199.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00199.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.401918,
+          13.034979
+        ]
+      },
+      "properties": {
+        "id": 59,
+        "name": "CALOCMUY BAYUIN IA MAIN CANAL #2 TURN OUT #6(R)\t(STA. 2+410.10)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC2 MFD (CANAL 724)",
+        "station": "STA 0+001.4",
+        "station_m": 1.45,
+        "offset_m": 1.04,
+        "ele": 122.77,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00189.jpg",
+        "elevation_m": 122.77,
+        "photo_filename": "DSC00189.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00189.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.399007,
+          13.036385
+        ]
+      },
+      "properties": {
+        "id": 69,
+        "name": "CALOCMUY BAYUIN IA LATERAL BX ROAD X-ING\tSTA.0+175.85",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL BX",
+        "station": "STA 0+169.9",
+        "station_m": 169.9,
+        "offset_m": 4.82,
+        "ele": 24.38,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00200.jpg",
+        "elevation_m": 24.38,
+        "photo_filename": "DSC00200.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00200.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.411751,
+          13.018012
+        ]
+      },
+      "properties": {
+        "id": 177,
+        "name": "STA MARIA PAGALAGALA IA MAIN CANAL #2 PARSHALL FLUME (STA. 0+040- 0+ 048.50)",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 0+043.5",
+        "station_m": 43.46,
+        "offset_m": 2.38,
+        "ele": 30.78,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00172.jpg",
+        "elevation_m": 30.78,
+        "photo_filename": "DSC00172.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00172.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.406525,
+          13.02812
+        ]
+      },
+      "properties": {
+        "id": 173,
+        "name": "STA MARIA PAGALAGALA IA MAIN CANAL #2 THRESHER X-ING (STA. 1+464.85- 1+475.89)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 1+464.6",
+        "station_m": 1464.62,
+        "offset_m": 4.42,
+        "ele": 18.89,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00168.jpg",
+        "elevation_m": 18.89,
+        "photo_filename": "DSC00168.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00168.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.40937,
+          13.025069
+        ]
+      },
+      "properties": {
+        "id": 171,
+        "name": "STA MARIA PAGALAGALA IA MAIN CANAL #2 THRESHER X-ING (STA. 1+069.14- 1+017.34)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 1+005.0",
+        "station_m": 1005,
+        "offset_m": 4.32,
+        "ele": 17.46,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00166.jpg",
+        "elevation_m": 17.46,
+        "photo_filename": "DSC00166.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00166.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.407304,
+          13.027082
+        ]
+      },
+      "properties": {
+        "id": 172,
+        "name": "STA MARIA PAGALAGALA IA MAIN CANAL #2 TURN OUT #3 (R) (STA. 1+326.32)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 1+321.2",
+        "station_m": 1321.22,
+        "offset_m": 2.46,
+        "ele": 18.34,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00167.jpg",
+        "elevation_m": 18.34,
+        "photo_filename": "DSC00167.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00167.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.448592,
+          13.067309
+        ]
+      },
+      "properties": {
+        "id": 196,
+        "name": "BACUNGAN IA LATERAL B SIPHON  STA.4+837.23 – 4+856.67",
+        "type": "Siphon",
+        "Structure_Category": "Siphon",
+        "canal_name": "LATERAL B",
+        "station": "STA 4+852.2",
+        "station_m": 4852.18,
+        "offset_m": 4.25,
+        "ele": 26.57,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00125.jpg",
+        "elevation_m": 26.57,
+        "photo_filename": "DSC00125.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00125.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.406233,
+          13.028644
+        ]
+      },
+      "properties": {
+        "id": 174,
+        "name": "STA. MARIA - PAGALAGALA IA MAIN CANAL #2 TURN OUT #4 (R) COMB. W/ ROAD X-ING (STA. 1+530.76- 1+539)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 1+530.5",
+        "station_m": 1530.51,
+        "offset_m": 0.21,
+        "ele": 26.42,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00169.jpg",
+        "elevation_m": 26.42,
+        "photo_filename": "DSC00169.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00169.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.451962,
+          13.046974
+        ]
+      },
+      "properties": {
+        "id": 134,
+        "name": "PALAYAN IA LATERAL E TURN OUT #3(L) COMB W/ THRESHER X-ING\tSTA. 1+003.20- 1+004.82- 1+017.09",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL E",
+        "station": "STA 1+011.5",
+        "station_m": 1011.47,
+        "offset_m": 4.45,
+        "ele": 28.83,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00268.jpg",
+        "elevation_m": 28.83,
+        "photo_filename": "DSC00268.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00268.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.44635,
+          13.042252
+        ]
+      },
+      "properties": {
+        "id": 132,
+        "name": "PALAYAN IA LATERAL E PARSHAL FLUME  STA. 0+053.50",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "LATERAL E",
+        "station": "STA 0+051.7",
+        "station_m": 51.71,
+        "offset_m": 3.84,
+        "ele": 31.1,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00264.jpg",
+        "elevation_m": 31.1,
+        "photo_filename": "DSC00264.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00264.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.453782,
+          13.049401
+        ]
+      },
+      "properties": {
+        "id": 136,
+        "name": "PALAYAN IA LATERAL E HD. GATE LAT. E-1 COMB W/ T.O #4(R) &ROAD X-ING  STA. 1+367.69- 1+371",
+        "type": "Road Crossing",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL E1",
+        "station": "STA 0+003.3",
+        "station_m": 3.33,
+        "offset_m": 2.23,
+        "ele": 23.78,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00270.jpg",
+        "elevation_m": 23.78,
+        "photo_filename": "DSC00270.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00270.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.453689,
+          13.049247
+        ]
+      },
+      "properties": {
+        "id": 135,
+        "name": "PALAYAN IA LATERAL E ROAD X-ING   STA. 1+340.70- 1+352.88",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL E",
+        "station": "STA 1+348.6",
+        "station_m": 1348.64,
+        "offset_m": 3.93,
+        "ele": 25.16,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00269.jpg",
+        "elevation_m": 25.16,
+        "photo_filename": "DSC00269.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00269.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.454172,
+          13.050433
+        ]
+      },
+      "properties": {
+        "id": 137,
+        "name": "PANGULAYAN ANOLING IA LATERAL E TURN OUT #5(R)  STA. 1+483.75",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL E",
+        "station": "STA 1+489.7",
+        "station_m": 1489.65,
+        "offset_m": 1.31,
+        "ele": 11,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00271.jpg",
+        "elevation_m": 11,
+        "photo_filename": "DSC00271.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00271.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.454609,
+          13.051907
+        ]
+      },
+      "properties": {
+        "id": 138,
+        "name": "PANGULAYAN IA ANOLING LATERAL E TURN OUT #6(R)  STA. 1+656",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL E",
+        "station": "STA 1+660.5",
+        "station_m": 1660.53,
+        "offset_m": 1.4,
+        "ele": 16.27,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00272.jpg",
+        "elevation_m": 16.27,
+        "photo_filename": "DSC00272.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00272.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.454795,
+          13.053031
+        ]
+      },
+      "properties": {
+        "id": 140,
+        "name": "PANGULAYAN ANOLING IA LATERAL E TURN OUT #8(L) COMB W/ THRESHER X-ING  STA. 1+780.79- 1+781.79- 1+792.26",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL E",
+        "station": "STA 1+788.0",
+        "station_m": 1788.03,
+        "offset_m": 3.98,
+        "ele": 17.26,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00274.jpg",
+        "elevation_m": 17.26,
+        "photo_filename": "DSC00274.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00274.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.455374,
+          13.054919
+        ]
+      },
+      "properties": {
+        "id": 141,
+        "name": "PANGULAYAN ANOLING IA LATERAL E TURN OUT #9(R)   STA.2+001.94",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL E",
+        "station": "STA 2+006.0",
+        "station_m": 2006.01,
+        "offset_m": 4.72,
+        "ele": 17.26,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00275.jpg",
+        "elevation_m": 17.26,
+        "photo_filename": "DSC00275.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00275.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.458211,
+          13.058916
+        ]
+      },
+      "properties": {
+        "id": 143,
+        "name": "PANGULAYAN ANOLING IA LATERAL E TURN OUT #12(R) COMB W/ THRESHER X-ING  STA.2+621.70- 2+625- 2+632.50",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL E",
+        "station": "STA 2+630.7",
+        "station_m": 2630.65,
+        "offset_m": 4.92,
+        "ele": 16.86,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00277.jpg",
+        "elevation_m": 16.86,
+        "photo_filename": "DSC00277.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00277.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.464219,
+          13.061727
+        ]
+      },
+      "properties": {
+        "id": 145,
+        "name": "PANGULAYAN ANOLING IA LATERAL E CHECKGATE STR  STA.3+425.25- 3+427.77",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL E",
+        "station": "STA 3+417.5",
+        "station_m": 3417.49,
+        "offset_m": 4.73,
+        "ele": 12.78,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00279.jpg",
+        "elevation_m": 12.78,
+        "photo_filename": "DSC00279.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00279.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.465548,
+          13.061855
+        ]
+      },
+      "properties": {
+        "id": 147,
+        "name": "PANGULAYAN ANOLING IA LATERAL E THRESHER X-ING   STA.3+569.50- 3+379",
+        "type": "Road Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL E",
+        "station": "STA 3+562.0",
+        "station_m": 3561.99,
+        "offset_m": 7.98,
+        "ele": 15.56,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00283.jpg",
+        "elevation_m": 15.56,
+        "photo_filename": "DSC00283.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00283.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.469123,
+          13.062625
+        ]
+      },
+      "properties": {
+        "id": 151,
+        "name": "PANGULAYAN ANOLING LATERAL E TURN OUT #15 (R)  STA.3+970.89",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL E",
+        "station": "STA 3+961.7",
+        "station_m": 3961.66,
+        "offset_m": 3.26,
+        "ele": 17.95,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00290.jpg",
+        "elevation_m": 17.95,
+        "photo_filename": "DSC00290.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00290.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.454226,
+          13.049522
+        ]
+      },
+      "properties": {
+        "id": 152,
+        "name": "CACAWAN IA LATERAL E1 PARSHALL FLUME STA.0+014",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "LATERAL E1",
+        "station": "STA 0+053.3",
+        "station_m": 53.27,
+        "offset_m": 1.94,
+        "ele": 17.23,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00291.jpg",
+        "elevation_m": 17.23,
+        "photo_filename": "DSC00291.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00291.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.456643,
+          13.049077
+        ]
+      },
+      "properties": {
+        "id": 154,
+        "name": "CACAWAN IA LATERAL E1 TURN OUT #1 (R)  STA.0+334.88",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL E1",
+        "station": "STA 0+337.7",
+        "station_m": 337.7,
+        "offset_m": 1.03,
+        "ele": 18.27,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00293.jpg",
+        "elevation_m": 18.27,
+        "photo_filename": "DSC00293.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00293.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.454693,
+          13.04967
+        ]
+      },
+      "properties": {
+        "id": 153,
+        "name": "CACAWAN IA LATERAL E1 THRESHER X-ING  STA.0+102.08- 0+108.25",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL E1",
+        "station": "STA 0+106.4",
+        "station_m": 106.41,
+        "offset_m": 1.23,
+        "ele": 18.89,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00292.jpg",
+        "elevation_m": 18.89,
+        "photo_filename": "DSC00292.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00292.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.459187,
+          13.048845
+        ]
+      },
+      "properties": {
+        "id": 155,
+        "name": "CACAWAN IA LATERAL E1 THRESHER X-ING  STA.0+612.98- 0+626.26",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL E1",
+        "station": "STA 0+617.2",
+        "station_m": 617.19,
+        "offset_m": 1.1,
+        "ele": 18.3,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00295.jpg",
+        "elevation_m": 18.3,
+        "photo_filename": "DSC00295.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00295.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.463393,
+          13.048807
+        ]
+      },
+      "properties": {
+        "id": 157,
+        "name": "CACAWAN IA LATERAL E1 TURN OUT #2 (R) COMB. W/ ROAD X-ING\tSTA.1+156.86- 1+169.52",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL E1",
+        "station": "STA 1+167.8",
+        "station_m": 1167.8,
+        "offset_m": 1.44,
+        "ele": 16.22,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00297.jpg",
+        "elevation_m": 16.22,
+        "photo_filename": "DSC00297.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00297.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.46483,
+          13.049713
+        ]
+      },
+      "properties": {
+        "id": 158,
+        "name": "CACAWAN IA LATERAL E1 TUR OUT # 3 (L) COMB. W/ ROAD X-ING  STA.1+339.95- 1+349.31",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL E1",
+        "station": "STA 1+352.8",
+        "station_m": 1352.8,
+        "offset_m": 4.93,
+        "ele": 14.4,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00298.jpg",
+        "elevation_m": 14.4,
+        "photo_filename": "DSC00298.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00298.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.478688,
+          13.049771
+        ]
+      },
+      "properties": {
+        "id": 162,
+        "name": "CACAWAN IA LATERAL E1 TUR OUT # 7 (R) COMB. W/ THRESHER x-ING\tSTA.2+945.87- 2+956.15",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL E1",
+        "station": "STA 2+960.2",
+        "station_m": 2960.22,
+        "offset_m": 1.75,
+        "ele": 20.81,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00302.jpg",
+        "elevation_m": 20.81,
+        "photo_filename": "DSC00302.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00302.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.472533,
+          13.049344
+        ]
+      },
+      "properties": {
+        "id": 160,
+        "name": "CACAWAN IA LATERAL E1 TUR OUT # 6 (R) COMB. W/ THRESHER x-ING  STA.2+239.73- 2+247.14",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL E1",
+        "station": "STA 2+251.9",
+        "station_m": 2251.92,
+        "offset_m": 2.9,
+        "ele": 20.7,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00300.jpg",
+        "elevation_m": 20.7,
+        "photo_filename": "DSC00300.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00300.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.47568,
+          13.048861
+        ]
+      },
+      "properties": {
+        "id": 161,
+        "name": "CACAWAN IA LATERAL E1 ROAD X-ING\tSTA.2+599.87- 2+608.29",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL E1",
+        "station": "STA 2+611.6",
+        "station_m": 2611.55,
+        "offset_m": 0.13,
+        "ele": 19.46,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00301.jpg",
+        "elevation_m": 19.46,
+        "photo_filename": "DSC00301.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00301.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.482683,
+          13.0509
+        ]
+      },
+      "properties": {
+        "id": 164,
+        "name": "CACAWAN IA LATERAL E1ROAD X-ING\tSTA.3+406.57- 3+414.52",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL E1",
+        "station": "STA 3+414.0",
+        "station_m": 3414.04,
+        "offset_m": 1.43,
+        "ele": 18.94,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00305.jpg",
+        "elevation_m": 18.94,
+        "photo_filename": "DSC00305.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00305.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.482804,
+          13.050936
+        ]
+      },
+      "properties": {
+        "id": 165,
+        "name": "CACAWAN IA LATERAL E1 TURN OUT #9&10 (L&R)  STA.3+420.88",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL E1",
+        "station": "STA 3+427.8",
+        "station_m": 3427.83,
+        "offset_m": 1.12,
+        "ele": 17.2,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00306.jpg",
+        "elevation_m": 17.2,
+        "photo_filename": "DSC00306.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00306.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.483403,
+          13.051047
+        ]
+      },
+      "properties": {
+        "id": 168,
+        "name": "CACAWAN IA LATERAL E1 TURN OUT #11\tSTA.3+487.00",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL E1",
+        "station": "STA 3+493.9",
+        "station_m": 3493.9,
+        "offset_m": 3.74,
+        "ele": 14.45,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00307.jpg",
+        "elevation_m": 14.45,
+        "photo_filename": "DSC00307.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00307.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.404763,
+          13.03184
+        ]
+      },
+      "properties": {
+        "id": 175,
+        "name": "STA. MARIA PAGALAGALA IA PAGALAGALA IA MAIN CANAL #2 SIPHON#1  (STA. 1+922-2+036.15)",
+        "type": "Siphon",
+        "Structure_Category": "Siphon",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 1+921.8",
+        "station_m": 1921.75,
+        "offset_m": 1.92,
+        "ele": 27.19,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00170.jpg",
+        "elevation_m": 27.19,
+        "photo_filename": "DSC00170.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00170.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.484534,
+          13.051329
+        ]
+      },
+      "properties": {
+        "id": 167,
+        "name": "CACAWAN IA LATERAL E1 END OF EXISTING CANAL (STA.3+613.28)",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "DRAINAGE CANAL (CANAL 741)",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 3,
+        "ele": 15.5,
+        "desc": "",
+        "comment": "Drainage Interface: Acts as physical Terminus of Cacawan IA Lateral E1 (STA 3+613.28) and serves as inflow origin (STA 0+000) for DRAINAGE CANAL 741 flowing downhill to natural outfall.",
+        "images": "../IMAGE/LATERAL E1/DSC00308.jpg",
+        "elevation_m": 15.5,
+        "photo_filename": "DSC00308.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00308.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23",
+        "drainage_interface": "DRAINAGE CANAL 741"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.441865,
+          13.062954
+        ]
+      },
+      "properties": {
+        "id": 169,
+        "name": "BACUNGAN IA LATERAL B TURN OUT #13(R)  STA.3+886.03",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B",
+        "station": "STA 3+891.2",
+        "station_m": 3891.23,
+        "offset_m": 4.41,
+        "ele": 26.26,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00116.jpg",
+        "elevation_m": 26.26,
+        "photo_filename": "DSC00116.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00116.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-27"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.477651,
+          13.069224
+        ]
+      },
+      "properties": {
+        "id": 229,
+        "name": "BULI IA LATERAL B END OF EXISTING CANAL  STA.2+738.79",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "LAT-B1 MFD (CANAL 718)",
+        "station": "STA 0+386.2",
+        "station_m": 386.24,
+        "offset_m": 41.22,
+        "ele": 10.93,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00160.jpg",
+        "elevation_m": 10.93,
+        "photo_filename": "DSC00160.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00160.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.412587,
+          13.02253
+        ]
+      },
+      "properties": {
+        "id": 178,
+        "name": "PAGALAGALA IA LATERAL AX PARSHALL FLUME  STA. 0+040 – 0+046.60",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "LATERAL AX",
+        "station": "STA 0+042.1",
+        "station_m": 42.09,
+        "offset_m": 1.12,
+        "ele": 28.15,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00173.jpg",
+        "elevation_m": 28.15,
+        "photo_filename": "DSC00173.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00173.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.411581,
+          13.027255
+        ]
+      },
+      "properties": {
+        "id": 179,
+        "name": "PAGALAGALA IA  LATERAL AX TURN OUT #1&2 (L&R) COMB W/ ROAD X-ING \tSTA.0+609.13 – 0+612.86 – 0+620.86",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL AX",
+        "station": "STA 0+576.1",
+        "station_m": 576.14,
+        "offset_m": 1.95,
+        "ele": 25.72,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00174.jpg",
+        "elevation_m": 25.72,
+        "photo_filename": "DSC00174.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00174.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.416077,
+          13.044052
+        ]
+      },
+      "properties": {
+        "id": 190,
+        "name": "PAGALAGALA LATERAL AX END OF EXISTING CANAL (STA. 2+980.09)",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "DRAINAGE CANAL (CANAL 736)",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 2.93,
+        "ele": 32.89,
+        "desc": "",
+        "comment": "Drainage Interface: Acts as physical Terminus of Pagalagala Lateral AX (STA 2+980.09) and serves as inflow origin (STA 0+000) for DRAINAGE CANAL 736 flowing downhill to natural outfall.",
+        "images": "../IMAGE/LATERAL AX/DSC00186.jpg",
+        "elevation_m": 32.89,
+        "photo_filename": "DSC00186.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00186.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30",
+        "drainage_interface": "DRAINAGE CANAL 736"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.417197,
+          13.014213
+        ]
+      },
+      "properties": {
+        "id": 244,
+        "name": "PAMBISAN CALINGAG IA LATERAL A TURN OUT #3 (R) COMB W/ THRESHER X-ING STA.0+590.70 – 0+597.60",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+594.1",
+        "station_m": 594.1,
+        "offset_m": 0.14,
+        "ele": 33.27,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/",
+        "elevation_m": 33.27,
+        "photo_filename": "",
+        "photo_path": "../IMAGE/LATERAL AX/",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.417301,
+          13.014251
+        ]
+      },
+      "properties": {
+        "id": 234,
+        "name": "PAMBISAN CALINGAG IA LATERAL A TURN OUT #4 (R) STA.0+615.60",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+606.1",
+        "station_m": 606.1,
+        "offset_m": 1.12,
+        "ele": 31.04,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00190.jpg",
+        "elevation_m": 31.04,
+        "photo_filename": "DSC00190.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00190.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.421267,
+          13.01575
+        ]
+      },
+      "properties": {
+        "id": 235,
+        "name": "PAMBISAN CALINGAG IA LATERAL A TURN OUT #5&6 (L&R) COMB W/ THRESHER X-ING \tSTA.1+064.66- 1+074.20",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL A",
+        "station": "STA 1+071.7",
+        "station_m": 1071.71,
+        "offset_m": 2.04,
+        "ele": 27.61,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00191.jpg",
+        "elevation_m": 27.61,
+        "photo_filename": "DSC00191.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00191.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.444432,
+          13.063886
+        ]
+      },
+      "properties": {
+        "id": 192,
+        "name": "BACUNGAN IA LATERAL B TURN OUT # 15(R)  STA.4+244.97",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B",
+        "station": "STA 4+254.2",
+        "station_m": 4254.18,
+        "offset_m": 0.38,
+        "ele": 40.77,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00121.jpg",
+        "elevation_m": 40.77,
+        "photo_filename": "DSC00121.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00121.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.448404,
+          13.067242
+        ]
+      },
+      "properties": {
+        "id": 195,
+        "name": "BACUNGAN IA LATERAL B TURN OUT #18&19 (L&R)  STA.4+818.38",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B",
+        "station": "STA 4+830.5",
+        "station_m": 4830.52,
+        "offset_m": 3.2,
+        "ele": 27.54,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00124.jpg",
+        "elevation_m": 27.54,
+        "photo_filename": "DSC00124.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00124.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.444667,
+          13.064028
+        ]
+      },
+      "properties": {
+        "id": 193,
+        "name": "BACUNGAN IA LATERAL B  TURN OUT # 16(R)  STA.4+275.95",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B",
+        "station": "STA 4+284.7",
+        "station_m": 4284.69,
+        "offset_m": 1.56,
+        "ele": 37.8,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00122.jpg",
+        "elevation_m": 37.8,
+        "photo_filename": "DSC00122.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00122.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.455539,
+          13.071172
+        ]
+      },
+      "properties": {
+        "id": 200,
+        "name": "ANOLING IA LATERAL B TURN OUT #22 (R) COMB W/ THRESHER X-ING  STA.5+747.47– 5+764.89",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 5+762.4",
+        "station_m": 5762.38,
+        "offset_m": 2.59,
+        "ele": 19.05,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00129.jpg",
+        "elevation_m": 19.05,
+        "photo_filename": "DSC00129.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00129.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.451862,
+          13.068563
+        ]
+      },
+      "properties": {
+        "id": 197,
+        "name": "BACUNGAN IA LATERAL B TURN OUT #20&21 (L&R) COMB W/ THRESHER X-ING  STA.5+221.80 – 5+231.72",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 5+233.6",
+        "station_m": 5233.64,
+        "offset_m": 1.97,
+        "ele": 21.85,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00126.jpg",
+        "elevation_m": 21.85,
+        "photo_filename": "DSC00126.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00126.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.456495,
+          13.075294
+        ]
+      },
+      "properties": {
+        "id": 203,
+        "name": "ANOLING IA LATERAL B TURN OUT #24 (R)  STA.6+255.30",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B",
+        "station": "STA 6+258.7",
+        "station_m": 6258.7,
+        "offset_m": 6.74,
+        "ele": 13.75,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00132.jpg",
+        "elevation_m": 13.75,
+        "photo_filename": "DSC00132.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00132.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.456521,
+          13.072916
+        ]
+      },
+      "properties": {
+        "id": 201,
+        "name": "ANOLING IA LATERAL B SUPPLY CANAL W/ ABANDONED T.O. STR.(R)\tSTA.5+979.72",
+        "type": "Intake",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B",
+        "station": "STA 5+982.7",
+        "station_m": 5982.72,
+        "offset_m": 0.39,
+        "ele": 15.86,
+        "desc": "fa",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00130.jpg",
+        "elevation_m": 15.86,
+        "photo_filename": "DSC00130.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00130.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.45613,
+          13.07697
+        ]
+      },
+      "properties": {
+        "id": 204,
+        "name": "ANOLING IA LATERAL B TURN OUT #25 (L)  STA.6+442.33",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B",
+        "station": "STA 6+449.6",
+        "station_m": 6449.57,
+        "offset_m": 1.47,
+        "ele": 11.05,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00134.jpg",
+        "elevation_m": 11.05,
+        "photo_filename": "DSC00134.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00134.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.45963,
+          13.080471
+        ]
+      },
+      "properties": {
+        "id": 206,
+        "name": "ANOLING IA LATERAL B TURN OUT #27 (R)  STA.6+999.60",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B",
+        "station": "STA 7+000.2",
+        "station_m": 7000.23,
+        "offset_m": 1.96,
+        "ele": 10.82,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00136.jpg",
+        "elevation_m": 10.82,
+        "photo_filename": "DSC00136.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00136.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.459593,
+          13.080607
+        ]
+      },
+      "properties": {
+        "id": 207,
+        "name": "ANOLING IA LATERAL B SIPHON #2  STA.7+013.79 – 7+032.46",
+        "type": "Siphon",
+        "Structure_Category": "Siphon",
+        "canal_name": "LATERAL B",
+        "station": "STA 7+017.4",
+        "station_m": 7017.45,
+        "offset_m": 2.35,
+        "ele": 8.15,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00138.jpg",
+        "elevation_m": 8.15,
+        "photo_filename": "DSC00138.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00138.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.460288,
+          13.101704
+        ]
+      },
+      "properties": {
+        "id": 217,
+        "name": "ANOLING IA LATERAL B  TURN OUT #38 (L) COMB W/ CHECK GATE  STA.9+492.53– 9+503.46",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL B",
+        "station": "STA 9+479.6",
+        "station_m": 9479.64,
+        "offset_m": 2.84,
+        "ele": 15.26,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00148.jpg",
+        "elevation_m": 15.26,
+        "photo_filename": "DSC00148.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00148.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.459655,
+          13.080736
+        ]
+      },
+      "properties": {
+        "id": 208,
+        "name": "ANOLING IA LATERAL B SUPPLY CANAL CHECK GATE  STA.7+032.46",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL B",
+        "station": "STA 7+029.8",
+        "station_m": 7029.81,
+        "offset_m": 8.56,
+        "ele": 9.92,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00139.jpg",
+        "elevation_m": 9.92,
+        "photo_filename": "DSC00139.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00139.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.458389,
+          13.090566
+        ]
+      },
+      "properties": {
+        "id": 210,
+        "name": "ANOLING IA LATERAL B TURN OUT #28&29 (L&R) COMB W/ CHECK GATE  STA.8+211.71– 8+217.82",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL B",
+        "station": "STA 8+207.4",
+        "station_m": 8207.43,
+        "offset_m": 0.91,
+        "ele": 15.67,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00141.jpg",
+        "elevation_m": 15.67,
+        "photo_filename": "DSC00141.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00141.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.458431,
+          13.091769
+        ]
+      },
+      "properties": {
+        "id": 211,
+        "name": "ANOLING IA LATERAL B TURN OUT #30&31 (L&R) COMB W/ CHECK GATE  STA.8+347.97– 8+355.76",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL B",
+        "station": "STA 8+343.5",
+        "station_m": 8343.54,
+        "offset_m": 2.37,
+        "ele": 16.62,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00142.jpg",
+        "elevation_m": 16.62,
+        "photo_filename": "DSC00142.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00142.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.458731,
+          13.093527
+        ]
+      },
+      "properties": {
+        "id": 212,
+        "name": "ANOLING IA LATERAL B TURN OUT #32 (L)  STA.8+543.93",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B",
+        "station": "STA 8+540.8",
+        "station_m": 8540.77,
+        "offset_m": 1.12,
+        "ele": 17.78,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00143.jpg",
+        "elevation_m": 17.78,
+        "photo_filename": "DSC00143.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00143.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.458988,
+          13.095511
+        ]
+      },
+      "properties": {
+        "id": 214,
+        "name": "ANOLING IA LATERAL B TURN OUT #34&35 (L&R) COMB W/ THRESHER X-ING\tSTA.8+763.85– 8+772.19",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 8+762.2",
+        "station_m": 8762.22,
+        "offset_m": 0.57,
+        "ele": 16.63,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00145.jpg",
+        "elevation_m": 16.63,
+        "photo_filename": "DSC00145.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00145.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.459496,
+          13.099425
+        ]
+      },
+      "properties": {
+        "id": 216,
+        "name": "ANOLING IA LATERAL B TURN OUT #37 (L) COMB W/ CHECK GATE  STA.9+199.24– 9+207.84",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL B",
+        "station": "STA 9+199.4",
+        "station_m": 9199.35,
+        "offset_m": 1.63,
+        "ele": 16.53,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00147.jpg",
+        "elevation_m": 16.53,
+        "photo_filename": "DSC00147.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00147.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.456946,
+          13.073018
+        ]
+      },
+      "properties": {
+        "id": 219,
+        "name": "BULI IA LATERAL B1 PARSHALL FLUME \tSTA.0+031 – 0+24.39",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "LATERAL B1",
+        "station": "STA 0+035.8",
+        "station_m": 35.79,
+        "offset_m": 2.12,
+        "ele": 19.06,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00150.jpg",
+        "elevation_m": 19.06,
+        "photo_filename": "DSC00150.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00150.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461979,
+          13.101861
+        ]
+      },
+      "properties": {
+        "id": 218,
+        "name": "ANOLING IA LATERAL B END OF EXISTING CANAL (STA.9+683.54)",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "LATERAL B",
+        "station": "STA 9+650.4",
+        "station_m": 9650.38,
+        "offset_m": 19.73,
+        "ele": 17.09,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00149.jpg",
+        "elevation_m": 17.09,
+        "photo_filename": "DSC00149.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00149.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.457099,
+          13.072994
+        ]
+      },
+      "properties": {
+        "id": 220,
+        "name": "BULI  IA LATERAL B1 SUPPLY CANAL  STA.0+052.12",
+        "type": "Intake",
+        "Structure_Category": "Inlet",
+        "canal_name": "LATERAL B1",
+        "station": "STA 0+052.3",
+        "station_m": 52.26,
+        "offset_m": 0.25,
+        "ele": 20.49,
+        "desc": "fa",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00151.jpg",
+        "elevation_m": 20.49,
+        "photo_filename": "DSC00151.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00151.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.468131,
+          13.073182
+        ]
+      },
+      "properties": {
+        "id": 224,
+        "name": "BULI IA LATERAL B1 TURN OUT #6&7 (L&R)  STA.1+268.13",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B1",
+        "station": "STA 1+271.1",
+        "station_m": 1271.11,
+        "offset_m": 0.5,
+        "ele": 18.86,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00155.jpg",
+        "elevation_m": 18.86,
+        "photo_filename": "DSC00155.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00155.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.465265,
+          13.073563
+        ]
+      },
+      "properties": {
+        "id": 222,
+        "name": "BULI  IA LATERAL B1 TURN OUT #3&4 (L&R)  STA.0+953",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B1",
+        "station": "STA 0+957.4",
+        "station_m": 957.35,
+        "offset_m": 1.2,
+        "ele": 17.8,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00153.jpg",
+        "elevation_m": 17.8,
+        "photo_filename": "DSC00153.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00153.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.465842,
+          13.073469
+        ]
+      },
+      "properties": {
+        "id": 223,
+        "name": "BULI  IA LATERAL B1 TURN OUT #5 (L) THRESHER X -ING  STA.1+020.43- 1+039.34",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B1",
+        "station": "STA 1+020.8",
+        "station_m": 1020.81,
+        "offset_m": 0.58,
+        "ele": 17.85,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00154.jpg",
+        "elevation_m": 17.85,
+        "photo_filename": "DSC00154.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00154.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.470235,
+          13.073045
+        ]
+      },
+      "properties": {
+        "id": 226,
+        "name": "BULI IA LATERAL B1 TURN OUT #9 (R) COMB W/THRESHER X-ING  STA.1+495.59 – 1+504.74",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B1",
+        "station": "STA 1+499.8",
+        "station_m": 1499.77,
+        "offset_m": 1.47,
+        "ele": 15.03,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00157.jpg",
+        "elevation_m": 15.03,
+        "photo_filename": "DSC00157.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00157.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.47589,
+          13.072681
+        ]
+      },
+      "properties": {
+        "id": 228,
+        "name": "BULI IA LATERAL B1 THRESHER X-ING  STA.2+112.35 – 2+121.25",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B1",
+        "station": "STA 2+114.4",
+        "station_m": 2114.37,
+        "offset_m": 2.33,
+        "ele": 13.88,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00159.jpg",
+        "elevation_m": 13.88,
+        "photo_filename": "DSC00159.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00159.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.473144,
+          13.072857
+        ]
+      },
+      "properties": {
+        "id": 227,
+        "name": "BULI IA LATERAL B1 SIPHON #1  STA.1+810.15 – 1+837.92",
+        "type": "Siphon",
+        "Structure_Category": "Siphon",
+        "canal_name": "LATERAL B1",
+        "station": "STA 1+816.0",
+        "station_m": 1815.95,
+        "offset_m": 0.76,
+        "ele": 14.81,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00158.jpg",
+        "elevation_m": 14.81,
+        "photo_filename": "DSC00158.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00158.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.411958,
+          13.033314
+        ]
+      },
+      "properties": {
+        "id": 182,
+        "name": "PAGALAGALA IA LATERAL AX SIPHON #1   STA.1+289.37 – 1+313.71",
+        "type": "Siphon",
+        "Structure_Category": "Siphon",
+        "canal_name": "LATERAL AX",
+        "station": "STA 1+253.8",
+        "station_m": 1253.8,
+        "offset_m": 1.52,
+        "ele": 29.5,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00177.jpg",
+        "elevation_m": 29.5,
+        "photo_filename": "DSC00177.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00177.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.412051,
+          13.033811
+        ]
+      },
+      "properties": {
+        "id": 183,
+        "name": "PAGALAGALA IA LATERAL AX TURN OUT #5-6 (L&R) COMB W/ CHECK GATE  STA.1+370.51–1+372.76",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL AX",
+        "station": "STA 1+309.7",
+        "station_m": 1309.68,
+        "offset_m": 0.36,
+        "ele": 31.62,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00178.jpg",
+        "elevation_m": 31.62,
+        "photo_filename": "DSC00178.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00178.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.412944,
+          13.039389
+        ]
+      },
+      "properties": {
+        "id": 185,
+        "name": "PAGALAGALA IA LATERAL AX TURN OUT #8 (L)  STA.2+007.78",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL AX",
+        "station": "STA 1+935.1",
+        "station_m": 1935.13,
+        "offset_m": 3.23,
+        "ele": 31.9,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00180.jpg",
+        "elevation_m": 31.9,
+        "photo_filename": "DSC00180.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00180.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.415993,
+          13.042179
+        ]
+      },
+      "properties": {
+        "id": 189,
+        "name": "PAGALAGALA IA LATERAL AX TURN OUT #10 (L)\tSTA.2+771. 07",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL AX",
+        "station": "STA 2+482.1",
+        "station_m": 2482.1,
+        "offset_m": 2.67,
+        "ele": 34.63,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00184.jpg",
+        "elevation_m": 34.63,
+        "photo_filename": "DSC00184.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00184.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.413376,
+          13.039885
+        ]
+      },
+      "properties": {
+        "id": 186,
+        "name": "PAGALAGALA IA LATERAL AX  THRESHER X-ING \tSTA.2+080.85 – 2+089.21",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL AX",
+        "station": "STA 2+014.8",
+        "station_m": 2014.82,
+        "offset_m": 3.37,
+        "ele": 32.03,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00181.jpg",
+        "elevation_m": 32.03,
+        "photo_filename": "DSC00181.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00181.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.414375,
+          13.04077
+        ]
+      },
+      "properties": {
+        "id": 187,
+        "name": "PAGALAGALA IA LATERAL AX TURN OUT #9 (L)   STA.2+478.49",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL AX",
+        "station": "STA 2+189.7",
+        "station_m": 2189.72,
+        "offset_m": 2.36,
+        "ele": 33.49,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00182.jpg",
+        "elevation_m": 33.49,
+        "photo_filename": "DSC00182.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00182.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.411733,
+          13.017672
+        ]
+      },
+      "properties": {
+        "id": 176,
+        "name": "STA MARIA PAGALAGALA IA MAIN CANAL #2 TURN OUT #1(R)COMB. W/ ROAD X-ING (STA. 0+001.50- 0+007.60)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 0+005.8",
+        "station_m": 5.8,
+        "offset_m": 2.17,
+        "ele": 26.53,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00171.jpg",
+        "elevation_m": 26.53,
+        "photo_filename": "DSC00171.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00171.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.403216,
+          13.003849
+        ]
+      },
+      "properties": {
+        "id": 38,
+        "name": "PAMBISAN CALINGAG IA MAIN CANAL #1 THRESHER X-ING STA. 0+703.70 - 0+714.50",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 0+705.0",
+        "station_m": 705.04,
+        "offset_m": 4.38,
+        "ele": 24.25,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00178.jpg",
+        "elevation_m": 24.25,
+        "photo_filename": "DSC00178.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00178.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.409014,
+          13.008115
+        ]
+      },
+      "properties": {
+        "id": 41,
+        "name": "PAMBISAN CALINGAG IA MAIN CANAL #1 TURN OUT #2 (R) STA. 1+499.50",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 1+491.8",
+        "station_m": 1491.85,
+        "offset_m": 3.91,
+        "ele": 27.78,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00183.jpg",
+        "elevation_m": 27.78,
+        "photo_filename": "DSC00183.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00183.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.418602,
+          13.02785
+        ]
+      },
+      "properties": {
+        "id": 28,
+        "name": "STA MARIA PAGALAGALA MAIN CANAL #1 TURN OUT #9 (R) STA. 4+147",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 4+138.5",
+        "station_m": 4138.54,
+        "offset_m": 6.57,
+        "ele": 26.66,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00230.jpg",
+        "elevation_m": 26.66,
+        "photo_filename": "DSC00230.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00230.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.419124,
+          13.028441
+        ]
+      },
+      "properties": {
+        "id": 29,
+        "name": "STA MARIA PAGALAGALA IA MAIN CANAL #1 TURN OUT #10 (L) COMB. W/ THRESHER X-ING (STA. 4+227 – 4+246.81)",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 4+224.4",
+        "station_m": 4224.35,
+        "offset_m": 2.53,
+        "ele": 27.54,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00231.jpg",
+        "elevation_m": 27.54,
+        "photo_filename": "DSC00231.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00231.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.429858,
+          13.037278
+        ]
+      },
+      "properties": {
+        "id": 100,
+        "name": "NABUSLOT IA MAIN CANAL #1 SIPHON #2 (STA. 5+672.40 – 5+961.80)",
+        "type": "Siphon",
+        "Structure_Category": "Siphon",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 5+905.1",
+        "station_m": 5905.09,
+        "offset_m": 9.3,
+        "ele": 27.7,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00133.jpg",
+        "elevation_m": 27.7,
+        "photo_filename": "DSC00133.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00133.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.433312,
+          13.039849
+        ]
+      },
+      "properties": {
+        "id": 104,
+        "name": "NABUSLOT IA MAIN CANAL #1 ROAD X-ING (STA. 6+482.84 – 6+502.60)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 6+470.7",
+        "station_m": 6470.69,
+        "offset_m": 9.42,
+        "ele": 30.43,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00138.jpg",
+        "elevation_m": 30.43,
+        "photo_filename": "DSC00138.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00138.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.438231,
+          13.044243
+        ]
+      },
+      "properties": {
+        "id": 108,
+        "name": "NABUSLOT IA MAIN CANAL #1 TURN OUT #20 (L) (STA. 7+285.50)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 7+264.1",
+        "station_m": 7264.07,
+        "offset_m": 2.25,
+        "ele": 24.69,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00146.jpg",
+        "elevation_m": 24.69,
+        "photo_filename": "DSC00146.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00146.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.411946,
+          13.013912
+        ]
+      },
+      "properties": {
+        "id": 44,
+        "name": "PAMBISAN CALINGAG IA MAIN CANAL #1 COMB HD. GATE LAT A, TURN OUT #5 (L) & ROAD X-ING STA. 2+226 - 2+231.50 – 2+264.75",
+        "type": "Head Gate",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+003.8",
+        "station_m": 3.79,
+        "offset_m": 2.21,
+        "ele": 26.19,
+        "desc": "fa",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00186.jpg",
+        "elevation_m": 26.19,
+        "photo_filename": "DSC00186.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00186.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.412577,
+          13.022212
+        ]
+      },
+      "properties": {
+        "id": 170,
+        "name": "STA MARIA PAGALAGALA IA MAIN CANAL #2 HD. GATE LAT AX COMB. W/ T.O. #2 (R) & THRESHER X-ING (STA. 0+511.88- 0+527)",
+        "type": "Head Gate",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL AX",
+        "station": "STA 0+007.1",
+        "station_m": 7.13,
+        "offset_m": 1.36,
+        "ele": 10.6,
+        "desc": "fa",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00165.jpg",
+        "elevation_m": 10.6,
+        "photo_filename": "DSC00165.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00165.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.411754,
+          13.017645
+        ]
+      },
+      "properties": {
+        "id": 25,
+        "name": "STA. MARIA PAGALAGALA IA MAIN CANAL #1 COMD HD. GATE MAIN CANAL 2 & ROAD X-ING STA. 2+643.65 - 2+658.15",
+        "type": "Head Gate",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 2+638.9",
+        "station_m": 2638.91,
+        "offset_m": 1.27,
+        "ele": 33.92,
+        "desc": "fa",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00224.jpg",
+        "elevation_m": 33.92,
+        "photo_filename": "DSC00224.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00224.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.446284,
+          13.041829
+        ]
+      },
+      "properties": {
+        "id": 113,
+        "name": "NABUSLOT IA MAIN CANAL #1 HD. GATE LAT C, D&E COMB W/ T.O. #24 & ROAD X-ING (STA. 8+220.60 – 8+224.50)",
+        "type": "Head Gate",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL D",
+        "station": "STA 0+005.5",
+        "station_m": 5.53,
+        "offset_m": 2.56,
+        "ele": 21.64,
+        "desc": "fa",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00152.jpg",
+        "elevation_m": 21.64,
+        "photo_filename": "DSC00152.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00152.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.412297,
+          13.013944
+        ]
+      },
+      "properties": {
+        "id": 231,
+        "name": "PAMBISAN CALINGAG IA LATERAL A PARSHALL FLUME STA. 0+038.64 – 0+044.20",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+041.9",
+        "station_m": 41.91,
+        "offset_m": 5.27,
+        "ele": 29.2,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00187.jpg",
+        "elevation_m": 29.2,
+        "photo_filename": "DSC00187.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00187.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-1-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.414084,
+          13.013486
+        ]
+      },
+      "properties": {
+        "id": 232,
+        "name": "PAMBISAN CALINGAG IA LATERAL A TURN OUT #1&2 (L&R) COMB W/ ROAD X-ING STA.0+244 – 0+246.50",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+243.8",
+        "station_m": 243.85,
+        "offset_m": 6.72,
+        "ele": 28.65,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00188.jpg",
+        "elevation_m": 28.65,
+        "photo_filename": "DSC00188.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00188.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.422665,
+          13.016871
+        ]
+      },
+      "properties": {
+        "id": 236,
+        "name": "PAMBISAN CALINGAG IA LATERAL A TURN OUT #7 (L) STA.1+269.20",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL A",
+        "station": "STA 1+267.6",
+        "station_m": 1267.61,
+        "offset_m": 2.43,
+        "ele": 28.18,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00192.jpg",
+        "elevation_m": 28.18,
+        "photo_filename": "DSC00192.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00192.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.43111,
+          13.024676
+        ]
+      },
+      "properties": {
+        "id": 243,
+        "name": "PAMBISAN CALINGAG IA LATERAL A END OF CANAL (STA. 2+707.78)",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "DRAINAGE CANAL (CANAL 738)",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 3.9,
+        "ele": 30.31,
+        "desc": "",
+        "comment": "Drainage Interface: Acts as physical Terminus of Pambisan Calingag IA Lateral A (STA 2+707.78) and serves as inflow origin (STA 0+000) for DRAINAGE CANAL 738 flowing downhill to natural outfall.",
+        "images": "../IMAGE/LATERAL AX/DSC00199.jpg",
+        "elevation_m": 30.31,
+        "photo_filename": "DSC00199.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00199.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11",
+        "drainage_interface": "DRAINAGE CANAL 738"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.425806,
+          13.019119
+        ]
+      },
+      "properties": {
+        "id": 237,
+        "name": "PAMBISAN CALINGAG IA LATERAL A TURN OUT #8&9 (L&R) COMB THRESHER X-ING STA.1+691- 1+696.50",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL A",
+        "station": "STA 1+689.3",
+        "station_m": 1689.32,
+        "offset_m": 6.24,
+        "ele": 52.39,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00193.jpg",
+        "elevation_m": 52.39,
+        "photo_filename": "DSC00193.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00193.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.446288,
+          13.041487
+        ]
+      },
+      "properties": {
+        "id": 1,
+        "name": "MANINGCOL IA LATERAL C PARSHALL FLUME  STA.0+037.08 – 0+043.50",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "LATERAL C",
+        "station": "STA 0+035.1",
+        "station_m": 35.12,
+        "offset_m": 6.74,
+        "ele": 17.01,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00154.jpg",
+        "elevation_m": 17.01,
+        "photo_filename": "DSC00154.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00154.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.427564,
+          13.020088
+        ]
+      },
+      "properties": {
+        "id": 238,
+        "name": "PAMBISAN CALINGAG IA LATERAL A THRESHER X-ING  STA. 1+904.78 – 1+914.27",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL A",
+        "station": "STA 1+908.0",
+        "station_m": 1907.95,
+        "offset_m": 0.48,
+        "ele": 52.07,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00194.jpg",
+        "elevation_m": 52.07,
+        "photo_filename": "DSC00194.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00194.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.428123,
+          13.020409
+        ]
+      },
+      "properties": {
+        "id": 239,
+        "name": "PAMBISAN CALINGAG IA LATERAL A TURN OUT #10 (L) STA.1+985.27",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL A",
+        "station": "STA 1+978.2",
+        "station_m": 1978.19,
+        "offset_m": 2.25,
+        "ele": 49.04,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00195.jpg",
+        "elevation_m": 49.04,
+        "photo_filename": "DSC00195.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00195.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.448922,
+          13.03999
+        ]
+      },
+      "properties": {
+        "id": 2,
+        "name": "MANINGCOL IA LATERAL C THRESHER X-ING STA.0+391.33 – 0+398.75",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL C",
+        "station": "STA 0+397.3",
+        "station_m": 397.31,
+        "offset_m": 6.56,
+        "ele": 15.2,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00155.jpg",
+        "elevation_m": 15.2,
+        "photo_filename": "DSC00155.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00155.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461903,
+          13.021919
+        ]
+      },
+      "properties": {
+        "id": 16,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #15 (L) STA.3+120",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL C",
+        "station": "STA 3+122.5",
+        "station_m": 3122.52,
+        "offset_m": 3.27,
+        "ele": 21.19,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00170.jpg",
+        "elevation_m": 21.19,
+        "photo_filename": "DSC00170.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00170.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.428422,
+          13.020576
+        ]
+      },
+      "properties": {
+        "id": 240,
+        "name": "PAMBISAN CALINGAG IA LATERAL A TURN OUT #11 (R) STA.2+024.27",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL A",
+        "station": "STA 2+015.5",
+        "station_m": 2015.49,
+        "offset_m": 3.65,
+        "ele": 45.2,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00196.jpg",
+        "elevation_m": 45.2,
+        "photo_filename": "DSC00196.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00196.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.458294,
+          13.030956
+        ]
+      },
+      "properties": {
+        "id": 10,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #7&8 (L&R) COMB W/THRESHER X-ING STA.1+905.47 – 1+908.37 – 1+912.40",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL C",
+        "station": "STA 1+911.4",
+        "station_m": 1911.44,
+        "offset_m": 0.08,
+        "ele": 21.42,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00164.jpg",
+        "elevation_m": 21.42,
+        "photo_filename": "DSC00164.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00164.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.42996,
+          13.021707
+        ]
+      },
+      "properties": {
+        "id": 242,
+        "name": "PAMBISAN CALINGAG IA LATERAL A THRESHER X-ING  STA. 2+227.60 – 2+234.28",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL A",
+        "station": "STA 2+225.9",
+        "station_m": 2225.87,
+        "offset_m": 2.84,
+        "ele": 31.78,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00198.jpg",
+        "elevation_m": 31.78,
+        "photo_filename": "DSC00198.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00198.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.465189,
+          13.017576
+        ]
+      },
+      "properties": {
+        "id": 19,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #19 (R) COMB W/ THRESHER X-ING  STA.3+780.93 – 3+783.21 – 3+792.92",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL C",
+        "station": "STA 3+795.3",
+        "station_m": 3795.27,
+        "offset_m": 5.78,
+        "ele": 16.4,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00173.jpg",
+        "elevation_m": 16.4,
+        "photo_filename": "DSC00173.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00173.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.429666,
+          13.021382
+        ]
+      },
+      "properties": {
+        "id": 241,
+        "name": "PAMBISAN CALINGAG IA LATERAL A TURN OUT #12 (R) STA.2+186",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL A",
+        "station": "STA 2+177.5",
+        "station_m": 2177.51,
+        "offset_m": 1.23,
+        "ele": 46.45,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00197.jpg",
+        "elevation_m": 46.45,
+        "photo_filename": "DSC00197.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00197.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-4-11"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.467472,
+          13.015953
+        ]
+      },
+      "properties": {
+        "id": 21,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #21 (R)COMB W/THRESHER X-ING STA.4+140.36 – 4+141.34 – 4+151.30",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL C",
+        "station": "STA 4+147.8",
+        "station_m": 4147.77,
+        "offset_m": 2.22,
+        "ele": 16.03,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00175.jpg",
+        "elevation_m": 16.03,
+        "photo_filename": "DSC00175.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00175.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.455241,
+          13.03274
+        ]
+      },
+      "properties": {
+        "id": 7,
+        "name": "MANINGCOL IA LATERAL C TURN OUT #5 (R) COMB DROP STR STA.1+505.65 – 1+508.64 – 1+516",
+        "type": "Drop",
+        "Structure_Category": "Drop",
+        "canal_name": "LATERAL C",
+        "station": "STA 1+512.7",
+        "station_m": 1512.68,
+        "offset_m": 5.26,
+        "ele": 15.57,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL C/DSC00161.jpg",
+        "elevation_m": 15.57,
+        "photo_filename": "DSC00161.jpg",
+        "photo_path": "../IMAGE/LATERAL C/DSC00161.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.446637,
+          13.041804
+        ]
+      },
+      "properties": {
+        "id": 114,
+        "name": "STA, RITA IA LATERAL D PARSHAL FLUME STA. 0+041.95",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "LATERAL D",
+        "station": "STA 0+043.6",
+        "station_m": 43.56,
+        "offset_m": 8.16,
+        "ele": 20.8,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00244.jpg",
+        "elevation_m": 20.8,
+        "photo_filename": "DSC00244.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00244.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.450759,
+          13.042658
+        ]
+      },
+      "properties": {
+        "id": 115,
+        "name": "STA, RITA IA LATERAL D TURN OUT #1(R) COMB W/ THRESHER X-ING STA 0+519.05 -0+528.65",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL D",
+        "station": "STA 0+520.5",
+        "station_m": 520.54,
+        "offset_m": 5.21,
+        "ele": 19.15,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00245.jpg",
+        "elevation_m": 19.15,
+        "photo_filename": "DSC00245.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00245.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461146,
+          13.041958
+        ]
+      },
+      "properties": {
+        "id": 119,
+        "name": "STA, RITA IA LATERAL D ROAD X-ING  STA. 1+677.10- 1+690.06",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL D",
+        "station": "STA 1+680.9",
+        "station_m": 1680.87,
+        "offset_m": 2.54,
+        "ele": 17.9,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00250.jpg",
+        "elevation_m": 17.9,
+        "photo_filename": "DSC00250.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00250.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.466297,
+          13.040596
+        ]
+      },
+      "properties": {
+        "id": 122,
+        "name": "STA, RITA IA LATERAL D TURN OUT #7(R) THRESHER X-ING\tSTA. 2+320.80- 2+327.60",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL D",
+        "station": "STA 2+326.2",
+        "station_m": 2326.21,
+        "offset_m": 3.87,
+        "ele": 14.04,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00253.jpg",
+        "elevation_m": 14.04,
+        "photo_filename": "DSC00253.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00253.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.471331,
+          13.032601
+        ]
+      },
+      "properties": {
+        "id": 126,
+        "name": "STA, IA RITA LATERAL D THRESHER X-ING   STA. 3+374.82- 3+383.73",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL D",
+        "station": "STA 3+376.9",
+        "station_m": 3376.9,
+        "offset_m": 1.87,
+        "ele": 13.04,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00257.jpg",
+        "elevation_m": 13.04,
+        "photo_filename": "DSC00257.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00257.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.46553,
+          13.061748
+        ]
+      },
+      "properties": {
+        "id": 146,
+        "name": "PANGULAYAN ANOLING IA LATERAL E SUPPLY CANAL STR\tSTA.3+567.43",
+        "type": "Intake",
+        "Structure_Category": "Inlet",
+        "canal_name": "LATERAL E",
+        "station": "STA 3+559.3",
+        "station_m": 3559.26,
+        "offset_m": 3.57,
+        "ele": 13.83,
+        "desc": "fa",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00282.jpg",
+        "elevation_m": 13.83,
+        "photo_filename": "DSC00282.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00282.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.454907,
+          13.069813
+        ]
+      },
+      "properties": {
+        "id": 199,
+        "name": "ANOLING IA LATERAL B ROAD X-ING\tSTA.5+585.12 – 5+596.58",
+        "type": "Settling Basin",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 5+595.2",
+        "station_m": 5595.25,
+        "offset_m": 1.07,
+        "ele": 18.33,
+        "desc": "fa",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00128.jpg",
+        "elevation_m": 18.33,
+        "photo_filename": "DSC00128.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00128.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.475307,
+          13.025629
+        ]
+      },
+      "properties": {
+        "id": 130,
+        "name": "STA, IA RITA LATERAL D TURN OUT #10 (R) COMB. W/ CHECK GATE STR.  STA. 4+289.22- 4+298.26",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL D",
+        "station": "STA 4+287.1",
+        "station_m": 4287.08,
+        "offset_m": 0.12,
+        "ele": 9.04,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL D/DSC00261.jpg",
+        "elevation_m": 9.04,
+        "photo_filename": "DSC00261.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00261.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.476478,
+          13.02584
+        ]
+      },
+      "properties": {
+        "id": 131,
+        "name": "STA, RITA IA LATERAL D ROAD X-ING END OF CANAL STA 4+419.53",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL D",
+        "station": "STA 4+416.5",
+        "station_m": 4416.48,
+        "offset_m": 3.56,
+        "ele": 14.91,
+        "desc": "",
+        "comment": "Drainage Interface: Acts as physical Terminus of Sta. Rita IA Lateral D (STA 4+416.50) and serves as inflow origin (STA 0+000) for DRAINAGE CANAL 740 flowing downhill to natural outfall.",
+        "images": "../IMAGE/LATERAL D/DSC00263.jpg",
+        "elevation_m": 14.91,
+        "photo_filename": "DSC00263.jpg",
+        "photo_path": "../IMAGE/LATERAL D/DSC00263.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22",
+        "drainage_interface": "DRAINAGE CANAL 740"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.448032,
+          13.046416
+        ]
+      },
+      "properties": {
+        "id": 133,
+        "name": "PALAYAN LATERAL E TURN OUT #1&2(L&R) COMB W/ THRESHER X-ING  STA. 0+553.31- 0+555.31- 0+566.21",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL E",
+        "station": "STA 0+561.8",
+        "station_m": 561.77,
+        "offset_m": 1.21,
+        "ele": 29.86,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00267.jpg",
+        "elevation_m": 29.86,
+        "photo_filename": "DSC00267.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00267.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-22"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.454687,
+          13.05244
+        ]
+      },
+      "properties": {
+        "id": 139,
+        "name": "PANGULAYAN ANOLING IA LATERAL E TURN OUT #7(R)  STA. 1+715.23",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL E",
+        "station": "STA 1+720.1",
+        "station_m": 1720.14,
+        "offset_m": 5.77,
+        "ele": 18.21,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00273.jpg",
+        "elevation_m": 18.21,
+        "photo_filename": "DSC00273.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00273.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.456025,
+          13.057119
+        ]
+      },
+      "properties": {
+        "id": 142,
+        "name": "PANGULAYAN ANOLING IA LATERAL E TURN OUT #10&11(L&R) COMB W/ THRESHER X-ING  STA.2+256.24- 2+257.36- 2+267.88",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL E",
+        "station": "STA 2+259.4",
+        "station_m": 2259.37,
+        "offset_m": 6.79,
+        "ele": 15.4,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00276.jpg",
+        "elevation_m": 15.4,
+        "photo_filename": "DSC00276.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00276.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461027,
+          13.061433
+        ]
+      },
+      "properties": {
+        "id": 144,
+        "name": "PANGULAYAN ANOLING IA LATERAL E TURN OUT #13&14(L&R) COMB W/ THRESHER X-ING  STA.3+053.85- 3+058.21- 3+062- 3+070.36",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL E",
+        "station": "STA 3+061.9",
+        "station_m": 3061.91,
+        "offset_m": 4.51,
+        "ele": 15.84,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E/DSC00278.jpg",
+        "elevation_m": 15.84,
+        "photo_filename": "DSC00278.jpg",
+        "photo_path": "../IMAGE/LATERAL E/DSC00278.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.461833,
+          13.04779
+        ]
+      },
+      "properties": {
+        "id": 156,
+        "name": "CACAWAN IA LATERAL E1 ROAD X-ING  STA.0+958.14- 0+965.87",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL E1",
+        "station": "STA 0+964.6",
+        "station_m": 964.63,
+        "offset_m": 3.17,
+        "ele": 18.16,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00296.jpg",
+        "elevation_m": 18.16,
+        "photo_filename": "DSC00296.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00296.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.466742,
+          13.049231
+        ]
+      },
+      "properties": {
+        "id": 159,
+        "name": "CACAWAN IA LATERAL E1  TURN OUT #4&5 (L&R) COMB. W/ THRESHER x-ING\tSTA.1+573.73- 1+581.42",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL E1",
+        "station": "STA 1+584.5",
+        "station_m": 1584.52,
+        "offset_m": 2.86,
+        "ele": 19.14,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00299.jpg",
+        "elevation_m": 19.14,
+        "photo_filename": "DSC00299.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00299.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.480819,
+          13.050279
+        ]
+      },
+      "properties": {
+        "id": 163,
+        "name": "CACAWAN IA LATERAL E1 TUR OUT # 8 (R) COMB. W/ CHECK GATE STA.3+187.23- 3+193.29",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL E1",
+        "station": "STA 3+200.4",
+        "station_m": 3200.44,
+        "offset_m": 0.22,
+        "ele": 16.53,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL E1/DSC00304.jpg",
+        "elevation_m": 16.53,
+        "photo_filename": "DSC00304.jpg",
+        "photo_path": "../IMAGE/LATERAL E1/DSC00304.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.425882,
+          13.040001
+        ]
+      },
+      "properties": {
+        "id": 80,
+        "name": "BANG BANG IA LATERAL B THRESHER X-ING   STA.0+497",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 0+498.9",
+        "station_m": 498.87,
+        "offset_m": 1.15,
+        "ele": 38.74,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00103.jpg",
+        "elevation_m": 38.74,
+        "photo_filename": "DSC00103.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00103.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-27"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.460861,
+          13.085635
+        ]
+      },
+      "properties": {
+        "id": 209,
+        "name": "ANOLING IA LATERAL B TURN OUT #28 (L) W/ COMB THRESHER  X-ING  STA.7+594.69– 7+608.56",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 7+598.1",
+        "station_m": 7598.09,
+        "offset_m": 2.96,
+        "ele": 18.94,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00140.jpg",
+        "elevation_m": 18.94,
+        "photo_filename": "DSC00140.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00140.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.429702,
+          13.053738
+        ]
+      },
+      "properties": {
+        "id": 84,
+        "name": "BACUNGAN IA LATERAL B TURN OUT #4&5 (L&R) COMB W/ THRESHER X-ING\tSTA.2+118.14 – 2+130",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 2+119.5",
+        "station_m": 2119.48,
+        "offset_m": 0.58,
+        "ele": 31.09,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00110.jpg",
+        "elevation_m": 31.09,
+        "photo_filename": "DSC00110.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00110.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-27"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.431904,
+          13.057419
+        ]
+      },
+      "properties": {
+        "id": 86,
+        "name": "BACUNGAN IA LATERAL B TURN OUT #7&8 (L&R) COMB W/ THRESHER X-ING\tSTA.2+591.96 – 2+603.13",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 2+602.4",
+        "station_m": 2602.45,
+        "offset_m": 7.62,
+        "ele": 26.51,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00112.jpg",
+        "elevation_m": 26.51,
+        "photo_filename": "DSC00112.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00112.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-27"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.444264,
+          13.063809
+        ]
+      },
+      "properties": {
+        "id": 191,
+        "name": "BACUNGAN IA LATERAL B TURN OUT # 14 (R)  STA.4+223.50",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL B",
+        "station": "STA 4+234.0",
+        "station_m": 4234.04,
+        "offset_m": 1.82,
+        "ele": 44.41,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00120.jpg",
+        "elevation_m": 44.41,
+        "photo_filename": "DSC00120.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00120.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.446222,
+          13.065852
+        ]
+      },
+      "properties": {
+        "id": 194,
+        "name": "BACUNGAN IA LATERAL B TURN OUT # 17 (L) COMB W/ DROP STR.  STA.4+535.56– 4+539.47",
+        "type": "Drop",
+        "Structure_Category": "Drop",
+        "canal_name": "LATERAL B",
+        "station": "STA 4+548.9",
+        "station_m": 4548.94,
+        "offset_m": 1.34,
+        "ele": 31.3,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00123.jpg",
+        "elevation_m": 31.3,
+        "photo_filename": "DSC00123.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00123.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.45415,
+          13.069677
+        ]
+      },
+      "properties": {
+        "id": 198,
+        "name": "BACUNGAN IA LATERAL B THRESHER X-ING  STA.5+502.10 – 5+507.83",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL B",
+        "station": "STA 5+512.0",
+        "station_m": 5512.02,
+        "offset_m": 2.28,
+        "ele": 20.24,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00127.jpg",
+        "elevation_m": 20.24,
+        "photo_filename": "DSC00127.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00127.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.458247,
+          13.078913
+        ]
+      },
+      "properties": {
+        "id": 205,
+        "name": "ANOLING IA LATERAL B TURN OUT #26 (R)  STA.6+761.88",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B",
+        "station": "STA 6+769.9",
+        "station_m": 6769.9,
+        "offset_m": 0.16,
+        "ele": 12.07,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00135.jpg",
+        "elevation_m": 12.07,
+        "photo_filename": "DSC00135.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00135.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.412755,
+          13.038055
+        ]
+      },
+      "properties": {
+        "id": 184,
+        "name": "PAGALAGALA IA LATERAL AX TURN OUT #7 (L) COMB W/ THRESHER X-ING \tSTA.1+847.74 – 1+855.74",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL AX",
+        "station": "STA 1+785.3",
+        "station_m": 1785.35,
+        "offset_m": 2.65,
+        "ele": 33.15,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00179.jpg",
+        "elevation_m": 33.15,
+        "photo_filename": "DSC00179.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00179.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.458907,
+          13.094477
+        ]
+      },
+      "properties": {
+        "id": 213,
+        "name": "ANOLING IA LATERAL B TURN OUT #33 (L)  STA.8+652.76",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL B",
+        "station": "STA 8+647.1",
+        "station_m": 8647.11,
+        "offset_m": 1.91,
+        "ele": 15.27,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00144.jpg",
+        "elevation_m": 15.27,
+        "photo_filename": "DSC00144.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00144.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.459138,
+          13.097359
+        ]
+      },
+      "properties": {
+        "id": 215,
+        "name": "ANOLING IA LATERAL B TURN OUT #36 (L) COMB W/ CHECK GATE  STA.8+971.02– 8+976.43",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL B",
+        "station": "STA 8+967.5",
+        "station_m": 8967.55,
+        "offset_m": 2.09,
+        "ele": 16.76,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00146.jpg",
+        "elevation_m": 16.76,
+        "photo_filename": "DSC00146.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00146.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.411526,
+          13.030207
+        ]
+      },
+      "properties": {
+        "id": 180,
+        "name": "PAGALAGALA IA  LATERAL AX TURN OUT #3 (R) COMB W/ CHECKGATE STR  STA.0+944.14 – 0+946.49",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL AX",
+        "station": "STA 0+906.9",
+        "station_m": 906.87,
+        "offset_m": 1.32,
+        "ele": 26.67,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00176.jpg",
+        "elevation_m": 26.67,
+        "photo_filename": "DSC00176.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00176.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.46202,
+          13.073979
+        ]
+      },
+      "properties": {
+        "id": 221,
+        "name": "BULI  IA LATERAL B1 TURN OUT #1&2 (L&R) COMB W/DROP STR.  STA.0+593.91 – 0+595.92 – 0+603.66",
+        "type": "Drop",
+        "Structure_Category": "Drop",
+        "canal_name": "SUB-LATERAL B1",
+        "station": "STA 0+004.0",
+        "station_m": 3.99,
+        "offset_m": 0.83,
+        "ele": 18.78,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00152.jpg",
+        "elevation_m": 18.78,
+        "photo_filename": "DSC00152.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00152.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.469607,
+          13.073072
+        ]
+      },
+      "properties": {
+        "id": 225,
+        "name": "BULI IA LATERAL B1 TURN OUT #8 (R) COMB W/CHECK GATE  STA.1+426.03- 1+437.00",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL B1",
+        "station": "STA 1+431.6",
+        "station_m": 1431.62,
+        "offset_m": 2.11,
+        "ele": 16.72,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00156.jpg",
+        "elevation_m": 16.72,
+        "photo_filename": "DSC00156.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00156.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.478122,
+          13.07191
+        ]
+      },
+      "properties": {
+        "id": 230,
+        "name": "BULI IA LATERAL B1 END OF EXISTING CANAL  STA.2+378.10",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "LAT-B1 FMD (CANAL 717)",
+        "station": "STA 0+197.3",
+        "station_m": 197.35,
+        "offset_m": 2.14,
+        "ele": 15.64,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL B/DSC00162.jpg",
+        "elevation_m": 15.64,
+        "photo_filename": "DSC00162.jpg",
+        "photo_path": "../IMAGE/LATERAL B/DSC00162.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.41473,
+          13.051462
+        ]
+      },
+      "properties": {
+        "id": 78,
+        "name": "CALOCMUY BAYUIN IA MAIN CANAL #2 THRESHER X-ING\tSTA. 4+883.51 – 4+841.13",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 5+255.8",
+        "station_m": 5255.82,
+        "offset_m": 0.15,
+        "ele": 25.77,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00210.jpg",
+        "elevation_m": 25.77,
+        "photo_filename": "DSC00210.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00210.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.411747,
+          13.031723
+        ]
+      },
+      "properties": {
+        "id": 181,
+        "name": "PAGALAGALA IA LATERAL AX TURN OUT #4 (R)\tSTA.1+117.49",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL AX",
+        "station": "STA 1+076.4",
+        "station_m": 1076.36,
+        "offset_m": 2.42,
+        "ele": 27.18,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00176.jpg",
+        "elevation_m": 27.18,
+        "photo_filename": "DSC00176.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00176.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.415767,
+          13.041533
+        ]
+      },
+      "properties": {
+        "id": 188,
+        "name": "PAGALAGALA IA LATERAL AX THRESHER X-ING\tSTA.2+5686.17 – 2+694.45",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL AX",
+        "station": "STA 2+406.9",
+        "station_m": 2406.88,
+        "offset_m": 2.86,
+        "ele": 32.23,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/LATERAL AX/DSC00183.jpg",
+        "elevation_m": 32.23,
+        "photo_filename": "DSC00183.jpg",
+        "photo_path": "../IMAGE/LATERAL AX/DSC00183.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.389921,
+          13.042201
+        ]
+      },
+      "properties": {
+        "id": 74,
+        "name": "CALOCMUY BAYUIN IA LATERAL BX TURN OUT #4 (R) COMB. W/ ROAD X-ING\tSTA.1+406.55– 1+417.93",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL BX",
+        "station": "STA 1+409.8",
+        "station_m": 1409.8,
+        "offset_m": 0.55,
+        "ele": 25.86,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00206.jpg",
+        "elevation_m": 25.86,
+        "photo_filename": "DSC00206.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00206.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.400437,
+          13.037048
+        ]
+      },
+      "properties": {
+        "id": 60,
+        "name": "CALOCMUY BAYUIN IA MAIN CANAL #2 HD. LAT GATE BX COMB W/ TURN OUT #7 8&9 & ROAD X-ING\t(STA. 2+685.50 - 2+688.46 -2+690.53 & 2+704.28)",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "MAIN CANAL 2",
+        "station": "STA 2+699.7",
+        "station_m": 2699.69,
+        "offset_m": 0.77,
+        "ele": 108.15,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00190.jpg",
+        "elevation_m": 108.15,
+        "photo_filename": "DSC00190.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00190.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.385274,
+          13.041931
+        ]
+      },
+      "properties": {
+        "id": 77,
+        "name": "CALOCMUY BAYUIN IA LATERAL BX END OF EXISTING CANAL  STA.1+962.09",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "LATERAL BX",
+        "station": "STA 1+952.0",
+        "station_m": 1951.97,
+        "offset_m": 5.77,
+        "ele": 26.46,
+        "desc": "",
+        "comment": "",
+        "images": "../IMAGE/aMC2/DSC00209.jpg",
+        "elevation_m": 26.46,
+        "photo_filename": "DSC00209.jpg",
+        "photo_path": "../IMAGE/aMC2/DSC00209.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-31"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4582125,
+          13.070481
+        ]
+      },
+      "properties": {
+        "id": 245,
+        "name": "",
+        "type": "",
+        "Structure_Category": "Other Structures",
+        "canal_name": "MACANLIG SUPPLY CANAL TO LATERAL E",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 11.23,
+        "ele": null,
+        "desc": "",
+        "comment": "",
+        "images": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4317638,
+          13.0281592
+        ]
+      },
+      "properties": {
+        "id": 247,
+        "name": "1",
+        "type": "Checkgate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL B SUPPLEMENTAL CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 8.49,
+        "ele": null,
+        "desc": "",
+        "comment": "",
+        "images": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-7-10"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.42815,
+          13.036149
+        ]
+      },
+      "properties": {
+        "id": 33,
+        "name": "BANG BANG IA MAIN CANAL #1 HD GATE LAT. B COMB W/ TURN OUT #13 (L) & ROAD X-ING (STA. 5+672.40 – 5+687.04)",
+        "type": "Head Gate",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 5+661.3",
+        "station_m": 5661.34,
+        "offset_m": 0.78,
+        "ele": 20.71,
+        "desc": "fa",
+        "comment": "",
+        "images": "../IMAGE/aMC1/DSC00237.jpg",
+        "elevation_m": 20.71,
+        "photo_filename": "DSC00237.jpg",
+        "photo_path": "../IMAGE/aMC1/DSC00237.jpg",
+        "surveyor_comment": null,
+        "survey_date": "2023-3-21"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.43177,
+          13.0281461
+        ]
+      },
+      "properties": {
+        "id": 248,
+        "name": "BANG BANG IA MACANLIG CHECK GATE #1 (STA. 0+000)",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "LATERAL B SUPPLEMENTAL CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 10.08,
+        "ele": 0,
+        "desc": "",
+        "comment": "",
+        "images": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-7-10"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4582249,
+          13.0704716
+        ]
+      },
+      "properties": {
+        "id": 246,
+        "name": "ANOLING IA MACANLIG CHECK GATE #2 (STA. 0+000)",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "MACANLIG SUPPLY CANAL TO LATERAL E",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 9.64,
+        "ele": 0,
+        "desc": "",
+        "comment": "",
+        "images": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-7-10"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4569933,
+          13.072305
+        ]
+      },
+      "properties": {
+        "id": 249,
+        "name": "ANOLING IA DOUBLE BARREL CANAL (STA. 0+000)",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "MACANLIG SUPPLY CANAL TO LATERAL B",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 0.02,
+        "ele": 0,
+        "desc": "",
+        "comment": "Manual Revision (2026-10-04): Corrected station from 302.25m to STA 0+000.0 matching authentic structure name ('ANOLING IA DOUBLE BARREL CANAL (STA. 0+000)') and intake origin.",
+        "images": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-7-10",
+        "station_source": "Native Name (STA 0+000 Origin)",
+        "parent_takeoff_station": "Origin of MACANLIG SUPPLY CANAL TO LATERAL BX"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.3982014,
+          13.0029232
+        ]
+      },
+      "properties": {
+        "id": 250,
+        "name": "PULARIS INCLANAY DAM (STA. 0+000)",
+        "type": "Dam",
+        "Structure_Category": "Diversion Dam / Weir",
+        "canal_name": "MAIN CANAL 1",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 40.73,
+        "ele": 0,
+        "desc": "",
+        "comment": "",
+        "images": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-7-10"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.3906957,
+          13.0443719
+        ]
+      },
+      "properties": {
+        "id": 251,
+        "name": "CALUCMOY CHECK GATE",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "CALUCMOY CHECKGATE SUPPLY CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 3.12,
+        "ele": 0,
+        "desc": "",
+        "comment": "",
+        "images": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": "2025-8-26"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4630824,
+          13.0774086
+        ]
+      },
+      "properties": {
+        "id": 252,
+        "name": "GONZALES CHECK GATE",
+        "type": "Check Gate",
+        "Structure_Category": "Check Gate",
+        "canal_name": "Off-Canal",
+        "station": "N/A",
+        "station_m": null,
+        "offset_m": null,
+        "ele": 0,
+        "desc": "",
+        "comment": "",
+        "images": "",
+        "elevation_m": null,
+        "photo_filename": null,
+        "photo_path": null,
+        "surveyor_comment": null,
+        "survey_date": null
+      }
+    }
+  ]
+}

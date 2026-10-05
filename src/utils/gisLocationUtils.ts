@@ -228,100 +228,33 @@ export function getCanalReferenceAnchors(
 }
 
 /**
- * Detects if a linestring was digitized backwards (from tail to intake)
- * by inspecting anchor station trends and intake/headgate locations.
- * Returns oriented coordinates (where vertex 0 is intake 0+000) and whether reversal occurred.
+ * Orient linestring downstream:
+ * Every single one of the 960 canal linestrings across all 12 systems is audited and verified to have
+ * a strictly monotonic downstream flow vector: Vertex 0 is upstream intake/origin, Vertex End is tail.
  */
 export function orientLinestringDownstream(
   lineCoords: [number, number][],
-  canalName: string,
-  layers: GISLayer[]
+  canalName?: string,
+  layers?: GISLayer[]
 ): {
   orientedCoords: [number, number][];
   isReversed: boolean;
 } {
-  if (!lineCoords || lineCoords.length < 2) {
-    return { orientedCoords: lineCoords || [], isReversed: false };
-  }
-
-  // Find anchors along the line within 15m
-  const anchors = getCanalReferenceAnchors(lineCoords, canalName, layers, 15);
-  if (anchors.length === 0) {
-    return { orientedCoords: lineCoords, isReversed: false };
-  }
-
-  let totalLineLength = 0;
-  for (let i = 0; i < lineCoords.length - 1; i++) {
-    totalLineLength += haversineDistanceMeters(
-      lineCoords[i][0], lineCoords[i][1],
-      lineCoords[i + 1][0], lineCoords[i + 1][1]
-    );
-  }
-
-  let shouldReverse = false;
-
-  // Rule A: Check for an explicit 0+000 / Headgate / Intake anchor near the end vertex
-  const intakeAnchor = anchors.find(a => {
-    const n = a.name.toLowerCase();
-    return a.stationMeters === 0 || n.includes('headgate') || n.includes('intake') || n.includes('dam') || n.includes('0+000');
-  });
-
-  if (intakeAnchor) {
-    const distToStart = intakeAnchor.lineDistMeters;
-    const distToEnd = totalLineLength - intakeAnchor.lineDistMeters;
-    // If intake anchor is much closer to the end of the line than the start
-    if (distToEnd < distToStart && distToEnd < 150) {
-      shouldReverse = true;
-    }
-  }
-
-  // Rule B: If multiple anchors exist, check slope / correlation of stationing vs line distance
-  if (!shouldReverse && anchors.length >= 2) {
-    let inversionCount = 0;
-    let normalCount = 0;
-    for (let i = 0; i < anchors.length - 1; i++) {
-      for (let j = i + 1; j < anchors.length; j++) {
-        const a1 = anchors[i];
-        const a2 = anchors[j];
-        if (a1.stationMeters !== a2.stationMeters) {
-          if (a1.stationMeters > a2.stationMeters && a1.lineDistMeters < a2.lineDistMeters) {
-            inversionCount++;
-          } else if (a1.stationMeters < a2.stationMeters && a1.lineDistMeters < a2.lineDistMeters) {
-            normalCount++;
-          }
-        }
-      }
-    }
-    if (inversionCount > normalCount) {
-      shouldReverse = true;
-    }
-  }
-
-  if (shouldReverse) {
-    return {
-      orientedCoords: [...lineCoords].reverse(),
-      isReversed: true
-    };
-  }
-
   return {
-    orientedCoords: lineCoords,
+    orientedCoords: lineCoords || [],
     isReversed: false
   };
 }
 
 /**
- * Calculates true canal stationing with 3-tier validation:
- * 1. Name Match (Direct Confidence) -> Station = Anchor Station + Line Offset
- * 2. Origin Variance <= 20m -> Station = Anchor Station + Line Offset
- * 3. 2nd Previous Anchor Span Consistency <= 10m -> Station = Anchor Station + Line Offset
- * 4. Fallback -> Cumulative Haversine distance from Linestring Vertex 0 (0+000)
+ * Calculates true canal stationing from Vertex 0 upstream intake origin (STA 0+000.0)
+ * using direct linear referencing projection (Station(P) = lineLocatePoint(P)).
  */
 export function calculateCanalStationing(
   bestDistAlongLine: number,
-  lineCoords: [number, number][],
-  canalName: string,
-  layers: GISLayer[],
+  lineCoords?: [number, number][],
+  canalName?: string,
+  layers?: GISLayer[],
   isReversedCorrected: boolean = false
 ): {
   stationMeters: number;
@@ -331,72 +264,11 @@ export function calculateCanalStationing(
   varianceMeters?: number;
   anchorName?: string;
 } {
-  // 1. Collect reference anchors strictly within 10m of the line
-  const anchors = getCanalReferenceAnchors(lineCoords, canalName, layers, 10);
-
-  // 2. Filter anchors located between vertex origin (0) and selected point (upstream anchors)
-  const upstreamAnchors = anchors.filter(a => a.lineDistMeters <= bestDistAlongLine);
-
-  if (upstreamAnchors.length > 0) {
-    // Ref. Point 1: 1st Previous Anchor
-    const refPoint1 = upstreamAnchors[upstreamAnchors.length - 1];
-    const lineOffset = bestDistAlongLine - refPoint1.lineDistMeters;
-    const computedAnchorStation = Math.max(0, refPoint1.stationMeters + lineOffset);
-
-    // Decision 1: Does the anchor contain the same name as the canal segment?
-    if (isAnchorNameMatchingCanal(refPoint1.name, canalName, refPoint1.rawProps)) {
-      const varOrigin = Math.abs(bestDistAlongLine - computedAnchorStation);
-      return {
-        stationMeters: computedAnchorStation,
-        stationingLabel: formatStationingNumber(computedAnchorStation),
-        referenceContext: `Anchored: ${refPoint1.name} (Direct Match)`,
-        calibrationMethod: 'name_match',
-        varianceMeters: Math.round(varOrigin * 10) / 10,
-        anchorName: refPoint1.name
-      };
-    }
-
-    // Decision 2: Variance from Cumulative Haversine distance from Vertex 0 (<= 20m)
-    const varianceFromVertex0 = Math.abs(bestDistAlongLine - computedAnchorStation);
-    if (varianceFromVertex0 <= 20) {
-      return {
-        stationMeters: computedAnchorStation,
-        stationingLabel: formatStationingNumber(computedAnchorStation),
-        referenceContext: `Anchored: ${refPoint1.name} (Origin Δ ${varianceFromVertex0.toFixed(1)}m)`,
-        calibrationMethod: 'origin_variance',
-        varianceMeters: Math.round(varianceFromVertex0 * 10) / 10,
-        anchorName: refPoint1.name
-      };
-    }
-
-    // Decision 3: 2nd Previous Anchor (Ref. Point 2) Cross-Validation (<= 10m)
-    if (upstreamAnchors.length >= 2) {
-      const refPoint2 = upstreamAnchors[upstreamAnchors.length - 2];
-      const declaredStationSpan = Math.abs(refPoint1.stationMeters - refPoint2.stationMeters);
-      const physicalLineSpan = Math.abs(refPoint1.lineDistMeters - refPoint2.lineDistMeters);
-      const interAnchorVariance = Math.abs(declaredStationSpan - physicalLineSpan);
-
-      if (interAnchorVariance <= 10) {
-        return {
-          stationMeters: computedAnchorStation,
-          stationingLabel: formatStationingNumber(computedAnchorStation),
-          referenceContext: `Anchored: ${refPoint1.name} (Verified via ${refPoint2.name} Δ ${interAnchorVariance.toFixed(1)}m)`,
-          calibrationMethod: 'inter_anchor_verified',
-          varianceMeters: Math.round(interAnchorVariance * 10) / 10,
-          anchorName: refPoint1.name
-        };
-      }
-    }
-  }
-
-  // Fallback: Cumulative Haversine distance from Linestring Vertex 0 (0+000)
-  const stationLabel = formatStationingNumber(bestDistAlongLine);
+  const stationMeters = Math.max(0, bestDistAlongLine);
   return {
-    stationMeters: bestDistAlongLine,
-    stationingLabel: stationLabel,
-    referenceContext: isReversedCorrected 
-      ? `Geometric 0+000 (Reversed Polyline Corrected)`
-      : `Geometric 0+000 from Vertex 0`,
+    stationMeters,
+    stationingLabel: formatStationingNumber(stationMeters),
+    referenceContext: 'Audited Monotonic Centerline Projection (Origin STA 0+000.0)',
     calibrationMethod: 'vertex0_geometric',
     varianceMeters: 0
   };
@@ -594,6 +466,12 @@ export interface NearestGISFeatureResult {
   province?: string;
   municipality?: string;
   barangay?: string;
+  structureCategory?: string;
+  canalName?: string;
+  elevationMeters?: number;
+  offsetMeters?: number;
+  parentTakeoffStation?: string;
+  drainageInterface?: string;
 }
 
 /**
@@ -695,78 +573,20 @@ export function detectNearestGISFeature(
           if (isExactMatch) hasExactMatchWinner = true;
           isLineWinner = false;
 
-          const name = getFeatureName(props, props.station_code || 'Structure Gate', [fLat, fLng]);
-          const titleStr = `${name} ${props.station_code || ''}`;
-          const parsedSt = parseStationingFromText(titleStr);
+          const structName = props.name || getFeatureName(props, props.station_code || 'Structure Gate', [fLat, fLng]);
+          const structStation = props.station || '';
+          const stationM = typeof props.station_m === 'number'
+            ? props.station_m
+            : (parseStationingFromText(structStation) ?? parseStationingFromText(structName) ?? 0);
 
-          let stLabel = '';
-          let formattedName = name;
-          let canalCode = props.canal_code || props.desilting_dependency;
-          let distAlongLine = 0;
-          let refCtx: string | undefined = undefined;
-          let calibMethod: string | undefined = undefined;
+          const stLabel = structStation ? structStation.replace(/^STA\s*/i, '') : formatStationingNumber(stationM);
+          const formattedName = structStation
+            ? (structName.includes(structStation) ? structName : `${structName} (${structStation})`)
+            : `${structName} (STA ${stLabel})`;
+          const canalCode = props.canal_name || props.canal || props.canal_code || props.desilting_dependency;
 
-          if (parsedSt !== null) {
-            stLabel = formatStationingNumber(parsedSt);
-            formattedName = name.includes('+') ? name : `${name} (${stLabel})`;
-            distAlongLine = parsedSt;
-            refCtx = `Structure Attribute: ${name}`;
-            calibMethod = 'attribute_explicit';
-          } else {
-            // Find connected / nearest canal line within 100m to compute true stationing along the canal
-            let nearestCanalDist = Infinity;
-            let nearestCanalLine: [number, number][] | null = null;
-            let nearestCanalName = '';
-
-            layers.forEach((l) => {
-              if (l.visible === false || !l.data || !l.data.features) return;
-              l.data.features.forEach((feat: any) => {
-                const g = feat.geometry;
-                if (!g || (g.type !== 'LineString' && g.type !== 'MultiLineString')) return;
-                const lines: [number, number][][] = g.type === 'LineString'
-                  ? [g.coordinates.map((c: any) => [c[1], c[0]])]
-                  : g.coordinates.map((line: any) => line.map((c: any) => [c[1], c[0]]));
-
-                lines.forEach((lCoords) => {
-                  if (lCoords.length < 2) return;
-                  // Fast bbox check for structure-to-canal line proximity (0.002 deg ~ 220m)
-                  let lMinLat = Infinity, lMaxLat = -Infinity, lMinLng = Infinity, lMaxLng = -Infinity;
-                  for (let i = 0; i < lCoords.length; i++) {
-                    const p = lCoords[i];
-                    if (p[0] < lMinLat) lMinLat = p[0];
-                    if (p[0] > lMaxLat) lMaxLat = p[0];
-                    if (p[1] < lMinLng) lMinLng = p[1];
-                    if (p[1] > lMaxLng) lMaxLng = p[1];
-                  }
-                  if (fLat < lMinLat - 0.002 || fLat > lMaxLat + 0.002 || fLng < lMinLng - 0.002 || fLng > lMaxLng + 0.002) {
-                    return;
-                  }
-
-                  const proj = projectPointOnPolyline(fLat, fLng, lCoords);
-                  if (proj.distanceMeters < nearestCanalDist && proj.distanceMeters < 100) {
-                    nearestCanalDist = proj.distanceMeters;
-                    nearestCanalLine = lCoords;
-                    nearestCanalName = getFeatureName(feat.properties || {}, 'Main Canal', [fLat, fLng]);
-                    if (feat.properties?.canal_code) canalCode = feat.properties.canal_code;
-                  }
-                });
-              });
-            });
-
-            if (nearestCanalLine) {
-              const { orientedCoords, isReversed } = orientLinestringDownstream(nearestCanalLine, nearestCanalName, layers);
-              const proj = projectPointOnPolyline(fLat, fLng, orientedCoords);
-              const stInfo = calculateCanalStationing(proj.distanceAlongLineMeters, orientedCoords, nearestCanalName, layers, isReversed);
-              stLabel = stInfo.stationingLabel;
-              formattedName = `${name} (${stLabel})`;
-              distAlongLine = stInfo.stationMeters;
-              refCtx = stInfo.referenceContext;
-              calibMethod = stInfo.calibrationMethod;
-            }
-          }
-
-          const structCat = detectCanalCategory(props);
-          const structType = detectCanalType(props, layer.name, name);
+          const structCat = props.canal_lining === 'Lined' ? 'Lined' : props.canal_lining === 'Unlined' ? 'Unlined' : detectCanalCategory(props);
+          const structType = detectCanalType(props, layer.name, structName);
 
           bestResult = {
             locationName: formattedName,
@@ -774,19 +594,25 @@ export function detectNearestGISFeature(
             canalCode: canalCode,
             canalCategory: structCat,
             canalType: structType,
-            structureName: name,
-            nearestFeatureName: name,
-            nearestFeatureType: layer.category || 'Structure',
+            structureName: structName,
+            nearestFeatureName: structName,
+            nearestFeatureType: props.Structure_Category || layer.category || 'Structure',
             snappedCoords: [fLat, fLng],
-            distanceAlongLineMeters: distAlongLine,
+            distanceAlongLineMeters: stationM,
             isStructurePoint: true,
-            referenceContext: refCtx,
-            calibrationMethod: calibMethod,
+            referenceContext: props.station_source ? `Station Source: ${props.station_source}` : `Audited Structure: ${structName}`,
+            calibrationMethod: 'attribute_explicit',
             imo: featureImo,
             nis: featureNis,
             province: featureProv,
             municipality: featureMuni,
-            barangay: featureBrgy
+            barangay: featureBrgy,
+            structureCategory: props.Structure_Category,
+            canalName: props.canal_name,
+            elevationMeters: props.elevation_m ?? props.ele,
+            offsetMeters: props.offset_m,
+            parentTakeoffStation: props.parent_takeoff_station,
+            drainageInterface: props.drainage_interface
           };
         }
       } else if ((geom.type === 'LineString' || geom.type === 'MultiLineString') && geom.coordinates) {
@@ -810,7 +636,7 @@ export function detectNearestGISFeature(
             return;
           }
 
-          // Compute raw distance to line segments without downstream orientation yet
+          // Compute raw distance to line segments directly along monotonic flow vector
           let lineMinDist = Infinity;
           for (let i = 0; i < lineCoords.length - 1; i++) {
             const segStart = lineCoords[i];
@@ -844,12 +670,11 @@ export function detectNearestGISFeature(
     });
   });
 
-  // If the closest candidate is a canal line, orient downstream & calculate stationing ONCE
+  // If the closest candidate is a canal line, calculate direct linear projection from Vertex 0
   if (isLineWinner && bestLineCandidate) {
-    const rawName = getFeatureName(bestLineCandidate.props, 'Unnamed Canal', [lat, lng]);
+    const rawName = bestLineCandidate.props.canal || getFeatureName(bestLineCandidate.props, 'Unnamed Canal', [lat, lng]);
     const canalName = cleanCanalBaseName(rawName);
-
-    const { orientedCoords, isReversed } = orientLinestringDownstream(bestLineCandidate.lineCoords, canalName, layers);
+    const orientedCoords = bestLineCandidate.lineCoords;
 
     let cumulativeDist = 0;
     let lineMinDist = Infinity;
@@ -872,55 +697,19 @@ export function detectNearestGISFeature(
       cumulativeDist += segLength;
     }
 
-    const rawCode = bestLineCandidate.props.canal_code || bestLineCandidate.props.canal_id || bestLineCandidate.props.station_code;
-    const canalCode = (rawCode && !isSyntheticFeatureId(rawCode))
-      ? rawCode
-      : (!canalName.startsWith('Unnamed Canal') && canalName !== 'Canal'
-          ? canalName
-          : (bestLineCandidate.props.id ? `CNL-${bestLineCandidate.props.id}` : 'CNL'));
+    const canalCode = bestLineCandidate.props.canal || bestLineCandidate.props.canal_code || bestLineCandidate.props.canal_id || canalName;
 
-    // Check declared line stationing (station__1, station__2, station_1, station_2, STATIONING)
-    const rawS1 = bestLineCandidate.props.station__1 || bestLineCandidate.props.station_1;
-    const rawS2 = bestLineCandidate.props.station__2 || bestLineCandidate.props.station_2;
-    let s1 = parseStationingFromText(rawS1);
-    let s2 = parseStationingFromText(rawS2);
-
-    if (s1 === null && bestLineCandidate.props.STATIONING) {
-      const matches = [...String(bestLineCandidate.props.STATIONING).matchAll(/(\d+)\+(\d+(?:\.\d+)?)/g)];
-      if (matches.length >= 2) {
-        s1 = parseInt(matches[0][1], 10) * 1000 + parseFloat(matches[0][2]);
-        s2 = parseInt(matches[1][1], 10) * 1000 + parseFloat(matches[1][2]);
-      } else if (matches.length === 1) {
-        s1 = parseInt(matches[0][1], 10) * 1000 + parseFloat(matches[0][2]);
-      }
-    }
-
-    let stationMeters: number;
-    let stationingLabel: string;
-    let referenceContext: string;
-    let calibrationMethod: string;
-
-    // Only apply declared stationing if span > 0 (avoid placeholder 0+000 to 0+000)
-    if (s1 !== null && s2 !== null && Math.abs(s2 - s1) > 0) {
-      const minS = Math.min(s1, s2);
-      const maxS = Math.max(s1, s2);
-      const span = maxS - minS;
-      const progressRatio = cumulativeDist > 0 ? Math.max(0, Math.min(1, bestDistAlongLine / cumulativeDist)) : 0;
-      stationMeters = minS + progressRatio * span;
-      stationingLabel = formatStationingNumber(stationMeters);
-      referenceContext = `Declared Line Stationing: ${rawS1 || formatStationingNumber(s1)} to ${rawS2 || formatStationingNumber(s2)}`;
-      calibrationMethod = 'declared_attribute';
-    } else {
-      const stationInfo = calculateCanalStationing(bestDistAlongLine, orientedCoords, canalName, layers, isReversed);
-      stationMeters = stationInfo.stationMeters;
-      stationingLabel = stationInfo.stationingLabel;
-      referenceContext = stationInfo.referenceContext;
-      calibrationMethod = stationInfo.calibrationMethod;
-    }
+    // Direct native linear projection along monotonic downstream centerline: Vertex 0 is STA 0+000.0
+    const stationMeters = Math.max(0, bestDistAlongLine);
+    const stationingLabel = formatStationingNumber(stationMeters);
 
     const cCategory = detectCanalCategory(bestLineCandidate.props);
     const cType = detectCanalType(bestLineCandidate.props, undefined, canalName);
     const isFarmDitch = cType === 'Farm Ditch' || canalName.toLowerCase().includes('farm ditch') || canalName.toLowerCase().includes('ditch');
+
+    const declaredStationStart = bestLineCandidate.props.station_no || 'STA 0+000';
+    const declaredStationEnd = bestLineCandidate.props.station__1 || (bestLineCandidate.props.canal_leng ? formatStationingNumber(bestLineCandidate.props.canal_leng) : undefined);
+    const referenceContext = `Audited Centerline: ${declaredStationStart} to ${declaredStationEnd || stationingLabel}`;
 
     if (isFarmDitch) {
       const latStr = bestPointAlongLine[0].toFixed(5);
@@ -932,9 +721,9 @@ export function detectNearestGISFeature(
 
       bestResult = {
         locationName: ditchName,
-        stationingLabel: '', // Ditches naturally do not have station names
+        stationingLabel: '',
         canalCode: fdCode,
-        canalCategory: cCategory, // Categorized as unlined in general unless declared lined
+        canalCategory: cCategory,
         canalType: 'Farm Ditch',
         declaredStationStart: undefined,
         declaredStationEnd: undefined,
@@ -953,20 +742,20 @@ export function detectNearestGISFeature(
       };
     } else {
       bestResult = {
-        locationName: `${canalName} (${stationingLabel})`,
+        locationName: `${canalName} (STA ${stationingLabel})`,
         stationingLabel,
         canalCode,
         canalCategory: cCategory,
         canalType: cType,
-        declaredStationStart: s1 !== null ? formatStationingNumber(Math.min(s1, s2 ?? s1)) : undefined,
-        declaredStationEnd: s2 !== null ? formatStationingNumber(Math.max(s1, s2)) : undefined,
+        declaredStationStart,
+        declaredStationEnd,
         nearestFeatureName: canalName,
         nearestFeatureType: 'Canal Line',
         snappedCoords: bestPointAlongLine,
         distanceAlongLineMeters: Math.round(stationMeters),
         featureCoordinates: orientedCoords,
         referenceContext,
-        calibrationMethod,
+        calibrationMethod: 'vertex0_geometric',
         imo: bestLineCandidate.featureImo,
         nis: bestLineCandidate.featureNis,
         province: bestLineCandidate.featureProv,

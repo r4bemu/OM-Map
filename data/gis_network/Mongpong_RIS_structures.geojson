@@ -1,0 +1,1879 @@
+{
+  "type": "FeatureCollection",
+  "name": "Mongpong_structures",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3,
+        "name": "End of Barrel / Start of partial flume",
+        "type": "Flume",
+        "Structure_Category": "Parshall Flume",
+        "canal_name": "NEW INTAKE",
+        "station": "STA 0+046.7",
+        "station_m": 46.74,
+        "offset_m": 1.97,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*49' 06.3\", Long (E): 120*52' 14.5\" Satation #:  0+030, Remarks:",
+        "elevation_m": 61.06,
+        "photo_filename": "DSC00661.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00661.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*49' 06.3\", Long (E): 120*52' 14.5\" Satation #: 0+030, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.870695,
+          12.818408
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 6,
+        "name": "Old Intake",
+        "type": "Intake",
+        "Structure_Category": "Inlet",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 5.65,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 49.2\", Long (E): 120*52' 02.1\" Satation #:  0+000, Remarks:",
+        "elevation_m": 59.28,
+        "photo_filename": "DSC00664.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00664.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 49.2\", Long (E): 120*52' 02.1\" Satation #: 0+000, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.867246,
+          12.813674
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 8,
+        "name": "Thresher crossing",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 0+578.7",
+        "station_m": 578.65,
+        "offset_m": 1.76,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 51.5\", Long (E): 120*51' 44.0\" Satation #:  0+565, Remarks:",
+        "elevation_m": 59.83,
+        "photo_filename": "DSC00666.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00666.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 51.5\", Long (E): 120*51' 44.0\" Satation #: 0+565, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.862225,
+          12.814293
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 9,
+        "name": "Turnout",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC 1",
+        "station": "STA 0+012.0",
+        "station_m": 12.02,
+        "offset_m": 4.04,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 45.1\", Long (E): 120*51' 27.9\" Satation #:  1+085, Remarks:",
+        "elevation_m": 63.29,
+        "photo_filename": "DSC00667.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00667.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 45.1\", Long (E): 120*51' 27.9\" Satation #: 1+085, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.857761,
+          12.812531
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13,
+        "name": "turnout",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "FARM DITCH (CANAL 170)",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 3.96,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 37.9\", Long (E): 120*51' 58.6\" Satation #:  2+014, Remarks: silted",
+        "elevation_m": 65.48,
+        "photo_filename": "DSC00672.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00672.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 37.9\", Long (E): 120*51' 58.6\" Satation #: 2+014, Remarks: silted",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.849654,
+          12.81054
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 12,
+        "name": "Turnout",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 1+473.1",
+        "station_m": 1473.06,
+        "offset_m": 3.9,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 40.3\", Long (E): 120*51' 16.7\" Satation #:  1+456, Remarks: silted",
+        "elevation_m": 66.43,
+        "photo_filename": "DSC00671.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00671.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 40.3\", Long (E): 120*51' 16.7\" Satation #: 1+456, Remarks: silted",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.854631,
+          12.811182
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 32,
+        "name": "Head gate of Lateral - A",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 2+546.3",
+        "station_m": 2546.33,
+        "offset_m": 0.45,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 41.7\", Long (E): 120*50' 42.5\" Satation #:  0+000, Remarks: Silted",
+        "elevation_m": -9.23,
+        "photo_filename": "DSC00693.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00693.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 41.7\", Long (E): 120*50' 42.5\" Satation #: 0+000, Remarks: Silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.845149,
+          12.811578
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 53,
+        "name": "Start of concrete canal (Outlet)",
+        "type": "Outlet",
+        "Structure_Category": "Outlet",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+014.3",
+        "station_m": 14.33,
+        "offset_m": 5.49,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 41.77\", Long (E): 120*50' 41.44 Satation #:  0+018, Remarks: Silted",
+        "elevation_m": 61.02,
+        "photo_filename": "DSC00370.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00370.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 41.77\", Long (E): 120*50' 41.44 Satation #: 0+018, Remarks: Silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.844836,
+          12.811602
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 18,
+        "name": "Head gate",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 2+573.0",
+        "station_m": 2573.01,
+        "offset_m": 0.5,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 42.1\", Long (E): 120*50' 41.8\" Satation #:  2+551, Remarks: Missing part",
+        "elevation_m": 65.36,
+        "photo_filename": "DSC00678.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00678.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 42.1\", Long (E): 120*50' 41.8\" Satation #: 2+551, Remarks: Missing part",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.844936,
+          12.811698
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17,
+        "name": "Head gate",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "MC 4",
+        "station": "STA 0+004.9",
+        "station_m": 4.89,
+        "offset_m": 1.66,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-4, Lat. (N) 12*48' 42.2\", Long (E): 120*50' 41.9\" Satation #:  2+548, Remarks:",
+        "elevation_m": 63.36,
+        "photo_filename": "DSC00677.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00677.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-4, Lat. (N) 12*48' 42.2\", Long (E): 120*50' 41.9\" Satation #: 2+548, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.844988,
+          12.811712
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 54,
+        "name": "Turnout (right side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC 5",
+        "station": "STA 0+043.2",
+        "station_m": 43.21,
+        "offset_m": 5.17,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5. (N) 12*48' 41.41\", Long (E): 120*50' 40.57\" Satation #:  0+045, Remarks: Silted",
+        "elevation_m": 59.3,
+        "photo_filename": "DSC00371.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00371.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5. (N) 12*48' 41.41\", Long (E): 120*50' 40.57\" Satation #: 0+045, Remarks: Silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.844603,
+          12.811503
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 34,
+        "name": "Turnout (left side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+479.3",
+        "station_m": 479.27,
+        "offset_m": 0.05,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 29.7\", Long (E): 120*50' 32.1\" Satation #:  0+478, Remarks: silted",
+        "elevation_m": 50.96,
+        "photo_filename": "DSC00695.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00695.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 29.7\", Long (E): 120*50' 32.1\" Satation #: 0+478, Remarks: silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.842261,
+          12.808255
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 36,
+        "name": "Turnout (left side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+730.0",
+        "station_m": 729.97,
+        "offset_m": 1.33,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 22.9\", Long (E): 120*50' 27.5\" Satation #:  0+730, Remarks: Delapidated",
+        "elevation_m": 47.97,
+        "photo_filename": "DSC00697.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00697.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 22.9\", Long (E): 120*50' 27.5\" Satation #: 0+730, Remarks: Delapidated",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.840982,
+          12.806369
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 40,
+        "name": "Comb. of thresher crossing &drop structure",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL A",
+        "station": "STA 1+203.6",
+        "station_m": 1203.62,
+        "offset_m": 0.41,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 10.0\", Long (E): 120*50' 19.0\" Satation #: 1+202 - 1+207, Remarks: silted",
+        "elevation_m": 47.62,
+        "photo_filename": "DSC00704.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00704.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 10.0\", Long (E): 120*50' 19.0\" Satation #: 1+202 - 1+207, Remarks: silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.838601,
+          12.802783
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 39,
+        "name": "Turnout (left side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL A",
+        "station": "STA 1+203.0",
+        "station_m": 1202.99,
+        "offset_m": 0.35,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48'10.0\", Long (E): 120*50' 19.0\" Satation #: 1+200, Remarks: for repair",
+        "elevation_m": 47.8,
+        "photo_filename": "DSC00700.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00700.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48'10.0\", Long (E): 120*50' 19.0\" Satation #: 1+200, Remarks: for repair",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.83861,
+          12.802784
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 42,
+        "name": "Thresher crossing & drop",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "FARM DITCH (CANAL 10)",
+        "station": "STA 0+004.8",
+        "station_m": 4.77,
+        "offset_m": 0.79,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 01.8\", Long (E): 120*50' 13.4\" Satation #:  1+1500-1+1504, Remarks: silted",
+        "elevation_m": 44.46,
+        "photo_filename": "DSC00709.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00709.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 01.8\", Long (E): 120*50' 13.4\" Satation #: 1+1500-1+1504, Remarks: silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.837062,
+          12.800511
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 41,
+        "name": "Head gate",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "LATERAL A",
+        "station": "STA 1+500.2",
+        "station_m": 1500.23,
+        "offset_m": 3.78,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A (AS-1), Lat. (N) 12*48' 02.0\", Long (E): 120*50' 13.5\" Satation #:  0+730, Remarks:Silted",
+        "elevation_m": 44.63,
+        "photo_filename": "DSC00712.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00712.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A (AS-1), Lat. (N) 12*48' 02.0\", Long (E): 120*50' 13.5\" Satation #: 0+730, Remarks:Silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.837072,
+          12.800562
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 46,
+        "name": "Head gate",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+198.8",
+        "station_m": 198.82,
+        "offset_m": 4.02,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A (AS-2), Lat. (N) 12*47' 1.1\", Long (E): 120*50' 06.0\" Satation #:  1+898, Remarks: silted",
+        "elevation_m": 48.62,
+        "photo_filename": "DSC00716.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00716.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A (AS-2), Lat. (N) 12*47' 1.1\", Long (E): 120*50' 06.0\" Satation #: 1+898, Remarks: silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.835008,
+          12.797524
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 48,
+        "name": "Beginning of Earth canal",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+005.9",
+        "station_m": 5.92,
+        "offset_m": 0.08,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*47'50.8\",Long (E):120*50'06.0\" Station #:1+904 Remarks: silted",
+        "elevation_m": 46.89,
+        "photo_filename": "DSC00719.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00719.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*47'50.8\",Long (E):120*50'06.0\" Station #:1+904 Remarks: silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.835007,
+          12.797458
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 20,
+        "name": "Thresher crossing",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 1.45,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC, Lat. (N) 12*48'48.6\",Long (E):120*50'29.7\" Station #: 2+950 - 2+973 Remarks:; Manual Revision (2026-10-04): Set to STA 0+000.0 as takeoff origin for MC 6. Original parent takeoff station: STA 2+989.1 on MAIN CANAL.",
+        "elevation_m": 58.16,
+        "photo_filename": "DSC00681.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00681.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC, Lat. (N) 12*48'48.6\",Long (E):120*50'29.7\" Station #: 2+950 - 2+973 Remarks:",
+        "survey_date": "2024-2-27",
+        "station_source": "Manual Revision (Takeoff STA 0+000 Origin)",
+        "parent_takeoff_station": "STA 2+989.1 on MAIN CANAL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.841575,
+          12.813501
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 19,
+        "name": "Turnout",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC 6",
+        "station": "STA 0+008.1",
+        "station_m": 8.07,
+        "offset_m": 1.73,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC, Lat. (N) 12*48'48.8\",Long (E):120*50'29.9\" Station #: 2+963 Remarks:Missing part of steel gate",
+        "elevation_m": 59.03,
+        "photo_filename": "DSC00679.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00679.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC, Lat. (N) 12*48'48.8\",Long (E):120*50'29.9\" Station #: 2+963 Remarks:Missing part of steel gate",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.841638,
+          12.813566
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 21,
+        "name": "Turnout both side",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "FARM DITCH (CANAL 168)",
+        "station": "STA 0+006.2",
+        "station_m": 6.2,
+        "offset_m": 2.3,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC, Lat. (N) 12*48'43.8\",Long (E):120*50'13.4\" Station #: 3+505, Remarks: for repair",
+        "elevation_m": 54.12,
+        "photo_filename": "DSC00682.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00682.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC, Lat. (N) 12*48'43.8\",Long (E):120*50'13.4\" Station #: 3+505, Remarks: for repair",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.837041,
+          12.812168
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 23,
+        "name": "Head gate",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 3+845.6",
+        "station_m": 3845.56,
+        "offset_m": 0.27,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC, Lat. (N) 12*48'40.1\",Long (E):120*50'03.5\" Station #: 3+823, Remarks:",
+        "elevation_m": 51.25,
+        "photo_filename": "DSC00684.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00684.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC, Lat. (N) 12*48'40.1\",Long (E):120*50'03.5\" Station #: 3+823, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.834301,
+          12.811142
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 25,
+        "name": "Head gate",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "MC 10",
+        "station": "STA 0+005.9",
+        "station_m": 5.88,
+        "offset_m": 3.13,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC, Lat. (N) 12*48'40.2\",Long (E):120*50'02.9\" Station #: 3+836 - 3+847 Remarks:",
+        "elevation_m": 54.88,
+        "photo_filename": "DSC00686.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00686.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC, Lat. (N) 12*48'40.2\",Long (E):120*50'02.9\" Station #: 3+836 - 3+847 Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.834129,
+          12.811164
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 27,
+        "name": "Turnout (both side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC 10",
+        "station": "STA 0+307.3",
+        "station_m": 307.32,
+        "offset_m": 0.14,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC-10, Lat. (N) 12*48'36.6\",Long (E):120*49'33.6\" Station #: 4+145 Remarks:",
+        "elevation_m": 49.91,
+        "photo_filename": "DSC00688.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00688.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC-10, Lat. (N) 12*48'36.6\",Long (E):120*49'33.6\" Station #: 4+145 Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.831564,
+          12.810174
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 29,
+        "name": "Turnout (right side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC 10",
+        "station": "STA 0+603.5",
+        "station_m": 603.46,
+        "offset_m": 0,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC-10, Lat. (N) 12*48'32.3\",Long (E):120*49'44.9\" Station #: 4+440, Remarks:",
+        "elevation_m": 45.62,
+        "photo_filename": "DSC00690.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00690.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC-10, Lat. (N) 12*48'32.3\",Long (E):120*49'44.9\" Station #: 4+440, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.829146,
+          12.808981
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1,
+        "name": "New Intake",
+        "type": "Intake",
+        "Structure_Category": "Inlet",
+        "canal_name": "NEW INTAKE",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 7.97,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*49' 07.9\", Satation #:  0+000, Remarks:",
+        "elevation_m": 55.86,
+        "photo_filename": "DSC00658.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00658.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*49' 07.9\", Satation #: 0+000, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.870681,
+          12.818874
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2,
+        "name": "Start of Barrel",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "NEW INTAKE",
+        "station": "STA 0+001.8",
+        "station_m": 1.79,
+        "offset_m": 3.58,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*49' 07.8\", Long (E): 120*52' 14.3\" Satation #:  0+000, Remarks:",
+        "elevation_m": 59.97,
+        "photo_filename": "DSC00660.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00660.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*49' 07.8\", Long (E): 120*52' 14.3\" Satation #: 0+000, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.870635,
+          12.81882
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 4,
+        "name": "Canal Lining",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "NEW INTAKE",
+        "station": "STA 0+072.9",
+        "station_m": 72.89,
+        "offset_m": 0.23,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal - 10, Lat. (N) 12*48' 40.3\", Long (E): 120*50' 02.3\" Satation #:  3+860, Remarks:",
+        "elevation_m": 60.22,
+        "photo_filename": "DSC00687.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00687.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal - 10, Lat. (N) 12*48' 40.3\", Long (E): 120*50' 02.3\" Satation #: 3+860, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.870738,
+          12.818176
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 7,
+        "name": "End of Barrel",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 0+013.4",
+        "station_m": 13.45,
+        "offset_m": 7.31,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 49.8\", Long (E): 120*52' 02.0\" Satation #:  0+007, Remarks:",
+        "elevation_m": 61.89,
+        "photo_filename": "DSC00665.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00665.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 49.8\", Long (E): 120*52' 02.0\" Satation #: 0+007, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.867221,
+          12.813842
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 5,
+        "name": "End of Barrel with Junction box",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "NEW INTAKE",
+        "station": "STA 0+762.7",
+        "station_m": 762.71,
+        "offset_m": 0.09,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 50.5\", Long (E): 120*52' 01.1\" Satation #:  0+760, Remarks:",
+        "elevation_m": 59.91,
+        "photo_filename": "DSC00663.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00663.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 50.5\", Long (E): 120*52' 01.1\" Satation #: 0+760, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.866978,
+          12.814033
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 10,
+        "name": "Road crossing",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 1+109.1",
+        "station_m": 1109.13,
+        "offset_m": 3.26,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 45.1\", Long (E): 120*51' 27.7\" Satation #:  1+095, Remarks:",
+        "elevation_m": 59.38,
+        "photo_filename": "DSC00668.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00668.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 45.1\", Long (E): 120*51' 27.7\" Satation #: 1+095, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.85769,
+          12.812527
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 11,
+        "name": "Siphon with threshser crossing",
+        "type": "Siphon",
+        "Structure_Category": "Siphon",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 1+356.4",
+        "station_m": 1356.4,
+        "offset_m": 5.24,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 41.9\", Long (E): 120*51' 20.2\" Satation #:  1+330 - 1+355, Remarks:",
+        "elevation_m": 65.5,
+        "photo_filename": "DSC00670.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00670.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 41.9\", Long (E): 120*51' 20.2\" Satation #: 1+330 - 1+355, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.855597,
+          12.811647
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 14,
+        "name": "Thresher crossing",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 2+044.3",
+        "station_m": 2044.26,
+        "offset_m": 5.86,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 38.0\", Long (E): 120*51' 58.5\" Satation #:  2+022, Remarks: silted",
+        "elevation_m": 64.22,
+        "photo_filename": "DSC00673.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00673.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Main canal, Lat. (N) 12*48' 38.0\", Long (E): 120*51' 58.5\" Satation #: 2+022, Remarks: silted",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.849595,
+          12.810561
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 15,
+        "name": "Head gate",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "MC 3",
+        "station": "STA 0+011.5",
+        "station_m": 11.47,
+        "offset_m": 0.85,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-3 -A, Lat. (N) 12*48' 41.6\", Long (E): 120*50' 41.9\" Satation #:  2+542, Remarks: Vegitated",
+        "elevation_m": 62.33,
+        "photo_filename": "DSC00676.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00676.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-3 -A, Lat. (N) 12*48' 41.6\", Long (E): 120*50' 41.9\" Satation #: 2+542, Remarks: Vegitated",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.844965,
+          12.811553
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 33,
+        "name": "Thresher crossing",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+013.8",
+        "station_m": 13.75,
+        "offset_m": 3.13,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 41.6\", Long (E): 120*50' 41.7\" Satation #:  0+000 - 0+006, Remarks: Silted",
+        "elevation_m": -6.97,
+        "photo_filename": "DSC00694.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00694.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 41.6\", Long (E): 120*50' 41.7\" Satation #: 0+000 - 0+006, Remarks: Silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.844906,
+          12.811565
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 52,
+        "name": "Head gate with road crossing",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "MC 5",
+        "station": "STA 0+004.9",
+        "station_m": 4.87,
+        "offset_m": 1.69,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 42.8\", Long (E): 120*50' 41.65\" Satation #:  0+018, Remarks: Silted",
+        "elevation_m": 76.51,
+        "photo_filename": "DSC00369.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00369.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 42.8\", Long (E): 120*50' 41.65\" Satation #: 0+018, Remarks: Silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.844902,
+          12.81169
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 57,
+        "name": "Turnout (left side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC 5",
+        "station": "STA 0+011.8",
+        "station_m": 11.78,
+        "offset_m": 9.92,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 40.09\", Long (E): 120*50' 35.03\" Satation #:  0+224, Remarks:",
+        "elevation_m": 68.78,
+        "photo_filename": "DSC00375.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00375.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 40.09\", Long (E): 120*50' 35.03\" Satation #: 0+224, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.843064,
+          12.811137
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 16,
+        "name": "Check gate with road crossing",
+        "type": "Check Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "MC 5",
+        "station": "STA 0+001.4",
+        "station_m": 1.35,
+        "offset_m": 0.04,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC, Lat. (N) 12*48' 42.1\", Long (E): 120*50' 41.8\" Satation #:  2+552 - 2+561.5, Remarks: Silted",
+        "elevation_m": 64.69,
+        "photo_filename": "DSC00675.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00675.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC, Lat. (N) 12*48' 42.1\", Long (E): 120*50' 41.8\" Satation #: 2+552 - 2+561.5, Remarks: Silted",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.844937,
+          12.811682
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 31,
+        "name": "Start of concrete canal lining",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 2+593.4",
+        "station_m": 2593.38,
+        "offset_m": 1.34,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC, Lat. (N) 12*48' 42.5\", Long (E): 120*50' 40.12\" Satation #:  2+572, Remarks: Silted",
+        "elevation_m": 56.58,
+        "photo_filename": "DSC00692.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00692.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC, Lat. (N) 12*48' 42.5\", Long (E): 120*50' 40.12\" Satation #: 2+572, Remarks: Silted",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.844779,
+          12.8118
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 55,
+        "name": "Thresher crossing",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MC 5",
+        "station": "STA 0+044.8",
+        "station_m": 44.82,
+        "offset_m": 9.74,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 41.25\", Long (E): 120*50' 40.58\", Satation #:  0+047 - 0+051, Remarks:",
+        "elevation_m": 61.71,
+        "photo_filename": "DSC00373.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00373.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 41.25\", Long (E): 120*50' 40.58\", Satation #: 0+047 - 0+051, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.844606,
+          12.811459
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 60,
+        "name": "Thresher crossing",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MC 5",
+        "station": "STA 0+383.3",
+        "station_m": 383.34,
+        "offset_m": 9.64,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 36.33\", Long (E): 120*50' 23.50\" Satation #:  0+597 - 0+599.5, Remarks:",
+        "elevation_m": 64.85,
+        "photo_filename": "DSC00378.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00378.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 36.33\", Long (E): 120*50' 23.50\" Satation #: 0+597 - 0+599.5, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.83986,
+          12.810092
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 56,
+        "name": "Turnout (right side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC 5",
+        "station": "STA 0+012.9",
+        "station_m": 12.93,
+        "offset_m": 5.7,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 40.55\", Long (E): 120*50' 37.10\" Satation #:  0+158, Remarks:",
+        "elevation_m": 67.08,
+        "photo_filename": "DSC00374.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00374.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 40.55\", Long (E): 120*50' 37.10\" Satation #: 0+158, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.843639,
+          12.811264
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 58,
+        "name": "Turnout (Both side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC 5",
+        "station": "STA 0+094.2",
+        "station_m": 94.25,
+        "offset_m": 4.55,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 39.95\", Long (E): 120*50' 32.28\" Satation #:  0+305, Remarks:",
+        "elevation_m": 68.51,
+        "photo_filename": "DSC00376.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00376.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 39.95\", Long (E): 120*50' 32.28\" Satation #: 0+305, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.8423,
+          12.811096
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 59,
+        "name": "Thresher crossing",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MC 5",
+        "station": "STA 0+122.5",
+        "station_m": 122.55,
+        "offset_m": 7.79,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 39.64\", Long (E): 120*50' 31.42\" Satation #:  0+332 - 0+335, Remarks:",
+        "elevation_m": 65.13,
+        "photo_filename": "DSC00377.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00377.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 39.64\", Long (E): 120*50' 31.42\" Satation #: 0+332 - 0+335, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.842061,
+          12.81101
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 62,
+        "name": "Threshrer crossing",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MC 5",
+        "station": "STA 0+389.5",
+        "station_m": 389.54,
+        "offset_m": 11.23,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 36.21\", Long (E): 120*50' 23.32\" Satation #:  0+603 - 0+605, Remarks:",
+        "elevation_m": 61.98,
+        "photo_filename": "DSC00380.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00380.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 36.21\", Long (E): 120*50' 23.32\" Satation #: 0+603 - 0+605, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.839811,
+          12.810058
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 61,
+        "name": "Turnout (right side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC 5",
+        "station": "STA 0+386.9",
+        "station_m": 386.9,
+        "offset_m": 9.81,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 36.28\", Long (E): 120*50' 23.39\" Satation #:  0+600, Remarks:",
+        "elevation_m": 63.71,
+        "photo_filename": "DSC00379.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00379.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 36.28\", Long (E): 120*50' 23.39\" Satation #: 0+600, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.83983,
+          12.810079
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 63,
+        "name": "Thresher crossing",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MC 5",
+        "station": "STA 0+426.6",
+        "station_m": 426.61,
+        "offset_m": 5.55,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 35.97\", Long (E): 120*50' 22.10\" Satation #:  0+644 - 0+646.5, Remarks:",
+        "elevation_m": 67.57,
+        "photo_filename": "DSC00381.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00381.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 35.97\", Long (E): 120*50' 22.10\" Satation #: 0+644 - 0+646.5, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.839472,
+          12.809992
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 65,
+        "name": "Turnout (right side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC 5",
+        "station": "STA 0+579.0",
+        "station_m": 578.98,
+        "offset_m": 4.62,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 34.85\", Long (E): 120*50' 17.19\" Satation #:  0+798, Remarks:",
+        "elevation_m": 67.17,
+        "photo_filename": "DSC00383.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00383.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 34.85\", Long (E): 120*50' 17.19\" Satation #: 0+798, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.838107,
+          12.809681
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 64,
+        "name": "Turnout (right side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC 5",
+        "station": "STA 0+442.9",
+        "station_m": 442.86,
+        "offset_m": 3.82,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 35.81\", Long (E): 120*50' 21.58\" Satation #:  0+660, Remarks:",
+        "elevation_m": 69.59,
+        "photo_filename": "DSC00382.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00382.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 35.81\", Long (E): 120*50' 21.58\" Satation #: 0+660, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.839327,
+          12.809947
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 66,
+        "name": "Thresher crossing",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MC 5",
+        "station": "STA 0+781.8",
+        "station_m": 781.85,
+        "offset_m": 9.45,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 30.21\", Long (E): 120*50' 13.26 Satation #:  0+993 - 0+995.5, Remarks:",
+        "elevation_m": 66.89,
+        "photo_filename": "DSC00384.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00384.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 30.21\", Long (E): 120*50' 13.26 Satation #: 0+993 - 0+995.5, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.837018,
+          12.808392
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 67,
+        "name": "Turnout (right side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "MC 5",
+        "station": "STA 0+852.1",
+        "station_m": 852.06,
+        "offset_m": 0.44,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 29.13\", Long (E): 120*50' 11.20\" Satation #:  1+068, Remarks:",
+        "elevation_m": 59.13,
+        "photo_filename": "DSC00385.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00385.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 29.13\", Long (E): 120*50' 11.20\" Satation #: 1+068, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.836444,
+          12.808091
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 68,
+        "name": "Thresher crossing",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MC 5",
+        "station": "STA 0+856.7",
+        "station_m": 856.69,
+        "offset_m": 0.31,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 29.06\", Long (E): 120*50' 11.06\" Satation #:  0+071 - 0+073.5, Remarks:",
+        "elevation_m": 56.19,
+        "photo_filename": "DSC00386.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00386.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 29.06\", Long (E): 120*50' 11.06\" Satation #: 0+071 - 0+073.5, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.836406,
+          12.808072
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 69,
+        "name": "End of concrete canal",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "MC 5",
+        "station": "STA 1+107.1",
+        "station_m": 1107.06,
+        "offset_m": 10.6,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 25.17\", Long (E): 120*50' 04.87\" Satation #:  1+320, Remarks:",
+        "elevation_m": 66.13,
+        "photo_filename": "DSC00388.jpg",
+        "photo_path": "../DCIM/1000GRMN/DSC00388.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: MC-5, Lat. (N) 12*48' 25.17\", Long (E): 120*50' 04.87\" Satation #: 1+320, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.834685,
+          12.806993
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 35,
+        "name": "Combination of Thesher crossing & Drop structure",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+486.0",
+        "station_m": 485.99,
+        "offset_m": 3.86,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 29.6\", Long (E): 120*50' 31.9\" Satation #:  0+478 - 0+483, Remarks: silted",
+        "elevation_m": 48.84,
+        "photo_filename": "DSC00696.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00696.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 29.6\", Long (E): 120*50' 31.9\" Satation #: 0+478 - 0+483, Remarks: silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.842197,
+          12.808223
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 37,
+        "name": "Turnout (left side)",
+        "type": "Turnout",
+        "Structure_Category": "Turnout (TO)",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+897.8",
+        "station_m": 897.76,
+        "offset_m": 1.36,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 18.3\", Long (E): 120*50' 24.5\" Satation #:  0+, Remarks: for repair",
+        "elevation_m": 48.27,
+        "photo_filename": "DSC00698.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00698.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 18.3\", Long (E): 120*50' 24.5\" Satation #: 0+, Remarks: for repair",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.840141,
+          12.805097
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 26,
+        "name": "Canal lining",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "MC 10",
+        "station": "STA 0+024.6",
+        "station_m": 24.56,
+        "offset_m": 6.13,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC-10, Lat. (N) 12*48'40.3\",Long (E):120*50'02.3\" Station #:3+860, Remarks:",
+        "elevation_m": 54.25,
+        "photo_filename": "DSC00687.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00687.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC-10, Lat. (N) 12*48'40.3\",Long (E):120*50'02.3\" Station #:3+860, Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.83396,
+          12.811186
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 28,
+        "name": "drop structure",
+        "type": "Drop",
+        "Structure_Category": "Other Structures",
+        "canal_name": "MC 10",
+        "station": "STA 0+503.1",
+        "station_m": 503.05,
+        "offset_m": 0.64,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC-10, Lat. (N) 12*48'34.0\",Long (E):120*49'47.7\" Station #: 4+339 - 4+343 Remarks:for repair",
+        "elevation_m": 45.45,
+        "photo_filename": "DSC00689.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00689.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC-10, Lat. (N) 12*48'34.0\",Long (E):120*49'47.7\" Station #: 4+339 - 4+343 Remarks:for repair",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.829925,
+          12.809438
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 30,
+        "name": "End of canal lining",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "MC 10",
+        "station": "STA 0+659.0",
+        "station_m": 658.98,
+        "offset_m": 1.05,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC-10, Lat. (N) 12*48'30.6\",Long (E):120*49'95.1\" Station #: 4+500 Remarks:",
+        "elevation_m": 43.3,
+        "photo_filename": "DSC00691.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00691.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC-10, Lat. (N) 12*48'30.6\",Long (E):120*49'95.1\" Station #: 4+500 Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.829183,
+          12.808504
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 38,
+        "name": "Comb. Thresher crossing & drop strucure",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+901.7",
+        "station_m": 901.65,
+        "offset_m": 5.92,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 18.3\", Long (E): 120*50' 24.3\" Satation #:  0+900-905, Remarks: for repair",
+        "elevation_m": 48.27,
+        "photo_filename": "DSC00699.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00699.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 18.3\", Long (E): 120*50' 24.3\" Satation #: 0+900-905, Remarks: for repair",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.840086,
+          12.805088
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 44,
+        "name": "Beginning of Earth canal",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "FARM DITCH (CANAL 10)",
+        "station": "STA 0+007.4",
+        "station_m": 7.45,
+        "offset_m": 3.68,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 01.8\", Long (E): 120*50' 13.3\" Satation #:  1+505, Remarks:",
+        "elevation_m": 47.76,
+        "photo_filename": "DSC00713.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00713.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*48' 01.8\", Long (E): 120*50' 13.3\" Satation #: 1+505, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.837026,
+          12.800507
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 43,
+        "name": "Head gate",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "LATERAL A",
+        "station": "STA 1+503.3",
+        "station_m": 1503.34,
+        "offset_m": 1.54,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A (A-S), Lat. (N) 12*48' 01.8\", Long (E): 120*50' 13.5\" Satation #:  1+498, Remarks: silted",
+        "elevation_m": 48.29,
+        "photo_filename": "DSC00711.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00711.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A (A-S), Lat. (N) 12*48' 01.8\", Long (E): 120*50' 13.5\" Satation #: 1+498, Remarks: silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.837097,
+          12.800512
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 45,
+        "name": "End of Earth canal",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+008.7",
+        "station_m": 8.65,
+        "offset_m": 0.33,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*47' 56.2\", Long (E): 120*50' 09.6\" Satation #:  1+505 - 1705, Remarks:",
+        "elevation_m": 48.23,
+        "photo_filename": "DSC00715.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00715.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*47' 56.2\", Long (E): 120*50' 09.6\" Satation #: 1+505 - 1705, Remarks:",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.836013,
+          12.798932
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 47,
+        "name": "thresher crossing & drop",
+        "type": "Turnout",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+003.5",
+        "station_m": 3.49,
+        "offset_m": 1.42,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A (AS-2), Lat. (N) 12*47'50.9\",Long (E):120*50'06.0\" Station #:  1+898-1+902 Remarks: silted",
+        "elevation_m": 47.18,
+        "photo_filename": "DSC00718.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00718.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A (AS-2), Lat. (N) 12*47'50.9\",Long (E):120*50'06.0\" Station #: 1+898-1+902 Remarks: silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.835009,
+          12.797483
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 49,
+        "name": "End of Earth canal",
+        "type": "Other Structures",
+        "Structure_Category": "Other Structures",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+005.6",
+        "station_m": 5.58,
+        "offset_m": 1.97,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A , Lat. (N) 12*47'43.3\",Long (E):120*50'00.8\" Station #:  2+193, Remarks: silted",
+        "elevation_m": 46.67,
+        "photo_filename": "DSC00720.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00720.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A , Lat. (N) 12*47'43.3\",Long (E):120*50'00.8\" Station #: 2+193, Remarks: silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.833545,
+          12.79535
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 50,
+        "name": "Combination of road crossing & Barell",
+        "type": "Road Crossing",
+        "Structure_Category": "Road Crossing",
+        "canal_name": "LATERAL A",
+        "station": "STA 0+005.2",
+        "station_m": 5.22,
+        "offset_m": 12.3,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*47'43.1\",Long (E):120*50'01.1\" Station #:  2+193 - 2+206 Remarks: silted",
+        "elevation_m": 46.04,
+        "photo_filename": "DSC00721.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00721.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A, Lat. (N) 12*47'43.1\",Long (E):120*50'01.1\" Station #: 2+193 - 2+206 Remarks: silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.83363,
+          12.795308
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 51,
+        "name": "Outlet of barell",
+        "type": "Other Structures",
+        "Structure_Category": "Outlet",
+        "canal_name": "FARM DITCH (CANAL 152)",
+        "station": "STA 0+404.2",
+        "station_m": 404.19,
+        "offset_m": 3.78,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A , Lat. (N) 12*47'42.07\",Long (E):120*50'01.1\" Station #:  1+898-1+902 Remarks: silted",
+        "elevation_m": 47.79,
+        "photo_filename": "DSC00722.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00722.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name: Lateral -A , Lat. (N) 12*47'42.07\",Long (E):120*50'01.1\" Station #: 1+898-1+902 Remarks: silted",
+        "survey_date": "2024-2-28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.833629,
+          12.795184
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 22,
+        "name": "Thresher crossing",
+        "type": "Thresher Crossing",
+        "Structure_Category": "Thresher Crossing",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 3+532.6",
+        "station_m": 3532.56,
+        "offset_m": 1.24,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC, Lat. (N) 12*48'43.6\",Long (E):120*50'13.1\" Station #: 3+511 - 3+515 Remarks:",
+        "elevation_m": 52.89,
+        "photo_filename": "DSC00683.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00683.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC, Lat. (N) 12*48'43.6\",Long (E):120*50'13.1\" Station #: 3+511 - 3+515 Remarks:",
+        "survey_date": "2024-2-27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.836984,
+          12.81212
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 24,
+        "name": "Head gate",
+        "type": "Head Gate",
+        "Structure_Category": "Head Gate",
+        "canal_name": "MAIN CANAL",
+        "station": "STA 0+000.0",
+        "station_m": 0,
+        "offset_m": 1.8,
+        "desc": "",
+        "comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC-8, Lat. (N) 12*48'40.2\",Long (E):120*50'03.3\" Station #: 3+831 Remarks: Dilapitated steel gate; Manual Revision (2026-10-04): Set to STA 0+000.0 as Head Gate origin for MC 9. Original parent takeoff station: STA 3+851.3 on MAIN CANAL.",
+        "elevation_m": 53.98,
+        "photo_filename": "DSC00685.jpg",
+        "photo_path": "../DCIM/10GRMN/DSC00685.jpg",
+        "surveyor_comment": "Tsag/IA name: Northern Mongpong IA, Canal name:MC-8, Lat. (N) 12*48'40.2\",Long (E):120*50'03.3\" Station #: 3+831 Remarks: Dilapitated steel gate",
+        "survey_date": "2024-2-27",
+        "station_source": "Manual Revision (Headgate STA 0+000 Origin)",
+        "parent_takeoff_station": "STA 3+851.3 on MAIN CANAL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          120.834247,
+          12.811158
+        ]
+      }
+    }
+  ]
+}

@@ -30,7 +30,7 @@ import {
   Plus,
   Minus
 } from 'lucide-react';
-import { detectNearestGISFeature, calculateCanalPathBetweenPoints, getFeatureName, haversineDistanceMeters, NearestGISFeatureResult } from '../utils/gisLocationUtils';
+import { detectNearestGISFeature, calculateCanalPathBetweenPoints, getFeatureName, haversineDistanceMeters, formatStationingNumber, NearestGISFeatureResult } from '../utils/gisLocationUtils';
 import { getIsoWeekInfo } from '../utils/weekUtils';
 import { 
   STRUCTURE_BLUE_COLOR, 
@@ -857,7 +857,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
             // Structures guaranteed in Azure Blue (#0284c7) with solid white border ring
             const markerColor = BLUE_PALETTE.STRUCTURE;
-            const stationCode = feature.properties?.Name || feature.properties?.name || feature.properties?.NAME || feature.properties?.canal_name || feature.properties?.station_name || feature.properties?.station_code || 'STRUCTURE';
+            const structName = feature.properties?.name || feature.properties?.Name || feature.properties?.NAME || feature.properties?.canal_name || 'STRUCTURE';
+            const structStation = feature.properties?.station || (feature.properties?.station_m !== undefined ? `STA ${formatStationingNumber(feature.properties.station_m)}` : null);
+            const tooltipContent = structStation && !structName.includes(structStation)
+              ? `${structName} (${structStation})`
+              : structName;
 
             // Point marker with crisp 2px solid white border ring
             const circleMarker = L.circleMarker(latlng, {
@@ -869,7 +873,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               opacity: 0.85,
               interactive: true
             });
-            circleMarker.bindTooltip(stationCode, { direction: 'top', opacity: 0.9, className: 'custom-map-tooltip' });
+            circleMarker.bindTooltip(tooltipContent, { direction: 'top', opacity: 0.9, className: 'custom-map-tooltip' });
             return circleMarker;
           },
           onEachFeature: (feature, leafletLayer) => {
@@ -982,7 +986,13 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 }
               }
 
-              let resolvedName = featInfo?.locationName || getFeatureName(props, 'Unnamed Canal', featureCoords);
+              const isStructure = itemStyle.isStructure || featInfo?.isStructurePoint;
+              const escapeHtml = (val: any) => String(val ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m] || m));
+
+              let resolvedName = isStructure
+                ? (props.name || featInfo?.locationName || getFeatureName(props, 'Unnamed Structure', featureCoords))
+                : (props.canal || featInfo?.locationName || getFeatureName(props, 'Unnamed Canal', featureCoords));
+
               if (itemStyle.canalType === 'Farm Ditch' && featureCoords && (!featInfo || !featInfo.locationName.startsWith('Farm ditch'))) {
                 resolvedName = `Farm ditch @${featureCoords[0].toFixed(5)}, ${featureCoords[1].toFixed(5)}`;
               }
@@ -999,25 +1009,78 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               const labelColor = isLight ? 'text-slate-500' : 'text-slate-400';
               const valColor = isLight ? 'text-slate-800' : 'text-slate-200';
 
+              let rowsHtml = '';
+              if (isStructure) {
+                const structCat = props.Structure_Category || props.structure_category || props.type || featInfo?.structureCategory || 'Structure';
+                const hostCanal = props.canal_name || props.Canal_Name || featInfo?.canalName || 'N/A';
+                const stationStr = props.station || (props.station_m !== undefined ? `STA ${formatStationingNumber(props.station_m)}` : (featInfo?.stationingLabel || 'STA 0+000.0'));
+                const takeoffStr = props.parent_takeoff_station || featInfo?.parentTakeoffStation;
+                const drainageStr = props.drainage_interface || featInfo?.drainageInterface;
+
+                rowsHtml = `
+                  <div class="flex justify-between items-center gap-2">
+                    <span class="${labelColor} font-medium shrink-0">Structure Category:</span>
+                    <span class="font-semibold ${valColor} text-right truncate">${escapeHtml(structCat)}</span>
+                  </div>
+                  <div class="flex justify-between items-center gap-2">
+                    <span class="${labelColor} font-medium shrink-0">Host Canal:</span>
+                    <span class="font-semibold ${isLight ? 'text-sky-600' : 'text-sky-400'} text-right truncate">${escapeHtml(hostCanal)}</span>
+                  </div>
+                  <div class="flex justify-between items-center gap-2">
+                    <span class="${labelColor} font-medium shrink-0">Station:</span>
+                    <span class="font-mono font-semibold ${isLight ? 'text-emerald-700' : 'text-emerald-400'} text-right truncate">${escapeHtml(stationStr)}</span>
+                  </div>
+                  ${takeoffStr ? `
+                    <div class="flex justify-between items-center gap-2">
+                      <span class="${labelColor} font-medium shrink-0">Takeoff:</span>
+                      <span class="font-mono text-[10px] ${valColor} text-right truncate" title="${escapeHtml(takeoffStr)}">${escapeHtml(takeoffStr)}</span>
+                    </div>
+                  ` : ''}
+                  ${drainageStr ? `
+                    <div class="flex justify-between items-center gap-2">
+                      <span class="${labelColor} font-medium shrink-0">Drainage Interface:</span>
+                      <span class="font-semibold ${isLight ? 'text-amber-700' : 'text-amber-400'} text-right truncate">${escapeHtml(drainageStr)}</span>
+                    </div>
+                  ` : ''}
+                `;
+              } else {
+                const canalTypeVal = props.canaltype || props.canal_type || typeLabel;
+                const liningVal = props.canal_lining || categoryLabel;
+                const canalStationVal = featInfo?.stationingLabel || (props.station_no ? `${props.station_no} - ${props.station__1 || ''}` : 'N/A');
+                const lengthVal = props.canal_leng ? `${Number(props.canal_leng).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} m` : null;
+
+                rowsHtml = `
+                  <div class="flex justify-between items-center gap-2">
+                    <span class="${labelColor} font-medium shrink-0">Canal Type:</span>
+                    <span class="font-semibold ${valColor} text-right truncate">${escapeHtml(canalTypeVal)}</span>
+                  </div>
+                  <div class="flex justify-between items-center gap-2">
+                    <span class="${labelColor} font-medium shrink-0">Lining Status:</span>
+                    <span class="font-semibold ${valColor} text-right truncate">${escapeHtml(liningVal)}</span>
+                  </div>
+                  <div class="flex justify-between items-center gap-2">
+                    <span class="${labelColor} font-medium shrink-0">Station:</span>
+                    <span class="font-mono font-semibold ${isLight ? 'text-emerald-700' : 'text-emerald-400'} text-right truncate">${escapeHtml(canalStationVal)}</span>
+                  </div>
+                  ${lengthVal ? `
+                    <div class="flex justify-between items-center gap-2">
+                      <span class="${labelColor} font-medium shrink-0">Total Length:</span>
+                      <span class="font-semibold ${valColor} text-right truncate">${escapeHtml(lengthVal)}</span>
+                    </div>
+                  ` : ''}
+                `;
+              }
+
               return `
                 <div class="p-1.5 space-y-2 min-w-[240px] max-w-sm font-sans text-xs ${isLight ? 'text-slate-800' : 'text-slate-200'}">
                   <div class="border-b ${borderClass} pb-1.5 pr-6">
                     <span class="font-bold text-xs ${headerColor} leading-snug break-words block">
-                      ${resolvedName}
+                      ${escapeHtml(resolvedName)}
                     </span>
                   </div>
 
                   <div class="space-y-1.5 py-0.5 text-[11px]">
-                    <div class="flex justify-between items-center gap-2">
-                      <span class="${labelColor} font-medium shrink-0">Canal Type:</span>
-                      <span class="font-semibold ${valColor} text-right truncate">${typeLabel}</span>
-                    </div>
-
-                    <div class="flex justify-between items-center gap-2">
-                      <span class="${labelColor} font-medium shrink-0">Category:</span>
-                      <span class="font-semibold ${valColor} text-right truncate">${categoryLabel}</span>
-                    </div>
-
+                    ${rowsHtml}
                     <div class="flex justify-between items-center gap-2">
                       <span class="${labelColor} font-medium shrink-0">Coordinates:</span>
                       <div class="flex items-center gap-1.5 font-mono font-semibold ${valColor} shrink-0">
