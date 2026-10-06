@@ -29,7 +29,6 @@ import { SignUpModal } from './SignUpModal';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
 import { ForcePasswordChangeModal } from './ForcePasswordChangeModal';
 import { GoogleProfileSetupModal, GoogleInitialData } from './GoogleProfileSetupModal';
-import { GoogleAuthDomainModal } from './GoogleAuthDomainModal';
 import { AccessRequestStatusModal } from './AccessRequestStatusModal';
 
 interface LoginModalProps {
@@ -96,7 +95,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   // Modals state
   const [isGoogleSetupModalOpen, setIsGoogleSetupModalOpen] = useState(false);
   const [googleSetupData, setGoogleSetupData] = useState<GoogleInitialData | null>(null);
-  const [isGoogleDomainModalOpen, setIsGoogleDomainModalOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [statusModalRequest, setStatusModalRequest] = useState<AccessRequest | null>(null);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
@@ -344,35 +342,38 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       if (googleProfile && googleProfile.email) {
         const userEmail = googleProfile.email.toLowerCase().trim();
 
+        // 1. Fetch any existing access request for this user (for uploaded portrait, custom details, or approval status)
+        let userReq: AccessRequest | null = null;
+        try {
+          userReq = await fetchUserAccessRequestApi(userEmail);
+        } catch (_) {}
+        if (!userReq) {
+          userReq = requests.find(r => r.email?.toLowerCase().trim() === userEmail) || null;
+        }
+
         // 0. Master Developer Override (r4b.emu@gmail.com): Instant access with full administrative authority
         if (userEmail === DEVELOPER_EMAIL.toLowerCase()) {
           const devUser: AuthUser = {
             id: 'usr-dev-01',
             username: 'dev_master',
-            name: googleProfile.name || 'Lead Systems Architect (Developer)',
+            name: userReq?.fullName || googleProfile.name || 'Lead Systems Architect (Developer)',
             role: 'Developer',
             passcode: 'GOOGLE_AUTH_SSO',
             imoOffice: 'All IMOs',
             nisBinding: 'All NIS',
             designation: 'Master Systems Administrator - Regional Wide',
-            avatar: userReq?.avatar || allUsers.find(u => u.id === 'usr-dev-01')?.avatar || googleProfile.picture,
+            avatar: userReq?.avatar || googleProfile.picture || allUsers.find(u => u.id === 'usr-dev-01')?.avatar,
             email: userEmail,
             provider: 'google'
           };
           onLogin(devUser);
           return;
         }
-        
-        // 1. Check if there is an existing access request for this user (fresh fetch from Firestore)
-        let userReq = await fetchUserAccessRequestApi(userEmail);
-        if (!userReq) {
-          userReq = requests.find(r => r.email?.toLowerCase().trim() === userEmail) || null;
-        }
 
         if (userReq) {
           if (userReq.status === 'approved') {
             // User is approved -> Log in directly!
-            loginApprovedUser(userReq, googleProfile.picture, 'google');
+            loginApprovedUser(userReq, userReq.avatar || googleProfile.picture, 'google');
             return;
           } else {
             // Request is Pending or Rejected -> show status modal
@@ -385,7 +386,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         // 2. Check if email matches one of the pre-configured accounts
         const matchedLocalUser = allUsers.find(u => u.email?.toLowerCase().trim() === userEmail);
         if (matchedLocalUser) {
-          const resolvedAvatar = matchedLocalUser.avatar || userReq?.avatar || googleProfile.picture;
+          const resolvedAvatar = userReq?.avatar || matchedLocalUser.avatar || googleProfile.picture;
           onLogin({ ...matchedLocalUser, avatar: resolvedAvatar, provider: 'google' });
           return;
         }
@@ -404,11 +405,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       if (err.type === 'popup_closed' || err.error === 'popup_closed_by_user' || err.message?.includes('closed')) {
         return;
       }
-      if (err.error === 'idpiframe_initialization_failed' || err.error === 'unauthorized_client' || err.message?.includes('origin') || err.message?.includes('domain')) {
-        setIsGoogleDomainModalOpen(true);
-        return;
-      }
-      setIsGoogleDomainModalOpen(true);
+      console.error('Google Sign-In Error:', err);
+      setErrorMsg(err.message || 'Google sign-in could not be completed. Please try again.');
     }
   };
 
@@ -756,16 +754,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         isLight={isLight}
       />
 
-      {/* Google Auth Domain Configuration / Instant Sign-In Modal */}
-      <GoogleAuthDomainModal
-        isOpen={isGoogleDomainModalOpen}
-        onClose={() => setIsGoogleDomainModalOpen(false)}
-        onOpenProfileSetup={(data) => {
-          setGoogleSetupData(data);
-          setIsGoogleSetupModalOpen(true);
-        }}
-        isLight={isLight}
-      />
 
       {/* Account Recovery & Temporary PIN Request Modal */}
       <ForgotPasswordModal

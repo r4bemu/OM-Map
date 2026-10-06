@@ -18,7 +18,10 @@ import {
   Layers,
   Sparkles,
   ShieldCheck,
-  User
+  User,
+  KeyRound,
+  ExternalLink,
+  Copy
 } from 'lucide-react';
 import { 
   AppConfigurations, 
@@ -28,6 +31,11 @@ import {
   RESOLUTION_CAP_OPTIONS,
   DIMENSION_OPTIONS
 } from '../utils/appConfigurations';
+import {
+  getStoredGoogleClientId,
+  saveStoredGoogleClientId,
+  DEFAULT_GOOGLE_CLIENT_ID
+} from '../lib/googleIdentityAuth';
 import {
   UserSignatoriesProfile,
   getUserSignatories,
@@ -54,10 +62,15 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
 }) => {
   const isDeveloper = currentUser?.role === 'Developer' || currentRole === 'Developer';
 
-  const [activeMainTab, setActiveMainTab] = useState<'signatories' | 'system'>('signatories');
+  const [activeMainTab, setActiveMainTab] = useState<'signatories' | 'system' | 'googleAuth'>('signatories');
   const [activeReportTab, setActiveReportTab] = useState<'wmr' | 'photoDoc' | 'inspectionReport'>('wmr');
 
   const [config, setConfig] = useState<AppConfigurations>(getSavedConfigurations);
+  const [googleClientId, setGoogleClientId] = useState(() => getStoredGoogleClientId());
+  const [isCopiedOrigin, setIsCopiedOrigin] = useState(false);
+  const [isSavedClientId, setIsSavedClientId] = useState(false);
+  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+
   const [signatories, setSignatories] = useState<UserSignatoriesProfile>(() => 
     getUserSignatories(currentUser?.id, currentUser)
   );
@@ -67,6 +80,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setConfig(getSavedConfigurations());
+      setGoogleClientId(getStoredGoogleClientId());
       setSignatories(getUserSignatories(currentUser?.id, currentUser));
       setSavedSuccessNotice(null);
       if (!isDeveloper) {
@@ -77,12 +91,30 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleCopyOrigin = () => {
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(currentOrigin);
+    }
+    setIsCopiedOrigin(true);
+    setTimeout(() => setIsCopiedOrigin(false), 2000);
+  };
+
+  const handleSaveGoogleClientId = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    saveStoredGoogleClientId(googleClientId);
+    setIsSavedClientId(true);
+    setTimeout(() => setIsSavedClientId(false), 2500);
+    setSavedSuccessNotice('Google Cloud OAuth 2.0 Client ID saved successfully!');
+    setTimeout(() => setSavedSuccessNotice(null), 2000);
+  };
+
   const handleSave = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
-    // 1. Save App System Configurations (Developer only)
+    // 1. Save App System Configurations & Google OAuth Client ID (Developer only)
     if (isDeveloper) {
       saveConfigurations(config);
+      saveStoredGoogleClientId(googleClientId);
     }
 
     // 2. Save User-Specific Signatories Profile
@@ -91,7 +123,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
 
     setSavedSuccessNotice(
       isDeveloper 
-        ? 'All configurations and report signatories saved successfully!' 
+        ? 'All system configurations, Google OAuth credentials, and signatories saved!' 
         : 'Report signatories saved successfully!'
     );
     setTimeout(() => {
@@ -101,7 +133,11 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
   };
 
   const handleResetCurrentTab = () => {
-    if (activeMainTab === 'system' && isDeveloper) {
+    if (activeMainTab === 'googleAuth' && isDeveloper) {
+      setGoogleClientId(DEFAULT_GOOGLE_CLIENT_ID);
+      saveStoredGoogleClientId(DEFAULT_GOOGLE_CLIENT_ID);
+      setSavedSuccessNotice('Google OAuth Client ID reset to official system default.');
+    } else if (activeMainTab === 'system' && isDeveloper) {
       setConfig(DEFAULT_CONFIGURATIONS);
       saveConfigurations(DEFAULT_CONFIGURATIONS);
       setSavedSuccessNotice('System photo & map configurations reset to defaults.');
@@ -173,11 +209,11 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
         </div>
 
         {/* Main Tab Bar */}
-        <div className="flex items-center border-b border-slate-700/80 bg-slate-950/60 px-4 pt-2 gap-2 shrink-0">
+        <div className="flex items-center border-b border-slate-700/80 bg-slate-950/60 px-4 pt-2 gap-2 shrink-0 overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveMainTab('signatories')}
-            className={`flex items-center gap-2 px-3.5 py-2.5 font-bold text-xs rounded-t-xl transition border-b-2 cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-2.5 font-bold text-xs rounded-t-xl transition border-b-2 cursor-pointer shrink-0 ${
               activeMainTab === 'signatories'
                 ? 'border-cyan-400 text-cyan-300 bg-slate-900/80 shadow-sm'
                 : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
@@ -191,21 +227,39 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
           </button>
 
           {isDeveloper && (
-            <button
-              type="button"
-              onClick={() => setActiveMainTab('system')}
-              className={`flex items-center gap-2 px-3.5 py-2.5 font-bold text-xs rounded-t-xl transition border-b-2 cursor-pointer ${
-                activeMainTab === 'system'
-                  ? 'border-[#166534] text-[#166534] dark:text-emerald-300 bg-slate-900/80 shadow-sm'
-                  : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
-              }`}
-            >
-              <Camera className="w-4 h-4 text-emerald-400" />
-              <span>Photo &amp; Map Settings</span>
-              <span className="text-[9.5px] px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300 font-mono border border-rose-500/30">
-                Developer Only
-              </span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => setActiveMainTab('system')}
+                className={`flex items-center gap-2 px-3.5 py-2.5 font-bold text-xs rounded-t-xl transition border-b-2 cursor-pointer shrink-0 ${
+                  activeMainTab === 'system'
+                    ? 'border-[#166534] text-[#166534] dark:text-emerald-300 bg-slate-900/80 shadow-sm'
+                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
+                }`}
+              >
+                <Camera className="w-4 h-4 text-emerald-400" />
+                <span>Photo &amp; Map Settings</span>
+                <span className="text-[9.5px] px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300 font-mono border border-rose-500/30">
+                  Developer
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveMainTab('googleAuth')}
+                className={`flex items-center gap-2 px-3.5 py-2.5 font-bold text-xs rounded-t-xl transition border-b-2 cursor-pointer shrink-0 ${
+                  activeMainTab === 'googleAuth'
+                    ? 'border-amber-400 text-amber-300 bg-slate-900/80 shadow-sm'
+                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
+                }`}
+              >
+                <KeyRound className="w-4 h-4 text-amber-400" />
+                <span>Google OAuth Credentials</span>
+                <span className="text-[9.5px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 font-mono border border-amber-500/30">
+                  Developer
+                </span>
+              </button>
+            </>
           )}
         </div>
 
@@ -802,6 +856,109 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
               </div>
             </div>
           )}
+
+          {/* =========================================================================
+              TAB 3: GOOGLE CLOUD OAUTH 2.0 CREDENTIALS (Developer Only)
+             ========================================================================= */}
+          {activeMainTab === 'googleAuth' && isDeveloper && (
+            <div className="space-y-4 animate-in fade-in duration-150">
+              <div className="bg-slate-800/60 border border-slate-700/80 rounded-xl p-4 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-700/80 pb-2.5">
+                  <div className="flex items-center gap-2 text-slate-100 font-bold text-xs uppercase tracking-wider">
+                    <KeyRound className="w-4 h-4 text-amber-400" />
+                    <span>Google Cloud Console OAuth 2.0 Credentials</span>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-mono font-bold">
+                    Zero Firebase Required
+                  </span>
+                </div>
+
+                <p className="text-[11.5px] text-slate-400 leading-relaxed">
+                  When hosting on Cloud Run, custom production domains, or localhost, configure your Google Cloud OAuth 2.0 Web Client ID for native Google Identity Services (GIS) pop-up sign-in.
+                </p>
+
+                {/* Step-by-Step Instructions */}
+                <div className="bg-slate-900/70 border border-slate-700/80 rounded-xl p-3.5 space-y-2 text-xs">
+                  <div className="font-bold text-slate-200 text-[11px] uppercase tracking-wider">
+                    Google Cloud Console Configuration:
+                  </div>
+                  <ol className="list-decimal list-inside space-y-2 text-slate-300">
+                    <li className="leading-relaxed">
+                      Open <strong className="text-white">Google Cloud Console → APIs &amp; Services → Credentials</strong>.
+                    </li>
+                    <li className="leading-relaxed">
+                      Create or edit an <strong className="text-white">OAuth 2.0 Client ID</strong> (Application type: <em>Web application</em>).
+                    </li>
+                    <li className="leading-relaxed">
+                      In <strong className="text-white">Authorized JavaScript origins</strong>, add this application origin:
+                      <div className="mt-1.5 flex items-center gap-2 flex-wrap">
+                        <span className="inline-flex items-center gap-1.5 font-mono font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-1 rounded-lg border border-emerald-500/30 text-[11px]">
+                          {currentOrigin}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleCopyOrigin}
+                          className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-[11px] font-semibold text-slate-200 transition flex items-center gap-1 cursor-pointer"
+                          title="Copy Authorized Origin to Clipboard"
+                        >
+                          {isCopiedOrigin ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className="text-emerald-400 font-bold">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Copy Origin</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </li>
+                  </ol>
+                </div>
+
+                {/* Custom Client ID Input Form */}
+                <form onSubmit={handleSaveGoogleClientId} className="space-y-2 pt-1">
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+                    Active Google Cloud OAuth 2.0 Client ID:
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={googleClientId}
+                      onChange={(e) => setGoogleClientId(e.target.value)}
+                      placeholder="e.g. 518397636928-xxx.apps.googleusercontent.com"
+                      className="flex-1 bg-slate-950 border border-slate-700 focus:border-amber-400 text-white font-mono text-xs p-2.5 rounded-xl focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md cursor-pointer shrink-0"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      <span>{isSavedClientId ? 'Saved!' : 'Save ID'}</span>
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-slate-400 italic">
+                    Persisted securely in device storage. Overrides the default repository client ID without requiring code rebuilds or redeployment.
+                  </p>
+                </form>
+
+                {/* Direct External Link */}
+                <div className="pt-2 border-t border-slate-700/80">
+                  <a
+                    href="https://console.cloud.google.com/apis/credentials"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 hover:underline font-semibold transition"
+                  >
+                    <span>Open Google Cloud Console Credentials</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Actions */}
@@ -813,7 +970,7 @@ export const ConfigurationsModal: React.FC<ConfigurationsModalProps> = ({
             title="Reset active tab configurations to official standards"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset {activeMainTab === 'signatories' || !isDeveloper ? 'Signatories' : 'Settings'}</span>
+            <span>Reset {activeMainTab === 'signatories' || !isDeveloper ? 'Signatories' : activeMainTab === 'googleAuth' ? 'OAuth ID' : 'Settings'}</span>
           </button>
 
           <div className="flex items-center gap-2">
