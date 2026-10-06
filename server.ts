@@ -637,6 +637,10 @@ export async function createApp() {
         return res.status(404).json({ error: `User ${id} not found.` });
       }
 
+      if (currentUsers[idx].role === 'Developer' && updates.role && updates.role !== 'Developer') {
+        return res.status(403).json({ error: 'Developer role cannot be altered.' });
+      }
+
       currentUsers[idx] = {
         ...currentUsers[idx],
         ...updates
@@ -652,11 +656,13 @@ export async function createApp() {
   app.delete('/api/users/:id', (req, res) => {
     const { id } = req.params;
     try {
-      if (id === 'usr-dev-01' || id === 'dev_master') {
-        return res.status(403).json({ error: 'Master Developer account cannot be deleted.' });
+      const currentUsers = loadSavedUsers();
+      const targetUser = currentUsers.find((u: any) => u.id === id || u.username.toLowerCase() === id.toLowerCase());
+
+      if (id === 'usr-dev-01' || id === 'dev_master' || (targetUser && targetUser.role === 'Developer')) {
+        return res.status(403).json({ error: 'Developer accounts cannot be deleted.' });
       }
 
-      const currentUsers = loadSavedUsers();
       const filtered = currentUsers.filter((u: any) => u.id !== id && u.username.toLowerCase() !== id.toLowerCase());
 
       saveUsersToFile(filtered);

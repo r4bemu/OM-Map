@@ -21,7 +21,9 @@ import {
   Clock,
   UserX,
   ShieldAlert,
-  CheckCircle2
+  CheckCircle2,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { AuthUser, UserRole } from '../types';
 import { 
@@ -185,6 +187,11 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
   const [newPasscode, setNewPasscode] = useState('');
   const [newDesignation, setNewDesignation] = useState('');
   const [isSubmittingNew, setIsSubmittingNew] = useState(false);
+  const [revealedPasscodes, setRevealedPasscodes] = useState<Record<string, boolean>>({});
+
+  const togglePasscodeVisibility = (userId: string) => {
+    setRevealedPasscodes(prev => ({ ...prev, [userId]: !prev[userId] }));
+  };
 
   // Pending Google Admissions Inline Assignment State
   const [admitRoleMap, setAdmitRoleMap] = useState<Record<string, UserRole>>({});
@@ -231,11 +238,31 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
   const users = getAuthUsers();
   const pendingUsers = getPendingGoogleAdmissions();
 
-  // Scoped users list for IMO Admin (or full list for RO Admin / Developer)
+  // Scoped users list: strictly enforce that Developer accounts are NEVER visible or accessible to non-developers
   const scopedUsers = users.filter(u => {
-    if (isImoAdmin && currentUser?.imoOffice) {
-      return u.imoOffice === currentUser.imoOffice || u.role === 'Developer';
+    // 1. Critical Security Enforcement: Developer accounts & access keys
+    // are strictly confidential and must NEVER be visible, searchable, or accessible to non-developers!
+    if (u.role === 'Developer' && !isDeveloper) {
+      return false;
     }
+
+    // 2. IMO Admin jurisdiction: strictly limited to accounts in their designated IMO Office,
+    // excluding all Regional (RO) and Developer accounts.
+    if (isImoAdmin) {
+      if (!currentUser?.imoOffice) return false;
+      return (
+        u.imoOffice === currentUser.imoOffice &&
+        !u.role.startsWith('RO') &&
+        u.role !== 'Developer'
+      );
+    }
+
+    // 3. RO Admin jurisdiction: can manage Regional and IMO personnel, but NEVER Developer
+    if (isRoAdmin) {
+      return u.role !== 'Developer';
+    }
+
+    // 4. Developer: full master control across all accounts
     return true;
   });
 
@@ -254,6 +281,10 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
   });
 
   const handleStartEdit = (user: AuthUser) => {
+    if (user.role === 'Developer' && !isDeveloper) {
+      setErrorMessage('Security Alert: Developer accounts can only be accessed with Developer credentials.');
+      return;
+    }
     if (isImoAdmin && (user.role === 'Developer' || user.role.startsWith('RO'))) {
       setErrorMessage('IMO Administrators cannot modify Regional or Developer accounts.');
       return;
@@ -270,6 +301,12 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
   };
 
   const handleSaveEdit = async (userId: string) => {
+    const targetUser = users.find(u => u.id === userId);
+    if (targetUser?.role === 'Developer' && !isDeveloper) {
+      setErrorMessage('Security Alert: Only Developer accounts can modify Developer credentials.');
+      return;
+    }
+
     if (!editPasscode.trim() || !editName.trim()) {
       setErrorMessage('Name and passcode cannot be blank.');
       return;
@@ -314,6 +351,10 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
 
   const handleCreateNewUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (newRole === 'Developer' && !isDeveloper) {
+      setErrorMessage('Security Alert: Only Developer accounts can create Developer access.');
+      return;
+    }
     if (!newName.trim() || !newUsername.trim() || !newPasscode.trim()) {
       setErrorMessage('Please fill in all required fields (Name, Username, Passcode).');
       return;
@@ -361,6 +402,11 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
       return;
     }
 
+    if (!isDeveloper && user.role === 'Developer') {
+      alert('Security Alert: Developer accounts can only be managed by Developer.');
+      return;
+    }
+
     if (isImoAdmin && user.role.startsWith('RO')) {
       alert('IMO Administrators cannot delete Regional or Developer accounts.');
       return;
@@ -395,6 +441,10 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
 
   const handleAdmitUser = async (pendingUser: AuthUser) => {
     const role = admitRoleMap[pendingUser.id] || (isImoAdmin ? 'IMO Preparer' : 'Field Personnel');
+    if (role === 'Developer' && !isDeveloper) {
+      setErrorMessage('Security Alert: Only Developer accounts can grant Developer access.');
+      return;
+    }
     const imo = isImoAdmin && currentUser?.imoOffice ? currentUser.imoOffice : (admitImoMap[pendingUser.id] || defaultImoSelection);
     const validNis = getNisOptionsForImo(imo);
     const nis = imo === 'All IMOs' ? 'All NIS' : (admitNisMap[pendingUser.id] || validNis[0] || 'All NIS');
@@ -843,11 +893,15 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
                   className="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-cyan-500 cursor-pointer"
                 >
                   <option value="All">All Roles ({filteredUsers.length})</option>
-                  <option value="Developer">Developer</option>
-                  <option value="RO Admin">RO Admin</option>
-                  <option value="RO Evaluator">RO Evaluator</option>
-                  <option value="RO Reviewer">RO Reviewer</option>
-                  <option value="RO Preparer">RO Preparer</option>
+                  {isDeveloper && <option value="Developer">Developer</option>}
+                  {(!isImoAdmin || isDeveloper) && (
+                    <>
+                      <option value="RO Admin">RO Admin</option>
+                      <option value="RO Evaluator">RO Evaluator</option>
+                      <option value="RO Reviewer">RO Reviewer</option>
+                      <option value="RO Preparer">RO Preparer</option>
+                    </>
+                  )}
                   <option value="IMO Admin">IMO Admin</option>
                   <option value="IMO Evaluator">IMO Evaluator</option>
                   <option value="IMO Reviewer">IMO Reviewer</option>
@@ -956,7 +1010,7 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
                             )}
                           </td>
 
-                          {/* Passcode */}
+                          {/* Passcode / Access Key */}
                           <td className="py-3 px-3">
                             {isEditing ? (
                               <input
@@ -966,9 +1020,19 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
                                 className="bg-slate-800 border border-cyan-500 text-amber-300 font-mono text-xs px-2 py-1 rounded w-28"
                               />
                             ) : (
-                              <span className="font-mono text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                                {u.passcode}
-                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-mono text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 tracking-wider">
+                                  {revealedPasscodes[u.id] ? u.passcode : '••••••••'}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => togglePasscodeVisibility(u.id)}
+                                  className="p-1 text-slate-400 hover:text-amber-300 transition rounded hover:bg-slate-800 cursor-pointer"
+                                  title={revealedPasscodes[u.id] ? "Hide Passcode" : "Show Passcode"}
+                                >
+                                  {revealedPasscodes[u.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                </button>
+                              </div>
                             )}
                           </td>
 
@@ -1289,35 +1353,48 @@ export const DeveloperUserManagementModal: React.FC<DeveloperUserManagementModal
         <div className="p-3 sm:p-4 border-t border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
           <div className="flex items-center gap-2">
             <span className="font-mono text-cyan-400 font-bold">{filteredUsers.length}</span>
-            <span>registered accounts ({users.length} total across Region IV-B)</span>
+            <span>
+              {isDeveloper 
+                ? `registered accounts (${users.length} total across Region IV-B)`
+                : isRoAdmin
+                ? `registered accounts (${scopedUsers.length} regional & IMO accounts)`
+                : `registered accounts (${scopedUsers.length} within ${currentUser?.imoOffice ? getShortImoName(currentUser.imoOffice) + ' IMO' : 'assigned IMO'})`
+              }
+            </span>
           </div>
           <div className="flex items-center gap-3 text-[11px] flex-wrap">
+            {isDeveloper && (
+              <span className="flex items-center gap-1 text-slate-400">
+                <span className="w-2 h-2 rounded-full bg-rose-500"></span> {users.filter(u => u.role === 'Developer').length} Dev
+              </span>
+            )}
+            {(!isImoAdmin || isDeveloper) && (
+              <>
+                <span className="flex items-center gap-1 text-slate-400">
+                  <span className="w-2 h-2 rounded-full bg-fuchsia-500"></span> {users.filter(u => u.role === 'RO Admin').length} RO Admin
+                </span>
+                <span className="flex items-center gap-1 text-slate-400">
+                  <span className="w-2 h-2 rounded-full bg-purple-500"></span> {users.filter(u => u.role === 'RO Evaluator').length} RO Evaluators
+                </span>
+              </>
+            )}
             <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-rose-500"></span> {users.filter(u => u.role === 'Developer').length} Dev
+              <span className="w-2 h-2 rounded-full bg-orange-500"></span> {scopedUsers.filter(u => u.role === 'IMO Admin').length} IMO Admin
             </span>
             <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-fuchsia-500"></span> {users.filter(u => u.role === 'RO Admin').length} RO Admin
+              <span className="w-2 h-2 rounded-full bg-amber-500"></span> {scopedUsers.filter(u => u.role === 'IMO Evaluator').length} IMO Evaluators
             </span>
             <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-purple-500"></span> {users.filter(u => u.role === 'RO Evaluator').length} RO Evaluators
+              <span className="w-2 h-2 rounded-full bg-cyan-500"></span> {scopedUsers.filter(u => u.role === 'IMO Reviewer').length} IMO Reviewers
             </span>
             <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-orange-500"></span> {users.filter(u => u.role === 'IMO Admin').length} IMO Admin
+              <span className="w-2 h-2 rounded-full bg-teal-500"></span> {scopedUsers.filter(u => u.role === 'IMO Preparer').length} IMO Preparers
             </span>
             <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-amber-500"></span> {users.filter(u => u.role === 'IMO Evaluator').length} IMO Evaluators
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span> {scopedUsers.filter(u => u.role === 'Field Personnel').length} Field
             </span>
             <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-cyan-500"></span> {users.filter(u => u.role === 'IMO Reviewer').length} IMO Reviewers
-            </span>
-            <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-teal-500"></span> {users.filter(u => u.role === 'IMO Preparer').length} IMO Preparers
-            </span>
-            <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span> {users.filter(u => u.role === 'Field Personnel').length} Field
-            </span>
-            <span className="flex items-center gap-1 text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-slate-500"></span> {users.filter(u => u.role === 'Viewer').length} Viewers
+              <span className="w-2 h-2 rounded-full bg-slate-500"></span> {scopedUsers.filter(u => u.role === 'Viewer').length} Viewers
             </span>
           </div>
         </div>
