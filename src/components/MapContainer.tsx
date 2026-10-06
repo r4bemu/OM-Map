@@ -195,6 +195,52 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const [activePopupCoords, setActivePopupCoords] = useState<[number, number] | null>(null);
   const [activePopupProps, setActivePopupProps] = useState<any>(null);
 
+  const clickedPointMarkerRef = useRef<L.Marker | null>(null);
+
+  const removeClickedPointMarker = () => {
+    if (clickedPointMarkerRef.current) {
+      try {
+        if (mapRef.current) {
+          mapRef.current.removeLayer(clickedPointMarkerRef.current);
+        }
+      } catch (_) {}
+      clickedPointMarkerRef.current = null;
+    }
+  };
+
+  const showClickedPointMarker = (lat: number, lng: number) => {
+    if (!mapRef.current || !isValidCoord(lat, lng)) return;
+    removeClickedPointMarker();
+
+    const clickIcon = L.divIcon({
+      className: 'custom-clicked-point-marker',
+      html: `
+        <div class="relative flex items-center justify-center w-7 h-7 pointer-events-none select-none">
+          <svg class="w-7 h-7 text-[#ff0000] drop-shadow-[0_0_8px_rgba(255,0,0,0.95)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="22" y1="12" x2="18" y2="12"></line>
+            <line x1="6" y1="12" x2="2" y2="12"></line>
+            <line x1="12" y1="6" x2="12" y2="2"></line>
+            <line x1="12" y1="22" x2="12" y2="18"></line>
+          </svg>
+          <span class="animate-ping absolute inline-flex h-4 w-4 rounded-full bg-[#ff0000] opacity-75"></span>
+          <span class="absolute inline-flex rounded-full h-2.5 w-2.5 bg-[#ff0000] border-2 border-white shadow-[0_0_12px_#ff0000] clicked-point-blinking-dot"></span>
+        </div>
+      `,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+
+    const marker = L.marker([lat, lng], {
+      icon: clickIcon,
+      interactive: false,
+      zIndexOffset: 1500
+    });
+
+    marker.addTo(mapRef.current);
+    clickedPointMarkerRef.current = marker;
+  };
+
   const [currentZoom, setCurrentZoom] = useState<number>(() => {
     try {
       const savedLocStr = localStorage.getItem('ommap_last_known_location');
@@ -613,13 +659,17 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       if (isMapPickerActiveRef.current || activeMeasureToolRef.current !== 'none') {
         return;
       }
+      removeClickedPointMarker();
       onDeselectFeatureRef.current?.();
     };
 
     map.on('click', handleGeneralMapClick);
+    map.on('popupclose', removeClickedPointMarker);
 
     return () => {
       map.off('click', handleGeneralMapClick);
+      map.off('popupclose', removeClickedPointMarker);
+      removeClickedPointMarker();
       map.remove();
       mapRef.current = null;
     };
@@ -751,6 +801,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     if (highlightedLayerRef.current) {
       highlightedLayerRef.current = null;
     }
+    removeClickedPointMarker();
 
     let allVectorBounds: L.LatLngBounds | null = null;
 
@@ -935,6 +986,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 }
               } else {
                 // Outside location selector mode: feature click only opens the map popup.
+                if (curLatlng && isValidCoord(curLatlng.lat, curLatlng.lng)) {
+                  showClickedPointMarker(curLatlng.lat, curLatlng.lng);
+                }
                 // The Attribute Inspector will appear ONLY when 'Inspect Attribute Details' is clicked.
                 if (selectedFeaturePropsRef.current) {
                   onDeselectFeatureRef.current?.();
@@ -1136,7 +1190,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                   ` : ''}
                 </div>
               `;
-            }, { maxWidth: 320, className: 'custom-leaflet-popup' });
+            }, { maxWidth: 320, className: 'custom-leaflet-popup', offset: [0, 0] });
 
             leafletLayer.on('mouseover', () => {
               if (containerRef.current) {
@@ -1161,6 +1215,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               }
               setActivePopupProps(null);
               setActivePopupCoords(null);
+              removeClickedPointMarker();
             });
 
             leafletLayer.on('popupopen', (e) => {
@@ -1204,6 +1259,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               if (clickCoords) {
                 setActivePopupCoords(clickCoords);
                 setActivePopupProps(props);
+                showClickedPointMarker(clickCoords[0], clickCoords[1]);
               }
 
               const copyCoordsBtn = document.getElementById(`copy-coords-btn-${inspectId}`);
