@@ -260,11 +260,12 @@ body.light,
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
 }
 .light .custom-leaflet-popup .leaflet-popup-content-wrapper {
-  background-color: rgba(255, 255, 255, 0.98) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
   border: 2px solid #ffffff !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.1) !important;
 }
 .light .leaflet-popup-tip {
   background-color: #ffffff !important;
@@ -453,37 +454,26 @@ body.light,
 }
 
 .custom-leaflet-popup {
-  margin-bottom: 30px !important;
+  margin: 0 !important;
 }
 
 .custom-leaflet-popup .leaflet-popup-content-wrapper {
-  background-color: rgba(15, 23, 42, 0.96) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background-color: rgba(15, 23, 42, 0.82) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
   border: 2px solid #ffffff !important;
-  border-radius: 12px !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 8px 10px -6px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4) !important;
   padding: 4px !important;
 }
 
-/* Hide the old triangular tip pointer */
-.custom-leaflet-popup .leaflet-popup-tip {
+/* Hide default tip and tip container (dogleg leader line is drawn via dynamic SVG overlay) */
+.custom-leaflet-popup .leaflet-popup-tip-container {
   display: none !important;
 }
 
-/* Transform Tip Container into a Crisp Leader Line (same 2px thickness and white color as the border) */
-.custom-leaflet-popup .leaflet-popup-tip-container {
-  width: 2px !important;
-  height: 30px !important;
-  position: absolute !important;
-  left: 50% !important;
-  margin-left: -1px !important;
-  margin-top: -2px !important;
-  background-color: #ffffff !important;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) !important;
-  overflow: visible !important;
-  pointer-events: none !important;
-  z-index: 10 !important;
+.custom-leaflet-popup .leaflet-popup-tip {
+  display: none !important;
 }
 
 .custom-leaflet-popup .leaflet-popup-content {
@@ -491,17 +481,17 @@ body.light,
   line-height: 1.4 !important;
 }
 
-/* Blinking Animation for Clicked Target Point Dot & Marker */
+/* Pulsating Animation for Clicked Target Black Dot with White Border */
 @keyframes clickedPointBlink {
   0%, 100% {
-    opacity: 1;
     transform: scale(1.15);
-    box-shadow: 0 0 14px 4px rgba(255, 0, 0, 1), 0 0 4px #ffffff;
+    box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.9), 0 0 3px #ffffff;
+    opacity: 1;
   }
   50% {
-    opacity: 0.25;
-    transform: scale(0.7);
-    box-shadow: 0 0 4px 1px rgba(255, 0, 0, 0.4);
+    transform: scale(0.75);
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.4), 0 0 1px #ffffff;
+    opacity: 0.65;
   }
 }
 

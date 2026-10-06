@@ -196,6 +196,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const [activePopupProps, setActivePopupProps] = useState<any>(null);
 
   const clickedPointMarkerRef = useRef<L.Marker | null>(null);
+  const leaderLineSvgRef = useRef<SVGSVGElement | null>(null);
+  const leaderLinePathRef = useRef<SVGPathElement | null>(null);
 
   const removeClickedPointMarker = () => {
     if (clickedPointMarkerRef.current) {
@@ -206,6 +208,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       } catch (_) {}
       clickedPointMarkerRef.current = null;
     }
+    if (leaderLinePathRef.current) {
+      leaderLinePathRef.current.setAttribute('d', '');
+    }
   };
 
   const showClickedPointMarker = (lat: number, lng: number) => {
@@ -215,20 +220,13 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     const clickIcon = L.divIcon({
       className: 'custom-clicked-point-marker',
       html: `
-        <div class="relative flex items-center justify-center w-7 h-7 pointer-events-none select-none">
-          <svg class="w-7 h-7 text-[#ff0000] drop-shadow-[0_0_8px_rgba(255,0,0,0.95)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="22" y1="12" x2="18" y2="12"></line>
-            <line x1="6" y1="12" x2="2" y2="12"></line>
-            <line x1="12" y1="6" x2="12" y2="2"></line>
-            <line x1="12" y1="22" x2="12" y2="18"></line>
-          </svg>
-          <span class="animate-ping absolute inline-flex h-4 w-4 rounded-full bg-[#ff0000] opacity-75"></span>
-          <span class="absolute inline-flex rounded-full h-2.5 w-2.5 bg-[#ff0000] border-2 border-white shadow-[0_0_12px_#ff0000] clicked-point-blinking-dot"></span>
+        <div class="relative flex items-center justify-center w-6 h-6 pointer-events-none select-none">
+          <span class="animate-ping absolute inline-flex h-3.5 w-3.5 rounded-full bg-slate-900/40 dark:bg-black/40 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-black border-2 border-white shadow-[0_0_6px_rgba(0,0,0,0.8),0_0_2px_#ffffff] clicked-point-blinking-dot"></span>
         </div>
       `,
-      iconSize: [28, 28],
-      iconAnchor: [14, 14]
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
     });
 
     const marker = L.marker([lat, lng], {
@@ -239,6 +237,176 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
     marker.addTo(mapRef.current);
     clickedPointMarkerRef.current = marker;
+  };
+
+  const computeOptimalPopupOffset = (
+    layer: any,
+    clickLatLng: L.LatLng,
+    map: L.Map | null
+  ): L.Point => {
+    if (!map) return L.point(0, -180);
+    const container = map.getContainer();
+    const mapW = container?.clientWidth || 800;
+    const mapH = container?.clientHeight || 600;
+    const curPt = map.latLngToContainerPoint(clickLatLng);
+
+    const popupW = 320;
+    const popupH = 260;
+
+    let normalX = 0;
+    let normalY = -1;
+    let isLine = false;
+
+    if (layer && typeof layer.getLatLngs === 'function') {
+      const rawLatLngs = layer.getLatLngs();
+      const flatCoords: L.LatLng[] = Array.isArray(rawLatLngs)
+        ? (Array.isArray(rawLatLngs[0]) ? rawLatLngs.flat(Infinity) : rawLatLngs)
+        : [];
+
+      if (flatCoords.length >= 2) {
+        isLine = true;
+        let minDist = Infinity;
+        let bestIdx = 0;
+        for (let i = 0; i < flatCoords.length - 1; i++) {
+          const d = clickLatLng.distanceTo(flatCoords[i]) + clickLatLng.distanceTo(flatCoords[i + 1]);
+          if (d < minDist) {
+            minDist = d;
+            bestIdx = i;
+          }
+        }
+        const ptA = map.latLngToContainerPoint(flatCoords[bestIdx]);
+        const ptB = map.latLngToContainerPoint(flatCoords[bestIdx + 1]);
+        const dx = ptB.x - ptA.x;
+        const dy = ptB.y - ptA.y;
+        const len = Math.hypot(dx, dy);
+        if (len > 0.5) {
+          normalX = -dy / len;
+          normalY = dx / len;
+        }
+      }
+    }
+
+    const candidateOffsets: { dx: number; dy: number; pref: number }[] = [];
+
+    if (isLine) {
+      const normDist = 200;
+      candidateOffsets.push({
+        dx: Math.round(normalX * normDist),
+        dy: Math.round(normalY * normDist) - 20,
+        pref: 250
+      });
+      candidateOffsets.push({
+        dx: Math.round(-normalX * normDist),
+        dy: Math.round(-normalY * normDist) - 20,
+        pref: 250
+      });
+    }
+
+    candidateOffsets.push({ dx: 210, dy: -50, pref: 160 });
+    candidateOffsets.push({ dx: -210, dy: -50, pref: 160 });
+    candidateOffsets.push({ dx: 0, dy: -200, pref: 130 });
+    candidateOffsets.push({ dx: 0, dy: 180, pref: 70 });
+
+    let bestScore = -Infinity;
+    let bestOffset = L.point(0, -200);
+
+    for (const cand of candidateOffsets) {
+      const left = curPt.x + cand.dx - popupW / 2;
+      const right = curPt.x + cand.dx + popupW / 2;
+      const top = curPt.y + cand.dy - popupH;
+      const bottom = curPt.y + cand.dy;
+
+      const marginL = left - 16;
+      const marginR = mapW - 16 - right;
+      const marginT = top - 24;
+      const marginB = mapH - 50 - bottom;
+
+      const minMargin = Math.min(marginL, marginR, marginT, marginB);
+
+      let score = cand.pref;
+      if (minMargin < 0) {
+        score += minMargin * 100;
+      } else {
+        score += Math.min(minMargin, 80);
+      }
+
+      if (top > 40 && bottom < mapH - 70) {
+        score += 50;
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestOffset = L.point(cand.dx, cand.dy);
+      }
+    }
+
+    return bestOffset;
+  };
+
+  const updateLeaderLine = () => {
+    if (!mapRef.current || !activePopupCoordsRef.current || !leaderLinePathRef.current || !containerRef.current) {
+      if (leaderLinePathRef.current) {
+        leaderLinePathRef.current.setAttribute('d', '');
+      }
+      return;
+    }
+
+    const popupWrapper = containerRef.current.querySelector('.custom-leaflet-popup .leaflet-popup-content-wrapper') as HTMLElement;
+    if (!popupWrapper) {
+      if (leaderLinePathRef.current) {
+        leaderLinePathRef.current.setAttribute('d', '');
+      }
+      return;
+    }
+
+    const targetPt = mapRef.current.latLngToContainerPoint(activePopupCoordsRef.current);
+    const mapRect = containerRef.current.getBoundingClientRect();
+    const rect = popupWrapper.getBoundingClientRect();
+
+    const box = {
+      left: rect.left - mapRect.left,
+      top: rect.top - mapRect.top,
+      right: rect.right - mapRect.left,
+      bottom: rect.bottom - mapRect.top,
+      width: rect.width,
+      height: rect.height,
+      centerX: (rect.left + rect.right) / 2 - mapRect.left,
+      centerY: (rect.top + rect.bottom) / 2 - mapRect.top
+    };
+
+    const diffX = box.centerX - targetPt.x;
+    const diffY = box.centerY - targetPt.y;
+
+    let p1: { x: number; y: number };
+    let p2: { x: number; y: number };
+    const p3 = { x: targetPt.x, y: targetPt.y };
+
+    const STUB_LEN = 18;
+
+    if (Math.abs(diffX) >= Math.abs(diffY)) {
+      if (diffX > 0) {
+        // Window is to the RIGHT of target -> connect Mid-Left (Horizontal stub + diagonal)
+        p1 = { x: box.left, y: box.centerY };
+        p2 = { x: box.left - STUB_LEN, y: box.centerY };
+      } else {
+        // Window is to the LEFT of target -> connect Mid-Right (Horizontal stub + diagonal)
+        p1 = { x: box.right, y: box.centerY };
+        p2 = { x: box.right + STUB_LEN, y: box.centerY };
+      }
+    } else {
+      if (diffY < 0) {
+        // Window is ABOVE target -> connect Mid-Bottom (Vertical stub + diagonal)
+        p1 = { x: box.centerX, y: box.bottom };
+        p2 = { x: box.centerX, y: box.bottom + STUB_LEN };
+      } else {
+        // Window is BELOW target -> connect Mid-Top (Vertical stub + diagonal)
+        p1 = { x: box.centerX, y: box.top };
+        p2 = { x: box.centerX, y: box.top - STUB_LEN };
+      }
+    }
+
+    const d = `M ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} L ${p2.x.toFixed(1)} ${p2.y.toFixed(1)} L ${p3.x.toFixed(1)} ${p3.y.toFixed(1)}`;
+    leaderLinePathRef.current.setAttribute('d', d);
   };
 
   const [currentZoom, setCurrentZoom] = useState<number>(() => {
@@ -273,7 +441,17 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   useEffect(() => { isPoint2SetRef.current = isPoint2Set; }, [isPoint2Set]);
   useEffect(() => { pickerPt1Ref.current = pickerPt1; }, [pickerPt1]);
   useEffect(() => { pickerPt2Ref.current = pickerPt2; }, [pickerPt2]);
-  useEffect(() => { activePopupCoordsRef.current = activePopupCoords; }, [activePopupCoords]);
+  useEffect(() => {
+    activePopupCoordsRef.current = activePopupCoords;
+    if (activePopupCoords) {
+      requestAnimationFrame(() => updateLeaderLine());
+      setTimeout(updateLeaderLine, 50);
+    } else {
+      if (leaderLinePathRef.current) {
+        leaderLinePathRef.current.setAttribute('d', '');
+      }
+    }
+  }, [activePopupCoords]);
   useEffect(() => { activePopupPropsRef.current = activePopupProps; }, [activePopupProps]);
   useEffect(() => { activeMeasureToolRef.current = activeMeasureTool; }, [activeMeasureTool]);
   useEffect(() => { onDeselectFeatureRef.current = onDeselectFeature; }, [onDeselectFeature]);
@@ -664,11 +842,22 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     };
 
     map.on('click', handleGeneralMapClick);
-    map.on('popupclose', removeClickedPointMarker);
+    map.on('popupclose', () => {
+      removeClickedPointMarker();
+      if (leaderLinePathRef.current) leaderLinePathRef.current.setAttribute('d', '');
+    });
+    map.on('move', updateLeaderLine);
+    map.on('zoom', updateLeaderLine);
+    map.on('viewreset', updateLeaderLine);
+    window.addEventListener('resize', updateLeaderLine);
 
     return () => {
       map.off('click', handleGeneralMapClick);
-      map.off('popupclose', removeClickedPointMarker);
+      map.off('popupclose');
+      map.off('move', updateLeaderLine);
+      map.off('zoom', updateLeaderLine);
+      map.off('viewreset', updateLeaderLine);
+      window.removeEventListener('resize', updateLeaderLine);
       removeClickedPointMarker();
       map.remove();
       mapRef.current = null;
@@ -987,6 +1176,10 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               } else {
                 // Outside location selector mode: feature click only opens the map popup.
                 if (curLatlng && isValidCoord(curLatlng.lat, curLatlng.lng)) {
+                  const optimalOffset = computeOptimalPopupOffset(leafletLayer, L.latLng(curLatlng.lat, curLatlng.lng), mapRef.current);
+                  if ((leafletLayer as any)._popup) {
+                    (leafletLayer as any)._popup.options.offset = optimalOffset;
+                  }
                   showClickedPointMarker(curLatlng.lat, curLatlng.lng);
                 }
                 // The Attribute Inspector will appear ONLY when 'Inspect Attribute Details' is clicked.
@@ -1190,7 +1383,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                   ` : ''}
                 </div>
               `;
-            }, { maxWidth: 320, className: 'custom-leaflet-popup', offset: [0, 0] });
+            }, { maxWidth: 320, className: 'custom-leaflet-popup' });
 
             leafletLayer.on('mouseover', () => {
               if (containerRef.current) {
@@ -1216,6 +1409,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               setActivePopupProps(null);
               setActivePopupCoords(null);
               removeClickedPointMarker();
+              if (leaderLinePathRef.current) leaderLinePathRef.current.setAttribute('d', '');
             });
 
             leafletLayer.on('popupopen', (e) => {
@@ -1257,9 +1451,16 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 : (leafletLayer as any)._lastClickLatLng;
 
               if (clickCoords) {
+                const optimalOffset = computeOptimalPopupOffset(leafletLayer, L.latLng(clickCoords[0], clickCoords[1]), mapRef.current);
+                if (e.popup) {
+                  e.popup.options.offset = optimalOffset;
+                  e.popup.update();
+                }
                 setActivePopupCoords(clickCoords);
                 setActivePopupProps(props);
                 showClickedPointMarker(clickCoords[0], clickCoords[1]);
+                requestAnimationFrame(() => updateLeaderLine());
+                setTimeout(updateLeaderLine, 50);
               }
 
               const copyCoordsBtn = document.getElementById(`copy-coords-btn-${inspectId}`);
@@ -2134,6 +2335,24 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           </div>
         );
       })()}
+
+      {/* CAD/GIS Dynamic Elbow Leader Line Overlay */}
+      <svg
+        ref={leaderLineSvgRef}
+        className="absolute inset-0 w-full h-full pointer-events-none z-[690] overflow-visible"
+        style={{ display: activePopupCoords ? 'block' : 'none' }}
+      >
+        <path
+          ref={leaderLinePathRef}
+          d=""
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ filter: 'drop-shadow(0 0 3px rgba(0, 0, 0, 0.8))' }}
+        />
+      </svg>
     </div>
   );
 };
