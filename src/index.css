@@ -457,8 +457,9 @@ body.light,
   margin: 0 !important;
 }
 
-.custom-leaflet-popup .leaflet-popup-content-wrapper {
-  background-color: rgba(15, 23, 42, 0.82) !important;
+.custom-leaflet-popup .leaflet-popup-content-wrapper,
+.light .custom-leaflet-popup .leaflet-popup-content-wrapper {
+  background-color: rgba(15, 23, 42, 0.85) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
   border: 2px solid #ffffff !important;

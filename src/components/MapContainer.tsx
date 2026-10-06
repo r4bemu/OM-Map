@@ -239,99 +239,200 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     clickedPointMarkerRef.current = marker;
   };
 
+  const segmentsIntersect = (
+    x1: number, y1: number, x2: number, y2: number,
+    x3: number, y3: number, x4: number, y4: number
+  ): boolean => {
+    const ccw = (ax: number, ay: number, bx: number, by: number, cx: number, cy: number) => {
+      return (cy - ay) * (bx - ax) > (by - ay) * (cx - ax);
+    };
+    return (
+      ccw(x1, y1, x3, y3, x4, y4) !== ccw(x2, y2, x3, y3, x4, y4) &&
+      ccw(x1, y1, x2, y2, x3, y3) !== ccw(x1, y1, x2, y2, x4, y4)
+    );
+  };
+
+  const segmentIntersectsBox = (
+    xa: number, ya: number, xb: number, yb: number,
+    left: number, top: number, right: number, bottom: number
+  ): boolean => {
+    if (Math.max(xa, xb) < left || Math.min(xa, xb) > right || Math.max(ya, yb) < top || Math.min(ya, yb) > bottom) {
+      return false;
+    }
+    if (xa >= left && xa <= right && ya >= top && ya <= bottom) return true;
+    if (xb >= left && xb <= right && yb >= top && yb <= bottom) return true;
+
+    if (segmentsIntersect(xa, ya, xb, yb, left, top, right, top)) return true;
+    if (segmentsIntersect(xa, ya, xb, yb, left, bottom, right, bottom)) return true;
+    if (segmentsIntersect(xa, ya, xb, yb, left, top, left, bottom)) return true;
+    if (segmentsIntersect(xa, ya, xb, yb, right, top, right, bottom)) return true;
+
+    return false;
+  };
+
+  const distPointToSegment = (px: number, py: number, x1: number, y1: number, x2: number, y2: number): number => {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return Math.hypot(px - x1, py - y1);
+    const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lenSq));
+    const projX = x1 + t * dx;
+    const projY = y1 + t * dy;
+    return Math.hypot(px - projX, py - projY);
+  };
+
   const computeOptimalPopupOffset = (
     layer: any,
     clickLatLng: L.LatLng,
     map: L.Map | null
   ): L.Point => {
-    if (!map) return L.point(0, -180);
+    if (!map) return L.point(235, -50);
     const container = map.getContainer();
     const mapW = container?.clientWidth || 800;
     const mapH = container?.clientHeight || 600;
     const curPt = map.latLngToContainerPoint(clickLatLng);
 
     const popupW = 320;
-    const popupH = 260;
+    const popupH = 265;
 
-    let normalX = 0;
-    let normalY = -1;
-    let isLine = false;
+    // Collect all visible canal linestring segments in container pixel coordinates
+    const canalSegments: { x1: number; y1: number; x2: number; y2: number }[] = [];
 
-    if (layer && typeof layer.getLatLngs === 'function') {
-      const rawLatLngs = layer.getLatLngs();
-      const flatCoords: L.LatLng[] = Array.isArray(rawLatLngs)
-        ? (Array.isArray(rawLatLngs[0]) ? rawLatLngs.flat(Infinity) : rawLatLngs)
-        : [];
-
-      if (flatCoords.length >= 2) {
-        isLine = true;
-        let minDist = Infinity;
-        let bestIdx = 0;
-        for (let i = 0; i < flatCoords.length - 1; i++) {
-          const d = clickLatLng.distanceTo(flatCoords[i]) + clickLatLng.distanceTo(flatCoords[i + 1]);
-          if (d < minDist) {
-            minDist = d;
-            bestIdx = i;
+    const extractLinePoints = (targetLayer: any) => {
+      if (!targetLayer || typeof targetLayer.getLatLngs !== 'function') return;
+      try {
+        const raw = targetLayer.getLatLngs();
+        const flat: L.LatLng[] = Array.isArray(raw)
+          ? (Array.isArray(raw[0]) ? (raw as any).flat(Infinity) : raw)
+          : [];
+        for (let i = 0; i < flat.length - 1; i++) {
+          const pt1 = map.latLngToContainerPoint(flat[i]);
+          const pt2 = map.latLngToContainerPoint(flat[i + 1]);
+          if (
+            Math.max(pt1.x, pt2.x) >= -80 &&
+            Math.min(pt1.x, pt2.x) <= mapW + 80 &&
+            Math.max(pt1.y, pt2.y) >= -80 &&
+            Math.min(pt1.y, pt2.y) <= mapH + 80
+          ) {
+            canalSegments.push({ x1: pt1.x, y1: pt1.y, x2: pt2.x, y2: pt2.y });
           }
         }
-        const ptA = map.latLngToContainerPoint(flatCoords[bestIdx]);
-        const ptB = map.latLngToContainerPoint(flatCoords[bestIdx + 1]);
-        const dx = ptB.x - ptA.x;
-        const dy = ptB.y - ptA.y;
-        const len = Math.hypot(dx, dy);
-        if (len > 0.5) {
-          normalX = -dy / len;
-          normalY = dx / len;
-        }
+      } catch (err) {
+        console.warn('Error extracting linestring points:', err);
       }
+    };
+
+    // 1. Extract from the clicked layer
+    extractLinePoints(layer);
+
+    // 2. Also extract from all other active vector layers in layerGroupRef
+    if (layerGroupRef.current) {
+      try {
+        layerGroupRef.current.eachLayer((l: any) => {
+          if (l !== layer && typeof l.getLatLngs === 'function') {
+            extractLinePoints(l);
+          }
+        });
+      } catch (_) {}
     }
 
-    const candidateOffsets: { dx: number; dy: number; pref: number }[] = [];
+    // Candidate positions:
+    // Pages 3, 4, 6 were explicitly verified and praised by the user as "Ideal positioning"
+    const candidateOffsets: { dx: number; dy: number; pref: number; name: string }[] = [
+      // 1. East / Right Side Callouts (Window to the right of the canal & dot)
+      { dx: 235, dy: -50, pref: 320, name: 'Right-Mid' },
+      { dx: 240, dy: -90, pref: 300, name: 'Right-Upper' },
+      { dx: 240, dy: -10, pref: 280, name: 'Right-Lower' },
+      { dx: 260, dy: -60, pref: 270, name: 'Right-Far' },
 
-    if (isLine) {
-      const normDist = 200;
-      candidateOffsets.push({
-        dx: Math.round(normalX * normDist),
-        dy: Math.round(normalY * normDist) - 20,
-        pref: 250
-      });
-      candidateOffsets.push({
-        dx: Math.round(-normalX * normDist),
-        dy: Math.round(-normalY * normDist) - 20,
-        pref: 250
-      });
-    }
+      // 2. West / Left Side Callouts (Window to the left of the canal & dot)
+      { dx: -235, dy: -50, pref: 320, name: 'Left-Mid' },
+      { dx: -240, dy: -90, pref: 300, name: 'Left-Upper' },
+      { dx: -240, dy: -10, pref: 280, name: 'Left-Lower' },
+      { dx: -260, dy: -60, pref: 270, name: 'Left-Far' },
 
-    candidateOffsets.push({ dx: 210, dy: -50, pref: 160 });
-    candidateOffsets.push({ dx: -210, dy: -50, pref: 160 });
-    candidateOffsets.push({ dx: 0, dy: -200, pref: 130 });
-    candidateOffsets.push({ dx: 0, dy: 180, pref: 70 });
+      // 3. North-East / Upper-Right
+      { dx: 190, dy: -170, pref: 240, name: 'Upper-Right' },
+      { dx: 210, dy: -210, pref: 220, name: 'Upper-Right-Far' },
+
+      // 4. North-West / Upper-Left
+      { dx: -190, dy: -170, pref: 240, name: 'Upper-Left' },
+      { dx: -210, dy: -210, pref: 220, name: 'Upper-Left-Far' },
+
+      // 5. North / Directly Above
+      { dx: 0, dy: -200, pref: 190, name: 'Top-Center' },
+      { dx: 0, dy: -240, pref: 170, name: 'Top-Far' },
+
+      // 6. South / Directly Below (Strictly guarded: dy=330 so window is well below the dot)
+      { dx: 0, dy: 330, pref: 50, name: 'Bottom-Center' },
+      { dx: 200, dy: 290, pref: 40, name: 'Bottom-Right' },
+      { dx: -200, dy: 290, pref: 40, name: 'Bottom-Left' }
+    ];
 
     let bestScore = -Infinity;
-    let bestOffset = L.point(0, -200);
+    let bestOffset = L.point(235, -50);
 
     for (const cand of candidateOffsets) {
-      const left = curPt.x + cand.dx - popupW / 2;
-      const right = curPt.x + cand.dx + popupW / 2;
-      const top = curPt.y + cand.dy - popupH;
-      const bottom = curPt.y + cand.dy;
+      // Calculate bounding box of the popup wrapper for this offset
+      const boxLeft = curPt.x + cand.dx - popupW / 2;
+      const boxRight = curPt.x + cand.dx + popupW / 2;
+      const boxBottom = curPt.y + cand.dy;
+      const boxTop = curPt.y + cand.dy - popupH;
+      const boxCenterX = (boxLeft + boxRight) / 2;
+      const boxCenterY = (boxTop + boxBottom) / 2;
 
-      const marginL = left - 16;
-      const marginR = mapW - 16 - right;
-      const marginT = top - 24;
-      const marginB = mapH - 50 - bottom;
-
-      const minMargin = Math.min(marginL, marginR, marginT, marginB);
-
-      let score = cand.pref;
-      if (minMargin < 0) {
-        score += minMargin * 100;
-      } else {
-        score += Math.min(minMargin, 80);
+      // 1. CRITICAL: Check if clicked dot is covered by or too close to window
+      // Must maintain at least 30px clear separation from the clicked dot
+      const dotInsidePaddedBox = (
+        curPt.x >= boxLeft - 30 &&
+        curPt.x <= boxRight + 30 &&
+        curPt.y >= boxTop - 30 &&
+        curPt.y <= boxBottom + 30
+      );
+      if (dotInsidePaddedBox) {
+        continue;
       }
 
-      if (top > 40 && bottom < mapH - 70) {
-        score += 50;
+      // 2. Screen Viewport Margins
+      const marginL = boxLeft - 20;
+      const marginR = mapW - 20 - boxRight;
+      const marginT = boxTop - 35;
+      const marginB = mapH - 50 - boxBottom;
+      const minViewportMargin = Math.min(marginL, marginR, marginT, marginB);
+
+      let score = cand.pref;
+
+      if (minViewportMargin < 0) {
+        // Offscreen penalty: severe penalty proportional to clipping
+        score += minViewportMargin * 500;
+      } else {
+        // Safe inside screen: bonus for comfortable margins
+        score += Math.min(minViewportMargin, 60);
+      }
+
+      // 3. Canal Collision Check: Check if window covers ANY canal segment
+      const PAD = 14;
+      let collisionCount = 0;
+      let minCanalDist = Infinity;
+
+      for (const seg of canalSegments) {
+        if (segmentIntersectsBox(seg.x1, seg.y1, seg.x2, seg.y2, boxLeft - PAD, boxTop - PAD, boxRight + PAD, boxBottom + PAD)) {
+          collisionCount++;
+        }
+        const d = distPointToSegment(boxCenterX, boxCenterY, seg.x1, seg.y1, seg.x2, seg.y2);
+        if (d < minCanalDist) {
+          minCanalDist = d;
+        }
+      }
+
+      if (collisionCount > 0) {
+        // Severe penalty: popup window covers canal linestring!
+        score -= 20000 + collisionCount * 2000;
+      } else {
+        // Canal is completely clear! Reward candidates that provide healthy breathing room
+        if (minCanalDist !== Infinity) {
+          score += Math.min(minCanalDist, 180) * 1.2;
+        }
       }
 
       if (score > bestScore) {
@@ -374,8 +475,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       centerY: (rect.top + rect.bottom) / 2 - mapRect.top
     };
 
-    const diffX = box.centerX - targetPt.x;
-    const diffY = box.centerY - targetPt.y;
+    const clamp = (val: number, min: number, max: number) => Math.max(min, Math.min(max, val));
 
     let p1: { x: number; y: number };
     let p2: { x: number; y: number };
@@ -383,25 +483,64 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
     const STUB_LEN = 18;
 
-    if (Math.abs(diffX) >= Math.abs(diffY)) {
-      if (diffX > 0) {
-        // Window is to the RIGHT of target -> connect Mid-Left (Horizontal stub + diagonal)
-        p1 = { x: box.left, y: box.centerY };
-        p2 = { x: box.left - STUB_LEN, y: box.centerY };
-      } else {
-        // Window is to the LEFT of target -> connect Mid-Right (Horizontal stub + diagonal)
-        p1 = { x: box.right, y: box.centerY };
-        p2 = { x: box.right + STUB_LEN, y: box.centerY };
-      }
+    // Check directional separation between popup box and clicked target dot
+    const isToRight = box.left >= targetPt.x + 10;
+    const isToLeft = box.right <= targetPt.x - 10;
+    const isAbove = box.bottom <= targetPt.y + 10;
+    const isBelow = box.top >= targetPt.y - 10;
+
+    if (isToRight) {
+      // Window is to the RIGHT of target dot:
+      // Connect to LEFT edge of window, stub extends horizontally leftwards towards target
+      const anchorY = clamp(targetPt.y, box.top + 28, box.bottom - 28);
+      const stub = Math.min(STUB_LEN, Math.max(8, (box.left - targetPt.x) * 0.35));
+      p1 = { x: box.left, y: anchorY };
+      p2 = { x: box.left - stub, y: anchorY };
+    } else if (isToLeft) {
+      // Window is to the LEFT of target dot:
+      // Connect to RIGHT edge of window, stub extends horizontally rightwards towards target
+      const anchorY = clamp(targetPt.y, box.top + 28, box.bottom - 28);
+      const stub = Math.min(STUB_LEN, Math.max(8, (targetPt.x - box.right) * 0.35));
+      p1 = { x: box.right, y: anchorY };
+      p2 = { x: box.right + stub, y: anchorY };
+    } else if (isAbove) {
+      // Window is ABOVE target dot:
+      // Connect to BOTTOM edge of window, stub extends vertically downwards towards target
+      const anchorX = clamp(targetPt.x, box.left + 28, box.right - 28);
+      const stub = Math.min(STUB_LEN, Math.max(8, (targetPt.y - box.bottom) * 0.35));
+      p1 = { x: anchorX, y: box.bottom };
+      p2 = { x: anchorX, y: box.bottom + stub };
+    } else if (isBelow) {
+      // Window is BELOW target dot:
+      // Connect to TOP edge of window, stub extends vertically upwards towards target
+      const anchorX = clamp(targetPt.x, box.left + 28, box.right - 28);
+      const stub = Math.min(STUB_LEN, Math.max(8, (box.top - targetPt.y) * 0.35));
+      p1 = { x: anchorX, y: box.top };
+      p2 = { x: anchorX, y: box.top - stub };
     } else {
-      if (diffY < 0) {
-        // Window is ABOVE target -> connect Mid-Bottom (Vertical stub + diagonal)
+      // Defensive fallback if dot is near edge: connect from closest face with outward stub
+      const distLeft = Math.abs(targetPt.x - box.left);
+      const distRight = Math.abs(targetPt.x - box.right);
+      const distTop = Math.abs(targetPt.y - box.top);
+      const distBottom = Math.abs(targetPt.y - box.bottom);
+      const minDist = Math.min(distLeft, distRight, distTop, distBottom);
+
+      if (minDist === distLeft) {
+        const anchorY = clamp(targetPt.y, box.top + 28, box.bottom - 28);
+        p1 = { x: box.left, y: anchorY };
+        p2 = { x: box.left - 12, y: anchorY };
+      } else if (minDist === distRight) {
+        const anchorY = clamp(targetPt.y, box.top + 28, box.bottom - 28);
+        p1 = { x: box.right, y: anchorY };
+        p2 = { x: box.right + 12, y: anchorY };
+      } else if (minDist === distBottom) {
+        const anchorX = clamp(targetPt.x, box.left + 28, box.right - 28);
         p1 = { x: box.centerX, y: box.bottom };
-        p2 = { x: box.centerX, y: box.bottom + STUB_LEN };
+        p2 = { x: box.centerX, y: box.bottom + 12 };
       } else {
-        // Window is BELOW target -> connect Mid-Top (Vertical stub + diagonal)
+        const anchorX = clamp(targetPt.x, box.left + 28, box.right - 28);
         p1 = { x: box.centerX, y: box.top };
-        p2 = { x: box.centerX, y: box.top - STUB_LEN };
+        p2 = { x: box.centerX, y: box.top - 12 };
       }
     }
 
@@ -848,6 +987,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     });
     map.on('move', updateLeaderLine);
     map.on('zoom', updateLeaderLine);
+    map.on('moveend', updateLeaderLine);
+    map.on('zoomend', updateLeaderLine);
     map.on('viewreset', updateLeaderLine);
     window.addEventListener('resize', updateLeaderLine);
 
@@ -856,6 +997,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       map.off('popupclose');
       map.off('move', updateLeaderLine);
       map.off('zoom', updateLeaderLine);
+      map.off('moveend', updateLeaderLine);
+      map.off('zoomend', updateLeaderLine);
       map.off('viewreset', updateLeaderLine);
       window.removeEventListener('resize', updateLeaderLine);
       removeClickedPointMarker();
