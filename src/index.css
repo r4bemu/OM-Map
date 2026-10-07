@@ -421,6 +421,40 @@ body.light,
   cursor: pointer !important;
 }
 
+/* Allow pointer events to pass through empty space in Leaflet custom map panes */
+.leaflet-canalsPane-pane,
+.leaflet-canalHighlightPane-pane,
+.leaflet-reportsPane-pane,
+.leaflet-pickerPane-pane,
+.leaflet-structuresPane-pane,
+.leaflet-measurePane-pane {
+  pointer-events: none !important;
+}
+
+.leaflet-canalsPane-pane svg,
+.leaflet-canalHighlightPane-pane svg,
+.leaflet-reportsPane-pane svg,
+.leaflet-pickerPane-pane svg,
+.leaflet-structuresPane-pane svg,
+.leaflet-measurePane-pane svg {
+  pointer-events: none !important;
+}
+
+.leaflet-canalsPane-pane path.leaflet-interactive,
+.leaflet-canalHighlightPane-pane path.leaflet-interactive,
+.leaflet-reportsPane-pane path.leaflet-interactive,
+.leaflet-pickerPane-pane path.leaflet-interactive,
+.leaflet-structuresPane-pane path.leaflet-interactive,
+.leaflet-measurePane-pane path.leaflet-interactive,
+.leaflet-canalsPane-pane .leaflet-interactive,
+.leaflet-canalHighlightPane-pane .leaflet-interactive,
+.leaflet-reportsPane-pane .leaflet-interactive,
+.leaflet-pickerPane-pane .leaflet-interactive,
+.leaflet-structuresPane-pane .leaflet-interactive,
+.leaflet-measurePane-pane .leaflet-interactive {
+  pointer-events: auto !important;
+}
+
 .leaflet-control-zoom {
   border: none !important;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;

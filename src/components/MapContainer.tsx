@@ -294,7 +294,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         // Border casing width: coreWeight + 5.0 (provides crisp 2.5px solid white border on each side)
         const casingWeight = coreWeight + 5.0;
 
-        // Underlay casing polyline in crisp solid white (#ffffff)
+        // 1. Underlay casing polyline in crisp solid white (#ffffff)
         const casing = L.polyline(latLngs, {
           color: '#ffffff',
           weight: casingWeight,
@@ -302,15 +302,24 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           lineCap: 'round',
           lineJoin: 'round',
           interactive: false,
-          pane: 'canalsPane'
+          pane: 'canalHighlightPane'
+        });
+
+        // 2. Overlay core polyline in pure solid black (#000000)
+        const highlightCore = L.polyline(latLngs, {
+          color: '#000000',
+          weight: coreWeight,
+          opacity: 1.0,
+          lineCap: 'round',
+          lineJoin: 'round',
+          interactive: false,
+          pane: 'canalHighlightPane'
         });
 
         selectionHighlightLayerGroupRef.current?.addLayer(casing);
-        if (typeof (casing as any).bringToFront === 'function') {
-          (casing as any).bringToFront();
-        }
+        selectionHighlightLayerGroupRef.current?.addLayer(highlightCore);
 
-        // Style the canal in solid black (#000000)
+        // Also style the underlying layer in solid black
         if (typeof layer.setStyle === 'function') {
           layer.setStyle({
             color: '#000000',
@@ -319,9 +328,6 @@ export const MapContainer: React.FC<MapContainerProps> = ({
             lineCap: 'round',
             lineJoin: 'round'
           });
-        }
-        if (typeof layer.bringToFront === 'function') {
-          layer.bringToFront();
         }
       } catch (err) {
         console.warn('Error applying canal highlight:', err);
@@ -336,9 +342,6 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           opacity: 1.0,
           fillOpacity: 1.0
         });
-      }
-      if (typeof layer.bringToFront === 'function') {
-        layer.bringToFront();
       }
     }
 
@@ -1037,13 +1040,35 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     map.on('zoomend', updateZoomAndLocation);
 
     // Strict GIS Layer Hierarchy Panes:
-    // 1. canalsPane (z-index: 410) - All canal linestrings & casings (always beneath structures)
-    // 2. structuresPane (z-index: 450) - Structure points & markers (always on top of canals)
+    // 1. canalsPane (z-index: 410) - All canal linestrings & polygons
+    // 2. canalHighlightPane (z-index: 420) - Selected canal white border & black core line
+    // 3. reportsPane (z-index: 430) - Maintenance report polylines & markers (always on top of canals)
+    // 4. pickerPane (z-index: 440) - Location selector 2-point segment path & markers (always on top of canals)
+    // 5. structuresPane (z-index: 450) - Structure points & markers (always on top of canals)
+    // 6. measurePane (z-index: 500) - Temporary measurement tools overlay
     const canalsPane = map.createPane('canalsPane');
     canalsPane.style.zIndex = '410';
+    canalsPane.style.pointerEvents = 'none';
+
+    const canalHighlightPane = map.createPane('canalHighlightPane');
+    canalHighlightPane.style.zIndex = '420';
+    canalHighlightPane.style.pointerEvents = 'none';
+
+    const reportsPane = map.createPane('reportsPane');
+    reportsPane.style.zIndex = '430';
+    reportsPane.style.pointerEvents = 'none';
+
+    const pickerPane = map.createPane('pickerPane');
+    pickerPane.style.zIndex = '440';
+    pickerPane.style.pointerEvents = 'none';
 
     const structuresPane = map.createPane('structuresPane');
     structuresPane.style.zIndex = '450';
+    structuresPane.style.pointerEvents = 'none';
+
+    const measurePane = map.createPane('measurePane');
+    measurePane.style.zIndex = '500';
+    measurePane.style.pointerEvents = 'none';
 
     // Layer Groups
     selectionHighlightLayerGroupRef.current = L.layerGroup().addTo(map);
@@ -2004,7 +2029,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
             color: '#0f172a',
             weight: 9,
             opacity: 0.9,
-            interactive: false
+            interactive: false,
+            pane: 'reportsPane'
           });
           reportsLayerGroupRef.current?.addLayer(casing);
 
@@ -2014,7 +2040,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
             weight: 6,
             opacity: 0.95,
             dashArray: report.status === 'In Progress' ? '6, 6' : undefined,
-            interactive: true
+            interactive: true,
+            pane: 'reportsPane'
           });
           polyline.on('click', (e: any) => {
             if (e && e.originalEvent) L.DomEvent.stopPropagation(e);
@@ -2033,7 +2060,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           color: '#0f172a',
           weight: 2,
           fillOpacity: 1,
-          interactive: true
+          interactive: true,
+          pane: 'reportsPane'
         });
         secondMarker.on('click', (e: any) => {
           if (e && e.originalEvent) L.DomEvent.stopPropagation(e);
@@ -2053,7 +2081,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           color: '#ffffff',
           weight: 2,
           fillOpacity: 1,
-          interactive: true
+          interactive: true,
+          pane: 'reportsPane'
         });
         reportMarker.on('click', (e: any) => {
           if (e && e.originalEvent) L.DomEvent.stopPropagation(e);
@@ -2141,7 +2170,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         iconAnchor: [14, 14]
       });
 
-      const marker1 = L.marker(pickerPt1, { icon: iconPt1, draggable: true });
+      const marker1 = L.marker(pickerPt1, { icon: iconPt1, draggable: true, pane: 'pickerPane' });
       marker1.on('dragend', (e: any) => {
         const latlng = e.target.getLatLng();
         if (latlng && isValidCoord(latlng.lat, latlng.lng)) {
@@ -2164,7 +2193,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         iconAnchor: [14, 14]
       });
 
-      const marker2 = L.marker(pickerPt2, { icon: iconPt2, draggable: true });
+      const marker2 = L.marker(pickerPt2, { icon: iconPt2, draggable: true, pane: 'pickerPane' });
       marker2.on('dragend', (e: any) => {
         const latlng = e.target.getLatLng();
         if (latlng && isValidCoord(latlng.lat, latlng.lng)) {
@@ -2183,7 +2212,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         const pathPolyline = L.polyline(validPathCoords, {
           color: '#f59e0b',
           weight: 5,
-          dashArray: '6, 6'
+          dashArray: '6, 6',
+          pane: 'pickerPane'
         });
         pickerLayerGroupRef.current.addLayer(pathPolyline);
       }
