@@ -198,6 +198,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const clickedPointMarkerRef = useRef<L.Marker | null>(null);
   const leaderLineSvgRef = useRef<SVGSVGElement | null>(null);
   const leaderLinePathRef = useRef<SVGPathElement | null>(null);
+  const activePopupInstanceRef = useRef<L.Popup | null>(null);
+  const lastFeatureClickTimeRef = useRef<number>(0);
 
   const removeClickedPointMarker = () => {
     if (clickedPointMarkerRef.current) {
@@ -452,12 +454,35 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       return;
     }
 
-    const popupWrapper = containerRef.current.querySelector('.custom-leaflet-popup .leaflet-popup-content-wrapper') as HTMLElement;
+    let popupWrapper: HTMLElement | null = null;
+    if (activePopupInstanceRef.current) {
+      const el = activePopupInstanceRef.current.getElement();
+      if (el && el.isConnected) {
+        popupWrapper = (el.querySelector('.leaflet-popup-content-wrapper') as HTMLElement) || (el as HTMLElement);
+      }
+    }
+
+    if (!popupWrapper && containerRef.current) {
+      const activeTagged = containerRef.current.querySelector('.active-attribute-popup .leaflet-popup-content-wrapper') as HTMLElement;
+      if (activeTagged && activeTagged.isConnected) {
+        popupWrapper = activeTagged;
+      } else {
+        const allWrappers = containerRef.current.querySelectorAll('.custom-leaflet-popup .leaflet-popup-content-wrapper');
+        if (allWrappers.length > 0) {
+          popupWrapper = allWrappers[allWrappers.length - 1] as HTMLElement;
+        }
+      }
+    }
+
     if (!popupWrapper) {
       if (leaderLinePathRef.current) {
         leaderLinePathRef.current.setAttribute('d', '');
       }
       return;
+    }
+
+    if (leaderLineSvgRef.current && leaderLineSvgRef.current.style.display === 'none') {
+      leaderLineSvgRef.current.style.display = 'block';
     }
 
     const targetPt = mapRef.current.latLngToContainerPoint(activePopupCoordsRef.current);
@@ -584,7 +609,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     activePopupCoordsRef.current = activePopupCoords;
     if (activePopupCoords) {
       requestAnimationFrame(() => updateLeaderLine());
-      setTimeout(updateLeaderLine, 50);
+      setTimeout(updateLeaderLine, 30);
+      setTimeout(updateLeaderLine, 100);
+      setTimeout(updateLeaderLine, 250);
     } else {
       if (leaderLinePathRef.current) {
         leaderLinePathRef.current.setAttribute('d', '');
@@ -976,15 +1003,35 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       if (isMapPickerActiveRef.current || activeMeasureToolRef.current !== 'none') {
         return;
       }
+      activePopupInstanceRef.current = null;
+      activePopupCoordsRef.current = null;
       removeClickedPointMarker();
       onDeselectFeatureRef.current?.();
     };
 
+    const handleMapPopupOpen = (e: any) => {
+      if (e?.popup) {
+        activePopupInstanceRef.current = e.popup;
+      }
+      requestAnimationFrame(() => updateLeaderLine());
+      setTimeout(updateLeaderLine, 30);
+      setTimeout(updateLeaderLine, 100);
+      setTimeout(updateLeaderLine, 250);
+    };
+
+    const handleMapPopupClose = (e: any) => {
+      const isSwitchingFeatures = Date.now() - lastFeatureClickTimeRef.current < 450;
+      if (!isSwitchingFeatures && (!e?.popup || activePopupInstanceRef.current === e.popup)) {
+        activePopupInstanceRef.current = null;
+        activePopupCoordsRef.current = null;
+        removeClickedPointMarker();
+        if (leaderLinePathRef.current) leaderLinePathRef.current.setAttribute('d', '');
+      }
+    };
+
     map.on('click', handleGeneralMapClick);
-    map.on('popupclose', () => {
-      removeClickedPointMarker();
-      if (leaderLinePathRef.current) leaderLinePathRef.current.setAttribute('d', '');
-    });
+    map.on('popupopen', handleMapPopupOpen);
+    map.on('popupclose', handleMapPopupClose);
     map.on('move', updateLeaderLine);
     map.on('zoom', updateLeaderLine);
     map.on('moveend', updateLeaderLine);
@@ -994,7 +1041,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
     return () => {
       map.off('click', handleGeneralMapClick);
-      map.off('popupclose');
+      map.off('popupopen', handleMapPopupOpen);
+      map.off('popupclose', handleMapPopupClose);
       map.off('move', updateLeaderLine);
       map.off('zoom', updateLeaderLine);
       map.off('moveend', updateLeaderLine);
@@ -1294,6 +1342,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
             // Direct click handler for vector layers
             leafletLayer.on('click', (e: any) => {
+              lastFeatureClickTimeRef.current = Date.now();
               if (e && e.originalEvent) {
                 L.DomEvent.stopPropagation(e);
               }
@@ -1319,6 +1368,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               } else {
                 // Outside location selector mode: feature click only opens the map popup.
                 if (curLatlng && isValidCoord(curLatlng.lat, curLatlng.lng)) {
+                  const coords: [number, number] = [curLatlng.lat, curLatlng.lng];
+                  activePopupCoordsRef.current = coords;
                   const optimalOffset = computeOptimalPopupOffset(leafletLayer, L.latLng(curLatlng.lat, curLatlng.lng), mapRef.current);
                   if ((leafletLayer as any)._popup) {
                     (leafletLayer as any)._popup.options.offset = optimalOffset;
@@ -1540,7 +1591,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               }
             });
 
-            leafletLayer.on('popupclose', () => {
+            leafletLayer.on('popupclose', (e) => {
               try {
                 if (leafletLayer && typeof (leafletLayer as any).setStyle === 'function') {
                   (leafletLayer as any).setStyle(defaultStyle);
@@ -1549,10 +1600,18 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               if (highlightedLayerRef.current?.layer === leafletLayer) {
                 highlightedLayerRef.current = null;
               }
-              setActivePopupProps(null);
-              setActivePopupCoords(null);
-              removeClickedPointMarker();
-              if (leaderLinePathRef.current) leaderLinePathRef.current.setAttribute('d', '');
+
+              const isSwitchingFeatures = Date.now() - lastFeatureClickTimeRef.current < 450;
+              const closingPopup = (e as any)?.popup || (leafletLayer as any)._popup;
+
+              if (!isSwitchingFeatures && (!activePopupInstanceRef.current || activePopupInstanceRef.current === closingPopup)) {
+                activePopupInstanceRef.current = null;
+                activePopupCoordsRef.current = null;
+                setActivePopupProps(null);
+                setActivePopupCoords(null);
+                removeClickedPointMarker();
+                if (leaderLinePathRef.current) leaderLinePathRef.current.setAttribute('d', '');
+              }
             });
 
             leafletLayer.on('popupopen', (e) => {
@@ -1562,6 +1621,26 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 } catch (_) {}
                 return;
               }
+
+              activePopupInstanceRef.current = e.popup;
+              const popupEl = e.popup?.getElement();
+              if (popupEl) {
+                // Clear any existing active-attribute-popup markers
+                containerRef.current?.querySelectorAll('.active-attribute-popup').forEach((node) => {
+                  node.classList.remove('active-attribute-popup');
+                });
+                popupEl.classList.add('active-attribute-popup');
+
+                // Immediately purge any stale/dying popup elements from previous layers
+                containerRef.current?.querySelectorAll('.custom-leaflet-popup').forEach((node) => {
+                  if (node !== popupEl) {
+                    try {
+                      node.remove();
+                    } catch (_) {}
+                  }
+                });
+              }
+
               const inspectId = (leafletLayer as any)._activeInspectId;
               // Revert previous highlighted layer if different
               if (highlightedLayerRef.current && highlightedLayerRef.current.layer !== leafletLayer) {
@@ -1599,11 +1678,14 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                   e.popup.options.offset = optimalOffset;
                   e.popup.update();
                 }
+                activePopupCoordsRef.current = clickCoords;
                 setActivePopupCoords(clickCoords);
                 setActivePopupProps(props);
                 showClickedPointMarker(clickCoords[0], clickCoords[1]);
                 requestAnimationFrame(() => updateLeaderLine());
-                setTimeout(updateLeaderLine, 50);
+                setTimeout(updateLeaderLine, 30);
+                setTimeout(updateLeaderLine, 100);
+                setTimeout(updateLeaderLine, 250);
               }
 
               const copyCoordsBtn = document.getElementById(`copy-coords-btn-${inspectId}`);
