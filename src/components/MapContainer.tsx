@@ -241,6 +241,110 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     clickedPointMarkerRef.current = marker;
   };
 
+  const clearFeatureHighlight = () => {
+    if (selectionHighlightLayerGroupRef.current) {
+      selectionHighlightLayerGroupRef.current.clearLayers();
+    }
+    if (highlightedLayerRef.current) {
+      try {
+        const { layer, defaultStyle } = highlightedLayerRef.current;
+        if (layer && typeof layer.setStyle === 'function' && defaultStyle) {
+          layer.setStyle(defaultStyle);
+        }
+      } catch (err) {}
+      highlightedLayerRef.current = null;
+    }
+  };
+
+  const applyFeatureHighlight = (layer: any, defaultStyle?: any) => {
+    if (!layer) return;
+
+    // 1. Revert previous highlighted layer if different
+    if (highlightedLayerRef.current && highlightedLayerRef.current.layer !== layer) {
+      try {
+        const { layer: prevLayer, defaultStyle: prevStyle } = highlightedLayerRef.current;
+        if (prevLayer && typeof prevLayer.setStyle === 'function' && prevStyle) {
+          prevLayer.setStyle(prevStyle);
+        }
+      } catch (err) {}
+    }
+
+    // 2. Clear any existing casing underlay
+    if (selectionHighlightLayerGroupRef.current) {
+      selectionHighlightLayerGroupRef.current.clearLayers();
+    }
+
+    const effectiveDefaultStyle = defaultStyle || highlightedLayerRef.current?.defaultStyle || {
+      color: (layer as any).options?.color || '#0284c7',
+      weight: (layer as any).options?.weight || 4.5,
+      opacity: (layer as any).options?.opacity || 0.85
+    };
+
+    // 3. Determine if layer is a linestring
+    const geomType = (layer as any).feature?.geometry?.type ||
+      (typeof (layer as any).toGeoJSON === 'function' ? (layer as any).toGeoJSON()?.geometry?.type : '');
+    const isPolyline = geomType.includes('LineString') ||
+      (typeof (layer as any).getLatLngs === 'function' && !(layer instanceof L.Polygon));
+
+    if (isPolyline) {
+      try {
+        const latLngs = (layer as any).getLatLngs();
+        const baseWeight = effectiveDefaultStyle?.weight || 4.5;
+        const coreWeight = Math.max(4.5, baseWeight + 0.5);
+        // Border casing width: coreWeight + 5.0 (provides crisp 2.5px solid white border on each side)
+        const casingWeight = coreWeight + 5.0;
+
+        // Underlay casing polyline in crisp solid white (#ffffff)
+        const casing = L.polyline(latLngs, {
+          color: '#ffffff',
+          weight: casingWeight,
+          opacity: 1.0,
+          lineCap: 'round',
+          lineJoin: 'round',
+          interactive: false,
+          pane: 'canalsPane'
+        });
+
+        selectionHighlightLayerGroupRef.current?.addLayer(casing);
+        if (typeof (casing as any).bringToFront === 'function') {
+          (casing as any).bringToFront();
+        }
+
+        // Style the canal in solid black (#000000)
+        if (typeof layer.setStyle === 'function') {
+          layer.setStyle({
+            color: '#000000',
+            weight: coreWeight,
+            opacity: 1.0,
+            lineCap: 'round',
+            lineJoin: 'round'
+          });
+        }
+        if (typeof layer.bringToFront === 'function') {
+          layer.bringToFront();
+        }
+      } catch (err) {
+        console.warn('Error applying canal highlight:', err);
+      }
+    } else {
+      // Polygon or Point feature
+      if (typeof layer.setStyle === 'function') {
+        layer.setStyle({
+          color: '#000000',
+          fillColor: '#38bdf8',
+          weight: (effectiveDefaultStyle?.weight || 2.0) + 2.0,
+          opacity: 1.0,
+          fillOpacity: 1.0
+        });
+      }
+      if (typeof layer.bringToFront === 'function') {
+        layer.bringToFront();
+      }
+    }
+
+    highlightedLayerRef.current = { layer, defaultStyle: effectiveDefaultStyle };
+  };
+
   const segmentsIntersect = (
     x1: number, y1: number, x2: number, y2: number,
     x3: number, y3: number, x4: number, y4: number
@@ -932,6 +1036,15 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     map.on('moveend', updateZoomAndLocation);
     map.on('zoomend', updateZoomAndLocation);
 
+    // Strict GIS Layer Hierarchy Panes:
+    // 1. canalsPane (z-index: 410) - All canal linestrings & casings (always beneath structures)
+    // 2. structuresPane (z-index: 450) - Structure points & markers (always on top of canals)
+    const canalsPane = map.createPane('canalsPane');
+    canalsPane.style.zIndex = '410';
+
+    const structuresPane = map.createPane('structuresPane');
+    structuresPane.style.zIndex = '450';
+
     // Layer Groups
     selectionHighlightLayerGroupRef.current = L.layerGroup().addTo(map);
     layerGroupRef.current = L.layerGroup().addTo(map);
@@ -1003,6 +1116,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       if (isMapPickerActiveRef.current || activeMeasureToolRef.current !== 'none') {
         return;
       }
+      clearFeatureHighlight();
       activePopupInstanceRef.current = null;
       activePopupCoordsRef.current = null;
       removeClickedPointMarker();
@@ -1022,6 +1136,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     const handleMapPopupClose = (e: any) => {
       const isSwitchingFeatures = Date.now() - lastFeatureClickTimeRef.current < 450;
       if (!isSwitchingFeatures && (!e?.popup || activePopupInstanceRef.current === e.popup)) {
+        clearFeatureHighlight();
         activePopupInstanceRef.current = null;
         activePopupCoordsRef.current = null;
         removeClickedPointMarker();
@@ -1219,6 +1334,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
       try {
         const geoJsonLayer = (L as any).geoJSON(layer.data, {
+          pane: isStructureLayer ? 'structuresPane' : 'canalsPane',
           smoothFactor: 1.2,
           filter: (feature: any) => {
             if (!feature || !feature.geometry || !feature.geometry.coordinates) {
@@ -1283,7 +1399,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           },
           pointToLayer: (feature, latlng) => {
             if (!latlng || !isValidCoord(latlng.lat, latlng.lng)) {
-              return L.circleMarker([13.1, 121.3], { radius: 0, opacity: 0, fillOpacity: 0, interactive: false });
+              return L.circleMarker([13.1, 121.3], { radius: 0, opacity: 0, fillOpacity: 0, interactive: false, pane: 'structuresPane' });
             }
 
             // Structures guaranteed in Azure Blue (#0284c7) with solid white border ring
@@ -1302,7 +1418,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               weight: 2.0,
               fillOpacity: 0.85,
               opacity: 0.85,
-              interactive: true
+              interactive: true,
+              pane: 'structuresPane'
             });
             circleMarker.bindTooltip(tooltipContent, { direction: 'top', opacity: 0.9, className: 'custom-map-tooltip' });
             return circleMarker;
@@ -1592,19 +1709,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
             });
 
             leafletLayer.on('popupclose', (e) => {
-              try {
-                if (leafletLayer && typeof (leafletLayer as any).setStyle === 'function') {
-                  (leafletLayer as any).setStyle(defaultStyle);
-                }
-              } catch (err) {}
-              if (highlightedLayerRef.current?.layer === leafletLayer) {
-                highlightedLayerRef.current = null;
-              }
-
               const isSwitchingFeatures = Date.now() - lastFeatureClickTimeRef.current < 450;
               const closingPopup = (e as any)?.popup || (leafletLayer as any)._popup;
 
               if (!isSwitchingFeatures && (!activePopupInstanceRef.current || activePopupInstanceRef.current === closingPopup)) {
+                clearFeatureHighlight();
                 activePopupInstanceRef.current = null;
                 activePopupCoordsRef.current = null;
                 setActivePopupProps(null);
@@ -1642,30 +1751,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               }
 
               const inspectId = (leafletLayer as any)._activeInspectId;
-              // Revert previous highlighted layer if different
-              if (highlightedLayerRef.current && highlightedLayerRef.current.layer !== leafletLayer) {
-                try {
-                  const { layer: prevLayer, defaultStyle: prevStyle } = highlightedLayerRef.current;
-                  if (prevLayer && typeof prevLayer.setStyle === 'function') {
-                    prevLayer.setStyle(prevStyle);
-                  }
-                } catch (err) {}
-              }
-
               // Highlight THIS EXACT clicked Leaflet vector layer directly!
-              try {
-                if (leafletLayer && typeof (leafletLayer as any).setStyle === 'function') {
-                  (leafletLayer as any).setStyle({
-                    color: '#38bdf8', // Glowing cyan border stroke
-                    weight: 4.5,
-                    opacity: 1.0
-                  });
-                  if (typeof (leafletLayer as any).bringToFront === 'function') {
-                    (leafletLayer as any).bringToFront();
-                  }
-                }
-                highlightedLayerRef.current = { layer: leafletLayer, defaultStyle };
-              } catch (err) {}
+              applyFeatureHighlight(leafletLayer, defaultStyle);
 
               const latlng = e.popup?.getLatLng();
               const clickCoords: [number, number] | undefined = latlng
@@ -1996,18 +2083,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
     // If no targetProps active, revert highlighted layer if any
     if (!targetProps) {
-      if (selectionHighlightLayerGroupRef.current) {
-        selectionHighlightLayerGroupRef.current.clearLayers();
-      }
-      if (highlightedLayerRef.current) {
-        try {
-          const { layer, defaultStyle } = highlightedLayerRef.current;
-          if (layer && typeof layer.setStyle === 'function') {
-            layer.setStyle(defaultStyle);
-          }
-        } catch (e) {}
-        highlightedLayerRef.current = null;
-      }
+      clearFeatureHighlight();
       return;
     }
 
@@ -2038,65 +2114,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     });
 
     if (match && match.layer) {
-      if (selectionHighlightLayerGroupRef.current) {
-        selectionHighlightLayerGroupRef.current.clearLayers();
-      }
-      if (highlightedLayerRef.current && highlightedLayerRef.current.layer !== match.layer) {
-        try {
-          const { layer, defaultStyle } = highlightedLayerRef.current;
-          if (layer && typeof layer.setStyle === 'function') {
-            layer.setStyle(defaultStyle);
-          }
-        } catch (e) {}
-      }
-
-      try {
-        const geomType = (match.layer as any).feature?.geometry?.type ||
-          (typeof (match.layer as any).toGeoJSON === 'function' ? (match.layer as any).toGeoJSON()?.geometry?.type : '');
-        const isPolyline = geomType.includes('LineString') || (typeof (match.layer as any).getLatLngs === 'function' && !(match.layer instanceof L.Polygon));
-
-        if (isPolyline) {
-          const latLngs = (match.layer as any).getLatLngs();
-          const baseWeight = match.defaultStyle?.weight || 4.0;
-          // Border casing width: base weight + 4px (provides a 2px light sky blue border on each side)
-          const casingWeight = baseWeight + 4.0;
-
-          // Underlay casing polyline in light sky blue (#38bdf8)
-          const casing = L.polyline(latLngs, {
-            color: '#38bdf8',
-            weight: casingWeight,
-            opacity: 0.85,
-            interactive: false
-          });
-
-          selectionHighlightLayerGroupRef.current?.addLayer(casing);
-
-          // Keep canal at its defined color & stroke, brought to front over the casing
-          if (typeof match.layer.setStyle === 'function') {
-            match.layer.setStyle({
-              color: match.defaultStyle.color,
-              weight: match.defaultStyle.weight,
-              opacity: 0.85
-            });
-          }
-          if (typeof match.layer.bringToFront === 'function') {
-            match.layer.bringToFront();
-          }
-        } else if (typeof match.layer.setStyle === 'function') {
-          // Polygon or Point feature
-          match.layer.setStyle({
-            color: '#38bdf8',
-            weight: (match.defaultStyle?.weight || 2.0) + 3.0,
-            opacity: 0.85
-          });
-          if (typeof match.layer.bringToFront === 'function') {
-            match.layer.bringToFront();
-          }
-        }
-        highlightedLayerRef.current = match;
-      } catch (err) {
-        console.warn('Error applying border highlight style:', err);
-      }
+      applyFeatureHighlight(match.layer, match.defaultStyle);
     }
   }, [selectedFeatureProps, activePopupProps]);
 
