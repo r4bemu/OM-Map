@@ -1006,8 +1006,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       center: initialCenter,
       zoom: initialZoom,
       zoomControl: false,
-      attributionControl: true,
-      preferCanvas: true
+      attributionControl: true
     });
 
     // Create Base Tile Layer immediately on map initialization
@@ -1039,12 +1038,12 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     map.on('moveend', updateZoomAndLocation);
     map.on('zoomend', updateZoomAndLocation);
 
-    // Strict GIS Layer Hierarchy Panes:
+    // Strict GIS Layer Hierarchy Panes (SVG transparent click-through):
     // 1. canalsPane (z-index: 410) - All canal linestrings & polygons
     // 2. canalHighlightPane (z-index: 420) - Selected canal white border & black core line
-    // 3. reportsPane (z-index: 430) - Maintenance report polylines & markers (always on top of canals)
-    // 4. pickerPane (z-index: 440) - Location selector 2-point segment path & markers (always on top of canals)
-    // 5. structuresPane (z-index: 450) - Structure points & markers (always on top of canals)
+    // 3. structuresPane (z-index: 430) - Structure points & markers (on top of canals)
+    // 4. reportsPane (z-index: 440) - Maintenance report polylines & markers (on top of canal structures & canals)
+    // 5. pickerPane (z-index: 450) - Location selector 2-point segment path & markers (on top of reports & structures)
     // 6. measurePane (z-index: 500) - Temporary measurement tools overlay
     const canalsPane = map.createPane('canalsPane');
     canalsPane.style.zIndex = '410';
@@ -1054,17 +1053,17 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     canalHighlightPane.style.zIndex = '420';
     canalHighlightPane.style.pointerEvents = 'none';
 
+    const structuresPane = map.createPane('structuresPane');
+    structuresPane.style.zIndex = '430';
+    structuresPane.style.pointerEvents = 'none';
+
     const reportsPane = map.createPane('reportsPane');
-    reportsPane.style.zIndex = '430';
+    reportsPane.style.zIndex = '440';
     reportsPane.style.pointerEvents = 'none';
 
     const pickerPane = map.createPane('pickerPane');
-    pickerPane.style.zIndex = '440';
+    pickerPane.style.zIndex = '450';
     pickerPane.style.pointerEvents = 'none';
-
-    const structuresPane = map.createPane('structuresPane');
-    structuresPane.style.zIndex = '450';
-    structuresPane.style.pointerEvents = 'none';
 
     const measurePane = map.createPane('measurePane');
     measurePane.style.zIndex = '500';
