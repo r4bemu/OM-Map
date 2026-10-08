@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  Star, 
   MapPin, 
   Eye, 
   GitCompare, 
@@ -46,13 +45,6 @@ function formatDateOnly(d: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function formatDateTime(d: Date): string {
-  const datePart = formatDateOnly(d);
-  const hours = String(d.getHours()).padStart(2, '0');
-  const mins = String(d.getMinutes()).padStart(2, '0');
-  return `${datePart} ${hours}:${mins}`;
-}
-
 export function resolveActivityDateRange(report: FieldReport): {
   dateString: string;
   isRange: boolean;
@@ -75,7 +67,7 @@ export function resolveActivityDateRange(report: FieldReport): {
     const fallbackDate = report.createdAt ? new Date(report.createdAt) : new Date();
     const valid = isNaN(fallbackDate.getTime()) ? new Date() : fallbackDate;
     return {
-      dateString: formatDateTime(valid),
+      dateString: formatDateOnly(valid),
       isRange: false,
       source: 'report_created'
     };
@@ -97,35 +89,60 @@ export function resolveActivityDateRange(report: FieldReport): {
   }
 
   return {
-    dateString: formatDateTime(earliest),
+    dateString: earliestDay,
     isRange: false,
     source: 'metadata'
   };
 }
 
-export function resolveVariationString(report: FieldReport): string {
+export function resolveFacilityAndLocation(report: FieldReport): {
+  facilityType: 'Canal Lining' | 'Point Structure';
+  locationDetails: string;
+} {
+  const hasTwoPoints = Boolean(
+    (report.secondLat !== undefined && report.secondLng !== undefined) ||
+    (typeof report.segmentDistanceMeters === 'number' && report.segmentDistanceMeters > 0) ||
+    (Array.isArray(report.pathCoords) && report.pathCoords.length > 1)
+  );
+
+  const act = (report.maintenanceActivity || report.title || '').toLowerCase();
+  const loc = (report.locationName || '').toLowerCase();
+  const structKeywords = [
+    'dam', 'intake', 'gate', 'diversion', 'staff gauge', 'turnout', 
+    'flume', 'siphon', 'culvert', 'checkgate', 'headgate', 'crossing', 
+    'drop', 'bridge', 'pump', 'spillway', 'sluice', 'barrel', 'weir', 
+    'outlet', 'inlet', 'control structure'
+  ];
+  const isPointStructure = !hasTwoPoints && Boolean(
+    (report.structureName && report.structureName.trim().length > 0) ||
+    structKeywords.some(kw => act.includes(kw) || loc.includes(kw))
+  );
+
+  const facilityType: 'Canal Lining' | 'Point Structure' = isPointStructure ? 'Point Structure' : 'Canal Lining';
+
   const parts: string[] = [];
+  if (report.nisBinding) {
+    parts.push(report.nisBinding);
+  }
 
-  // NIS Name
-  const nis = report.nisBinding || 'Irrigation System';
-  parts.push(nis);
-
-  // Canal / Structure Name
-  const canalOrStructure = report.canalSegment || report.structureName || report.locationName || 'Main Canal';
+  const canalOrStructure = isPointStructure
+    ? (report.structureName || report.locationName || 'Structure')
+    : (report.canalSegment || report.locationName || 'Main Canal');
   parts.push(canalOrStructure);
 
-  // Stationing or Coordinates
   let locationDetail = '';
   if (report.dimensionDetailsFormatted) {
     locationDetail = report.dimensionDetailsFormatted;
-  } else if (report.locationName && report.locationName !== canalOrStructure) {
+  } else if (report.locationName && report.locationName !== canalOrStructure && !isPointStructure) {
     locationDetail = report.locationName;
   } else if (typeof report.lat === 'number' && typeof report.lng === 'number' && !isNaN(report.lat)) {
     locationDetail = `${report.lat.toFixed(4)}°, ${report.lng.toFixed(4)}°`;
   }
 
   const base = parts.join(' • ');
-  return locationDetail ? `${base} (${locationDetail})` : base;
+  const locationDetails = locationDetail ? `${base} (${locationDetail})` : base;
+
+  return { facilityType, locationDetails };
 }
 
 function getInitials(name: string): string {
@@ -169,7 +186,7 @@ export const ReportReviewCard: React.FC<ReportReviewCardProps> = ({
   const advanceAction = canUserAdvanceTier(report, currentUser || null, currentRole);
   const canEdit = canUserEditReport(report, currentUser || null, currentRole);
   const activityDate = useMemo(() => resolveActivityDateRange(report), [report]);
-  const variationText = useMemo(() => resolveVariationString(report), [report]);
+  const facilityInfo = useMemo(() => resolveFacilityAndLocation(report), [report]);
 
   const allPhotos = useMemo<PhotoAttachment[]>(() => {
     if (Array.isArray(report.photos) && report.photos.length > 0) {
@@ -272,31 +289,38 @@ export const ReportReviewCard: React.FC<ReportReviewCardProps> = ({
             )}
           </div>
 
-          {/* Reporter Details & Category */}
+          {/* Reporter Details & Activity/Date */}
           <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs sm:text-sm font-bold text-white">
+            <div className="flex items-center gap-1.5 flex-wrap text-xs sm:text-sm">
+              <span className="font-bold text-white">
                 {report.reporterName || 'Field Personnel'}
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 font-medium">
-                {report.imoOffice || 'IMO Office'}
-              </span>
               {report.reporterDesignation && (
-                <span className="text-[10px] text-slate-400 font-medium hidden sm:inline">
-                  • {report.reporterDesignation}
-                </span>
+                <>
+                  <span className="text-slate-500 font-normal">|</span>
+                  <span className="text-slate-300 font-medium text-xs">
+                    {report.reporterDesignation}
+                  </span>
+                </>
+              )}
+              {report.imoOffice && (
+                <>
+                  <span className="text-slate-500 font-normal">•</span>
+                  <span className="text-slate-400 font-normal text-xs">
+                    {report.imoOffice}
+                  </span>
+                </>
               )}
             </div>
 
-            {/* Shopee-style 5 Stars + Activity Category */}
-            <div className="flex items-center gap-1.5 mt-1">
-              <div className="flex items-center gap-0.5 text-[#ee4d2d]">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-3.5 h-3.5 fill-[#ee4d2d]" />
-                ))}
-              </div>
-              <span className="text-xs font-semibold text-emerald-400 ml-1">
+            {/* Activity Category + Date */}
+            <div className="flex items-center gap-1.5 mt-1 flex-wrap text-xs">
+              <span className="font-semibold text-emerald-400">
                 {report.maintenanceActivity || report.title || report.operationalState || 'Accomplishment'}
+              </span>
+              <span className="text-slate-500 font-normal">•</span>
+              <span className="text-slate-300 font-mono text-[11px]">
+                {activityDate.dateString}
               </span>
             </div>
           </div>
@@ -315,16 +339,14 @@ export const ReportReviewCard: React.FC<ReportReviewCardProps> = ({
         </div>
       </div>
 
-      {/* 2. Review Date & Variation Line */}
-      <div className="text-[11px] text-slate-400 font-normal flex items-center gap-2 flex-wrap">
-        <span className="text-slate-300 font-mono">{activityDate.dateString}</span>
-        <span className="text-slate-600">|</span>
-        <span className="text-slate-300">
-          Variation: <strong className="text-slate-200 font-normal">{variationText}</strong>
+      {/* 2. Facility & Location Line */}
+      <div className="text-[11px] text-slate-300 font-normal flex items-center gap-1.5 flex-wrap">
+        <span className="text-white font-semibold">
+          {facilityInfo.facilityType}
         </span>
-        <span className="text-slate-600">|</span>
-        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-teal-500/15 text-teal-300 border border-teal-500/30">
-          {canalClassification}
+        <span className="text-slate-500">•</span>
+        <span className="text-slate-300">
+          {facilityInfo.locationDetails}
         </span>
       </div>
 

@@ -928,9 +928,23 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     setIsPoint2Set(true);
     isPoint2SetRef.current = true;
     pickerPt2Ref.current = coords;
-    if (featureProps) {
-      point2PropsRef.current = featureProps;
+
+    // The location selector mode should not choose a structure as 'Point 2' on 2-point segment path
+    const isPt2Structure = Boolean(
+      featureProps && (
+        featureProps.Structure_Category ||
+        featureProps.structure_category ||
+        featureProps.isStructurePoint ||
+        featureProps.desilting_dependency
+      )
+    );
+
+    let effectivePt2Props = featureProps;
+    if (isPt2Structure) {
+      const canalFeat2 = detectNearestGISFeature(coords[0], coords[1], layers, undefined, { ignoreStructures: true });
+      effectivePt2Props = canalFeat2.nearestFeatureProps || null;
     }
+    point2PropsRef.current = effectivePt2Props;
 
     if (mapRef.current && isValidCoord(coords[0], coords[1])) {
       mapRef.current.panTo(coords);
@@ -942,6 +956,21 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     }
 
     const pt1 = pickerPt1Ref.current;
+
+    // When Point 2 is declared, Point 1 refers to the canal lining adjacent to its position
+    const isPt1Structure = Boolean(
+      point1PropsRef.current && (
+        point1PropsRef.current.Structure_Category ||
+        point1PropsRef.current.structure_category ||
+        point1PropsRef.current.isStructurePoint ||
+        point1PropsRef.current.desilting_dependency
+      )
+    );
+    if (isPt1Structure) {
+      const canalFeat1 = detectNearestGISFeature(pt1[0], pt1[1], layers, undefined, { ignoreStructures: true });
+      point1PropsRef.current = canalFeat1.nearestFeatureProps || null;
+    }
+
     const seq = ++calculationSeqRef.current;
 
     // Optimistic straight line path & distance
@@ -1494,10 +1523,18 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               if (isMapPickerActiveRef.current) {
                 if (curLatlng && isValidCoord(curLatlng.lat, curLatlng.lng)) {
                   const isPt1Set = isPoint1SetRef.current && pickerPt1Ref.current && isValidCoord(pickerPt1Ref.current[0], pickerPt1Ref.current[1]);
+                  const isFeatureStructure = itemStyle.isStructure || isStructureLayer || feature?.geometry?.type === 'Point' || layer.category === 'Structures' || Boolean(props?.Structure_Category);
+
                   if (!isPt1Set) {
                     handleSetPoint1([curLatlng.lat, curLatlng.lng], props);
                   } else {
-                    handleSetPoint2([curLatlng.lat, curLatlng.lng], props);
+                    // Do not choose a structure as Point 2 on 2-point segment path
+                    if (isFeatureStructure) {
+                      const canalFeat = detectNearestGISFeature(curLatlng.lat, curLatlng.lng, layers, undefined, { ignoreStructures: true });
+                      handleSetPoint2([curLatlng.lat, curLatlng.lng], canalFeat.nearestFeatureProps || undefined);
+                    } else {
+                      handleSetPoint2([curLatlng.lat, curLatlng.lng], props);
+                    }
                   }
                   try {
                     if (typeof (leafletLayer as any).closePopup === 'function') {

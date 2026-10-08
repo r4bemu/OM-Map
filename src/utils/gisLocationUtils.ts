@@ -455,6 +455,7 @@ export interface NearestGISFeatureResult {
   structureName?: string;
   nearestFeatureName?: string;
   nearestFeatureType?: string;
+  nearestFeatureProps?: any;
   snappedCoords: [number, number];
   distanceAlongLineMeters: number;
   featureCoordinates?: [number, number][]; // LineString coordinates
@@ -481,7 +482,8 @@ export function detectNearestGISFeature(
   lat: number,
   lng: number,
   layers: GISLayer[],
-  preferredProps?: any
+  preferredProps?: any,
+  options?: { ignoreStructures?: boolean }
 ): NearestGISFeatureResult {
   const numLat = Number(lat);
   const numLng = Number(lng);
@@ -556,7 +558,7 @@ export function detectNearestGISFeature(
         )
       );
 
-      if (geom.type === 'Point' && geom.coordinates) {
+      if (!options?.ignoreStructures && geom.type === 'Point' && geom.coordinates) {
         const [fLng, fLat] = geom.coordinates;
         const dist = haversineDistanceMeters(lat, lng, fLat, fLng);
 
@@ -597,6 +599,7 @@ export function detectNearestGISFeature(
             structureName: structName,
             nearestFeatureName: structName,
             nearestFeatureType: props.Structure_Category || layer.category || 'Structure',
+            nearestFeatureProps: props,
             snappedCoords: [fLat, fLng],
             distanceAlongLineMeters: stationM,
             isStructurePoint: true,
@@ -729,6 +732,7 @@ export function detectNearestGISFeature(
         declaredStationEnd: undefined,
         nearestFeatureName: ditchName,
         nearestFeatureType: 'Farm Ditch Line',
+        nearestFeatureProps: bestLineCandidate.props,
         snappedCoords: bestPointAlongLine,
         distanceAlongLineMeters: Math.round(bestDistAlongLine),
         featureCoordinates: orientedCoords,
@@ -751,6 +755,7 @@ export function detectNearestGISFeature(
         declaredStationEnd,
         nearestFeatureName: canalName,
         nearestFeatureType: 'Canal Line',
+        nearestFeatureProps: bestLineCandidate.props,
         snappedCoords: bestPointAlongLine,
         distanceAlongLineMeters: Math.round(stationMeters),
         featureCoordinates: orientedCoords,
