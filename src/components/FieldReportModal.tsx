@@ -1591,29 +1591,24 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
         {/* Sticky Modal Header */}
         <div className="border-b border-slate-800/90 bg-slate-900/95 sticky top-0 z-20 backdrop-blur-md">
           <div className="flex items-center justify-between p-3.5 sm:p-4 pb-2.5">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl border bg-cyan-500/10 text-cyan-400 border-cyan-500/30">
-                {categoryMode === 'maintenance' ? <Wrench className="w-5 h-5" /> : <Activity className="w-5 h-5" />}
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-sm sm:text-base font-bold text-white font-heading">
+                  {editingReport
+                    ? `Edit ${categoryMode === 'maintenance' ? 'Maintenance' : 'Operational'} Report`
+                    : (categoryMode === 'maintenance' ? 'Irrigation Facility Maintenance Report' : 'Operational Status Report')}
+                </h2>
+                {editingReport && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-cyan-500/20 text-cyan-300 border-cyan-500/40">
+                    Editing Mode
+                  </span>
+                )}
               </div>
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-sm sm:text-base font-bold text-white font-heading">
-                    {editingReport
-                      ? `Edit ${categoryMode === 'maintenance' ? 'Maintenance' : 'Operational'} Report`
-                      : (categoryMode === 'maintenance' ? 'Irrigation Facility Maintenance Report' : 'Operational Status Report')}
-                  </h2>
-                  {editingReport && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-cyan-500/20 text-cyan-300 border-cyan-500/40">
-                      Editing Mode
-                    </span>
-                  )}
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  {categoryMode === 'maintenance' 
-                    ? 'Record canal desilting, structural repairs, gate servicing & maintenance progress'
-                    : 'Monitor discharge flow rates, gauge heights, gate openings & water distribution'}
-                </p>
-              </div>
+              <p className="text-[11px] text-slate-400">
+                {categoryMode === 'maintenance' 
+                  ? 'Record canal desilting, structural repairs, gate servicing & maintenance progress'
+                  : 'Monitor discharge flow rates, gauge heights, gate openings & water distribution'}
+              </p>
             </div>
             <button 
               type="button"
@@ -1703,6 +1698,18 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
             </button>
           </div>
 
+          {/* Reporter Attribution (Positioned on top of 1st Component) */}
+          <div className="px-1 py-1 space-y-1 text-xs">
+            <div className="flex items-baseline gap-2">
+              <span className="text-slate-400 font-medium shrink-0">Reporter's Name:</span>
+              <span className="text-slate-100 font-semibold">{effectiveReporterName || 'Field Personnel'}</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-slate-400 font-medium shrink-0">Designation:</span>
+              <span className="text-slate-200 font-medium">{currentUser?.designation || reporterDesignation || 'Personnel'}</span>
+            </div>
+          </div>
+
           {/* ========================================================
               STEP 1: ACTIVITY & WORK CLASSIFICATION
               -> Guided Input with auto-focus & persistent cache
@@ -1714,54 +1721,13 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                   1
                 </span>
                 <div className="min-w-0">
-                  <h3 className="text-xs sm:text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2 truncate">
-                    <Wrench className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span className="truncate">Activity &amp; Work Classification</span>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-100 uppercase tracking-wider truncate">
+                    Activity &amp; Work Classification
                   </h3>
                   <p className="text-[11px] text-slate-400 truncate">
-                    Specify work type, operational category, and reporter attribution
+                    Specify work type and operational category
                   </p>
                 </div>
-              </div>
-              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${
-                isStep1Ready
-                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                  : 'bg-slate-900 text-slate-400 border-slate-800'
-              }`}>
-                {isStep1Ready ? '✓ Complete' : 'Step 1 of 5'}
-              </span>
-            </div>
-
-            {/* Reporter Attribution */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Reporter's Name</span>
-                  <span className="text-amber-400 font-bold">*</span>
-                </label>
-              </div>
-              <div className="relative">
-                <input
-                  ref={reporterNameRef}
-                  type="text"
-                  readOnly
-                  value={effectiveReporterName}
-                  placeholder="Approved account name"
-                  className={`w-full bg-slate-900/60 border text-slate-200 text-xs p-2.5 pr-8 rounded-xl cursor-not-allowed select-none transition ${
-                    isReporterMissing
-                      ? 'border-rose-500 ring-2 ring-rose-500/40 bg-rose-950/20 text-white'
-                      : 'border-slate-800 text-slate-300'
-                  }`}
-                  title="Linked to approved account name from application request (Read-only)"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500" title="Locked to approved account">
-                  <Lock className="w-3.5 h-3.5" />
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400 pt-0.5">
-                <Briefcase className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span>Designation: <strong className="text-slate-200 font-semibold">{currentUser?.designation || reporterDesignation || 'Personnel'}</strong></span>
               </div>
             </div>
 
@@ -1771,8 +1737,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
               {/* Maintenance Activity Selector */}
               {categoryMode === 'maintenance' ? (
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <Wrench className="w-3.5 h-3.5 text-cyan-400" />
+                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
                     <span>Maintenance Activity Performed</span>
                     <span className="text-amber-400">*</span>
                   </label>
@@ -1805,8 +1770,7 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                 </div>
               ) : (
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <Gauge className="w-3.5 h-3.5 text-cyan-400" />
+                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
                     <span>Facility Operational State</span>
                     <span className="text-amber-400">*</span>
                   </label>
@@ -1951,22 +1915,14 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                   2
                 </span>
                 <div className="min-w-0">
-                  <h3 className="text-xs sm:text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2 truncate">
-                    <Camera className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span className="truncate">Site Inspection Photos &amp; Geotag Evidence</span>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-100 uppercase tracking-wider truncate">
+                    Site Inspection Photos &amp; Geotag Evidence
                   </h3>
                   <p className="text-[11px] text-slate-400 truncate">
                     Upload inspection photos — GPS metadata will automatically detect map coordinates &amp; IMO office
                   </p>
                 </div>
               </div>
-              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${
-                isPhotosReady
-                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                  : 'bg-slate-900 text-slate-400 border-slate-800'
-              }`}>
-                {isPhotosReady ? `${photos.length} Photo${photos.length > 1 ? 's' : ''} ✓` : 'Step 2 of 5'}
-              </span>
             </div>
 
             {/* Photo Manager Component: Upload, Camera, Lens Selector, 4:3 Grid, Dynamic Captions & WYSIWYG Framing */}
@@ -1998,20 +1954,12 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                   3
                 </span>
                 <div className="min-w-0">
-                  <h3 className="text-xs sm:text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2 truncate">
-                    <MapPin className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span className="truncate">Location &amp; Physical Dimensions</span>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-100 uppercase tracking-wider truncate">
+                    Location &amp; Physical Dimensions
                   </h3>
                   <p className="text-[11px] text-slate-400 truncate">Auto-detected from photo GPS or pinpointed on GIS map</p>
                 </div>
               </div>
-              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${
-                isLocationReady
-                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                  : 'bg-slate-900 text-slate-400 border-slate-800'
-              }`}>
-                {isLocationReady ? '✓ Location Set' : 'Location Required *'}
-              </span>
             </div>
 
             {/* Location Display & Picker Controls */}
@@ -2114,7 +2062,6 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
               <div className="pt-2 border-t border-slate-800/80 space-y-2.5">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <Ruler className="w-3.5 h-3.5 text-cyan-400" />
                     <span>Activity Measurements &amp; Volume Estimator</span>
                     <span className="text-slate-500 text-[10px] font-normal normal-case">(Optional)</span>
                   </label>
@@ -2265,30 +2212,21 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                   4
                 </span>
                 <div className="min-w-0">
-                  <h3 className="text-xs sm:text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2 truncate">
-                    <Users className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span className="truncate">Execution Workforce &amp; Final Work Status</span>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-100 uppercase tracking-wider truncate">
+                    Execution Workforce &amp; Final Work Status
                   </h3>
                   <p className="text-[11px] text-slate-400 truncate">
                     Assign executing team/association and record current completion status
                   </p>
                 </div>
               </div>
-              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${
-                isStep4Ready
-                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                  : 'bg-slate-900 text-slate-400 border-slate-800'
-              }`}>
-                {isStep4Ready ? '✓ Complete' : 'Required Inputs *'}
-              </span>
             </div>
 
             {/* Performed By Section (Maintenance Mode) */}
             {categoryMode === 'maintenance' && (
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between flex-wrap gap-1">
-                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-cyan-400" />
+                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
                     <span>Performed by</span>
                     <span className="text-amber-400">*</span>
                     <span className="text-[10px] text-slate-400 font-normal normal-case">(Select all that apply)</span>
@@ -2372,7 +2310,6 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                   <div className="space-y-2.5 pt-2 bg-slate-900/95 p-3.5 rounded-xl border border-slate-800" ref={iaComboboxRef}>
                     <div className="flex items-center justify-between flex-wrap gap-1">
                       <label className="block text-[10.5px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5 text-amber-400" />
                         <span>Select Irrigators' Association (IA) *</span>
                       </label>
                       <span className="text-[9.5px] text-cyan-400 font-mono px-2 py-0.5 rounded-md bg-cyan-950/40 border border-cyan-800/40">
@@ -2598,7 +2535,6 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
             <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Final Work Status</span>
                   <span className="text-amber-400">*</span>
                   <span className="text-[10px] text-slate-400 font-normal normal-case">(Please select one)</span>
@@ -2721,9 +2657,8 @@ export const FieldReportModal: React.FC<FieldReportModalProps> = ({
                   5
                 </span>
                 <div className="min-w-0">
-                  <h3 className="text-xs sm:text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2 truncate">
-                    <FileText className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span className="truncate">Technical Remarks &amp; Field Notes</span>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-100 uppercase tracking-wider truncate">
+                    Technical Remarks &amp; Field Notes
                   </h3>
                   <p className="text-[11px] text-slate-400 truncate">
                     Document engineering observations, site conditions, equipment utilized and accomplishment notes
