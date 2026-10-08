@@ -428,146 +428,7 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
     return groups;
   }, [filteredReports, clusterMode]);
 
-  // Overall KPIs for Maintenance
-  const maintenanceKPIs = useMemo(() => {
-    let totalDist = 0;
-    let totalVol = 0;
-    let totalPainting = 0;
-    let completed = 0;
-    let approved = 0;
-    let structureCount = 0;
-    let maintainedByIACount = 0;
 
-    // Detailed Accomplishment Distance breakdown by Category & Type
-    let linedMainDist = 0;
-    let linedLateralDist = 0;
-    let linedFarmDitchDist = 0;
-    let linedOtherDist = 0;
-
-    let unlinedMainDist = 0;
-    let unlinedLateralDist = 0;
-    let unlinedFarmDitchDist = 0;
-    let unlinedOtherDist = 0;
-
-    let uncategorizedMainDist = 0;
-    let uncategorizedLateralDist = 0;
-    let uncategorizedFarmDitchDist = 0;
-    let uncategorizedOtherDist = 0;
-
-    filteredReports.forEach(r => {
-      const dist = (typeof r.segmentDistanceMeters === 'number' && !isNaN(r.segmentDistanceMeters) && r.segmentDistanceMeters > 0)
-        ? r.segmentDistanceMeters
-        : 0;
-
-      if (dist > 0) {
-        totalDist += dist;
-        const { category, type } = getReportCanalCategoryAndType(r);
-
-        if (category === 'Lined') {
-          if (type === 'Main') linedMainDist += dist;
-          else if (type === 'Lateral') linedLateralDist += dist;
-          else if (type === 'Farm Ditch') linedFarmDitchDist += dist;
-          else linedOtherDist += dist;
-        } else if (category === 'Unlined') {
-          if (type === 'Main') unlinedMainDist += dist;
-          else if (type === 'Lateral') unlinedLateralDist += dist;
-          else if (type === 'Farm Ditch') unlinedFarmDitchDist += dist;
-          else unlinedOtherDist += dist;
-        } else {
-          if (type === 'Main') uncategorizedMainDist += dist;
-          else if (type === 'Lateral') uncategorizedLateralDist += dist;
-          else if (type === 'Farm Ditch') uncategorizedFarmDitchDist += dist;
-          else uncategorizedOtherDist += dist;
-        }
-      }
-      
-      const vol = r.calculatedVolumeM3 || r.desiltingVolumeM3;
-      if (typeof vol === 'number' && !isNaN(vol) && vol > 0) {
-        totalVol += vol;
-      }
-      if (typeof r.paintedAreaSqm === 'number' && !isNaN(r.paintedAreaSqm) && r.paintedAreaSqm > 0) {
-        totalPainting += r.paintedAreaSqm;
-      }
-      if (r.status === 'Completed') completed++;
-      if (r.approvalStatus === 'Approved') approved++;
-
-      const isTwoPointSegment = Boolean(
-        (r.secondLat !== undefined && r.secondLng !== undefined) ||
-        (typeof r.segmentDistanceMeters === 'number' && r.segmentDistanceMeters > 0) ||
-        (Array.isArray(r.pathCoords) && r.pathCoords.length > 1)
-      );
-
-      if (!isTwoPointSegment) {
-        const act = (r.maintenanceActivity || '').toLowerCase();
-        const title = (r.title || '').toLowerCase();
-        const loc = (r.locationName || '').toLowerCase();
-        const structName = (r.structureName || '').toLowerCase();
-
-        const structureKeywords = [
-          'dam', 'intake', 'gate', 'diversion', 'staff gauge', 'turnout', 
-          'flume', 'siphon', 'culvert', 'checkgate', 'headgate', 'crossing', 
-          'drop', 'bridge', 'pump', 'spillway', 'sluice', 'barrel', 'weir', 
-          'outlet', 'inlet', 'control structure'
-        ];
-
-        const isStructure = structureKeywords.some(kw => 
-          act.includes(kw) || title.includes(kw) || loc.includes(kw) || structName.includes(kw)
-        ) || Boolean(r.structureName);
-
-        if (isStructure) {
-          structureCount++;
-        }
-      }
-
-      const isIA = Boolean(
-        r.performedBy === 'IA' ||
-        (Array.isArray(r.performedByList) && r.performedByList.includes('IA')) ||
-        (typeof r.performedBy === 'string' && r.performedBy.toLowerCase().includes('ia')) ||
-        (r.performedByIA && r.performedByIA.trim().length > 0) ||
-        (r.performedByDetails && r.performedByDetails.toLowerCase().includes('ia')) ||
-        r.reporterRole === 'Field Personnel'
-      );
-
-      if (isIA) {
-        maintainedByIACount++;
-      }
-    });
-
-    const totalLinedDist = linedMainDist + linedLateralDist + linedFarmDitchDist + linedOtherDist;
-    const totalUnlinedDist = unlinedMainDist + unlinedLateralDist + unlinedFarmDitchDist + unlinedOtherDist;
-    const totalUncategorizedDist = uncategorizedMainDist + uncategorizedLateralDist + uncategorizedFarmDitchDist + uncategorizedOtherDist;
-
-    return {
-      count: filteredReports.length,
-      totalDistanceKm: (totalDist / 1000).toFixed(2),
-      totalDistanceMeters: totalDist,
-      totalDesiltingM3: totalVol,
-      totalPaintingSqm: totalPainting,
-      completed,
-      approved,
-      structureCount,
-      maintainedByIACount,
-
-      // Breakdown Metrics
-      linedMainDist,
-      linedLateralDist,
-      linedFarmDitchDist,
-      linedOtherDist,
-      totalLinedDist,
-
-      unlinedMainDist,
-      unlinedLateralDist,
-      unlinedFarmDitchDist,
-      unlinedOtherDist,
-      totalUnlinedDist,
-
-      uncategorizedMainDist,
-      uncategorizedLateralDist,
-      uncategorizedFarmDitchDist,
-      uncategorizedOtherDist,
-      totalUncategorizedDist
-    };
-  }, [filteredReports]);
 
   // Overall KPIs for Operational Summary
   const operationalKPIs = useMemo(() => {
@@ -889,80 +750,55 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
           </div>
         </div>
 
-        {/* Top Header Bar */}
+        {/* Navigation & Actions Toolbar */}
         <div className="p-3 sm:p-4 border-b border-slate-800 bg-slate-900/95 flex flex-wrap items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl border shadow-inner shrink-0 ${
-              summaryMode === 'maintenance'
-                ? 'bg-gradient-to-br from-amber-500/20 to-teal-500/20 text-amber-300 border-amber-500/30'
-                : 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 text-cyan-300 border-cyan-500/30'
-            }`}>
-              {summaryMode === 'maintenance' ? (
-                <Wrench className="w-5 h-5 sm:w-6 sm:h-6" />
-              ) : (
-                <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
-              )}
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-sm sm:text-base font-bold text-white font-heading truncate">
-                {summaryMode === 'maintenance' ? 'Irrigation Facility Maintenance Summary' : 'Irrigation Flow & Operational Status Summary'}
-              </h2>
-              <p className="text-[11px] sm:text-xs text-slate-300 truncate">
-                {summaryMode === 'maintenance' 
-                  ? 'NIA MIMAROPA • Canal Desilting, Structural Repairs & Physical Accomplishments'
-                  : 'NIA MIMAROPA • Water Delivery, Discharge Readings & System Status'}
-              </p>
-            </div>
+          {/* View Switcher Tabs */}
+          <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+            <button
+              type="button"
+              onClick={() => setActiveTab('ledger')}
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'ledger'
+                  ? 'bg-[#15803d] text-white shadow-sm font-bold'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Ledger View</span>
+              <span className="sm:hidden">Ledger</span>
+            </button>
+
+            {summaryMode === 'maintenance' && (
+              <button
+                type="button"
+                onClick={() => setActiveTab('form691')}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  activeTab === 'form691'
+                    ? 'bg-[#15803d] text-white shadow-sm font-bold'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>WMR</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('photos')}
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'photos'
+                  ? 'bg-[#15803d] text-white shadow-sm font-bold'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Camera className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Photo Documentation</span>
+              <span className="sm:hidden">Photos</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            {/* View Switcher Tabs */}
-            <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
-              <button
-                type="button"
-                onClick={() => setActiveTab('ledger')}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                  activeTab === 'ledger'
-                    ? 'bg-[#15803d] text-white shadow-sm font-bold'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <Layers className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Ledger View</span>
-                <span className="sm:hidden">Ledger</span>
-              </button>
-
-              {summaryMode === 'maintenance' && (
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('form691')}
-                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                    activeTab === 'form691'
-                      ? 'bg-[#15803d] text-white shadow-sm font-bold'
-                      : 'text-slate-300 hover:text-white'
-                  }`}
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">WMR (Form 691)</span>
-                  <span className="sm:hidden">WMR</span>
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('photos')}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                  activeTab === 'photos'
-                    ? 'bg-[#15803d] text-white shadow-sm font-bold'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <Camera className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Photo Documentation</span>
-                <span className="sm:hidden">Photos</span>
-              </button>
-            </div>
-
             {activeTab === 'ledger' && (
               <>
                 {/* Weekly vs Monthly Switcher */}
@@ -1138,168 +974,7 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
             {/* Clustered Content Area */}
             <div className="flex-1 overflow-y-auto min-h-0 p-3 sm:p-5 space-y-4">
 
-              {/* Maintenance Physical Accomplishments Breakdown Matrix Banner */}
-              {summaryMode === 'maintenance' && (
-                <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3.5">
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
-                        <Ruler className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-white font-heading flex items-center gap-2 flex-wrap">
-                          <span>Physical Accomplishment Distance Matrix</span>
-                          <span className="text-[10.5px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
-                            Total: {maintenanceKPIs.totalDistanceKm} km ({maintenanceKPIs.totalDistanceMeters.toLocaleString()} m)
-                          </span>
-                        </h3>
-                        <p className="text-[11px] text-slate-400">
-                          Accredited linear measurement divided into canal category (Lined vs Unlined) and canal type (Main vs Lateral)
-                        </p>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="text-slate-400">Approved Reports:</span>
-                      <span className="font-mono font-bold text-cyan-400">
-                        {maintenanceKPIs.approved}/{maintenanceKPIs.count}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* 4-Column Core Matrix: Lined (Main), Lined (Lateral), Unlined (Main), Unlined (Lateral) */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    {/* 1. Lined Canal (Main) */}
-                    <div className="bg-slate-900/90 border border-teal-500/30 rounded-xl p-3 space-y-1 relative overflow-hidden group hover:border-teal-400/50 transition shadow-inner">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-teal-300 uppercase tracking-wider">
-                          Lined Canals (Main)
-                        </span>
-                        <span className="w-2.5 h-2.5 rounded-full bg-teal-400 ring-2 ring-teal-500/20" />
-                      </div>
-                      <div className="text-xl sm:text-2xl font-black font-mono text-white">
-                        {maintenanceKPIs.linedMainDist >= 1000 
-                          ? `${(maintenanceKPIs.linedMainDist / 1000).toFixed(2)} km`
-                          : `${maintenanceKPIs.linedMainDist.toLocaleString()} m`}
-                      </div>
-                      <div className="text-[10.5px] text-slate-400 font-mono">
-                        {maintenanceKPIs.linedMainDist.toLocaleString()} linear meters
-                      </div>
-                    </div>
-
-                    {/* 2. Lined Canal (Lateral) */}
-                    <div className="bg-slate-900/90 border border-emerald-500/30 rounded-xl p-3 space-y-1 relative overflow-hidden group hover:border-emerald-400/50 transition shadow-inner">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider">
-                          Lined Canals (Lateral)
-                        </span>
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-500/20" />
-                      </div>
-                      <div className="text-xl sm:text-2xl font-black font-mono text-white">
-                        {maintenanceKPIs.linedLateralDist >= 1000 
-                          ? `${(maintenanceKPIs.linedLateralDist / 1000).toFixed(2)} km`
-                          : `${maintenanceKPIs.linedLateralDist.toLocaleString()} m`}
-                      </div>
-                      <div className="text-[10.5px] text-slate-400 font-mono">
-                        {maintenanceKPIs.linedLateralDist.toLocaleString()} linear meters
-                      </div>
-                    </div>
-
-                    {/* 3. Unlined Canal (Main) */}
-                    <div className="bg-slate-900/90 border border-amber-500/30 rounded-xl p-3 space-y-1 relative overflow-hidden group hover:border-amber-400/50 transition shadow-inner">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
-                          Unlined Canals (Main)
-                        </span>
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-amber-500/20" />
-                      </div>
-                      <div className="text-xl sm:text-2xl font-black font-mono text-white">
-                        {maintenanceKPIs.unlinedMainDist >= 1000 
-                          ? `${(maintenanceKPIs.unlinedMainDist / 1000).toFixed(2)} km`
-                          : `${maintenanceKPIs.unlinedMainDist.toLocaleString()} m`}
-                      </div>
-                      <div className="text-[10.5px] text-slate-400 font-mono">
-                        {maintenanceKPIs.unlinedMainDist.toLocaleString()} linear meters
-                      </div>
-                    </div>
-
-                    {/* 4. Unlined Canal (Lateral) */}
-                    <div className="bg-slate-900/90 border border-orange-500/30 rounded-xl p-3 space-y-1 relative overflow-hidden group hover:border-orange-400/50 transition shadow-inner">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-orange-300 uppercase tracking-wider">
-                          Unlined Canals (Lateral)
-                        </span>
-                        <span className="w-2.5 h-2.5 rounded-full bg-orange-400 ring-2 ring-orange-500/20" />
-                      </div>
-                      <div className="text-xl sm:text-2xl font-black font-mono text-white">
-                        {maintenanceKPIs.unlinedLateralDist >= 1000 
-                          ? `${(maintenanceKPIs.unlinedLateralDist / 1000).toFixed(2)} km`
-                          : `${maintenanceKPIs.unlinedLateralDist.toLocaleString()} m`}
-                      </div>
-                      <div className="text-[10.5px] text-slate-400 font-mono">
-                        {maintenanceKPIs.unlinedLateralDist.toLocaleString()} linear meters
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Category Summary Bar & Additional Metrics */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs border-t border-slate-800/80">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <div className="flex items-center gap-1.5 font-mono">
-                        <span className="text-slate-400">Total Lined:</span>
-                        <strong className="text-teal-300">
-                          {maintenanceKPIs.totalLinedDist >= 1000 
-                            ? `${(maintenanceKPIs.totalLinedDist / 1000).toFixed(2)} km` 
-                            : `${maintenanceKPIs.totalLinedDist.toLocaleString()} m`}
-                        </strong>
-                      </div>
-                      <span className="text-slate-700">|</span>
-                      <div className="flex items-center gap-1.5 font-mono">
-                        <span className="text-slate-400">Total Unlined:</span>
-                        <strong className="text-amber-300">
-                          {maintenanceKPIs.totalUnlinedDist >= 1000 
-                            ? `${(maintenanceKPIs.totalUnlinedDist / 1000).toFixed(2)} km` 
-                            : `${maintenanceKPIs.totalUnlinedDist.toLocaleString()} m`}
-                        </strong>
-                      </div>
-                      {maintenanceKPIs.totalUncategorizedDist > 0 && (
-                        <>
-                          <span className="text-slate-700">|</span>
-                          <div className="flex items-center gap-1.5 font-mono">
-                            <span className="text-slate-400">Uncategorized:</span>
-                            <strong className="text-slate-300">
-                              {maintenanceKPIs.totalUncategorizedDist >= 1000 
-                                ? `${(maintenanceKPIs.totalUncategorizedDist / 1000).toFixed(2)} km` 
-                                : `${maintenanceKPIs.totalUncategorizedDist.toLocaleString()} m`}
-                            </strong>
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-3 flex-wrap text-[11px] font-mono">
-                      {maintenanceKPIs.totalDesiltingM3 > 0 && (
-                        <span className="text-amber-300">
-                          Desilted: <strong>{maintenanceKPIs.totalDesiltingM3.toLocaleString()} m³</strong>
-                        </span>
-                      )}
-                      {maintenanceKPIs.totalPaintingSqm > 0 && (
-                        <span className="text-purple-300">
-                          Painted: <strong>{maintenanceKPIs.totalPaintingSqm.toLocaleString()} m²</strong>
-                        </span>
-                      )}
-                      <span className="text-cyan-300">
-                        Maintained by IA: <strong>{maintenanceKPIs.maintainedByIACount}</strong>
-                      </span>
-                      {maintenanceKPIs.structureCount > 0 && (
-                        <span className="text-blue-300">
-                          Structures: <strong>{maintenanceKPIs.structureCount}</strong>
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Operational Flow Summary Banner */}
               {summaryMode === 'operational' && (
@@ -1463,10 +1138,7 @@ export const ReportsSummaryModal: React.FC<ReportsSummaryModalProps> = ({
         )}
 
         {/* Modal Bottom Footer */}
-        <div className="p-3 sm:p-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between text-xs text-slate-300 shrink-0">
-          <div className="flex items-center gap-2">
-            <span>💡 <strong>Tip:</strong> Filter by Weekly or Monthly clusters to generate official submission reports. Press <strong>Esc</strong> anytime to close.</span>
-          </div>
+        <div className="p-3 sm:p-4 bg-slate-900 border-t border-slate-800 flex items-center justify-end text-xs text-slate-300 shrink-0">
           <button
             type="button"
             onClick={onClose}
